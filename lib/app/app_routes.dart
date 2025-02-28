@@ -31,11 +31,14 @@ class AppRoutes {
             path: createShopItem.toPath,
             name: createShopItem,
             pageBuilder: (BuildContext context, GoRouterState state) {
-              final onAdd = state.extra! as void Function(ShopItem);
+              final extra = state.extra! as Map<String, dynamic>;
+              final onAdd = extra['onAdd'] as void Function(ShopItem)?;
+              final existingItem = extra['existingItem'] as ShopItem?;
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: CreateShopItemPage(
-                  onAdd: onAdd,
+                  onSave: onAdd ?? (_) {},
+                  existingItem: existingItem,
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

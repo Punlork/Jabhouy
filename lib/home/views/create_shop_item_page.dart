@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/home/widgets/widgets.dart'; // Adjust import path as needed
+import 'package:my_app/home/widgets/widgets.dart';
 
 class CreateShopItemPage extends StatefulWidget {
-  const CreateShopItemPage({required this.onAdd, super.key});
-  final void Function(ShopItem) onAdd;
+  const CreateShopItemPage({
+    required this.onSave,
+    super.key,
+    this.existingItem,
+  });
+  final ShopItem? existingItem;
+  final void Function(ShopItem) onSave;
 
   @override
-  State<CreateShopItemPage> createState() => _AddItemPageState();
+  State<CreateShopItemPage> createState() => _CreateShopItemPageState();
 }
 
-class _AddItemPageState extends State<CreateShopItemPage> {
+class _CreateShopItemPageState extends State<CreateShopItemPage> {
   final _nameController = TextEditingController();
   final _defaultPriceController = TextEditingController();
-  final _defaultBatchPriceController = TextEditingController(); // New controller
+  final _defaultBatchPriceController = TextEditingController();
   final _customerPriceController = TextEditingController();
   final _sellerPriceController = TextEditingController();
   final _customerBatchPriceController = TextEditingController();
@@ -20,13 +25,37 @@ class _AddItemPageState extends State<CreateShopItemPage> {
   final _batchSizeController = TextEditingController();
   final _noteController = TextEditingController();
   final _imageUrlController = TextEditingController();
-  String _category = 'Electronics';
+  late String _category;
+
+  bool get _isEditMode => widget.existingItem != null;
+
+  @override
+  void initState() {
+    super.initState();
+    // If editing, populate fields with existing item data
+    if (_isEditMode) {
+      final item = widget.existingItem!;
+      _nameController.text = item.name;
+      _defaultPriceController.text = item.defaultPrice.toString();
+      _defaultBatchPriceController.text = item.defaultBatchPrice.toString();
+      _customerPriceController.text = item.customerPrice.toString();
+      _sellerPriceController.text = item.sellerPrice.toString();
+      _customerBatchPriceController.text = item.customerBatchPrice.toString();
+      _sellerBatchPriceController.text = item.sellerBatchPrice.toString();
+      _batchSizeController.text = item.batchSize.toString();
+      _noteController.text = item.note;
+      _imageUrlController.text = item.imageUrl;
+      _category = item.category;
+    } else {
+      _category = 'Electronics'; // Default for new items
+    }
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
     _defaultPriceController.dispose();
-    _defaultBatchPriceController.dispose(); // Dispose new controller
+    _defaultBatchPriceController.dispose();
     _customerPriceController.dispose();
     _sellerPriceController.dispose();
     _customerBatchPriceController.dispose();
@@ -40,18 +69,20 @@ class _AddItemPageState extends State<CreateShopItemPage> {
   void _submitItem() {
     final item = ShopItem(
       name: _nameController.text,
-      defaultPrice: double.parse(_defaultPriceController.text),
-      defaultBatchPrice: double.parse(_defaultBatchPriceController.text), // New field
-      customerPrice: double.parse(_customerPriceController.text),
-      sellerPrice: double.parse(_sellerPriceController.text),
-      customerBatchPrice: double.parse(_customerBatchPriceController.text),
-      sellerBatchPrice: double.parse(_sellerBatchPriceController.text),
-      batchSize: int.parse(_batchSizeController.text),
+      defaultPrice: double.parse(_defaultPriceController.text.isEmpty ? '0' : _defaultPriceController.text),
+      defaultBatchPrice:
+          double.parse(_defaultBatchPriceController.text.isEmpty ? '0' : _defaultBatchPriceController.text),
+      customerPrice: double.parse(_customerPriceController.text.isEmpty ? '0' : _customerPriceController.text),
+      sellerPrice: double.parse(_sellerPriceController.text.isEmpty ? '0' : _sellerPriceController.text),
+      customerBatchPrice:
+          double.parse(_customerBatchPriceController.text.isEmpty ? '0' : _customerBatchPriceController.text),
+      sellerBatchPrice: double.parse(_sellerBatchPriceController.text.isEmpty ? '0' : _sellerBatchPriceController.text),
+      batchSize: int.parse(_batchSizeController.text.isEmpty ? '1' : _batchSizeController.text),
       note: _noteController.text,
       imageUrl: _imageUrlController.text.isEmpty ? 'https://via.placeholder.com/150' : _imageUrlController.text,
       category: _category,
     );
-    widget.onAdd(item);
+    widget.onSave(item);
     Navigator.pop(context);
   }
 
@@ -61,7 +92,7 @@ class _AddItemPageState extends State<CreateShopItemPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Item'),
+        title: Text(_isEditMode ? 'Edit Item' : 'Add New Item'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -90,7 +121,7 @@ class _AddItemPageState extends State<CreateShopItemPage> {
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: _defaultBatchPriceController, // New field
+              controller: _defaultBatchPriceController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: 'Default Batch Price',
@@ -145,7 +176,9 @@ class _AddItemPageState extends State<CreateShopItemPage> {
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _category,
-              items: ['Electronics', 'Accessories', 'Beverages', 'Other'].map((value) => DropdownMenuItem(value: value, child: Text(value))).toList(),
+              items: ['Electronics', 'Accessories', 'Beverages', 'Other']
+                  .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+                  .toList(),
               onChanged: (value) => setState(() => _category = value!),
               decoration: const InputDecoration(
                 labelText: 'Category',
@@ -172,11 +205,11 @@ class _AddItemPageState extends State<CreateShopItemPage> {
             ElevatedButton(
               onPressed: _submitItem,
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50), // Full-width button
+                minimumSize: const Size(double.infinity, 50),
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
               ),
-              child: const Text('Add Item'),
+              child: Text(_isEditMode ? 'Save Changes' : 'Add Item'),
             ),
           ],
         ),
