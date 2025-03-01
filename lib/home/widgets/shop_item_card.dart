@@ -5,45 +5,42 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 class ShopItem {
   ShopItem({
     required this.name,
-    required this.defaultPrice,
-    required this.defaultBatchPrice,
     required this.customerPrice,
-    required this.sellerPrice,
     required this.customerBatchPrice,
+    required this.sellerPrice,
     required this.sellerBatchPrice,
     required this.batchSize,
-    required this.note,
     required this.imageUrl,
     required this.category,
+    required this.defaultBatchPrice,
+    this.note, // Optional, if rarely used
   });
 
   factory ShopItem.fromJson(Map<String, dynamic> json) {
     return ShopItem(
       name: json['name'] as String,
-      defaultPrice: (json['default_price'] as num).toDouble(),
-      defaultBatchPrice: (json['default_batch_price'] as num).toDouble(),
       customerPrice: (json['customer_price'] as num).toDouble(),
-      sellerPrice: (json['seller_price'] as num).toDouble(),
+      defaultBatchPrice: (json['default_batch_price'] as num).toDouble(),
       customerBatchPrice: (json['customer_batch_price'] as num).toDouble(),
+      sellerPrice: (json['seller_price'] as num).toDouble(),
       sellerBatchPrice: (json['seller_batch_price'] as num).toDouble(),
       batchSize: json['batch_size'] as int,
-      note: json['note'] as String,
       imageUrl: json['image_url'] as String,
       category: json['category'] as String,
+      note: json['note'] as String?,
     );
   }
 
   final String name;
-  final double defaultPrice;
-  final double defaultBatchPrice;
   final double customerPrice;
-  final double sellerPrice;
   final double customerBatchPrice;
+  final double sellerPrice;
   final double sellerBatchPrice;
+  final double defaultBatchPrice;
   final int batchSize;
-  final String note;
   final String imageUrl;
   final String category;
+  final String? note; // Made optional
 }
 
 class ShopItemCard extends StatelessWidget {
@@ -137,107 +134,99 @@ class _ShopItemCardContent extends StatelessWidget {
             style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
-                'Base: ',
-                style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-              ),
-              Text(
-                '\$${item.defaultPrice.toStringAsFixed(2)} / unit',
-                style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-              ),
-            ],
+          Text(
+            '\$${item.sellerPrice.toStringAsFixed(2)} / unit',
+            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Note:',
-                style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item.note,
-                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Base: \$${item.defaultBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
-                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.person, size: 16, color: colorScheme.primary),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Customer',
-                              style: textTheme.labelMedium?.copyWith(color: colorScheme.primary),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${item.customerPrice.toStringAsFixed(2)} / unit',
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '\$${item.customerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
-                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.store, size: 16, color: colorScheme.secondary),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Seller',
-                              style: textTheme.labelMedium?.copyWith(color: colorScheme.secondary),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${item.sellerPrice.toStringAsFixed(2)} / unit',
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '\$${item.sellerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
-                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.secondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Text(
+        //         'Note:',
+        //         style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        //       ),
+        //       const SizedBox(height: 4),
+        //       Text(
+        //         item.note,
+        //         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        //       ),
+        //       const SizedBox(height: 8),
+        //       Text(
+        //         'Base: \$${item.defaultBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
+        //         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        //       ),
+        //       const SizedBox(height: 16),
+        //       Row(
+        //         crossAxisAlignment: CrossAxisAlignment.start,
+        //         children: [
+        //           Expanded(
+        //             child: Column(
+        //               crossAxisAlignment: CrossAxisAlignment.start,
+        //               children: [
+        //                 Row(
+        //                   children: [
+        //                     Icon(Icons.person, size: 16, color: colorScheme.primary),
+        //                     const SizedBox(width: 4),
+        //                     Text(
+        //                       'Customer',
+        //                       style: textTheme.labelMedium?.copyWith(color: colorScheme.primary),
+        //                     ),
+        //                   ],
+        //                 ),
+        //                 const SizedBox(height: 4),
+        //                 Text(
+        //                   '\$${item.customerPrice.toStringAsFixed(2)} / unit',
+        //                   style: textTheme.bodyLarge?.copyWith(
+        //                     color: colorScheme.primary,
+        //                     fontWeight: FontWeight.bold,
+        //                   ),
+        //                 ),
+        //                 Text(
+        //                   '\$${item.customerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
+        //                   style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
+        //                 ),
+        //               ],
+        //             ),
+        //           ),
+        //           Expanded(
+        //             child: Column(
+        //               crossAxisAlignment: CrossAxisAlignment.start,
+        //               children: [
+        //                 Row(
+        //                   children: [
+        //                     Icon(Icons.store, size: 16, color: colorScheme.secondary),
+        //                     const SizedBox(width: 4),
+        //                     Text(
+        //                       'Seller',
+        //                       style: textTheme.labelMedium?.copyWith(color: colorScheme.secondary),
+        //                     ),
+        //                   ],
+        //                 ),
+        //                 const SizedBox(height: 4),
+        //                 Text(
+        //                   '\$${item.sellerPrice.toStringAsFixed(2)} / unit',
+        //                   style: textTheme.bodyLarge?.copyWith(
+        //                     color: colorScheme.secondary,
+        //                     fontWeight: FontWeight.bold,
+        //                   ),
+        //                 ),
+        //                 Text(
+        //                   '\$${item.sellerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
+        //                   style: textTheme.bodyMedium?.copyWith(color: colorScheme.secondary),
+        //                 ),
+        //               ],
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ],
     );
   }

@@ -27,7 +27,7 @@ class _InventoryTabView extends StatefulWidget {
 
 class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
-  bool _isGridView = false;
+  bool _isGridView = true;
 
   @override
   bool get wantKeepAlive => true;
@@ -46,20 +46,18 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
     super.dispose();
   }
 
-  void _showFilterSheet(BuildContext context) {
+  void _showFilterSheet() {
     showModalBottomSheet<ShopItem>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => BlocProvider.value(
+      builder: (_) => BlocProvider.value(
         value: context.read<InventoryBloc>(),
         child: FilterSheet(
           initialCategoryFilter: context.read<InventoryBloc>().state.categoryFilter,
           initialBuyerFilter: context.read<InventoryBloc>().state.buyerFilter,
-          onApply: (category, buyer) {
-            context.read<InventoryBloc>().add(FilterItemsEvent(category, buyer));
-          },
+          onApply: (category, buyer) => context.read<InventoryBloc>().add(FilterItemsEvent(category, buyer)),
         ),
       ),
     );
@@ -68,13 +66,6 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
   void _toggleView() {
     _isGridView = !_isGridView;
     setState(() {});
-  }
-
-  String getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning Punlork';
-    if (hour < 17) return 'Good Afternoon Punlork';
-    return 'Good Evening Punlork';
   }
 
   @override
@@ -120,13 +111,24 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                         // Navigate to profile or settings
                         // context.pushNamed(AppRoutes.profile);
                       },
-                      child: Text(
-                        getGreeting(),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
-                        ),
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 14,
+                            backgroundImage: NetworkImage(
+                              'https://cdn2.vectorstock.com/i/1000x1000/44/01/default-avatar-photo-placeholder-icon-grey-vector-38594401.jpg',
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Punlork',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const Spacer(),
@@ -146,6 +148,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                             label: Text('Grid'),
                           ),
                         ],
+                        showSelectedIcon: false,
                         selected: {_isGridView},
                         onSelectionChanged: (newSelection) => _toggleView(),
                         style: SegmentedButton.styleFrom(
@@ -190,7 +193,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                       const SizedBox(width: 8),
                       _buildIconButton(
                         icon: Icons.filter_list,
-                        onPressed: () => _showFilterSheet(context),
+                        onPressed: _showFilterSheet,
                         colorScheme: colorScheme,
                       ),
                     ],

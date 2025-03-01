@@ -3,7 +3,6 @@ import 'package:my_app/home/widgets/widgets.dart';
 final List<ShopItem> defaultShopList = [
   ShopItem(
     name: 'MacBook Pro',
-    defaultPrice: 1199.99,
     defaultBatchPrice: 11999.99, // 10 units at base cost
     customerPrice: 1499.99,
     sellerPrice: 1299.99,
@@ -16,7 +15,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Sony WH-1000XM5 Headphones',
-    defaultPrice: 329.99,
     defaultBatchPrice: 1649.95, // 5 units at base cost
     customerPrice: 399.99,
     sellerPrice: 349.99,
@@ -29,7 +27,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Beer Can',
-    defaultPrice: 0.85,
     defaultBatchPrice: 10.20, // 12 units at base cost
     customerPrice: 1,
     sellerPrice: 0.75,
@@ -42,7 +39,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'iPhone 14',
-    defaultPrice: 749.99,
     defaultBatchPrice: 7499.90, // 10 units at base cost
     customerPrice: 899.99,
     sellerPrice: 799.99,
@@ -55,7 +51,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Samsung 4K Smart TV',
-    defaultPrice: 599.99,
     defaultBatchPrice: 2999.95, // 5 units
     customerPrice: 699.99,
     sellerPrice: 649.99,
@@ -68,7 +63,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Apple AirPods Pro',
-    defaultPrice: 229.99,
     defaultBatchPrice: 1149.95, // 5 units
     customerPrice: 249.99,
     sellerPrice: 239.99,
@@ -81,7 +75,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Dell XPS 13',
-    defaultPrice: 999.99,
     defaultBatchPrice: 9999.90, // 10 units
     customerPrice: 1199.99,
     sellerPrice: 1099.99,
@@ -94,7 +87,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Logitech MX Master 3 Mouse',
-    defaultPrice: 89.99,
     defaultBatchPrice: 899.90, // 10 units
     customerPrice: 99.99,
     sellerPrice: 94.99,
@@ -107,7 +99,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Canon EOS R6 Camera',
-    defaultPrice: 2399.99,
     defaultBatchPrice: 11999.95, // 5 units
     customerPrice: 2599.99,
     sellerPrice: 2499.99,
@@ -120,7 +111,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Anker Power Bank 20000mAh',
-    defaultPrice: 49.99,
     defaultBatchPrice: 499.90, // 10 units
     customerPrice: 59.99,
     sellerPrice: 54.99,
@@ -133,7 +123,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Samsung Galaxy Watch 5',
-    defaultPrice: 279.99,
     defaultBatchPrice: 1399.95, // 5 units
     customerPrice: 329.99,
     sellerPrice: 299.99,
@@ -146,7 +135,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'HP LaserJet Pro Printer',
-    defaultPrice: 199.99,
     defaultBatchPrice: 1999.90, // 10 units
     customerPrice: 249.99,
     sellerPrice: 219.99,
@@ -159,7 +147,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'JBL Flip 6 Speaker',
-    defaultPrice: 119.99,
     defaultBatchPrice: 1199.90, // 10 units
     customerPrice: 139.99,
     sellerPrice: 129.99,
@@ -172,7 +159,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'ASUS ROG Gaming Laptop',
-    defaultPrice: 1499.99,
     defaultBatchPrice: 14999.90, // 10 units
     customerPrice: 1699.99,
     sellerPrice: 1599.99,
@@ -185,7 +171,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'USB-C Hub Adapter',
-    defaultPrice: 29.99,
     defaultBatchPrice: 299.90, // 10 units
     customerPrice: 39.99,
     sellerPrice: 34.99,
@@ -198,7 +183,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Nintendo Switch OLED',
-    defaultPrice: 329.99,
     defaultBatchPrice: 3299.90, // 10 units
     customerPrice: 349.99,
     sellerPrice: 339.99,
@@ -211,7 +195,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'WD 1TB External SSD',
-    defaultPrice: 129.99,
     defaultBatchPrice: 1299.90, // 10 units
     customerPrice: 149.99,
     sellerPrice: 139.99,
@@ -224,7 +207,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Coffee Beans',
-    defaultPrice: 8.99,
     defaultBatchPrice: 89.90, // 10 units (e.g., 10 bags)
     customerPrice: 10.99,
     sellerPrice: 9.99,
@@ -237,7 +219,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Leather Wallet',
-    defaultPrice: 19.99,
     defaultBatchPrice: 199.90, // 10 units
     customerPrice: 29.99,
     sellerPrice: 24.99,
@@ -250,7 +231,6 @@ final List<ShopItem> defaultShopList = [
   ),
   ShopItem(
     name: 'Yoga Mat',
-    defaultPrice: 24.99,
     defaultBatchPrice: 249.90, // 10 units
     customerPrice: 34.99,
     sellerPrice: 29.99,

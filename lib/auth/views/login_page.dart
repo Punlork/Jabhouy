@@ -9,8 +9,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
-    with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   final _emailController = TextEditingController();
@@ -76,37 +75,33 @@ class _LoginPageState extends State<LoginPage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Icon with M3 styling
-                      Hero(
-                        tag: 'login_icon',
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: colorScheme.shadow.withOpacity(0.1),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.lock_outline_rounded,
-                            size: 80,
-                            color: colorScheme.onPrimary,
-                          ),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.shadow.withOpacity(0.1),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.lock_outline_rounded,
+                          size: 80,
+                          color: colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(height: 40),
                       // M3 Typography
                       Text(
                         'Welcome Back',
-                        style:
-                            Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                  color: colorScheme.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -130,22 +125,19 @@ class _LoginPageState extends State<LoginPage>
                             color: colorScheme.primary,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(16), // Softer corners
+                            borderRadius: BorderRadius.circular(16), // Softer corners
                             borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide:
-                                BorderSide(color: colorScheme.outlineVariant),
+                            borderSide: BorderSide(color: colorScheme.outlineVariant),
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                              .hasMatch(value)) {
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -171,8 +163,7 @@ class _LoginPageState extends State<LoginPage>
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide:
-                                BorderSide(color: colorScheme.outlineVariant),
+                            borderSide: BorderSide(color: colorScheme.outlineVariant),
                           ),
                         ),
                         validator: (value) {
@@ -203,11 +194,10 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         child: Text(
                           'Login',
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                       const SizedBox(height: 20),

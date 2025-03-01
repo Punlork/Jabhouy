@@ -39,15 +39,10 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
   void _filterAndEmit(Emitter<InventoryState> emit) {
     final filtered = allItems.where((item) {
       final matchesSearch = item.name.toLowerCase().contains(state.searchQuery.toLowerCase()) ||
-          item.note.toLowerCase().contains(state.searchQuery.toLowerCase());
+          (item.note ?? '').toLowerCase().contains(state.searchQuery.toLowerCase());
       final matchesCategory = state.categoryFilter == 'All' || item.category == state.categoryFilter;
-      final matchesBuyer = state.buyerFilter == 'All' ||
-          (state.buyerFilter == 'Customer Only' &&
-              (item.customerPrice != item.defaultPrice ||
-                  item.customerBatchPrice != item.defaultPrice * item.batchSize)) ||
-          (state.buyerFilter == 'Seller Only' &&
-              (item.sellerPrice != item.defaultPrice || item.sellerBatchPrice != item.defaultPrice * item.batchSize));
-      return matchesSearch && matchesCategory && matchesBuyer;
+
+      return matchesSearch && matchesCategory;
     }).toList();
 
     emit(state.copyWith(filteredItems: filtered));

@@ -63,20 +63,20 @@ class GridShopItemCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    Text(
+                      '\$${item.customerPrice.toStringAsFixed(2)} / unit',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                     // Price
                     Text(
-                      '\$${item.defaultPrice.toStringAsFixed(2)} / unit',
+                      '\$${item.customerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     // Batch Price
-                    Text(
-                      '\$${item.defaultBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
                   ],
                 ),
               ),

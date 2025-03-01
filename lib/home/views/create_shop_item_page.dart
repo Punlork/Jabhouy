@@ -36,14 +36,13 @@ class _CreateShopItemPageState extends State<CreateShopItemPage> {
     if (_isEditMode) {
       final item = widget.existingItem!;
       _nameController.text = item.name;
-      _defaultPriceController.text = item.defaultPrice.toString();
       _defaultBatchPriceController.text = item.defaultBatchPrice.toString();
       _customerPriceController.text = item.customerPrice.toString();
       _sellerPriceController.text = item.sellerPrice.toString();
       _customerBatchPriceController.text = item.customerBatchPrice.toString();
       _sellerBatchPriceController.text = item.sellerBatchPrice.toString();
       _batchSizeController.text = item.batchSize.toString();
-      _noteController.text = item.note;
+      _noteController.text = item.note.toString();
       _imageUrlController.text = item.imageUrl;
       _category = item.category;
     } else {
@@ -69,7 +68,6 @@ class _CreateShopItemPageState extends State<CreateShopItemPage> {
   void _submitItem() {
     final item = ShopItem(
       name: _nameController.text,
-      defaultPrice: double.parse(_defaultPriceController.text.isEmpty ? '0' : _defaultPriceController.text),
       defaultBatchPrice:
           double.parse(_defaultBatchPriceController.text.isEmpty ? '0' : _defaultBatchPriceController.text),
       customerPrice: double.parse(_customerPriceController.text.isEmpty ? '0' : _customerPriceController.text),
