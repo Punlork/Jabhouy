@@ -96,7 +96,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: .1),
+                  color: Colors.black.withOpacity(.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -152,7 +152,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                         selected: {_isGridView},
                         onSelectionChanged: (newSelection) => _toggleView(),
                         style: SegmentedButton.styleFrom(
-                          backgroundColor: colorScheme.onPrimary.withValues(alpha: 0.1),
+                          backgroundColor: colorScheme.onPrimary.withOpacity(0.1),
                           foregroundColor: colorScheme.onPrimary,
                           selectedForegroundColor: colorScheme.primary,
                           padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 10),
@@ -183,9 +183,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                                 borderSide: BorderSide.none,
                               ),
                               filled: true,
-                              fillColor: colorScheme.surfaceContainerHighest.withValues(
-                                alpha: .3,
-                              ),
+                              fillColor: colorScheme.surfaceContainerHighest.withOpacity(.3),
                             ),
                           ),
                         ),
