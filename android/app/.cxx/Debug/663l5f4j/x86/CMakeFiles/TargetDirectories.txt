@@ -1,0 +1,2 @@
+/Users/tt/Documents/workspace/shop_management/android/app/.cxx/Debug/663l5f4j/x86/CMakeFiles/edit_cache.dir
+/Users/tt/Documents/workspace/shop_management/android/app/.cxx/Debug/663l5f4j/x86/CMakeFiles/rebuild_cache.dir

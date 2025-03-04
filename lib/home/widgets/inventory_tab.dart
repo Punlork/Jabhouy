@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/auth/auth.dart';
+import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
 import 'package:my_app/home/bloc/inventory/inventory_bloc.dart';
 import 'package:my_app/home/widgets/widgets.dart';
 
@@ -11,8 +13,15 @@ class InventoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => InventoryBloc(items),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => InventoryBloc(items),
+        ),
+        BlocProvider(
+          create: (context) => SignoutBloc(getIt<AuthService>()),
+        ),
+      ],
       child: const _InventoryTabView(),
     );
   }
@@ -74,11 +83,6 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.pushNamed(AppRoutes.createShopItem),
-        backgroundColor: colorScheme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
       body: Column(
         children: [
           Container(
@@ -96,7 +100,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.1),
+                  color: Colors.black.withValues(alpha: .1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -106,29 +110,64 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
               children: [
                 Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        // Navigate to profile or settings
-                        // context.pushNamed(AppRoutes.profile);
+                    BlocListener<SignoutBloc, SignoutState>(
+                      listener: (context, state) {
+                        if (state is SignoutSuccess) {
+                          context.read<AuthBloc>().add(AuthSignedOut());
+                        }
                       },
-                      child: Row(
-                        children: [
-                          const CircleAvatar(
-                            radius: 14,
-                            backgroundImage: NetworkImage(
-                              'https://cdn2.vectorstock.com/i/1000x1000/44/01/default-avatar-photo-placeholder-icon-grey-vector-38594401.jpg',
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () async {
+                          final shouldSignOut = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Sign Out'),
+                              content: const Text('Are you sure you want to sign out?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(false), // Cancel
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(true), // Confirm
+                                  child: const Text('Sign Out'),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Punlork',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onPrimary,
+                          );
+
+                          if (shouldSignOut ?? false) {
+                            if (!context.mounted) return;
+                            context.read<SignoutBloc>().add(const SignoutSubmitted());
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            const CircleAvatar(
+                              radius: 14,
+                              backgroundImage: NetworkImage(
+                                'https://cdn2.vectorstock.com/i/1000x1000/44/01/default-avatar-photo-placeholder-icon-grey-vector-38594401.jpg',
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            BlocBuilder<AuthBloc, AuthState>(
+                              builder: (context, state) {
+                                if (state is Authenticated) {
+                                  return Text(
+                                    state.user.name ?? 'No name',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onPrimary,
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -152,7 +191,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                         selected: {_isGridView},
                         onSelectionChanged: (newSelection) => _toggleView(),
                         style: SegmentedButton.styleFrom(
-                          backgroundColor: colorScheme.onPrimary.withOpacity(0.1),
+                          backgroundColor: colorScheme.onPrimary.withValues(alpha: 0.1),
                           foregroundColor: colorScheme.onPrimary,
                           selectedForegroundColor: colorScheme.primary,
                           padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 10),
@@ -183,7 +222,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                                 borderSide: BorderSide.none,
                               ),
                               filled: true,
-                              fillColor: colorScheme.surfaceContainerHighest.withOpacity(.3),
+                              fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: .3),
                             ),
                           ),
                         ),

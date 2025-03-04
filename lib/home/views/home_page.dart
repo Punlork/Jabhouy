@@ -31,18 +31,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primary,
-                colorScheme.primaryContainer,
-              ],
-            ),
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary,
+              colorScheme.primaryContainer,
+            ],
           ),
+        ),
+        child: SafeArea(
           child: Column(
             children: [
               Expanded(

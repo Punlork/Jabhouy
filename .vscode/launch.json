@@ -13,8 +13,8 @@
         "--flavor",
         "development",
         "--target",
-        "lib/main_development.dart",
-        "-v"
+        "lib/main_development.dart"
+        // "-v"
       ]
     },
     {
