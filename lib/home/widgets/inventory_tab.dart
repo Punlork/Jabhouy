@@ -234,13 +234,36 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                       height: 48,
                       child: Row(
                         children: [
+                          // InputDecoration(
+                          //       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                          //       hintText: 'Search items...',
+                          //       prefixIcon: Icon(
+                          //         Icons.search,
+                          //         color: colorScheme.primary,
+                          //       ),
+                          //       border: OutlineInputBorder(
+                          //         borderRadius: BorderRadius.circular(24),
+                          //         borderSide: BorderSide.none,
+                          //       ),
+                          //       filled: true,
+                          //       fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: .3),
+                          //     )
                           Expanded(
-                            child: TextField(
+                            child: CustomTextFormField(
                               controller: _searchController,
+                              hintText: 'Search items...',
+                              labelText: '', // Adding a label for clarity, optional
+                              prefixIcon: Icons.search,
+                              action: TextInputAction.search, // Optional: adds search action to keyboard
+                              showClearButton: true,
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              useCustomBorder: false,
                               decoration: InputDecoration(
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                                hintText: 'Search items...',
-                                prefixIcon: Icon(Icons.search, color: colorScheme.primary),
+                                hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Colors.white.withValues(alpha: .8),
+                                      fontWeight: FontWeight.w300,
+                                    ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
                                   borderSide: BorderSide.none,
