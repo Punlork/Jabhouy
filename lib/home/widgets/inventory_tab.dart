@@ -234,20 +234,6 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                       height: 48,
                       child: Row(
                         children: [
-                          // InputDecoration(
-                          //       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                          //       hintText: 'Search items...',
-                          //       prefixIcon: Icon(
-                          //         Icons.search,
-                          //         color: colorScheme.primary,
-                          //       ),
-                          //       border: OutlineInputBorder(
-                          //         borderRadius: BorderRadius.circular(24),
-                          //         borderSide: BorderSide.none,
-                          //       ),
-                          //       filled: true,
-                          //       fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: .3),
-                          //     )
                           Expanded(
                             child: CustomTextFormField(
                               controller: _searchController,

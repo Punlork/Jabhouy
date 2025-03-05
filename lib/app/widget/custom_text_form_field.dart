@@ -35,7 +35,7 @@ class CustomTextFormField extends StatefulWidget {
   final FocusNode? focusNode;
   final InputDecoration? decoration;
   final FloatingLabelBehavior? floatingLabelBehavior;
-  final bool useCustomBorder; // Controls whether to use CustomOutlineInputBorder
+  final bool useCustomBorder;
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -74,7 +74,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Define the custom border (used only if useCustomBorder is true)
     final customBorder = widget.useCustomBorder
         ? CustomOutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -126,7 +125,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       ),
     );
 
-    // Merge with external decoration if provided
     final mergedDecoration = widget.decoration != null
         ? baseDecoration.copyWith(
             contentPadding: widget.decoration!.contentPadding,
@@ -136,8 +134,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             filled: widget.decoration!.filled,
             fillColor: widget.decoration!.fillColor,
             hintStyle: widget.decoration!.hintStyle,
-
-            // Add other properties as needed
+            //! Add other properties as needed
           )
         : baseDecoration;
 
