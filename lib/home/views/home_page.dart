@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   (list) => list,
                 )
                 .toList(),
-          ),
+        ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

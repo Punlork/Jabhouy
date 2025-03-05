@@ -114,11 +114,9 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                           onTap: () async {},
                           child: Row(
                             children: [
-                              const CircleAvatar(
-                                radius: 14,
-                                backgroundImage: NetworkImage(
-                                  'https://cdn2.vectorstock.com/i/1000x1000/44/01/default-avatar-photo-placeholder-icon-grey-vector-38594401.jpg',
-                                ),
+                              const AppLogo(
+                                size: 40,
+                                useBg: false,
                               ),
                               const SizedBox(width: 8),
                               BlocBuilder<AuthBloc, AuthState>(

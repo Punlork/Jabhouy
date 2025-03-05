@@ -67,25 +67,7 @@ class _LoadingPageState extends State<LoadingPage> with SingleTickerProviderStat
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Logo or Icon
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.surface.withValues(alpha: .2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.shadow.withValues(alpha: .3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.lock_open_rounded, // Replace with your app logo/icon
-                        size: 80,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
+                    const AppLogo(),
                     const SizedBox(height: 40),
                     // Animated Loading Indicator
                     ScaleTransition(
@@ -103,7 +85,7 @@ class _LoadingPageState extends State<LoadingPage> with SingleTickerProviderStat
                       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         color: colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 36,
+                        fontSize: 30,
                         shadows: [
                           Shadow(
                             color: colorScheme.shadow.withValues(alpha: .5),

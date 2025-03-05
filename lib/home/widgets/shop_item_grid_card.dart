@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/home/home.dart';
 
 class GridShopItemCard extends StatelessWidget {
@@ -30,17 +31,21 @@ class GridShopItemCard extends StatelessWidget {
               flex: 2,
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: CachedNetworkImage(
-                  imageUrl: item.imageUrl,
-                  fit: BoxFit.cover,
-                  memCacheHeight: 200,
-                  memCacheWidth: 200,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey[300],
-                  ),
-                  errorWidget: (context, url, error) => const Icon(
-                    Icons.broken_image,
-                    size: 50,
+                child: ColoredBox(
+                  color: Colors.white,
+                  child: CachedNetworkImage(
+                    imageUrl: item.imageUrl,
+                    fit: BoxFit.cover,
+                    memCacheHeight: 200,
+                    memCacheWidth: 200,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[300],
+                    ),
+                    errorWidget: (context, url, error) => const AppLogo(
+                      shape: BoxShape.rectangle,
+                      useBg: false,
+                      size: 50,
+                    ),
                   ),
                 ),
               ),

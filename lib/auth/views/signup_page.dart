@@ -121,25 +121,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface.withValues(alpha: .2),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: colorScheme.shadow.withValues(alpha: .1),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.person_add_rounded,
-                            size: 80,
-                            color: colorScheme.onPrimary,
-                          ),
-                        ),
+                        const AppLogo(),
                         const SizedBox(height: 40),
                         Text(
                           'Create Account',

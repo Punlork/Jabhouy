@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/home/home.dart';
 
 class ShopItemDetailSheet extends StatelessWidget {
@@ -41,11 +42,9 @@ class ShopItemDetailSheet extends StatelessWidget {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 80,
-                    height: 80,
-                    color: Colors.grey.shade300,
-                    child: const Icon(Icons.image_not_supported),
+                  errorBuilder: (context, error, stackTrace) => const AppLogo(
+                    shape: BoxShape.rectangle,
+                    useBg: false,
                   ),
                 ),
               ),

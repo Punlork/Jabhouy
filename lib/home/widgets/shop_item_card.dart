@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/home/home.dart';
 
 void showShopItemDetailSheet({
@@ -154,11 +155,10 @@ class ShopItemCard extends StatelessWidget {
                       height: 100,
                       color: Colors.grey[300],
                     ),
-                    errorWidget: (context, url, error) => Container(
-                      width: 100,
-                      height: 100,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 40),
+                    errorWidget: (context, url, error) => const AppLogo(
+                      shape: BoxShape.rectangle,
+                      size: 100,
+                      useBg: false,
                     ),
                   ),
                 ),
