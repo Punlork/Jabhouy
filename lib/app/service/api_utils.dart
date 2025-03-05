@@ -46,9 +46,16 @@ ApiResponse<T> handleResponse<T>(
 }
 
 Future<http.Response> interceptRequest(Future<http.Response> Function() request) async {
-  developer.log('Request started: ${DateTime.now()}');
+  final startTime = DateTime.now();
+  // Create a readable date format (e.g., "March 4, 2025 3:30:45 PM")
+  final timeFormatter = DateFormat('MMMM d, yyyy h:mm:ss a');
+  developer.log('Request started: ${timeFormatter.format(startTime.toLocal())}');
+
   final response = await request();
-  developer.log('Response received: ${response.statusCode} at ${DateTime.now()}');
+
+  final endTime = DateTime.now();
+  developer.log('Response received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
+
   return response;
 }
 

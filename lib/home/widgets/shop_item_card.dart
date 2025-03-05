@@ -1,6 +1,28 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:my_app/home/home.dart';
+
+void showShopItemDetailSheet({
+  required BuildContext context,
+  required ShopItem item,
+  required VoidCallback onEdit,
+  required VoidCallback onDelete,
+}) =>
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) => SingleChildScrollView(
+        child: ShopItemDetailSheet(
+          item: item,
+          onEdit: onEdit,
+          onDelete: onDelete,
+        ),
+      ),
+    );
 
 class ShopItem {
   ShopItem({
@@ -47,14 +69,41 @@ class ShopItemCard extends StatelessWidget {
   const ShopItemCard({
     required this.item,
     required this.onEdit,
+    required this.onDelete,
     super.key,
   });
 
   final ShopItem item;
   final void Function(ShopItem) onEdit;
+  final void Function(ShopItem) onDelete;
+
+  void _confirmDelete(BuildContext context) => showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: Text('Are you sure you want to delete "${item.name}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                onDelete(item);
+              },
+              style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Slidable(
@@ -69,165 +118,93 @@ class ShopItemCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             SlidableAction(
-              onPressed: (_) {},
+              onPressed: (_) => _confirmDelete(context),
               borderRadius: BorderRadius.circular(12),
-              foregroundColor: Colors.red,
               icon: Icons.delete,
+              foregroundColor: Colors.white,
             ),
           ],
         ),
-        child: Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: EdgeInsets.zero,
-          color: Colors.white,
-          child: _ShopItemCardContent(item: item),
-        ),
-      ),
-    );
-  }
-}
-
-// Extracted content widget to prevent unnecessary rebuilds
-class _ShopItemCardContent extends StatelessWidget {
-  const _ShopItemCardContent({required this.item});
-
-  final ShopItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return ExpansionTile(
-      tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-      leading: CachedNetworkImage(
-        imageUrl: item.imageUrl,
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-        memCacheHeight: 120, // Cache smaller image
-        memCacheWidth: 120,
-        placeholder: (context, url) => Container(
-          width: 60,
-          height: 60,
-          color: Colors.grey[300],
-        ),
-        errorWidget: (context, url, error) => const Icon(
-          Icons.broken_image,
-          size: 60,
-        ),
-      ),
-      title: Text(
-        item.name,
-        style: textTheme.titleMedium?.copyWith(
-          color: colorScheme.onSurface,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 4),
-          Text(
-            'Category: ${item.category}',
-            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+        child: GestureDetector(
+          onTap: () => showShopItemDetailSheet(
+            context: context,
+            item: item,
+            onEdit: () => onEdit(item),
+            onDelete: () => onDelete(item),
           ),
-          const SizedBox(height: 4),
-          Text(
-            '\$${item.sellerPrice.toStringAsFixed(2)} / unit',
-            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          child: Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: EdgeInsets.zero,
+            color: Colors.white,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                  child: CachedNetworkImage(
+                    imageUrl: item.imageUrl,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    memCacheHeight: 200,
+                    memCacheWidth: 200,
+                    placeholder: (context, url) => Container(
+                      width: 100,
+                      height: 100,
+                      color: Colors.grey[300],
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 100,
+                      height: 100,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image, size: 40),
+                    ),
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        // Name
+                        Text(
+                          item.name,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        // Price
+                        Text(
+                          '\$${item.customerPrice.toStringAsFixed(2)} / unit',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        // Batch Price
+                        Text(
+                          '\$${item.customerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
-      children: [
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        //   child: Column(
-        //     crossAxisAlignment: CrossAxisAlignment.start,
-        //     children: [
-        //       Text(
-        //         'Note:',
-        //         style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-        //       ),
-        //       const SizedBox(height: 4),
-        //       Text(
-        //         item.note,
-        //         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-        //       ),
-        //       const SizedBox(height: 8),
-        //       Text(
-        //         'Base: \$${item.defaultBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
-        //         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-        //       ),
-        //       const SizedBox(height: 16),
-        //       Row(
-        //         crossAxisAlignment: CrossAxisAlignment.start,
-        //         children: [
-        //           Expanded(
-        //             child: Column(
-        //               crossAxisAlignment: CrossAxisAlignment.start,
-        //               children: [
-        //                 Row(
-        //                   children: [
-        //                     Icon(Icons.person, size: 16, color: colorScheme.primary),
-        //                     const SizedBox(width: 4),
-        //                     Text(
-        //                       'Customer',
-        //                       style: textTheme.labelMedium?.copyWith(color: colorScheme.primary),
-        //                     ),
-        //                   ],
-        //                 ),
-        //                 const SizedBox(height: 4),
-        //                 Text(
-        //                   '\$${item.customerPrice.toStringAsFixed(2)} / unit',
-        //                   style: textTheme.bodyLarge?.copyWith(
-        //                     color: colorScheme.primary,
-        //                     fontWeight: FontWeight.bold,
-        //                   ),
-        //                 ),
-        //                 Text(
-        //                   '\$${item.customerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
-        //                   style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
-        //                 ),
-        //               ],
-        //             ),
-        //           ),
-        //           Expanded(
-        //             child: Column(
-        //               crossAxisAlignment: CrossAxisAlignment.start,
-        //               children: [
-        //                 Row(
-        //                   children: [
-        //                     Icon(Icons.store, size: 16, color: colorScheme.secondary),
-        //                     const SizedBox(width: 4),
-        //                     Text(
-        //                       'Seller',
-        //                       style: textTheme.labelMedium?.copyWith(color: colorScheme.secondary),
-        //                     ),
-        //                   ],
-        //                 ),
-        //                 const SizedBox(height: 4),
-        //                 Text(
-        //                   '\$${item.sellerPrice.toStringAsFixed(2)} / unit',
-        //                   style: textTheme.bodyLarge?.copyWith(
-        //                     color: colorScheme.secondary,
-        //                     fontWeight: FontWeight.bold,
-        //                   ),
-        //                 ),
-        //                 Text(
-        //                   '\$${item.sellerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
-        //                   style: textTheme.bodyMedium?.copyWith(color: colorScheme.secondary),
-        //                 ),
-        //               ],
-        //             ),
-        //           ),
-        //         ],
-        //       ),
-        //     ],
-        //   ),
-        // ),
-      ],
     );
   }
 }

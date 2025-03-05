@@ -12,10 +12,7 @@ class SignoutInitial extends SignoutState {}
 
 class SignoutLoading extends SignoutState {}
 
-class SignoutSuccess extends SignoutState {
-  const SignoutSuccess(this.user);
-  final User user;
-}
+class SignoutSuccess extends SignoutState {}
 
 class SignoutFailure extends SignoutState {
   const SignoutFailure(this.error);

@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
-import 'package:my_app/home/views/views.dart';
-import 'package:my_app/home/widgets/widgets.dart';
+import 'package:my_app/home/home.dart';
+import 'package:my_app/home/views/home_page.dart';
+import 'package:my_app/home/views/shop_item_form_page.dart';
 
 extension StringExtension on String {
   String get toPath => '/$this';
@@ -33,20 +34,37 @@ class AppRoutes {
   static const loading = 'loading';
   static const createShopItem = 'create_shop_item';
 
+  static final allowedUnauthenticated = {
+    signin.toPath,
+    signup.toPath,
+    loading.toPath,
+  };
+
+  static final allowedAuthenticated = {
+    home.toPath,
+    '${home.toPath}${createShopItem.toPath}',
+    loading.toPath,
+  };
+
   static final GoRouter router = GoRouter(
     initialLocation: loading.toPath,
     redirect: (context, state) {
       final authState = BlocProvider.of<AuthBloc>(context).state;
+      final currentPath = state.matchedLocation;
 
       if (authState is AuthLoading) {
-        return loading.toPath; // Show loading page during auth check
+        return loading.toPath;
       }
 
-      if (authState is Unauthenticated && state.matchedLocation != signin.toPath) {
-        return signin.toPath;
+      if (authState is Unauthenticated) {
+        if (!allowedUnauthenticated.contains(currentPath)) {
+          return signin.toPath;
+        }
       }
       if (authState is Authenticated && state.matchedLocation == signin.toPath) {
-        return home.toPath;
+        if (!allowedAuthenticated.contains(currentPath)) {
+          return home.toPath;
+        }
       }
       return null;
     },
@@ -82,7 +100,7 @@ class AppRoutes {
               final existingItem = extra['existingItem'] as ShopItem?;
               return CustomTransitionPage(
                 key: state.pageKey,
-                child: CreateShopItemPage(
+                child: ShopItemFormPage(
                   onSave: onAdd ?? (_) {},
                   existingItem: existingItem,
                 ),

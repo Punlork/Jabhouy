@@ -25,7 +25,7 @@ class SignoutBloc extends Bloc<SignoutEvent, SignoutState> {
       final response = await apiService.signout();
 
       if (response.success) {
-        emit(SignoutSuccess(response.data!));
+        emit(SignoutSuccess());
       } else {
         emit(SignoutFailure(response.message ?? 'Unknown error'));
       }

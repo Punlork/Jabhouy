@@ -1,4 +1,4 @@
-import 'package:my_app/home/widgets/widgets.dart';
+import 'package:my_app/home/home.dart';
 
 final List<ShopItem> defaultShopList = [
   ShopItem(

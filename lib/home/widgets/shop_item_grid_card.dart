@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/home/widgets/widgets.dart';
+import 'package:my_app/home/home.dart';
 
 class GridShopItemCard extends StatelessWidget {
   const GridShopItemCard({

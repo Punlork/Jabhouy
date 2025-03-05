@@ -5,7 +5,7 @@ import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
 import 'package:my_app/home/bloc/inventory/inventory_bloc.dart';
-import 'package:my_app/home/widgets/widgets.dart';
+import 'package:my_app/home/home.dart';
 
 class InventoryTab extends StatelessWidget {
   const InventoryTab({required this.items, super.key});
@@ -66,15 +66,15 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
         child: FilterSheet(
           initialCategoryFilter: context.read<InventoryBloc>().state.categoryFilter,
           initialBuyerFilter: context.read<InventoryBloc>().state.buyerFilter,
-          onApply: (category, buyer) => context.read<InventoryBloc>().add(FilterItemsEvent(category, buyer)),
+          onApply: (category, buyer) => context.read<InventoryBloc>().add(
+                FilterItemsEvent(
+                  category,
+                  buyer,
+                ),
+              ),
         ),
       ),
     );
-  }
-
-  void _toggleView() {
-    _isGridView = !_isGridView;
-    setState(() {});
   }
 
   @override
@@ -110,15 +110,93 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
               children: [
                 Row(
                   children: [
-                    BlocListener<SignoutBloc, SignoutState>(
-                      listener: (context, state) {
-                        if (state is SignoutSuccess) {
-                          context.read<AuthBloc>().add(AuthSignedOut());
-                        }
-                      },
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {},
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 14,
+                            backgroundImage: NetworkImage(
+                              'https://cdn2.vectorstock.com/i/1000x1000/44/01/default-avatar-photo-placeholder-icon-grey-vector-38594401.jpg',
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          BlocBuilder<AuthBloc, AuthState>(
+                            builder: (context, state) {
+                              if (state is Authenticated) {
+                                return Text(
+                                  state.user.name ?? 'No name',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      height: 36,
+                      child: SegmentedButton<bool>(
+                        segments: const [
+                          ButtonSegment(
+                            value: false,
+                            icon: Icon(Icons.list),
+                            label: Text('List'),
+                          ),
+                          ButtonSegment(
+                            value: true,
+                            icon: Icon(Icons.grid_view),
+                            label: Text('Grid'),
+                          ),
+                        ],
+                        showSelectedIcon: false,
+                        selected: {_isGridView},
+                        onSelectionChanged: (newSelection) => () {
+                          _isGridView = !_isGridView;
+                          setState(() {});
+                        }(),
+                        style: SegmentedButton.styleFrom(
+                          backgroundColor: colorScheme.onPrimary.withValues(alpha: 0.1),
+                          foregroundColor: colorScheme.onPrimary,
+                          selectedForegroundColor: colorScheme.primary,
+                          padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    MultiBlocListener(
+                      listeners: [
+                        BlocListener<SignoutBloc, SignoutState>(
+                          listener: (context, state) {
+                            switch (state.runtimeType) {
+                              case SignoutSuccess:
+                                context.read<AuthBloc>().add(AuthSignedOut());
+                              //   case SignoutLoading:
+                              //     context.goNamed(AppRoutes.loading);
+                            }
+                          },
+                        ),
+                        BlocListener<AuthBloc, AuthState>(
+                          listener: (context, state) {
+                            if (state is Unauthenticated) {
+                              showSuccessSnackBar(context, 'Signout successful');
+                              context.goNamed(AppRoutes.signin);
+                            }
+                          },
+                        ),
+                      ],
+                      child: _buildIconButton(
+                        icon: Icons.logout,
+                        color: Colors.red,
+                        onPressed: () async {
                           final shouldSignOut = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -142,60 +220,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                             context.read<SignoutBloc>().add(const SignoutSubmitted());
                           }
                         },
-                        child: Row(
-                          children: [
-                            const CircleAvatar(
-                              radius: 14,
-                              backgroundImage: NetworkImage(
-                                'https://cdn2.vectorstock.com/i/1000x1000/44/01/default-avatar-photo-placeholder-icon-grey-vector-38594401.jpg',
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            BlocBuilder<AuthBloc, AuthState>(
-                              builder: (context, state) {
-                                if (state is Authenticated) {
-                                  return Text(
-                                    state.user.name ?? 'No name',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                  );
-                                }
-                                return const SizedBox.shrink();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      height: 36,
-                      child: SegmentedButton<bool>(
-                        segments: const [
-                          ButtonSegment(
-                            value: false,
-                            icon: Icon(Icons.list),
-                            label: Text('List'),
-                          ),
-                          ButtonSegment(
-                            value: true,
-                            icon: Icon(Icons.grid_view),
-                            label: Text('Grid'),
-                          ),
-                        ],
-                        showSelectedIcon: false,
-                        selected: {_isGridView},
-                        onSelectionChanged: (newSelection) => _toggleView(),
-                        style: SegmentedButton.styleFrom(
-                          backgroundColor: colorScheme.onPrimary.withValues(alpha: 0.1),
-                          foregroundColor: colorScheme.onPrimary,
-                          selectedForegroundColor: colorScheme.primary,
-                          padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 10),
-                        ),
+                        colorScheme: colorScheme,
                       ),
                     ),
                   ],
@@ -286,12 +311,23 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                                 child: GridShopItemCard(
                                   key: ValueKey(state.filteredItems[index].name),
                                   item: state.filteredItems[index],
-                                  onEdit: (item) {
-                                    context.pushNamed(
-                                      AppRoutes.createShopItem,
-                                      extra: {'existingItem': item},
-                                    );
-                                  },
+                                  onEdit: (item) => showShopItemDetailSheet(
+                                    context: context,
+                                    item: item,
+                                    onEdit: () {
+                                      context.pushNamed(
+                                        AppRoutes.createShopItem,
+                                        extra: {'existingItem': item},
+                                      );
+                                    },
+                                    onDelete: () async {
+                                      //TODO: stimulate requesting delete
+                                      LoadingOverlay.show();
+                                      // ignore: inference_failure_on_instance_creation
+                                      await Future.delayed(const Duration(seconds: 2));
+                                      LoadingOverlay.hide();
+                                    },
+                                  ),
                                 ),
                               );
                             },
@@ -308,6 +344,13 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                                 duration: const Duration(milliseconds: 300),
                                 curve: Curves.easeInOut,
                                 child: ShopItemCard(
+                                  onDelete: (_) async {
+                                    //TODO: stimulate requesting delete
+                                    LoadingOverlay.show();
+                                    // ignore: inference_failure_on_instance_creation
+                                    await Future.delayed(const Duration(seconds: 2));
+                                    LoadingOverlay.hide();
+                                  },
                                   key: ValueKey(state.filteredItems[index].name),
                                   item: state.filteredItems[index],
                                   onEdit: (item) {
@@ -336,6 +379,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
     required VoidCallback onPressed,
     required ColorScheme colorScheme,
     String? tooltip,
+    Color? color,
   }) {
     return SizedBox(
       height: 48,
@@ -346,7 +390,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
           onPressed: onPressed,
           icon: Icon(
             icon,
-            color: Colors.black,
+            color: color ?? Colors.black,
           ),
           style: IconButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

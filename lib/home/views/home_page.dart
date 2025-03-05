@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/home/constant.dart';
-import 'package:my_app/home/widgets/widgets.dart';
+import 'package:my_app/home/home.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

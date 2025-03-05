@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_dynamic_calls
 
-import 'package:my_app/app/service/api_service.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 
 class AuthService {
@@ -79,14 +79,11 @@ class AuthService {
     );
   }
 
-  Future<ApiResponse<User?>> signout() async {
-    final response = await _apiService.post(
+  Future<ApiResponse<dynamic>> signout() async {
+    LoadingOverlay.show();
+
+    final response = await _apiService.post<dynamic>(
       '$_auth/sign-out',
-      parser: (value) => value != null
-          ? User.fromJson(
-              value['user'] as Map<String, dynamic>,
-            )
-          : null,
     );
 
     return ApiResponse(

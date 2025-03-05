@@ -22,6 +22,13 @@ class App extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
+        builder: (context, child) => Overlay(
+          initialEntries: [
+            OverlayEntry(
+              builder: (context) => child!,
+            ),
+          ],
+        ),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         routerDelegate: AppRoutes.router.routerDelegate,

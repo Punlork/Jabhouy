@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:my_app/home/widgets/widgets.dart';
+import 'package:my_app/home/home.dart';
 
 part 'inventory_event.dart';
 part 'inventory_state.dart';

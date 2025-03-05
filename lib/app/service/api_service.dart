@@ -6,6 +6,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 import 'package:my_app/app/app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,7 +47,12 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
-        () => _client.get(uri, headers: tempHeaders).timeout(_timeout),
+        () => _client
+            .get(
+              uri,
+              headers: tempHeaders,
+            )
+            .timeout(_timeout),
       );
 
       cookies.updateCookies(uri, response);
@@ -108,6 +114,8 @@ class ApiService {
         showErrorSnackBar(context, errorMessage);
       }
       return ApiResponse<T>(success: false, message: errorMessage);
+    } finally {
+      LoadingOverlay.hide();
     }
   }
 

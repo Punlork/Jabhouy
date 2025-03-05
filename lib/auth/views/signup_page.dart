@@ -124,11 +124,11 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: colorScheme.surface.withOpacity(0.2),
+                            color: colorScheme.surface.withValues(alpha: .2),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: colorScheme.shadow.withOpacity(0.1),
+                                color: colorScheme.shadow.withValues(alpha: .1),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -152,7 +152,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         Text(
                           'Sign up to get started',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onPrimary.withOpacity(0.8),
+                                color: colorScheme.onPrimary.withValues(alpha: .8),
                               ),
                         ),
                         const SizedBox(height: 40),

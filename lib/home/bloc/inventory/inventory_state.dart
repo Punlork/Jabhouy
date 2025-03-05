@@ -7,7 +7,7 @@ class InventoryState {
     this.categoryFilter = 'All',
     this.buyerFilter = 'All',
   });
-  
+
   final List<ShopItem> filteredItems;
   final String searchQuery;
   final String categoryFilter;
