@@ -7,13 +7,13 @@ environment:
   sdk: ^3.5.0
 
 dependencies:
-  bloc: ^8.1.4
+  bloc: ^9.0.0
   cached_network_image: ^3.4.1
   dio: ^5.8.0+1
   equatable: ^2.0.7
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.6
+  flutter_bloc: ^9.1.0
   flutter_dotenv: ^5.2.1
   flutter_launcher_icons: ^0.14.3
   flutter_localizations:
@@ -28,7 +28,7 @@ dependencies:
   shimmer: ^3.0.0
 
 dev_dependencies:
-  bloc_test: ^9.1.7
+  bloc_test: ^10.0.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
