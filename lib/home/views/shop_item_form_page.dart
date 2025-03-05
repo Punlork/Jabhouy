@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_app/home/home.dart';
 
 class ShopItemFormPage extends StatefulWidget {
@@ -82,8 +83,8 @@ class _ShopItemFormPageState extends State<ShopItemFormPage> {
     setState(() => _hasChanges = true);
   }
 
-  Future<bool> _onWillPop() async {
-    if (!_hasChanges) return true;
+  Future<void> _onWillPop(bool didPop) async {
+    if (didPop || !_hasChanges) return; // If already popped or no changes, do nothing
 
     final shouldPop = await showDialog<bool>(
       context: context,
@@ -104,7 +105,11 @@ class _ShopItemFormPageState extends State<ShopItemFormPage> {
       ),
     );
 
-    return shouldPop ?? false;
+    if (shouldPop ?? false) {
+      if (!context.mounted) return;
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context); // Manually pop if user confirms
+    }
   }
 
   void _submitItem() {
@@ -131,17 +136,19 @@ class _ShopItemFormPageState extends State<ShopItemFormPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return PopScope(
-      onPopInvokedWithResult: (didPop, result) => _onWillPop(),
+      canPop: !_hasChanges,
+      onPopInvokedWithResult: (didPop, result) => _onWillPop(didPop),
       child: Scaffold(
         appBar: AppBar(
           title: Text(_isEditMode ? 'Edit Item' : 'Add New Item'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
-              if (await _onWillPop()) {
-                if (!context.mounted) return;
-                Navigator.pop(context);
+              if (!_hasChanges) {
+                context.pop();
+                return;
               }
+              await _onWillPop(false);
             },
           ),
         ),
