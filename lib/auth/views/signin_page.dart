@@ -54,6 +54,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
 
   void _handleLogin(BuildContext context) {
     if (_formKey.currentState!.validate()) {
+      FocusManager.instance.primaryFocus?.unfocus();
       context.read<SigninBloc>().add(
             SigninSubmitted(
               email: _emailController.text,

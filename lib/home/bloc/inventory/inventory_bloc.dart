@@ -8,7 +8,11 @@ part 'inventory_event.dart';
 part 'inventory_state.dart';
 
 class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
-  InventoryBloc(this.allItems) : super(InventoryState(filteredItems: allItems)) {
+  InventoryBloc(List<ShopItem> items)
+      : allItems = List.from(items),
+        super(
+          InventoryState(filteredItems: items),
+        ) {
     on<SearchItemsEvent>(_onSearchItems);
     on<FilterItemsEvent>(_onFilterItems);
     on<RefreshItemsEvent>(_onRefreshItems);

@@ -42,19 +42,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  controller: _tabController,
-                  children: [
-                    InventoryTab(items: defaultShopList),
-                    const AccountTab(),
-                  ],
-                ),
-              ),
-            ],
+          child: InventoryTab(
+            items: List.generate(
+              10,
+              (_) => defaultShopList,
+            )
+                .expand<ShopItem>(
+                  (list) => list,
+                )
+                .toList(),
           ),
         ),
       ),
