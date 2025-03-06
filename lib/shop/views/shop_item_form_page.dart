@@ -246,11 +246,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                   required: true,
                   keyboardType: TextInputType.number,
                 ),
-                _buildTextField(
-                  key: 'defaultPrice',
-                  label: l10n.defaultPrice,
-                  keyboardType: TextInputType.number,
-                ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
