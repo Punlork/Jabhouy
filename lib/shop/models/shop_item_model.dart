@@ -38,7 +38,7 @@ class ShopItemModel extends Equatable {
       id: tryCast<int>(json['id'])!,
       userId: tryCast<String>(json['userId'])!,
       name: tryCast<String>(json['name'])!,
-      defaultPrice: tryCast<num>(json['defaultPrice'], fallback: 0)!.toDouble(),
+      defaultPrice: tryCast<num>(json['basePrice'], fallback: 0)!.toDouble(),
       defaultBatchPrice: tryCast<num>(json['defaultBatchPrice'])?.toDouble(),
       customerPrice: tryCast<num>(json['customerPrice'])?.toDouble(),
       sellerPrice: tryCast<num>(json['sellerPrice'])?.toDouble(),
@@ -79,15 +79,10 @@ class ShopItemModel extends Equatable {
       sellerPrice != null;
 
   Map<String, dynamic> toJson() {
-    assert(
-      name.isNotEmpty && defaultPrice > 0,
-      'Name & Default price must be provided',
-    );
-
     return {
       'userId': userId,
       'name': name,
-      'defaultPrice': defaultPrice,
+      'basePrice': defaultPrice,
       'defaultBatchPrice': defaultBatchPrice,
       'customerPrice': customerPrice,
       'sellerPrice': sellerPrice,

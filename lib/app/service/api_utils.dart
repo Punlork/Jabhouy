@@ -11,7 +11,6 @@ ApiResponse<T> handleResponse<T>(
   if (rawBody != null) {
     try {
       responseBody = jsonDecode(rawBody);
-      // Beautify and print the response JSON body
     } catch (e) {
       throw ApiException(
         'Failed to parse response: $e',
@@ -51,8 +50,8 @@ Future<http.Response> interceptRequest(Future<http.Response> Function() request)
 
   final response = await request();
 
-  // final prettyJson = const JsonEncoder.withIndent('  ').convert(response.body);
-  // log('Response JSON: $prettyJson');
+  final prettyJson = const JsonEncoder.withIndent('  ').convert(response.body);
+  log('Response JSON: $prettyJson');
 
   final endTime = DateTime.now();
   developer.log('Response received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');

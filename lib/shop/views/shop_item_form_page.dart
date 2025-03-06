@@ -269,6 +269,11 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                 ),
                 if (_isDistributorMode) ...[
                   _buildTextField(
+                    key: 'sellerBatchPrice',
+                    label: l10n.sellerBatchPrice,
+                    keyboardType: TextInputType.number,
+                  ),
+                  _buildTextField(
                     key: 'defaultPrice',
                     label: l10n.defaultPrice,
                     required: true,
@@ -292,11 +297,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                   _buildTextField(
                     key: 'batchSize',
                     label: l10n.batchSize,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'sellerBatchPrice',
-                    label: l10n.sellerBatchPrice,
                     keyboardType: TextInputType.number,
                   ),
                 ],
