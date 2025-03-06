@@ -64,26 +64,3 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 }
-
-class AccountTab extends StatefulWidget {
-  const AccountTab({super.key});
-
-  @override
-  State<AccountTab> createState() => _AccountTabState();
-}
-
-class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true; // Keep state alive
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
-    return const Center(
-      child: Text(
-        'Account Page\n(Add your account details here)',
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-}

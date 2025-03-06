@@ -1,3 +1,4 @@
+export 'bloc/app_bloc.dart';
 export 'constant/app_assets.dart';
 export 'injection/dependency_injection.dart';
 export 'routes/app_routes.dart';

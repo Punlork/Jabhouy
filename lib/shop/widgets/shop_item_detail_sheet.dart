@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
 void showShopItemDetailSheet({
@@ -36,6 +37,8 @@ class ShopItemDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context); // Access translations
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -82,7 +85,7 @@ class ShopItemDetailSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.category ?? 'N/A',
+                      item.category ?? l10n.na,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey.shade600,
                           ),
@@ -96,33 +99,33 @@ class ShopItemDetailSheet extends StatelessWidget {
 
           // Price Details
           _buildDetailRow(
-            'Customer Price',
-            '\$${item.customerPrice?.toStringAsFixed(2)}',
+            l10n.customerPrice,
+            item.customerPrice != null ? '\$${item.customerPrice!.toStringAsFixed(2)}' : l10n.na,
             context,
           ),
           _buildDetailRow(
-            'Customer Batch Price',
-            '\$${item.customerBatchPrice?.toStringAsFixed(2)}',
+            l10n.customerBatchPrice,
+            item.customerBatchPrice != null ? '\$${item.customerBatchPrice!.toStringAsFixed(2)}' : l10n.na,
             context,
           ),
           _buildDetailRow(
-            'Seller Price',
-            '\$${item.sellerPrice?.toStringAsFixed(2)}',
+            l10n.sellerPrice,
+            item.sellerPrice != null ? '\$${item.sellerPrice!.toStringAsFixed(2)}' : l10n.na,
             context,
           ),
           _buildDetailRow(
-            'Seller Batch Price',
-            '\$${item.sellerBatchPrice?.toStringAsFixed(2)}',
+            l10n.sellerBatchPrice,
+            item.sellerBatchPrice != null ? '\$${item.sellerBatchPrice!.toStringAsFixed(2)}' : l10n.na,
             context,
           ),
           _buildDetailRow(
-            'Default Batch Price',
-            '\$${item.defaultBatchPrice?.toStringAsFixed(2)}',
+            l10n.defaultBatchPrice,
+            item.defaultBatchPrice != null ? '\$${item.defaultBatchPrice!.toStringAsFixed(2)}' : l10n.na,
             context,
           ),
           _buildDetailRow(
-            'Batch Size',
-            item.batchSize.toString(),
+            l10n.batchSize,
+            item.batchSize?.toString() ?? l10n.na,
             context,
           ),
 
@@ -130,7 +133,7 @@ class ShopItemDetailSheet extends StatelessWidget {
           if (item.note != null && item.note!.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(
-              'Note',
+              l10n.note,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -155,7 +158,7 @@ class ShopItemDetailSheet extends StatelessWidget {
                     Icons.edit,
                     color: Colors.white,
                   ),
-                  label: const Text('Edit'),
+                  label: Text(l10n.edit),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -167,7 +170,7 @@ class ShopItemDetailSheet extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _confirmDelete(context),
                   icon: const Icon(Icons.delete),
-                  label: const Text('Delete'),
+                  label: Text(l10n.delete),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.error,
                     side: BorderSide(color: Theme.of(context).colorScheme.error),
@@ -208,28 +211,31 @@ class ShopItemDetailSheet extends StatelessWidget {
         ),
       );
 
-  void _confirmDelete(BuildContext context) => showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete "${item.name}"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+  void _confirmDelete(BuildContext context) {
+    final l10n = AppLocalizations.of(context); // Access translations
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.confirmDeleteMessage(item.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await onDelete();
+              if (context.mounted) Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-                await onDelete();
-                if (context.mounted) Navigator.pop(context);
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.error,
-              ),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
-      );
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+  }
 }

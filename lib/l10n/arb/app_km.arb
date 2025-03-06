@@ -1,82 +1,82 @@
 {
-  "@@locale": "en",
-  "welcomeBack": "Welcome Back",
+  "@@locale": "km",
+  "welcomeBack": "សូមស្វាគមន៍ត្រឡប់មកវិញ",
   "@welcomeBack": {
     "description": "Headline text welcoming the user back on the sign-in page"
   },
-  "signInToContinue": "Sign in to continue",
+  "signInToContinue": "ចូលដើម្បីបន្ត",
   "@signInToContinue": {
     "description": "Subtitle text prompting the user to sign in"
   },
-  "enterYourEmail": "Enter your email",
+  "enterYourEmail": "បញ្ចូលអ៊ីមែលរបស់អ្នក",
   "@enterYourEmail": {
     "description": "Hint text for the email input field"
   },
-  "email": "Email",
+  "email": "អ៊ីមែល",
   "@email": {
     "description": "Label for the email input field"
   },
-  "pleaseEnterYourEmail": "Please enter your email",
+  "pleaseEnterYourEmail": "សូមបញ្ចូលអ៊ីមែលរបស់អ្នក",
   "@pleaseEnterYourEmail": {
     "description": "Validation message when email is empty"
   },
-  "pleaseEnterAValidEmail": "Please enter a valid email",
+  "pleaseEnterAValidEmail": "សូមបញ្ចូលអ៊ីមែលត្រឹមត្រូវ",
   "@pleaseEnterAValidEmail": {
     "description": "Validation message when email format is invalid"
   },
-  "enterYourPassword": "Enter your password",
+  "enterYourPassword": "បញ្ចូលលេខសម្ងាត់របស់អ្នក",
   "@enterYourPassword": {
     "description": "Hint text for the password input field"
   },
-  "password": "Password",
+  "password": "លេខសម្ងាត់",
   "@password": {
     "description": "Label for the password input field"
   },
-  "pleaseEnterYourPassword": "Please enter your password",
+  "pleaseEnterYourPassword": "សូមបញ្ចូលលេខសម្ងាត់របស់អ្នក",
   "@pleaseEnterYourPassword": {
     "description": "Validation message when password is empty"
   },
-  "passwordMinLength": "Password must be at least 6 characters",
+  "passwordMinLength": "លេខសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ",
   "@passwordMinLength": {
     "description": "Validation message when password is too short"
   },
-  "login": "Login",
+  "login": "ចូល",
   "@login": {
     "description": "Text for the login button"
   },
-  "signUp": "Sign Up",
+  "signUp": "ចុះឈ្មោះ",
   "@signUp": {
     "description": "Text for the sign-up button"
   },
-  "signinSuccessful": "Signin successful",
+  "signinSuccessful": "ចូលបានជោគជ័យ",
   "@signinSuccessful": {
     "description": "Success message after signing in"
   },
-  "createAccount": "Create Account",
+  "createAccount": "បង្កើតគណនី",
   "@createAccount": {
     "description": "Headline text for the sign-up page"
   },
-  "signUpToGetStarted": "Sign up to get started",
+  "signUpToGetStarted": "ចុះឈ្មោះដើម្បីចាប់ផ្តើម",
   "@signUpToGetStarted": {
     "description": "Subtitle text prompting the user to sign up"
   },
-  "enterYourName": "Enter your name",
+  "enterYourName": "បញ្ចូលឈ្មោះរបស់អ្នក",
   "@enterYourName": {
     "description": "Hint text for the name input field"
   },
-  "name": "Name",
+  "name": "ឈ្មោះ",
   "@name": {
     "description": "Label for the name input field"
   },
-  "pleaseEnterYourName": "Please enter your name",
+  "pleaseEnterYourName": "សូមបញ្ចូលឈ្មោះរបស់អ្នក",
   "@pleaseEnterYourName": {
     "description": "Validation message when name is empty"
   },
-  "signIn": "Sign In",
+  "signIn": "ចូល",
   "@signIn": {
     "description": "Text for the sign-in button"
   },
-  "welcomeUser": "Welcome, {name}!",
+  "welcomeUser": "សូមស្វាគមន៍, {name}!",
   "@welcomeUser": {
     "description": "Success message after signing up, with user name",
     "placeholders": {
@@ -85,39 +85,39 @@
       }
     }
   },
-  "noName": "No name",
+  "noName": "គ្មានឈ្មោះ",
   "@noName": {
     "description": "Default text displayed when user name is not available"
   },
-  "list": "List",
+  "list": "បញ្ជី",
   "@list": {
     "description": "Label for the list view option in segmented button"
   },
-  "grid": "Grid",
+  "grid": "ក្រឡា",
   "@grid": {
     "description": "Label for the grid view option in segmented button"
   },
-  "searchItems": "Search items...",
+  "searchItems": "ស្វែងរកធាតុ...",
   "@searchItems": {
     "description": "Hint text for the search input field"
   },
-  "signOut": "Sign Out",
+  "signOut": "ចាកចេញ",
   "@signOut": {
     "description": "Text for sign-out action in dialog title and button"
   },
-  "confirmSignOut": "Are you sure you want to sign out?",
+  "confirmSignOut": "តើអ្នកប្រាកដថាចង់ចាកចេញទេ?",
   "@confirmSignOut": {
     "description": "Confirmation message in the sign-out dialog"
   },
-  "cancel": "Cancel",
+  "cancel": "បោះបង់",
   "@cancel": {
     "description": "Text for the cancel button in dialogs"
   },
-  "signoutSuccessful": "Signout successful",
+  "signoutSuccessful": "ចាកចេញជោគជ័យ",
   "@signoutSuccessful": {
     "description": "Success message after signing out"
   },
-  "itemCount": "Counts: {count}",
+  "itemCount": "ចំនួន: {count}",
   "@itemCount": {
     "description": "Text displaying the number of items, with a count placeholder",
     "placeholders": {
@@ -126,51 +126,51 @@
       }
     }
   },
-  "na": "N/A",
+  "na": "គ្មាន",
   "@na": {
     "description": "Default text when a value (e.g., category) is not available"
   },
-  "customerPrice": "Customer Price",
+  "customerPrice": "តម្លៃសម្រាប់អតិថិជន",
   "@customerPrice": {
     "description": "Label for the customer price of an item"
   },
-  "customerBatchPrice": "Customer Batch Price",
+  "customerBatchPrice": "តម្លៃបាច់សម្រាប់អតិថិជន",
   "@customerBatchPrice": {
     "description": "Label for the customer batch price of an item"
   },
-  "sellerPrice": "Seller Price",
+  "sellerPrice": "តម្លៃសម្រាប់អ្នកលក់",
   "@sellerPrice": {
     "description": "Label for the seller price of an item"
   },
-  "sellerBatchPrice": "Seller Batch Price",
+  "sellerBatchPrice": "តម្លៃបាច់សម្រាប់អ្នកលក់",
   "@sellerBatchPrice": {
     "description": "Label for the seller batch price of an item"
   },
-  "defaultBatchPrice": "Default Batch Price",
+  "defaultBatchPrice": "តម្លៃបាច់លំនាំដើម",
   "@defaultBatchPrice": {
     "description": "Label for the default batch price of an item"
   },
-  "batchSize": "Batch Size",
+  "batchSize": "ទំហំបាច់",
   "@batchSize": {
     "description": "Label for the batch size of an item"
   },
-  "note": "Note",
+  "note": "កំណត់សម្គាល់",
   "@note": {
     "description": "Title for the note section of an item"
   },
-  "edit": "Edit",
+  "edit": "កែសម្រួល",
   "@edit": {
     "description": "Label for the edit button"
   },
-  "delete": "Delete",
+  "delete": "លុប",
   "@delete": {
     "description": "Label for the delete button and action in dialog"
   },
-  "confirmDelete": "Confirm Delete",
+  "confirmDelete": "បញ្ជាក់ការលុប",
   "@confirmDelete": {
     "description": "Title for the delete confirmation dialog"
   },
-  "confirmDeleteMessage": "Are you sure you want to delete \"{name}\"?",
+  "confirmDeleteMessage": "តើអ្នកប្រាកដថាចង់លុប \"{name}\" មែនទេ?",
   "@confirmDeleteMessage": {
     "description": "Confirmation message in the delete dialog, with item name",
     "placeholders": {
@@ -179,99 +179,99 @@
       }
     }
   },
-  "settings": "Settings",
+  "settings": "ការកំណត់",
   "@settings": {
     "description": "Label for the settings button and sheet title"
   },
-  "switchLanguage": "Switch Language",
+  "switchLanguage": "ប្តូរភាសា",
   "@switchLanguage": {
     "description": "Label for the switch language option"
   },
-  "languageEnglish": "English",
+  "languageEnglish": "អង់គ្លេស",
   "@languageEnglish": {
     "description": "Label for English language option"
   },
-  "languageKhmer": "Khmer",
+  "languageKhmer": "ខ្មែរ",
   "@languageKhmer": {
     "description": "Label for Khmer language option"
   },
-  "editItem": "Edit Item",
+  "editItem": "កែសម្រួលធាតុ",
   "@editItem": {
     "description": "AppBar title when editing an item"
   },
-  "addNewItem": "Add New Item",
+  "addNewItem": "បន្ថែមធាតុថ្មី",
   "@addNewItem": {
     "description": "AppBar title when adding a new item"
   },
-  "nameRequired": "Name is required",
+  "nameRequired": "ឈ្មោះត្រូវបានទាមទារ",
   "@nameRequired": {
     "description": "Validation message when name is empty"
   },
-  "defaultPrice": "Default Price (per unit)",
+  "defaultPrice": "តម្លៃលំនាំដើម (ក្នុងមួយឯកតា)",
   "@defaultPrice": {
     "description": "Label for the default price input field"
   },
-  "defaultPriceRequired": "Default Price is required",
+  "defaultPriceRequired": "តម្លៃលំនាំដើមត្រូវបានទាមទារ",
   "@defaultPriceRequired": {
     "description": "Validation message when default price is empty"
   },
-  "changeToSeller": "Change to seller",
+  "changeToSeller": "ប្តូរទៅជាអ្នកលក់",
   "@changeToSeller": {
     "description": "Label for switching to seller mode"
   },
-  "changeToDistributor": "Change to distributor",
+  "changeToDistributor": "ប្តូរទៅជាអ្នកចែកចាយ",
   "@changeToDistributor": {
     "description": "Label for switching to distributor mode"
   },
-  "category": "Category",
+  "category": "ប្រភេទ",
   "@category": {
     "description": "Label for the category dropdown"
   },
-  "electronics": "Electronics",
+  "electronics": "អេឡិចត្រូនិក",
   "@electronics": {
     "description": "Category option for electronics"
   },
-  "accessories": "Accessories",
+  "accessories": "គ្រឿងបន្លាស់",
   "@accessories": {
     "description": "Category option for accessories"
   },
-  "beverages": "Beverages",
+  "beverages": "ភេសជ្ជៈ",
   "@beverages": {
     "description": "Category option for beverages"
   },
-  "other": "Other",
+  "other": "ផ្សេងទៀត",
   "@other": {
     "description": "Category option for other"
   },
-  "imageUrl": "Image URL (optional)",
+  "imageUrl": "URL រូបភាព (ជាជម្រើស)",
   "@imageUrl": {
     "description": "Label for the image URL input field"
   },
-  "saveChanges": "Save Changes",
+  "saveChanges": "រក្សាទុកការផ្លាស់ប្តូរ",
   "@saveChanges": {
     "description": "Button text for saving changes in edit mode"
   },
-  "addItem": "Add Item",
+  "addItem": "បន្ថែមធាតុ",
   "@addItem": {
     "description": "Button text for adding a new item"
   },
-  "unsavedChanges": "Unsaved Changes",
+  "unsavedChanges": "ការផ្លាស់ប្តូរមិនទាន់រក្សាទុក",
   "@unsavedChanges": {
     "description": "Title for the unsaved changes dialog"
   },
-  "confirmDiscardChanges": "You have unsaved changes. Are you sure you want to discard them?",
+  "confirmDiscardChanges": "អ្នកមានការផ្លាស់ប្តូរមិនទាន់រក្សាទុក។ តើអ្នកប្រាកដថាចង់បោះបង់វាទេ?",
   "@confirmDiscardChanges": {
     "description": "Content for the unsaved changes dialog"
   },
-  "discard": "Discard",
+  "discard": "បោះបង់",
   "@discard": {
     "description": "Text for the discard button in dialogs"
   },
-  "perUnit": "/ unit",
+  "perUnit": "/ ឯកតា",
   "@perUnit": {
     "description": "Text indicating price per unit"
   },
-  "perBatchPack": "/ {batchSize}-pack",
+  "perBatchPack": "/ {batchSize}-កញ្ចប់",
   "@perBatchPack": {
     "description": "Text indicating price per batch pack with batch size",
     "placeholders": {

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
+import 'package:my_app/l10n/l10n.dart';
 
 class SigninPage extends StatelessWidget {
   const SigninPage({super.key});
@@ -72,6 +73,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context); // Access translations
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -98,18 +100,14 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                       listener: (context, state) {
                         if (state is SigninSuccess) {
                           context.read<AuthBloc>().add(AuthSignedIn(state.user));
-                        } else if (state is SigninFailure) {
-                          // Error SnackBar handled by ApiService
                         }
                       },
                     ),
                     BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
                         if (state is Authenticated) {
-                          showSuccessSnackBar(context, 'Signin successful');
+                          showSuccessSnackBar(context, l10n.signinSuccessful);
                           context.goNamed(AppRoutes.home);
-                        } else if (state is Unauthenticated) {
-                          // Error SnackBar handled by ApiService
                         }
                       },
                     ),
@@ -122,7 +120,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                         const AppLogo(),
                         const SizedBox(height: 40),
                         Text(
-                          'Welcome Back',
+                          l10n.welcomeBack,
                           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                 color: colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
@@ -130,7 +128,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Sign in to continue',
+                          l10n.signInToContinue,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onPrimary.withValues(alpha: .8),
                               ),
@@ -138,17 +136,17 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                         const SizedBox(height: 40),
                         CustomTextFormField(
                           controller: _emailController,
-                          hintText: 'Enter your email',
-                          labelText: 'Email',
+                          hintText: l10n.enterYourEmail,
+                          labelText: l10n.email,
                           prefixIcon: Icons.email_rounded,
                           action: TextInputAction.next,
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return l10n.pleaseEnterYourEmail;
                             }
                             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                              return 'Please enter a valid email';
+                              return l10n.pleaseEnterAValidEmail;
                             }
                             return null;
                           },
@@ -156,18 +154,18 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                         const SizedBox(height: 20),
                         CustomTextFormField(
                           controller: _passwordController,
-                          hintText: 'Enter your password',
-                          labelText: 'Password',
+                          hintText: l10n.enterYourPassword,
+                          labelText: l10n.password,
                           prefixIcon: Icons.lock_rounded,
                           obscureText: _obscurePassword,
                           showVisibilityIcon: true,
                           onVisibilityToggle: _togglePasswordVisibility,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                              return l10n.pleaseEnterYourPassword;
                             }
                             if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
+                              return l10n.passwordMinLength;
                             }
                             return null;
                           },
@@ -196,7 +194,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                                       ),
                                     )
                                   : Text(
-                                      'Login',
+                                      l10n.login,
                                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                             color: colorScheme.onPrimary,
                                             fontWeight: FontWeight.bold,
@@ -214,9 +212,9 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                               style: TextButton.styleFrom(
                                 foregroundColor: colorScheme.onPrimary,
                               ),
-                              child: const Text(
-                                'Sign Up',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.signUp,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

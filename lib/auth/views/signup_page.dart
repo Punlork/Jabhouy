@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
+import 'package:my_app/l10n/l10n.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
@@ -30,7 +31,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _obscurePassword = true; // For password visibility toggle
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -75,6 +76,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context); // Access translations
 
     return Scaffold(
       body: Container(
@@ -100,18 +102,14 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                       listener: (context, state) {
                         if (state is SignupSuccess) {
                           context.read<AuthBloc>().add(AuthSignedIn(state.user));
-                        } else if (state is SignupFailure) {
-                          // Error SnackBar is handled by ApiService
                         }
                       },
                     ),
                     BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
                         if (state is Authenticated) {
-                          showSuccessSnackBar(context, 'Welcome, ${state.user.name}!');
+                          showSuccessSnackBar(context, l10n.welcomeUser(state.user.name ?? 'No name'));
                           context.goNamed(AppRoutes.home);
-                        } else if (state is Unauthenticated) {
-                          // Error SnackBar is handled by ApiService
                         }
                       },
                     ),
@@ -124,7 +122,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         const AppLogo(),
                         const SizedBox(height: 40),
                         Text(
-                          'Create Account',
+                          l10n.createAccount,
                           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                 color: colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
@@ -132,7 +130,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Sign up to get started',
+                          l10n.signUpToGetStarted,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onPrimary.withValues(alpha: .8),
                               ),
@@ -140,12 +138,12 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         const SizedBox(height: 40),
                         CustomTextFormField(
                           controller: _nameController,
-                          hintText: 'Enter your name',
-                          labelText: 'Name',
+                          hintText: l10n.enterYourName,
+                          labelText: l10n.name,
                           prefixIcon: Icons.person_rounded,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your name';
+                              return l10n.pleaseEnterYourName;
                             }
                             return null;
                           },
@@ -153,16 +151,16 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         const SizedBox(height: 20),
                         CustomTextFormField(
                           controller: _emailController,
-                          hintText: 'Enter your email',
-                          labelText: 'Email',
+                          hintText: l10n.enterYourEmail,
+                          labelText: l10n.email,
                           prefixIcon: Icons.email_rounded,
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return l10n.pleaseEnterYourEmail;
                             }
                             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                              return 'Please enter a valid email';
+                              return l10n.pleaseEnterAValidEmail;
                             }
                             return null;
                           },
@@ -170,18 +168,18 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         const SizedBox(height: 20),
                         CustomTextFormField(
                           controller: _passwordController,
-                          hintText: 'Enter your password',
-                          labelText: 'Password',
+                          hintText: l10n.enterYourPassword,
+                          labelText: l10n.password,
                           prefixIcon: Icons.lock_rounded,
                           obscureText: _obscurePassword,
                           showVisibilityIcon: true,
                           onVisibilityToggle: _togglePasswordVisibility,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                              return l10n.pleaseEnterYourPassword;
                             }
                             if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
+                              return l10n.passwordMinLength;
                             }
                             return null;
                           },
@@ -210,7 +208,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                                       ),
                                     )
                                   : Text(
-                                      'Sign Up',
+                                      l10n.signUp,
                                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                             color: colorScheme.onPrimary,
                                             fontWeight: FontWeight.bold,
@@ -228,9 +226,9 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                               style: TextButton.styleFrom(
                                 foregroundColor: colorScheme.onPrimary,
                               ),
-                              child: const Text(
-                                'Sign In',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                              child: Text(
+                                l10n.signIn,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],

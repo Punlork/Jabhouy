@@ -14,27 +14,44 @@ class App extends StatelessWidget {
         BlocProvider(
           create: (context) => getIt<AuthBloc>(),
         ),
+        BlocProvider(
+          create: (context) => getIt<AppBloc>(),
+        ),
       ],
-      child: MaterialApp.router(
-        theme: ThemeData(
-          appBarTheme: AppBarTheme(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          ),
-          useMaterial3: true,
-        ),
-        builder: (context, child) => Overlay(
-          initialEntries: [
-            OverlayEntry(
-              builder: (context) => child!,
+      child: const _MyApp(),
+    );
+  }
+}
+
+class _MyApp extends StatelessWidget {
+  const _MyApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AppBloc, AppState>(
+      builder: (context, state) {
+        return MaterialApp.router(
+          locale: state.locale,
+          theme: ThemeData(
+            appBarTheme: AppBarTheme(
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             ),
-          ],
-        ),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerDelegate: AppRoutes.router.routerDelegate,
-        routeInformationProvider: AppRoutes.router.routeInformationProvider,
-        routeInformationParser: AppRoutes.router.routeInformationParser,
-      ),
+            useMaterial3: true,
+          ),
+          builder: (context, child) => Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) => child!,
+              ),
+            ],
+          ),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerDelegate: AppRoutes.router.routerDelegate,
+          routeInformationProvider: AppRoutes.router.routeInformationProvider,
+          routeInformationParser: AppRoutes.router.routeInformationParser,
+        );
+      },
     );
   }
 }

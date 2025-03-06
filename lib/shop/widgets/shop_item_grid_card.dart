@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
 class GridShopItemCard extends StatelessWidget {
@@ -17,6 +18,7 @@ class GridShopItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
 
     return GestureDetector(
       onTap: () => onEdit(item), // Tap to edit
@@ -50,7 +52,7 @@ class GridShopItemCard extends StatelessWidget {
                 ),
               ),
             ),
-            // Content
+
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8),
@@ -68,20 +70,20 @@ class GridShopItemCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    // Price per unit
                     Text(
-                      '\$${item.customerPrice?.toStringAsFixed(2)} / unit',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    // Price
-                    Text(
-                      '\$${item.customerBatchPrice?.toStringAsFixed(2)} / ${item.batchSize}-pack',
+                      '\$${item.customerPrice?.toStringAsFixed(2)}${l10n.perUnit}',
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     // Batch Price
+                    Text(
+                      '\$${item.customerBatchPrice?.toStringAsFixed(2)}${l10n.perBatchPack(item.batchSize?.toString() ?? l10n.na)}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
               ),

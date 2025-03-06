@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_app/app/app.dart';
+import 'package:my_app/l10n/l10n.dart';
 
 import 'package:my_app/shop/shop.dart';
 
@@ -107,20 +109,21 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   Future<bool> _onWillPop() async {
     if (!_hasChanges) return true;
 
+    final l10n = AppLocalizations.of(context);
     final shouldPop = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Unsaved Changes'),
-        content: const Text('You have unsaved changes. Are you sure you want to discard them?'),
+        title: Text(l10n.unsavedChanges),
+        content: Text(l10n.confirmDiscardChanges),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('Discard'),
+            child: Text(l10n.discard),
           ),
         ],
       ),
@@ -155,35 +158,44 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       batchSize: _isDistributorMode && _controllers['batchSize']!.text.isNotEmpty
           ? int.tryParse(_controllers['batchSize']!.text)
           : null,
-    note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
       imageUrl: _controllers['imageUrl']!.text.isEmpty ? null : _controllers['imageUrl']!.text,
       category: _category,
+      // isDistributorMode: _isDistributorMode,
     );
 
     if (_isEditMode) {
       context.read<ShopBloc>().add(ShopEditItemEvent(body: item));
-      return;
+    } else {
+      context.read<ShopBloc>().add(ShopCreateItemEvent(body: item));
     }
-
-    context.read<ShopBloc>().add(ShopCreateItemEvent(body: item));
   }
 
   Widget _buildTextField({
     required String key,
-    String? label,
+    required String label,
     bool required = false,
     TextInputType keyboardType = TextInputType.text,
+    TextInputAction textInputAction = TextInputAction.next, // Default to next
   }) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: _controllers[key],
+      child: CustomTextFormField(
+        controller: _controllers[key]!,
+        hintText: '', // Hint not used in original, can add if needed
+        labelText: required ? '$label *' : label,
         keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: required ? '$label *' : label,
-          border: const OutlineInputBorder(),
+        action: textInputAction,
+        useCustomBorder: false,
+        validator: required ? (value) => value!.isEmpty ? l10n.nameRequired.replaceAll('Name', label) : null : null,
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          // errorBorder: OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(),
+          focusedBorder: OutlineInputBorder(),
+          // focusedErrorBorder: OutlineInputBorder(),
         ),
-        validator: required ? (value) => value!.isEmpty ? '$label is required' : null : null,
       ),
     );
   }
@@ -191,6 +203,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return PopScope(
       canPop: !_hasChanges,
@@ -202,7 +215,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_isEditMode ? 'Edit Item' : 'Add New Item'),
+          title: Text(_isEditMode ? l10n.editItem : l10n.addNewItem),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -224,22 +237,21 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
               children: [
                 _buildTextField(
                   key: 'name',
-                  label: 'Name',
+                  label: l10n.name,
                   required: true,
                 ),
                 _buildTextField(
                   key: 'defaultPrice',
-                  label: 'Default Price (per unit)',
+                  label: l10n.defaultPrice,
                   required: true,
                   keyboardType: TextInputType.number,
                 ),
-                // Switch for Seller/Distributor mode
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                      "Change to ${_isDistributorMode ? 'seller' : 'distributor'}",
+                      _isDistributorMode ? l10n.changeToSeller : l10n.changeToDistributor,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     onTap: () => setState(() {
@@ -255,59 +267,80 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                     ),
                   ),
                 ),
-                // Distributor-specific fields (no accordion)
                 if (_isDistributorMode) ...[
                   _buildTextField(
                     key: 'defaultBatchPrice',
-                    label: 'Default Batch Price',
+                    label: l10n.defaultBatchPrice,
                     keyboardType: TextInputType.number,
                   ),
                   _buildTextField(
                     key: 'customerPrice',
-                    label: 'Customer Price (per unit)',
+                    label: l10n.customerPrice,
                     keyboardType: TextInputType.number,
                   ),
                   _buildTextField(
                     key: 'sellerPrice',
-                    label: 'Seller Price (per unit)',
+                    label: l10n.sellerPrice,
                     keyboardType: TextInputType.number,
                   ),
                   _buildTextField(
                     key: 'customerBatchPrice',
-                    label: 'Customer Batch Price',
+                    label: l10n.customerBatchPrice,
                     keyboardType: TextInputType.number,
                   ),
                   _buildTextField(
                     key: 'sellerBatchPrice',
-                    label: 'Seller Batch Price',
+                    label: l10n.sellerBatchPrice,
                     keyboardType: TextInputType.number,
                   ),
                   _buildTextField(
                     key: 'batchSize',
-                    label: 'Batch Size (units)',
+                    label: l10n.batchSize,
                     keyboardType: TextInputType.number,
                   ),
                 ],
-                // Common optional fields
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: DropdownButtonFormField<String>(
                     value: _category,
-                    items: ['Electronics', 'Accessories', 'Beverages', 'Other']
-                        .map((value) => DropdownMenuItem(value: value, child: Text(value)))
-                        .toList(),
+                    items: const [
+                      DropdownMenuItem(value: 'Electronics', child: Text('Electronics')),
+                      DropdownMenuItem(value: 'Accessories', child: Text('Accessories')),
+                      DropdownMenuItem(value: 'Beverages', child: Text('Beverages')),
+                      DropdownMenuItem(value: 'Other', child: Text('Other')),
+                    ].map((item) {
+                      final l10n = AppLocalizations.of(context);
+                      final translatedLabel = switch (item.value) {
+                        'Electronics' => l10n.electronics,
+                        'Accessories' => l10n.accessories,
+                        'Beverages' => l10n.beverages,
+                        'Other' => l10n.other,
+                        _ => item.value!, // Fallback
+                      };
+                      return DropdownMenuItem<String>(
+                        value: item.value,
+                        child: Text(translatedLabel),
+                      );
+                    }).toList(),
                     onChanged: (value) => setState(() {
                       _category = value!;
                       _hasChanges = true;
                     }),
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.category,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
-                _buildTextField(key: 'note', label: 'Note'),
-                _buildTextField(key: 'imageUrl', label: 'Image URL (optional)'),
+                _buildTextField(
+                  key: 'note',
+                  label: l10n.note,
+                ),
+                _buildTextField(
+                  key: 'imageUrl',
+                  label: l10n.imageUrl,
+                  textInputAction: TextInputAction.done, // Last field
+                ),
                 const SizedBox(height: 24),
                 BlocListener<ShopBloc, ShopState>(
                   listener: (context, state) {
@@ -320,7 +353,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                     ),
-                    child: Text(_isEditMode ? 'Save Changes' : 'Add Item'),
+                    child: Text(_isEditMode ? l10n.saveChanges : l10n.addItem),
                   ),
                 ),
               ],

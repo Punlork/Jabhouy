@@ -6,7 +6,7 @@ class CustomTextFormField extends StatefulWidget {
     required this.controller,
     required this.hintText,
     required this.labelText,
-    required this.prefixIcon,
+    this.prefixIcon,
     super.key,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
@@ -25,7 +25,7 @@ class CustomTextFormField extends StatefulWidget {
   final TextInputAction? action;
   final String hintText;
   final String labelText;
-  final IconData prefixIcon;
+  final IconData? prefixIcon;
   final TextInputType keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
@@ -87,10 +87,12 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       labelText: widget.labelText,
       filled: true,
       fillColor: colorScheme.surface,
-      prefixIcon: Icon(
-        widget.prefixIcon,
-        color: colorScheme.primary,
-      ),
+      prefixIcon: widget.prefixIcon != null
+          ? Icon(
+              widget.prefixIcon,
+              color: colorScheme.primary,
+            )
+          : null,
       suffixIcon: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -131,6 +133,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             border: widget.decoration!.border,
             enabledBorder: widget.decoration!.enabledBorder,
             focusedBorder: widget.decoration!.focusedBorder,
+            focusedErrorBorder: widget.decoration!.focusedErrorBorder,
+            errorBorder: widget.decoration!.errorBorder,
             filled: widget.decoration!.filled,
             fillColor: widget.decoration!.fillColor,
             hintStyle: widget.decoration!.hintStyle,
