@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/home/home.dart';
+import 'package:my_app/shop/shop.dart';
 
 class GridShopItemCard extends StatelessWidget {
   const GridShopItemCard({
@@ -10,8 +10,8 @@ class GridShopItemCard extends StatelessWidget {
     super.key,
   });
 
-  final ShopItem item;
-  final void Function(ShopItem) onEdit;
+  final ShopItemModel item;
+  final void Function(ShopItemModel) onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class GridShopItemCard extends StatelessWidget {
                 child: ColoredBox(
                   color: Colors.white,
                   child: CachedNetworkImage(
-                    imageUrl: item.imageUrl,
+                    imageUrl: item.imageUrl ?? '',
                     fit: BoxFit.cover,
                     memCacheHeight: 200,
                     memCacheWidth: 200,
@@ -69,14 +69,14 @@ class GridShopItemCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '\$${item.customerPrice.toStringAsFixed(2)} / unit',
+                      '\$${item.customerPrice?.toStringAsFixed(2)} / unit',
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     // Price
                     Text(
-                      '\$${item.customerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
+                      '\$${item.customerBatchPrice?.toStringAsFixed(2)} / ${item.batchSize}-pack',
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),

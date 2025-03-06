@@ -3,27 +3,21 @@
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 
-class AuthService {
-  AuthService(this._apiService);
+class AuthService extends BaseService {
+  factory AuthService(ApiService apiService) => AuthService._(apiService);
+  AuthService._(super.apiService);
 
-  final ApiService _apiService;
-
-  String get _auth => '/auth';
+  @override
+  String get basePath => '/auth';
 
   Future<ApiResponse<User?>> getSession() async {
-    final response = await _apiService.get(
-      '$_auth/get-session',
+    return get(
+      '/get-session',
       parser: (value) => value != null
           ? User.fromJson(
               value['user'] as Map<String, dynamic>,
             )
           : null,
-    );
-
-    return ApiResponse(
-      success: response.success,
-      data: response.data,
-      message: response.message,
     );
   }
 
@@ -39,18 +33,10 @@ class AuthService {
       'password': password,
     };
 
-    final response = await _apiService.post(
-      '$_auth/sign-up/email',
+    return post(
+      '/sign-up/email',
       body: signupData,
-      parser: (value) => User.fromJson(
-        value['user'] as Map<String, dynamic>,
-      ),
-    );
-
-    return ApiResponse(
-      success: response.success,
-      data: response.data,
-      message: response.message,
+      parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
     );
   }
 
@@ -64,32 +50,15 @@ class AuthService {
       'password': password,
     };
 
-    final response = await _apiService.post(
-      '$_auth/sign-in/email',
+    return post(
+      '/sign-in/email',
       body: signinData,
-      parser: (value) => User.fromJson(
-        value['user'] as Map<String, dynamic>,
-      ),
-    );
-
-    return ApiResponse(
-      success: response.success,
-      data: response.data,
-      message: response.message,
+      parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
     );
   }
 
   Future<ApiResponse<dynamic>> signout() async {
     LoadingOverlay.show();
-
-    final response = await _apiService.post<dynamic>(
-      '$_auth/sign-out',
-    );
-
-    return ApiResponse(
-      success: response.success,
-      data: response.data,
-      message: response.message,
-    );
+    return post('/sign-out');
   }
 }

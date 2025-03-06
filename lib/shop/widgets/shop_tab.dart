@@ -4,37 +4,33 @@ import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
-import 'package:my_app/home/home.dart';
+import 'package:my_app/shop/shop.dart';
 
-class InventoryTab extends StatelessWidget {
-  const InventoryTab({required this.items, super.key});
-  final List<ShopItem> items;
+class ShopTab extends StatelessWidget {
+  const ShopTab({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => InventoryBloc(items),
-        ),
-        BlocProvider(
           create: (context) => SignoutBloc(getIt<AuthService>()),
         ),
       ],
-      child: const _InventoryTabView(),
+      child: const _ShopTabView(),
     );
   }
 }
 
-class _InventoryTabView extends StatefulWidget {
-  const _InventoryTabView();
+class _ShopTabView extends StatefulWidget {
+  const _ShopTabView();
 
   @override
-  State<_InventoryTabView> createState() => _InventoryTabState();
+  State<_ShopTabView> createState() => _ShopTabState();
 }
 
-class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliveClientMixin {
-  final TextEditingController _searchController = TextEditingController();
+class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMixin {
+  final _searchController = TextEditingController();
   bool _isGridView = true;
 
   @override
@@ -42,9 +38,10 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
 
   @override
   void initState() {
+    context.read<ShopBloc>().add(ShopGetItemsEvent());
     super.initState();
     _searchController.addListener(() {
-      context.read<InventoryBloc>().add(SearchItemsEvent(_searchController.text));
+      // context.read<ShopBloc>().add(SearchItemsEvent(_searchController.text));
     });
   }
 
@@ -55,22 +52,22 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
   }
 
   void _showFilterSheet() {
-    showModalBottomSheet<ShopItem>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => BlocProvider.value(
-        value: context.read<InventoryBloc>(),
-        child: FilterSheet(
-          initialCategoryFilter: context.read<InventoryBloc>().state.categoryFilter,
-          initialBuyerFilter: context.read<InventoryBloc>().state.buyerFilter,
-          onApply: (category, buyer) => context.read<InventoryBloc>().add(
-                FilterItemsEvent(category, buyer),
-              ),
-        ),
-      ),
-    );
+    // showModalBottomSheet<ShopItem>(
+    //   context: context,
+    //   shape: const RoundedRectangleBorder(
+    //     borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    //   ),
+    //   builder: (_) => BlocProvider.value(
+    //     value: context.read<ShopBloc>(),
+    //     child: FilterSheet(
+    //       initialCategoryFilter: context.read<ShopBloc>().state.categoryFilter,
+    //       initialBuyerFilter: context.read<ShopBloc>().state.buyerFilter,
+    //       onApply: (category, buyer) => context.read<ShopBloc>().add(
+    //             FilterItemsEvent(category, buyer),
+    //           ),
+    //     ),
+    //   ),
+    // );
   }
 
   @override
@@ -78,7 +75,7 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
     super.build(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    final counts = context.watch<InventoryBloc>().allItems.length;
+    final counts = context.watch<ShopBloc>().state.asLoaded?.items.length;
 
     return Scaffold(
       body: Stack(
@@ -270,115 +267,9 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
                 ),
               ),
               // Items Listing
-              Expanded(
-                child: BlocBuilder<InventoryBloc, InventoryState>(
-                  buildWhen: (previous, current) => previous.filteredItems != current.filteredItems,
-                  builder: (context, state) {
-                    if (state.filteredItems.isEmpty) {
-                      return const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
-                              'No items found',
-                              style: TextStyle(fontSize: 18, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return RefreshIndicator(
-                      onRefresh: () async {
-                        context.read<InventoryBloc>().add(RefreshItemsEvent());
-                        await context.read<InventoryBloc>().stream.first;
-                      },
-                      color: colorScheme.primary,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (child, animation) => FadeTransition(
-                          opacity: animation,
-                          child: ScaleTransition(
-                            scale: animation.drive(
-                              Tween<double>(begin: 0.95, end: 1).chain(CurveTween(curve: Curves.easeInOut)),
-                            ),
-                            child: child,
-                          ),
-                        ),
-                        child: _isGridView
-                            ? GridView.builder(
-                                key: const ValueKey('grid'),
-                                padding: const EdgeInsets.all(16),
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  childAspectRatio: 0.75,
-                                ),
-                                physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-                                cacheExtent: 1000,
-                                itemCount: state.filteredItems.length,
-                                itemBuilder: (context, index) {
-                                  return AnimatedScale(
-                                    scale: 1,
-                                    duration: const Duration(milliseconds: 200),
-                                    child: GridShopItemCard(
-                                      key: ValueKey(state.filteredItems[index].name),
-                                      item: state.filteredItems[index],
-                                      onEdit: (item) => showShopItemDetailSheet(
-                                        context: context,
-                                        item: item,
-                                        onEdit: () {
-                                          context.pushNamed(
-                                            AppRoutes.createShopItem,
-                                            extra: {'existingItem': item},
-                                          );
-                                        },
-                                        onDelete: () async {
-                                          LoadingOverlay.show();
-                                          await Future<void>.delayed(const Duration(seconds: 2));
-                                          LoadingOverlay.hide();
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
-                              )
-                            : ListView.builder(
-                                key: const ValueKey('list'),
-                                padding: const EdgeInsets.all(16),
-                                itemCount: state.filteredItems.length,
-                                physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-                                cacheExtent: 1000,
-                                itemBuilder: (context, index) {
-                                  return AnimatedSlide(
-                                    offset: Offset(0, state.filteredItems[index].name.isNotEmpty ? 0 : 0.1),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                    child: ShopItemCard(
-                                      onDelete: (_) async {
-                                        LoadingOverlay.show();
-                                        await Future<void>.delayed(const Duration(seconds: 2));
-                                        LoadingOverlay.hide();
-                                      },
-                                      key: ValueKey(state.filteredItems[index].name),
-                                      item: state.filteredItems[index],
-                                      onEdit: (item) {
-                                        context.pushNamed(
-                                          AppRoutes.createShopItem,
-                                          extra: {'existingItem': item},
-                                        );
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-                    );
-                  },
-                ),
+              buildShopList(
+                context,
+                isGridView: _isGridView,
               ),
             ],
           ),
@@ -395,6 +286,147 @@ class _InventoryTabState extends State<_InventoryTabView> with AutomaticKeepAliv
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buildShopList(
+    BuildContext context, {
+    required bool isGridView,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Expanded(
+      child: BlocBuilder<ShopBloc, ShopState>(
+        buildWhen: (previous, current) {
+          if (previous is ShopLoaded && current is ShopLoaded) {
+            return previous.items != current.items;
+          }
+          return previous.runtimeType != current.runtimeType;
+        },
+        builder: (context, state) {
+          return switch (state) {
+            ShopInitial() || ShopLoading() => const Center(child: CircularProgressIndicator()),
+            ShopLoaded(:final items) => items.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No items found',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<ShopBloc>().add(ShopGetItemsEvent(forceRefresh: true));
+                      // await context.read<ShopBloc>().stream.firstWhere((state) => state is! ShopLoading);
+                    },
+                    color: colorScheme.primary,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: ScaleTransition(
+                          scale: animation.drive(
+                            Tween<double>(begin: 0.95, end: 1).chain(CurveTween(curve: Curves.easeInOut)),
+                          ),
+                          child: child,
+                        ),
+                      ),
+                      child: isGridView
+                          ? GridView.builder(
+                              key: const ValueKey('grid'),
+                              padding: const EdgeInsets.all(16),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                childAspectRatio: 0.75,
+                              ),
+                              physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+                              cacheExtent: 1000,
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                return AnimatedScale(
+                                  scale: 1,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: GridShopItemCard(
+                                    key: ValueKey(items[index].name),
+                                    item: items[index],
+                                    onEdit: (item) => showShopItemDetailSheet(
+                                      context: context,
+                                      item: item,
+                                      onEdit: () {
+                                        context
+                                          ..pop()
+                                          ..pushNamed(
+                                            AppRoutes.createShopItem,
+                                            extra: {
+                                              'existingItem': item,
+                                              'bloc': context.read<ShopBloc>(),
+                                            },
+                                          );
+                                      },
+                                      onDelete: () => context.read<ShopBloc>().add(
+                                            ShopDeleteItemEvent(
+                                              body: item,
+                                            ),
+                                          ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : ListView.builder(
+                              key: const ValueKey('list'),
+                              padding: const EdgeInsets.all(16),
+                              itemCount: items.length,
+                              physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+                              cacheExtent: 1000,
+                              itemBuilder: (context, index) {
+                                return AnimatedSlide(
+                                  offset: Offset(0, items[index].name.isNotEmpty ? 0 : 0.1),
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  child: ShopItemCard(
+                                    onDelete: (_) async {
+                                      LoadingOverlay.show();
+                                      await Future<void>.delayed(const Duration(seconds: 2));
+                                      LoadingOverlay.hide();
+                                    },
+                                    key: ValueKey(items[index].name),
+                                    item: items[index],
+                                    onEdit: (item) {
+                                      context.pushNamed(
+                                        AppRoutes.createShopItem,
+                                        extra: {'existingItem': item},
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ),
+            ShopError(:final message) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(
+                      message,
+                      style: const TextStyle(fontSize: 18, color: Colors.red),
+                    ),
+                  ],
+                ),
+              ),
+          };
+        },
       ),
     );
   }

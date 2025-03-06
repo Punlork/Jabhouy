@@ -2,69 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/home/home.dart';
-
-void showShopItemDetailSheet({
-  required BuildContext context,
-  required ShopItem item,
-  required VoidCallback onEdit,
-  required VoidCallback onDelete,
-}) =>
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
-        child: ShopItemDetailSheet(
-          item: item,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        ),
-      ),
-    );
-
-class ShopItem {
-  ShopItem({
-    required this.name,
-    required this.customerPrice,
-    required this.customerBatchPrice,
-    required this.sellerPrice,
-    required this.sellerBatchPrice,
-    required this.batchSize,
-    required this.imageUrl,
-    required this.category,
-    required this.defaultBatchPrice,
-    this.note, // Optional, if rarely used
-  });
-
-  factory ShopItem.fromJson(Map<String, dynamic> json) {
-    return ShopItem(
-      name: json['name'] as String,
-      customerPrice: (json['customer_price'] as num).toDouble(),
-      defaultBatchPrice: (json['default_batch_price'] as num).toDouble(),
-      customerBatchPrice: (json['customer_batch_price'] as num).toDouble(),
-      sellerPrice: (json['seller_price'] as num).toDouble(),
-      sellerBatchPrice: (json['seller_batch_price'] as num).toDouble(),
-      batchSize: json['batch_size'] as int,
-      imageUrl: json['image_url'] as String,
-      category: json['category'] as String,
-      note: json['note'] as String?,
-    );
-  }
-
-  final String name;
-  final double customerPrice;
-  final double customerBatchPrice;
-  final double sellerPrice;
-  final double sellerBatchPrice;
-  final double defaultBatchPrice;
-  final int batchSize;
-  final String imageUrl;
-  final String category;
-  final String? note; // Made optional
-}
+import 'package:my_app/shop/shop.dart';
 
 class ShopItemCard extends StatelessWidget {
   const ShopItemCard({
@@ -74,9 +12,9 @@ class ShopItemCard extends StatelessWidget {
     super.key,
   });
 
-  final ShopItem item;
-  final void Function(ShopItem) onEdit;
-  final void Function(ShopItem) onDelete;
+  final ShopItemModel item;
+  final void Function(ShopItemModel) onEdit;
+  final void Function(ShopItemModel) onDelete;
 
   void _confirmDelete(BuildContext context) => showDialog<void>(
         context: context,
@@ -144,7 +82,7 @@ class ShopItemCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
                   child: CachedNetworkImage(
-                    imageUrl: item.imageUrl,
+                    imageUrl: item.imageUrl ?? '',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
@@ -183,7 +121,7 @@ class ShopItemCard extends StatelessWidget {
                         const SizedBox(height: 10),
                         // Price
                         Text(
-                          '\$${item.customerPrice.toStringAsFixed(2)} / unit',
+                          '\$${item.customerPrice?.toStringAsFixed(2)} / unit',
                           style: textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -191,7 +129,7 @@ class ShopItemCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         // Batch Price
                         Text(
-                          '\$${item.customerBatchPrice.toStringAsFixed(2)} / ${item.batchSize}-pack',
+                          '\$${item.customerBatchPrice?.toStringAsFixed(2)} / ${item.batchSize}-pack',
                           style: textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),

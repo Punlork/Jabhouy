@@ -11,9 +11,7 @@ ApiResponse<T> handleResponse<T>(
   if (rawBody != null) {
     try {
       responseBody = jsonDecode(rawBody);
-      if (responseBody is! Map<String, dynamic> && responseBody != null) {
-        throw const FormatException('Response body is not a valid JSON object');
-      }
+      // Beautify and print the response JSON body
     } catch (e) {
       throw ApiException(
         'Failed to parse response: $e',
@@ -47,11 +45,14 @@ ApiResponse<T> handleResponse<T>(
 
 Future<http.Response> interceptRequest(Future<http.Response> Function() request) async {
   final startTime = DateTime.now();
-  // Create a readable date format (e.g., "March 4, 2025 3:30:45 PM")
+
   final timeFormatter = DateFormat('MMMM d, yyyy h:mm:ss a');
   developer.log('Request started: ${timeFormatter.format(startTime.toLocal())}');
 
   final response = await request();
+
+  // final prettyJson = const JsonEncoder.withIndent('  ').convert(response.body);
+  // log('Response JSON: $prettyJson');
 
   final endTime = DateTime.now();
   developer.log('Response received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');

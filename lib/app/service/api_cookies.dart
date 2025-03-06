@@ -5,6 +5,7 @@ class ApiCookies {
     // Domain -> Cookie Name -> Value
     _cookies = <String, Map<String, String>>{};
   }
+
   late Map<String, Map<String, String>> _cookies;
 
   Future<void> initCookies() async {

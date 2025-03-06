@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/home/home.dart';
+import 'package:my_app/shop/shop.dart';
+
+void showShopItemDetailSheet({
+  required BuildContext context,
+  required ShopItemModel item,
+  required VoidCallback onEdit,
+  required VoidCallback onDelete,
+}) =>
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) => SingleChildScrollView(
+        child: ShopItemDetailSheet(
+          item: item,
+          onEdit: onEdit,
+          onDelete: onDelete,
+        ),
+      ),
+    );
 
 class ShopItemDetailSheet extends StatelessWidget {
   const ShopItemDetailSheet({
@@ -9,7 +30,7 @@ class ShopItemDetailSheet extends StatelessWidget {
     required this.onDelete,
     super.key,
   });
-  final ShopItem item;
+  final ShopItemModel item;
   final VoidCallback onEdit;
   final dynamic Function() onDelete;
 
@@ -38,7 +59,7 @@ class ShopItemDetailSheet extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  item.imageUrl,
+                  item.imageUrl ?? '',
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
@@ -61,7 +82,7 @@ class ShopItemDetailSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.category,
+                      item.category ?? 'N/A',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey.shade600,
                           ),
@@ -76,27 +97,27 @@ class ShopItemDetailSheet extends StatelessWidget {
           // Price Details
           _buildDetailRow(
             'Customer Price',
-            '\$${item.customerPrice.toStringAsFixed(2)}',
+            '\$${item.customerPrice?.toStringAsFixed(2)}',
             context,
           ),
           _buildDetailRow(
             'Customer Batch Price',
-            '\$${item.customerBatchPrice.toStringAsFixed(2)}',
+            '\$${item.customerBatchPrice?.toStringAsFixed(2)}',
             context,
           ),
           _buildDetailRow(
             'Seller Price',
-            '\$${item.sellerPrice.toStringAsFixed(2)}',
+            '\$${item.sellerPrice?.toStringAsFixed(2)}',
             context,
           ),
           _buildDetailRow(
             'Seller Batch Price',
-            '\$${item.sellerBatchPrice.toStringAsFixed(2)}',
+            '\$${item.sellerBatchPrice?.toStringAsFixed(2)}',
             context,
           ),
           _buildDetailRow(
             'Default Batch Price',
-            '\$${item.defaultBatchPrice.toStringAsFixed(2)}',
+            '\$${item.defaultBatchPrice?.toStringAsFixed(2)}',
             context,
           ),
           _buildDetailRow(

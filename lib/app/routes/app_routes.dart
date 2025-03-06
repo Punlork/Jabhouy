@@ -5,7 +5,7 @@ import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/home/views/home_page.dart';
-import 'package:my_app/home/views/shop_item_form_page.dart';
+import 'package:my_app/shop/shop.dart';
 
 extension StringExtension on String {
   String get toPath => '/$this';
@@ -85,7 +85,10 @@ class AppRoutes {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: const HomePage(),
+            child: BlocProvider(
+              create: (context) => ShopBloc(getIt<ShopService>()),
+              child: const HomePage(),
+            ),
             transitionsBuilder: _rightToLeftTransition,
           );
         },
@@ -96,13 +99,15 @@ class AppRoutes {
             pageBuilder: (BuildContext context, GoRouterState state) {
               GlobalContext.currentContext = context;
               final extra = state.extra! as Map<String, dynamic>;
-              final onAdd = extra['onAdd'] as void Function(ShopItem)?;
-              final existingItem = extra['existingItem'] as ShopItem?;
+              final onAdd = extra['onAdd'] as void Function(ShopItemModel)?;
+              final existingItem = extra['existingItem'] as ShopItemModel?;
+              final bloc = extra['bloc'] as ShopBloc;
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: ShopItemFormPage(
-                  onSave: onAdd ?? (_) {},
+                  onSaved: onAdd ?? (_) {},
                   existingItem: existingItem,
+                  bloc: bloc,
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

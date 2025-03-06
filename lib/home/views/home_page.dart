@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/home/constant.dart';
-import 'package:my_app/home/home.dart';
+import 'package:my_app/shop/shop.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -41,17 +41,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ],
           ),
         ),
-        child: SafeArea(
-          child: InventoryTab(
-            items: List.generate(
-              10,
-              (_) => defaultShopList,
-            )
-                .expand<ShopItem>(
-                  (list) => list,
-                )
-                .toList(),
-        ),
+        child: const SafeArea(
+          child: ShopTab(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -59,8 +50,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           context.pushNamed(
             AppRoutes.createShopItem,
             extra: {
-              'onAdd': (ShopItem item) {
-                defaultShopList.add(item);
+              'bloc': context.read<ShopBloc>(),
+              'onAdd': (ShopItemModel item) {
+                // defaultShopList.add(item);
                 setState(() {}); // Trigger rebuild to reflect new item
               },
             },

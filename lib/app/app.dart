@@ -2,6 +2,7 @@ export 'constant/app_assets.dart';
 export 'injection/dependency_injection.dart';
 export 'routes/app_routes.dart';
 export 'service/api_service.dart';
+export 'service/base_service.dart';
 export 'utils/overlay_loading.dart';
 export 'utils/snack_bar.dart';
 export 'view/app.dart';
