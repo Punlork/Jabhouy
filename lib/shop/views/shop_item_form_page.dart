@@ -241,9 +241,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                   required: true,
                 ),
                 _buildTextField(
+                  key: 'sellerPrice',
+                  label: l10n.sellerPrice,
+                  required: true,
+                  keyboardType: TextInputType.number,
+                ),
+                _buildTextField(
                   key: 'defaultPrice',
                   label: l10n.defaultPrice,
-                  required: true,
                   keyboardType: TextInputType.number,
                 ),
                 Padding(
@@ -269,6 +274,12 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                 ),
                 if (_isDistributorMode) ...[
                   _buildTextField(
+                    key: 'defaultPrice',
+                    label: l10n.defaultPrice,
+                    required: true,
+                    keyboardType: TextInputType.number,
+                  ),
+                  _buildTextField(
                     key: 'defaultBatchPrice',
                     label: l10n.defaultBatchPrice,
                     keyboardType: TextInputType.number,
@@ -279,18 +290,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                     keyboardType: TextInputType.number,
                   ),
                   _buildTextField(
-                    key: 'sellerPrice',
-                    label: l10n.sellerPrice,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
                     key: 'customerBatchPrice',
                     label: l10n.customerBatchPrice,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'sellerBatchPrice',
-                    label: l10n.sellerBatchPrice,
                     keyboardType: TextInputType.number,
                   ),
                   _buildTextField(
@@ -298,7 +299,13 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                     label: l10n.batchSize,
                     keyboardType: TextInputType.number,
                   ),
+                  _buildTextField(
+                    key: 'sellerBatchPrice',
+                    label: l10n.sellerBatchPrice,
+                    keyboardType: TextInputType.number,
+                  ),
                 ],
+                // ... (keeping rest of the build method unchanged)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: DropdownButtonFormField<String>(
@@ -315,7 +322,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                         'Accessories' => l10n.accessories,
                         'Beverages' => l10n.beverages,
                         'Other' => l10n.other,
-                        _ => item.value!, // Fallback
+                        _ => item.value!,
                       };
                       return DropdownMenuItem<String>(
                         value: item.value,
@@ -339,7 +346,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                 _buildTextField(
                   key: 'imageUrl',
                   label: l10n.imageUrl,
-                  textInputAction: TextInputAction.done, // Last field
+                  textInputAction: TextInputAction.done,
                 ),
                 const SizedBox(height: 24),
                 BlocListener<ShopBloc, ShopState>(
