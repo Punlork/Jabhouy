@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ShopItemCard extends StatelessWidget {
   const ShopItemCard({
@@ -77,26 +77,18 @@ class ShopItemCard extends StatelessWidget {
             margin: EdgeInsets.zero,
             color: Colors.white,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
-                  child: CachedNetworkImage(
-                    imageUrl: item.imageUrl ?? '',
-                    width: 100,
-                    height: 100,
+                  child: FadeInImage.memoryNetwork(
+                    image: item.imageUrl ?? '',
+                    fadeInDuration: const Duration(milliseconds: 15),
                     fit: BoxFit.cover,
-                    memCacheHeight: 200,
-                    memCacheWidth: 200,
-                    placeholder: (context, url) => Container(
-                      width: 100,
-                      height: 100,
-                      color: Colors.grey[300],
-                    ),
-                    errorWidget: (context, url, error) => const AppLogo(
+                    placeholder: kTransparentImage,
+                    imageErrorBuilder: (context, url, error) => const AppLogo(
                       shape: BoxShape.rectangle,
-                      size: 100,
                       useBg: false,
+                      size: 100,
                     ),
                   ),
                 ),
@@ -127,13 +119,6 @@ class ShopItemCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        // Batch Price
-                        Text(
-                          '\$${item.customerBatchPrice?.toStringAsFixed(2)} / ${item.batchSize}-pack',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
                       ],
                     ),
                   ),

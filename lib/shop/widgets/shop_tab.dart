@@ -37,29 +37,25 @@ class _ShopTabState extends State<_ShopTabView> {
   void initState() {
     super.initState();
     context.read<ShopBloc>().add(ShopGetItemsEvent());
-    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchController
-      ..removeListener(_onSearchChanged)
-      ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    // Uncomment and implement if needed
-    // context.read<ShopBloc>().add(SearchItemsEvent(_searchController.text));
+  void _onSearchChanged(String? value) {
+    context.read<ShopBloc>().add(ShopGetItemsEvent(searchQuery: value));
   }
 
   void _showFilterSheet() {
     // Uncomment and implement if needed
     // showModalBottomSheet<ShopItem>(
-    //   context: context,
+    //   context: context,o
     //   shape: const RoundedRectangleBorder(
     //     borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    //   ),
+    //   ),~
     //   builder: (_) => BlocProvider.value(
     //     value: context.read<ShopBloc>(),
     //     child: FilterSheet(
@@ -82,7 +78,7 @@ class _ShopTabState extends State<_ShopTabView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final counts = context.watch<ShopBloc>().state.asLoaded?.items.length ?? 0;
+    final counts = context.watch<ShopBloc>().state.asLoaded?.pagination.total ?? 0;
 
     return Scaffold(
       body: Stack(
@@ -238,6 +234,7 @@ class _ShopTabState extends State<_ShopTabView> {
               hintText: l10n.searchItems,
               labelText: '',
               prefixIcon: Icons.search,
+              onChanged: _onSearchChanged,
               action: TextInputAction.search,
               showClearButton: true,
               floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -248,7 +245,22 @@ class _ShopTabState extends State<_ShopTabView> {
                       color: Colors.white.withValues(alpha: .8),
                       fontWeight: FontWeight.w300,
                     ),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
                 filled: true,
                 fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: .3),
               ),
@@ -270,7 +282,7 @@ class _ShopTabState extends State<_ShopTabView> {
       child: BlocBuilder<ShopBloc, ShopState>(
         buildWhen: _shouldRebuild,
         builder: (context, state) => switch (state) {
-          ShopInitial() || ShopLoading() => const Center(child: CircularProgressIndicator()),
+          ShopInitial() || ShopLoading() => const Center(child: CustomLoading()),
           ShopLoaded(:final items) => _buildItemsView(context, items),
           ShopError(:final message) => _buildErrorView(context, message),
         },
@@ -305,7 +317,7 @@ class _ShopTabState extends State<_ShopTabView> {
                 child: child,
               ),
             ),
-            child: appState.isGridView ? _buildGridView(context, items) : _buildListView(context, items),
+            child: appState.isGridView ? const ShopGridBuilder() : _buildListView(context, items),
           );
         },
       ),
@@ -321,31 +333,6 @@ class _ShopTabState extends State<_ShopTabView> {
           SizedBox(height: 16),
           Text('No items found', style: TextStyle(fontSize: 18, color: Colors.grey)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildGridView(BuildContext context, List<ShopItemModel> items) {
-    return GridView.builder(
-      key: const ValueKey('grid'),
-      padding: const EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.75,
-      ),
-      physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-      cacheExtent: 1000,
-      itemCount: items.length,
-      itemBuilder: (context, index) => AnimatedScale(
-        scale: 1,
-        duration: const Duration(milliseconds: 200),
-        child: GridShopItemCard(
-          key: ValueKey(items[index].name),
-          item: items[index],
-          onEdit: (item) => _showEditSheet(context, item),
-        ),
       ),
     );
   }
@@ -400,22 +387,13 @@ class _ShopTabState extends State<_ShopTabView> {
   }
 
   Future<void> _refreshItems(BuildContext context) async {
-    context.read<ShopBloc>().add(ShopGetItemsEvent(forceRefresh: true));
-    // Uncomment if you need to wait for the refresh to complete
-    // await context.read<ShopBloc>().stream.firstWhere((state) => state is! ShopLoading);
-  }
-
-  void _showEditSheet(BuildContext context, ShopItemModel item) {
-    showShopItemDetailSheet(
-      context: context,
-      item: item,
-      onEdit: () {
-        context
-          ..pop()
-          ..pushNamed(AppRoutes.createShopItem, extra: {'existingItem': item, 'bloc': context.read<ShopBloc>()});
-      },
-      onDelete: () => context.read<ShopBloc>().add(ShopDeleteItemEvent(body: item)),
-    );
+    context.read<ShopBloc>().add(
+          ShopGetItemsEvent(
+            forceRefresh: true,
+            page: 1,
+            pageSize: 10,
+          ),
+        );
   }
 
   Widget _buildIconButton({

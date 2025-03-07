@@ -9,12 +9,16 @@ class ShopGetItemsEvent extends ShopEvent {
     this.categoryFilter,
     this.buyerFilter,
     this.forceRefresh = false,
+    this.pageSize,
+    this.page,
   });
 
-  final String? searchQuery; // Null means no change
-  final String? categoryFilter; // Null means no change
-  final String? buyerFilter; // Null means no change
-  final bool forceRefresh; // Triggers a refresh if true
+  final String? searchQuery;
+  final String? categoryFilter;
+  final String? buyerFilter;
+  final bool forceRefresh;
+  final int? pageSize;
+  final int? page;
 }
 
 class ShopCreateItemEvent extends ShopEvent {

@@ -17,25 +17,29 @@ class ShopLoading extends ShopState {
 
 class ShopLoaded extends ShopState {
   const ShopLoaded({
-    required this.items,
+    required this.paginatedItems,
     this.searchQuery = '',
     this.categoryFilter = 'All',
     this.buyerFilter = 'All',
   });
 
-  final List<ShopItemModel> items;
+  final PaginatedResponse<ShopItemModel> paginatedItems;
   final String searchQuery;
   final String categoryFilter;
   final String buyerFilter;
 
+  List<ShopItemModel> get items => paginatedItems.items;
+  Pagination get pagination => paginatedItems.pagination;
+
   ShopLoaded copyWith({
-    List<ShopItemModel>? items,
+    PaginatedResponse<ShopItemModel>? paginatedItems,
     String? searchQuery,
     String? categoryFilter,
     String? buyerFilter,
+    bool? isMoreLoading,
   }) {
     return ShopLoaded(
-      items: items ?? this.items,
+      paginatedItems: paginatedItems ?? this.paginatedItems,
       searchQuery: searchQuery ?? this.searchQuery,
       categoryFilter: categoryFilter ?? this.categoryFilter,
       buyerFilter: buyerFilter ?? this.buyerFilter,
@@ -43,7 +47,14 @@ class ShopLoaded extends ShopState {
   }
 
   @override
-  List<Object?> get props => [...items, items.length, searchQuery, categoryFilter, buyerFilter];
+  List<Object?> get props => [
+        searchQuery,
+        categoryFilter,
+        buyerFilter,
+        paginatedItems,
+        items.length,
+        ...items,
+      ];
 }
 
 class ShopError extends ShopState {

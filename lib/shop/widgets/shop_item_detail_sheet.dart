@@ -99,33 +99,19 @@ class ShopItemDetailSheet extends StatelessWidget {
 
           // Price Details
           _buildDetailRow(
-            l10n.customerPrice,
-            item.customerPrice != null ? '\$${item.customerPrice!.toStringAsFixed(2)}' : l10n.na,
+            l10n.defaultPrice,
+            item.defaultPrice != null ? '${item.defaultPrice!.toInt()} រៀល' : l10n.na,
             context,
           ),
           _buildDetailRow(
-            l10n.customerBatchPrice,
-            item.customerBatchPrice != null ? '\$${item.customerBatchPrice!.toStringAsFixed(2)}' : l10n.na,
+            l10n.customerPrice,
+            item.customerPrice != null ? '${item.customerPrice!.toInt()} រៀល' : l10n.na,
             context,
           ),
+
           _buildDetailRow(
             l10n.sellerPrice,
-            item.sellerPrice != null ? '\$${item.sellerPrice!.toStringAsFixed(2)}' : l10n.na,
-            context,
-          ),
-          _buildDetailRow(
-            l10n.sellerBatchPrice,
-            item.sellerBatchPrice != null ? '\$${item.sellerBatchPrice!.toStringAsFixed(2)}' : l10n.na,
-            context,
-          ),
-          _buildDetailRow(
-            l10n.defaultBatchPrice,
-            item.defaultBatchPrice != null ? '\$${item.defaultBatchPrice!.toStringAsFixed(2)}' : l10n.na,
-            context,
-          ),
-          _buildDetailRow(
-            l10n.batchSize,
-            item.batchSize?.toString() ?? l10n.na,
+            item.sellerPrice != null ? '${item.sellerPrice!.toInt()} រៀល' : l10n.na,
             context,
           ),
 

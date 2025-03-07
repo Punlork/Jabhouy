@@ -53,7 +53,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               'bloc': context.read<ShopBloc>(),
               'onAdd': (ShopItemModel item) {
                 // defaultShopList.add(item);
-                setState(() {}); // Trigger rebuild to reflect new item
               },
             },
           );

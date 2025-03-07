@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -37,29 +36,36 @@ class ApiService {
     Map<String, String>? headers,
     T Function(dynamic)? parser,
     BuildContext? context,
+    Map<String, dynamic>? queryParameters,
     bool showSnackBar = true,
   }) async {
     try {
       var tempHeaders = getHeaders();
-      final uri = Uri.https(_baseUrl, endpoint);
+      final uri = Uri.https(
+        _baseUrl,
+        endpoint,
+        queryParameters,
+      );
+
+      logger.i(uri.path + uri.queryParameters.toString());
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
+        endpoint,
         () => _client.get(uri, headers: tempHeaders).timeout(_timeout),
       );
 
       cookies.updateCookies(uri, response);
       return handleResponse(response, parser ?? (data) => data as T);
     } catch (e, stackTrace) {
-      final errorMessage = e is ApiException ? e.message : 'Network error: $e';
-      developer.log(
+      logger.e(
         'Error occurred in GET request to $endpoint',
         error: e,
         stackTrace: stackTrace,
-        level: 1000,
       );
+      final errorMessage = e is ApiException ? e.message : 'Network error: $e';
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
       return ApiResponse<T>(success: false, message: errorMessage);
     } finally {
@@ -93,6 +99,7 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
+        endpoint,
         () => _client.post(uri, headers: tempHeaders, body: encodeBody).timeout(_timeout),
       );
 
@@ -100,11 +107,10 @@ class ApiService {
       return handleResponse(response, parser ?? (data) => data as T);
     } catch (e, stackTrace) {
       final errorMessage = e is ApiException ? e.message : 'Network error: $e';
-      developer.log(
+      logger.e(
         'Error occurred in POST request to $endpoint',
         error: e,
         stackTrace: stackTrace,
-        level: 1000,
       );
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
       return ApiResponse<T>(success: false, message: errorMessage);
@@ -116,7 +122,7 @@ class ApiService {
   Future<ApiResponse<T>> put<T>(
     String endpoint, {
     Map<String, dynamic> body = const {},
-    Map<String, dynamic> Function()? bodyParser, // Processes request body
+    Map<String, dynamic> Function()? bodyParser,
     Map<String, String>? headers,
     T Function(dynamic)? parser,
     BuildContext? context,
@@ -139,6 +145,7 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
+        endpoint,
         () => _client
             .put(
               uri,
@@ -152,11 +159,10 @@ class ApiService {
       return handleResponse(response, parser ?? (data) => data as T);
     } catch (e, stackTrace) {
       final errorMessage = e is ApiException ? e.message : 'Network error: $e';
-      developer.log(
+      logger.e(
         'Error occurred in PUT request to $endpoint',
         error: e,
         stackTrace: stackTrace,
-        level: 1000,
       );
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
       return ApiResponse<T>(success: false, message: errorMessage);
@@ -180,6 +186,7 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
+        endpoint,
         () => _client.delete(uri, headers: tempHeaders).timeout(_timeout),
       );
 
@@ -187,11 +194,10 @@ class ApiService {
       return handleResponse(response, parser ?? (data) => data as T);
     } catch (e, stackTrace) {
       final errorMessage = e is ApiException ? e.message : 'Network error: $e';
-      developer.log(
+      logger.e(
         'Error occurred in DELETE request to $endpoint',
         error: e,
         stackTrace: stackTrace,
-        level: 1000,
       );
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
       return ApiResponse<T>(success: false, message: errorMessage);

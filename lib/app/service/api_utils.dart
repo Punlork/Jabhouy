@@ -24,7 +24,7 @@ ApiResponse<T> handleResponse<T>(
       return ApiResponse<T>(
         success: true,
         data: parser(responseBody),
-        message: responseBody is Map<String, dynamic> ? responseBody['message']?.toString() : null,
+        message: responseBody is Map ? responseBody['message']?.toString() : null,
       );
     } catch (e) {
       throw ApiException(
@@ -42,20 +42,23 @@ ApiResponse<T> handleResponse<T>(
   }
 }
 
-Future<http.Response> interceptRequest(Future<http.Response> Function() request) async {
+Future<http.Response> interceptRequest(
+  String endpoint,
+  Future<http.Response> Function() request,
+) async {
+  final logger = LoggerFactory.createLogger(
+    methodCount: 0,
+    printTime: false,
+  );
   final startTime = DateTime.now();
-
+  final endTime = DateTime.now();
   final timeFormatter = DateFormat('MMMM d, yyyy h:mm:ss a');
-  developer.log('Request started: ${timeFormatter.format(startTime.toLocal())}');
+
+  logger.i('Request $endpoint started: ${timeFormatter.format(startTime.toLocal())}');
 
   final response = await request();
 
-  final prettyJson = const JsonEncoder.withIndent('  ').convert(response.body);
-  log('Response JSON: $prettyJson');
-
-  final endTime = DateTime.now();
-  developer.log('Response received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
-
+  logger.i('Response $endpoint  received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
   return response;
 }
 

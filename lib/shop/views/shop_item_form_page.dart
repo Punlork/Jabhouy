@@ -48,8 +48,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   late final Map<String, TextEditingController> _controllers;
   late String _category;
   bool _hasChanges = false;
-  bool _isDistributorMode = false; // false = Seller, true = Distributor
-  bool get _isEditMode => widget.existingItem != null;
 
   @override
   void initState() {
@@ -57,36 +55,21 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     _controllers = {
       'name': TextEditingController(),
       'defaultPrice': TextEditingController(),
-      'defaultBatchPrice': TextEditingController(),
       'customerPrice': TextEditingController(),
       'sellerPrice': TextEditingController(),
-      'customerBatchPrice': TextEditingController(),
-      'sellerBatchPrice': TextEditingController(),
-      'batchSize': TextEditingController(),
       'note': TextEditingController(),
       'imageUrl': TextEditingController(),
     };
 
-    if (_isEditMode) {
+    if (widget.existingItem != null) {
       final item = widget.existingItem!;
       _controllers['name']!.text = item.name;
       _controllers['defaultPrice']!.text = item.defaultPrice.toString();
-      _controllers['defaultBatchPrice']!.text = item.defaultBatchPrice?.toString() ?? '';
       _controllers['customerPrice']!.text = item.customerPrice?.toString() ?? '';
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
-      _controllers['customerBatchPrice']!.text = item.customerBatchPrice?.toString() ?? '';
-      _controllers['sellerBatchPrice']!.text = item.sellerBatchPrice?.toString() ?? '';
-      _controllers['batchSize']!.text = item.batchSize?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
       _controllers['imageUrl']!.text = item.imageUrl ?? '';
       _category = item.category ?? 'Electronics';
-
-      if (item.isDistributorMode) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _isDistributorMode = item.isDistributorMode;
-          setState(() {});
-        });
-      }
     } else {
       _category = 'Electronics';
     }
@@ -136,35 +119,19 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     if (!_formKey.currentState!.validate()) return;
 
     final item = ShopItemModel(
-      id: _isEditMode ? widget.existingItem!.id : 0,
-      userId: _isEditMode ? widget.existingItem!.userId : 'user123', // Replace with auth logic
+      id: widget.existingItem?.id ?? 0,
       name: _controllers['name']!.text,
-      defaultPrice: double.tryParse(_controllers['defaultPrice']!.text) ?? 0.0,
-      defaultBatchPrice: _isDistributorMode && _controllers['defaultBatchPrice']!.text.isNotEmpty
-          ? double.tryParse(_controllers['defaultBatchPrice']!.text)
-          : null,
-      customerPrice: _isDistributorMode && _controllers['customerPrice']!.text.isNotEmpty
-          ? double.tryParse(_controllers['customerPrice']!.text)
-          : null,
-      sellerPrice: _isDistributorMode && _controllers['sellerPrice']!.text.isNotEmpty
-          ? double.tryParse(_controllers['sellerPrice']!.text)
-          : null,
-      customerBatchPrice: _isDistributorMode && _controllers['customerBatchPrice']!.text.isNotEmpty
-          ? double.tryParse(_controllers['customerBatchPrice']!.text)
-          : null,
-      sellerBatchPrice: _isDistributorMode && _controllers['sellerBatchPrice']!.text.isNotEmpty
-          ? double.tryParse(_controllers['sellerBatchPrice']!.text)
-          : null,
-      batchSize: _isDistributorMode && _controllers['batchSize']!.text.isNotEmpty
-          ? int.tryParse(_controllers['batchSize']!.text)
-          : null,
+      defaultPrice: int.tryParse(_controllers['defaultPrice']!.text) ?? 0,
+      customerPrice:
+          _controllers['customerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['customerPrice']!.text) : null,
+      sellerPrice:
+          _controllers['sellerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['sellerPrice']!.text) : null,
       note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
       imageUrl: _controllers['imageUrl']!.text.isEmpty ? null : _controllers['imageUrl']!.text,
       category: _category,
-      // isDistributorMode: _isDistributorMode,
     );
 
-    if (_isEditMode) {
+    if (widget.existingItem != null) {
       context.read<ShopBloc>().add(ShopEditItemEvent(body: item));
     } else {
       context.read<ShopBloc>().add(ShopCreateItemEvent(body: item));
@@ -175,26 +142,29 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     required String key,
     required String label,
     bool required = false,
+    bool isPrice = false,
     TextInputType keyboardType = TextInputType.text,
-    TextInputAction textInputAction = TextInputAction.next, // Default to next
+    TextInputAction textInputAction = TextInputAction.next,
   }) {
     final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: CustomTextFormField(
         controller: _controllers[key]!,
-        hintText: '', // Hint not used in original, can add if needed
+        hintText: '',
         labelText: required ? '$label *' : label,
-        keyboardType: keyboardType,
+        keyboardType: isPrice ? TextInputType.number : keyboardType,
         action: textInputAction,
         useCustomBorder: false,
         validator: required ? (value) => value!.isEmpty ? l10n.nameRequired.replaceAll('Name', label) : null : null,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          // errorBorder: OutlineInputBorder(),
-          enabledBorder: OutlineInputBorder(),
-          focusedBorder: OutlineInputBorder(),
-          // focusedErrorBorder: OutlineInputBorder(),
+        decoration: InputDecoration(
+          suffixText: isPrice ? 'រៀល' : null,
+          suffixStyle: isPrice
+              ? const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                )
+              : null,
         ),
       ),
     );
@@ -215,7 +185,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_isEditMode ? l10n.editItem : l10n.addNewItem),
+          title: Text(widget.existingItem != null ? l10n.editItem : l10n.addNewItem),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -238,73 +208,43 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                 _buildTextField(
                   key: 'name',
                   label: l10n.name,
+                ),
+                _buildTextField(
+                  key: 'customerPrice',
+                  label: l10n.customerPrice,
+                  isPrice: true,
                   required: true,
+                  keyboardType: TextInputType.number,
+                ),
+                _buildTextField(
+                  key: 'defaultPrice',
+                  label: l10n.defaultPrice,
+                  isPrice: true,
+                  keyboardType: TextInputType.number,
                 ),
                 _buildTextField(
                   key: 'sellerPrice',
                   label: l10n.sellerPrice,
-                  required: true,
+                  isPrice: true,
                   keyboardType: TextInputType.number,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      _isDistributorMode ? l10n.changeToSeller : l10n.changeToDistributor,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    onTap: () => setState(() {
-                      _isDistributorMode = !_isDistributorMode;
-                      _hasChanges = true;
-                    }),
-                    trailing: Switch(
-                      value: _isDistributorMode,
-                      onChanged: (value) => setState(() {
-                        _isDistributorMode = value;
-                        _hasChanges = true;
-                      }),
-                    ),
-                  ),
-                ),
-                if (_isDistributorMode) ...[
-                  _buildTextField(
-                    key: 'sellerBatchPrice',
-                    label: l10n.sellerBatchPrice,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'defaultPrice',
-                    label: l10n.defaultPrice,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'defaultBatchPrice',
-                    label: l10n.defaultBatchPrice,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'customerPrice',
-                    label: l10n.customerPrice,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'customerBatchPrice',
-                    label: l10n.customerBatchPrice,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'batchSize',
-                    label: l10n.batchSize,
-                    keyboardType: TextInputType.number,
-                  ),
-                ],
-                // ... (keeping rest of the build method unchanged)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
                   child: DropdownButtonFormField<String>(
                     value: _category,
+                    isExpanded: true,
+                    icon: const Icon(Icons.arrow_drop_down_rounded),
+                    decoration: InputDecoration(
+                      labelText: l10n.category,
+                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    // menuMaxHeight: 200,
+                    itemHeight: 56,
                     items: const [
                       DropdownMenuItem(value: 'Electronics', child: Text('Electronics')),
                       DropdownMenuItem(value: 'Accessories', child: Text('Accessories')),
@@ -321,17 +261,16 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                       };
                       return DropdownMenuItem<String>(
                         value: item.value,
-                        child: Text(translatedLabel),
+                        child: Text(
+                          translatedLabel,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) => setState(() {
                       _category = value!;
                       _hasChanges = true;
                     }),
-                    decoration: InputDecoration(
-                      labelText: l10n.category,
-                      border: const OutlineInputBorder(),
-                    ),
                   ),
                 ),
                 _buildTextField(
@@ -355,7 +294,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                     ),
-                    child: Text(_isEditMode ? l10n.saveChanges : l10n.addItem),
+                    child: Text(widget.existingItem != null ? l10n.saveChanges : l10n.addItem),
                   ),
                 ),
               ],

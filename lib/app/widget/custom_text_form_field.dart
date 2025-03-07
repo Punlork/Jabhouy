@@ -18,6 +18,7 @@ class CustomTextFormField extends StatefulWidget {
     this.decoration,
     this.focusNode,
     this.floatingLabelBehavior,
+    this.onChanged,
     this.useCustomBorder = true,
   });
 
@@ -29,6 +30,7 @@ class CustomTextFormField extends StatefulWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
+  final void Function(String?)? onChanged;
   final VoidCallback? onVisibilityToggle;
   final bool showVisibilityIcon;
   final bool showClearButton;
@@ -67,6 +69,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
 
   void _clearText() {
     widget.controller.clear();
+    widget.onChanged?.call('');
+    _focusNode.unfocus();
     setState(() => _hasText = false);
   }
 
@@ -79,9 +83,10 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           )
-        : null;
+        : const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          );
 
-    // Base decoration with conditional border
     final baseDecoration = InputDecoration(
       hintText: widget.hintText,
       labelText: widget.labelText,
@@ -117,9 +122,11 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       border: customBorder,
       enabledBorder: customBorder,
       focusedBorder: customBorder,
+      disabledBorder: customBorder,
       labelStyle: TextStyle(
         color: colorScheme.onSurface.withValues(alpha: .6),
       ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       floatingLabelBehavior: widget.floatingLabelBehavior,
       floatingLabelStyle: TextStyle(
         color: colorScheme.primary,
@@ -138,6 +145,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             filled: widget.decoration!.filled,
             fillColor: widget.decoration!.fillColor,
             hintStyle: widget.decoration!.hintStyle,
+            suffixText: widget.decoration!.suffixText,
+            suffixStyle: widget.decoration!.suffixStyle,
             //! Add other properties as needed
           )
         : baseDecoration;
@@ -150,6 +159,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       focusNode: _focusNode,
       decoration: mergedDecoration,
       validator: widget.validator,
+      onChanged: widget.onChanged,
     );
   }
 }

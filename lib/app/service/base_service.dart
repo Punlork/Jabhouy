@@ -9,10 +9,12 @@ abstract class BaseService {
   Future<ApiResponse<T>> get<T>(
     String endpoint, {
     T Function(dynamic)? parser,
+    Map<String, dynamic>? queryParameters,
   }) async {
     final response = await _apiService.get(
       '$basePath$endpoint',
       parser: parser,
+      queryParameters: queryParameters,
     );
     return ApiResponse<T>(
       success: response.success,

@@ -1,31 +1,13 @@
-// ignore_for_file: avoid_dynamic_calls
-
-import 'dart:developer';
-
 import 'package:equatable/equatable.dart';
-
-T? tryCast<T>(dynamic x, {T? fallback}) {
-  if (x is T) return x;
-  log('CastError when trying to cast $x to $T!');
-  return fallback;
-}
-
-extension ObjectExtension<T> on T {
-  R? let<R>(R Function(T) transform) => this != null ? transform(this!) : null;
-}
+import 'package:my_app/app/app.dart';
 
 class ShopItemModel extends Equatable {
   const ShopItemModel({
     required this.id,
-    required this.userId,
     required this.name,
-    required this.defaultPrice,
-    this.defaultBatchPrice,
+    this.defaultPrice,
     this.customerPrice,
     this.sellerPrice,
-    this.customerBatchPrice,
-    this.sellerBatchPrice,
-    this.batchSize,
     this.note,
     this.imageUrl,
     this.category,
@@ -36,15 +18,10 @@ class ShopItemModel extends Equatable {
   factory ShopItemModel.fromJson(Map<String, dynamic> json) {
     return ShopItemModel(
       id: tryCast<int>(json['id'])!,
-      userId: tryCast<String>(json['userId'])!,
       name: tryCast<String>(json['name'])!,
-      defaultPrice: tryCast<num>(json['basePrice'], fallback: 0)!.toDouble(),
-      defaultBatchPrice: tryCast<num>(json['defaultBatchPrice'])?.toDouble(),
-      customerPrice: tryCast<num>(json['customerPrice'])?.toDouble(),
-      sellerPrice: tryCast<num>(json['sellerPrice'])?.toDouble(),
-      customerBatchPrice: tryCast<num>(json['customerBatchPrice'])?.toDouble(),
-      sellerBatchPrice: tryCast<num>(json['sellerBatchPrice'])?.toDouble(),
-      batchSize: tryCast<int>(json['batchSize']),
+      defaultPrice: tryCast<int>(json['basePrice'], fallback: 0),
+      customerPrice: tryCast<int>(json['customerPrice']),
+      sellerPrice: tryCast<int>(json['sellerPrice']),
       note: tryCast<String>(json['note']),
       imageUrl: tryCast<String>(json['imageUrl']),
       category: tryCast<String>(json['category']),
@@ -54,65 +31,68 @@ class ShopItemModel extends Equatable {
   }
 
   final int id;
-  final String userId;
   final String name;
-  final double defaultPrice;
-  final double? defaultBatchPrice;
-  final double? customerPrice;
-  final double? sellerPrice;
-  final double? customerBatchPrice;
-  final double? sellerBatchPrice;
-  final int? batchSize;
+  final int? defaultPrice;
+  final int? customerPrice;
+  final int? sellerPrice;
   final String? note;
   final String? imageUrl;
   final String? category;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  bool get isDistributorMode =>
-      defaultBatchPrice != null &&
-      customerPrice != null &&
-      sellerBatchPrice != null &&
-      customerBatchPrice != null &&
-      sellerBatchPrice != null &&
-      batchSize != null &&
-      sellerPrice != null;
-
   Map<String, dynamic> toJson() {
     return {
-      'userId': userId,
       'name': name,
       'basePrice': defaultPrice,
-      'defaultBatchPrice': defaultBatchPrice,
       'customerPrice': customerPrice,
       'sellerPrice': sellerPrice,
-      'customerBatchPrice': customerBatchPrice,
-      'sellerBatchPrice': sellerBatchPrice,
-      'batchSize': batchSize,
       'note': note,
       'imageUrl': imageUrl,
-      'category': category,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      // 'category': category,
+      // 'createdAt': createdAt?.toIso8601String(),
+      // 'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
   @override
   List<Object?> get props => [
         id,
-        userId,
         name,
         defaultPrice,
-        defaultBatchPrice,
         customerPrice,
         sellerPrice,
-        customerBatchPrice,
-        sellerBatchPrice,
-        batchSize,
         note,
         imageUrl,
         category,
         createdAt,
         updatedAt,
       ];
+
+  ShopItemModel copyWith({
+    int? id,
+    String? userId,
+    String? name,
+    int? defaultPrice,
+    int? customerPrice,
+    int? sellerPrice,
+    String? note,
+    String? imageUrl,
+    String? category,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ShopItemModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      defaultPrice: defaultPrice ?? this.defaultPrice,
+      customerPrice: customerPrice ?? this.customerPrice,
+      sellerPrice: sellerPrice ?? this.sellerPrice,
+      note: note ?? this.note,
+      imageUrl: imageUrl ?? this.imageUrl,
+      category: category ?? this.category,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

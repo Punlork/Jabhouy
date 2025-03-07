@@ -14,6 +14,8 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     on<SwitchViewMode>(_onSwitchViewMode);
     add(const InitializeApp());
   }
+    
+  
 
   Future<void> _onInitializeApp(InitializeApp event, Emitter<AppState> emit) async {
     final sharedPref = await SharedPreferences.getInstance();

@@ -134,25 +134,9 @@
   "@customerPrice": {
     "description": "Label for the customer price of an item"
   },
-  "customerBatchPrice": "Customer Batch Price",
-  "@customerBatchPrice": {
-    "description": "Label for the customer batch price of an item"
-  },
   "sellerPrice": "Seller Price",
   "@sellerPrice": {
     "description": "Label for the seller price of an item"
-  },
-  "sellerBatchPrice": "Seller Batch Price",
-  "@sellerBatchPrice": {
-    "description": "Label for the seller batch price of an item"
-  },
-  "defaultBatchPrice": "Default Batch Price",
-  "@defaultBatchPrice": {
-    "description": "Label for the default batch price of an item"
-  },
-  "batchSize": "Batch Size",
-  "@batchSize": {
-    "description": "Label for the batch size of an item"
   },
   "note": "Note",
   "@note": {
@@ -266,18 +250,5 @@
   "discard": "Discard",
   "@discard": {
     "description": "Text for the discard button in dialogs"
-  },
-  "perUnit": "/ unit",
-  "@perUnit": {
-    "description": "Text indicating price per unit"
-  },
-  "perBatchPack": "/ {batchSize}-pack",
-  "@perBatchPack": {
-    "description": "Text indicating price per batch pack with batch size",
-    "placeholders": {
-      "batchSize": {
-        "type": "String"
-      }
-    }
   }
 }
