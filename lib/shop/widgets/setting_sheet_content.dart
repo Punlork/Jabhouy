@@ -35,7 +35,8 @@ class SettingsSheet extends StatelessWidget {
               context.goNamed(
                 AppRoutes.category,
                 extra: {
-                  'bloc': context.read<CategoryBloc>(),
+                  'shop': context.read<ShopBloc>(),
+                  'category': context.read<CategoryBloc>(),
                 },
               );
               Navigator.pop(context);

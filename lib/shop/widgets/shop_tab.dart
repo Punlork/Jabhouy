@@ -17,9 +17,6 @@ class ShopTab extends StatelessWidget {
         BlocProvider(
           create: (context) => SignoutBloc(getIt<AuthService>()),
         ),
-        BlocProvider(
-          create: (context) => CategoryBloc(getIt<CategoryService>()),
-        ),
       ],
       child: const _ShopTabView(),
     );
@@ -76,8 +73,11 @@ class _ShopTabState extends State<_ShopTabView> {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => BlocProvider.value(
-        value: context.read<CategoryBloc>(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<CategoryBloc>()),
+          BlocProvider.value(value: context.read<ShopBloc>()),
+        ],
         child: SettingsSheet(
           onSignout: onSignout,
         ),
@@ -367,7 +367,14 @@ class _ShopTabState extends State<_ShopTabView> {
             await Future<void>.delayed(const Duration(seconds: 2));
             LoadingOverlay.hide();
           },
-          onEdit: (item) => context.pushNamed(AppRoutes.createShopItem, extra: {'existingItem': item}),
+          onEdit: (item) => context.pushNamed(
+            AppRoutes.createShopItem,
+            extra: {
+              'existingItem': item,
+              'shop': context.read<ShopBloc>(),
+              'category': context.read<CategoryBloc>(),
+            },
+          ),
         ),
       ),
     );
@@ -405,6 +412,7 @@ class _ShopTabState extends State<_ShopTabView> {
             pageSize: 10,
           ),
         );
+    context.read<CategoryBloc>().add(CategoryGetEvent());
   }
 
   Widget _buildIconButton({

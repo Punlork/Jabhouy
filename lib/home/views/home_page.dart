@@ -50,7 +50,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           context.pushNamed(
             AppRoutes.createShopItem,
             extra: {
-              'bloc': context.read<ShopBloc>(),
+              'shop': context.read<ShopBloc>(),
+              'category': context.read<CategoryBloc>(),
               'onAdd': (ShopItemModel item) {
                 // defaultShopList.add(item);
               },

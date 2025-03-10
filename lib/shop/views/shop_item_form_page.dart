@@ -9,22 +9,27 @@ import 'package:my_app/shop/shop.dart';
 class ShopItemFormPage extends StatelessWidget {
   const ShopItemFormPage({
     required this.onSaved,
-    required this.bloc,
+    required this.shop,
+    required this.category,
     this.existingItem,
     super.key,
   });
 
   final ShopItemModel? existingItem;
   final void Function(ShopItemModel) onSaved;
-  final ShopBloc bloc;
+  final ShopBloc shop;
+  final CategoryBloc category;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: bloc,
-      child: _ShopItemFormPageContent(
-        onSaved: onSaved,
-        existingItem: existingItem,
+      value: shop,
+      child: BlocProvider.value(
+        value: category,
+        child: _ShopItemFormPageContent(
+          onSaved: onSaved,
+          existingItem: existingItem,
+        ),
       ),
     );
   }
@@ -46,7 +51,7 @@ class _ShopItemFormPageContent extends StatefulWidget {
 class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
-  late String _category;
+  CategoryItemModel? _categoryFilter; // Changed from String to CategoryItemModel?
   bool _hasChanges = false;
 
   @override
@@ -69,9 +74,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
       _controllers['imageUrl']!.text = item.imageUrl ?? '';
-      _category = item.category ?? 'Electronics';
-    } else {
-      _category = 'Electronics';
+      // Assuming category in ShopItemModel is now a String that matches CategoryItemModel.id
+      _categoryFilter = null; // Will be set by CategoryDropdown based on existing item's category
     }
 
     _controllers.forEach((key, controller) {
@@ -128,7 +132,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
           _controllers['sellerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['sellerPrice']!.text) : null,
       note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
       imageUrl: _controllers['imageUrl']!.text.isEmpty ? null : _controllers['imageUrl']!.text,
-      category: _category,
+      category: _categoryFilter?.id.toString() ?? '', // Updated to use CategoryItemModel id
     );
 
     if (widget.existingItem != null) {
@@ -228,51 +232,33 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                   isPrice: true,
                   keyboardType: TextInputType.number,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: DropdownButtonFormField<String>(
-                    value: _category,
-                    isExpanded: true,
-                    icon: const Icon(Icons.arrow_drop_down_rounded),
-                    decoration: InputDecoration(
-                      labelText: l10n.category,
-                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                    ),
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    dropdownColor: Theme.of(context).colorScheme.surface,
-                    // menuMaxHeight: 200,
-                    itemHeight: 56,
-                    items: const [
-                      DropdownMenuItem(value: 'Electronics', child: Text('Electronics')),
-                      DropdownMenuItem(value: 'Accessories', child: Text('Accessories')),
-                      DropdownMenuItem(value: 'Beverages', child: Text('Beverages')),
-                      DropdownMenuItem(value: 'Other', child: Text('Other')),
-                    ].map((item) {
-                      final l10n = AppLocalizations.of(context);
-                      final translatedLabel = switch (item.value) {
-                        'Electronics' => l10n.electronics,
-                        'Accessories' => l10n.accessories,
-                        'Beverages' => l10n.beverages,
-                        'Other' => l10n.other,
-                        _ => item.value!,
-                      };
-                      return DropdownMenuItem<String>(
-                        value: item.value,
-                        child: Text(
-                          translatedLabel,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) => setState(() {
-                      _category = value!;
-                      _hasChanges = true;
-                    }),
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.only(bottom: 16),
+                //   child: CategoryDropdown(
+                //     initialValue: widget.existingItem != null
+                //         ? CategoryItemModel(
+                //             id: widget.existingItem!.id,
+                //             name: widget.existingItem!.name,
+                //           )
+                //         : null,
+                //     onChanged: (value) {
+                //       _categoryFilter = value;
+                //       _hasChanges = true;
+                //     },
+                //     decoration: InputDecoration(
+                //       labelText: l10n.category,
+                //       border: const OutlineInputBorder(
+                //         borderRadius: BorderRadius.all(Radius.circular(8)),
+                //       ),
+                //       contentPadding: const EdgeInsets.symmetric(
+                //         horizontal: 16,
+                //         vertical: 12,
+                //       ),
+                //       filled: true,
+                //       fillColor: Theme.of(context).colorScheme.surface,
+                //     ),
+                //   ),
+                // ),
                 _buildTextField(
                   key: 'note',
                   label: l10n.note,

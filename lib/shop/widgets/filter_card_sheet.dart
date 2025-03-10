@@ -1,6 +1,6 @@
 // New FilterSheet widget
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_app/shop/shop.dart';
 
 class FilterSheet extends StatefulWidget {
@@ -42,30 +42,11 @@ class _FilterSheetState extends State<FilterSheet> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          BlocBuilder<CategoryBloc, CategoryState>(
-            builder: (context, state) {
-              if (state is CategoryLoaded) {
-                return DropdownButtonFormField<CategoryItemModel>(
-                  value: _categoryFilter,
-                  items: state.items
-                      .map(
-                        (value) => DropdownMenuItem(
-                          value: value,
-                          child: Text(value.name),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    _categoryFilter = value;
-                    setState(() {});
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
-                  ),
-                );
-              }
-              return SizedBox.fromSize();
+          CategoryDropdown(
+            initialValue: _categoryFilter,
+            onChanged: (value) {
+              _categoryFilter = value;
+              setState(() {});
             },
           ),
           const SizedBox(height: 24),
@@ -82,7 +63,7 @@ class _FilterSheetState extends State<FilterSheet> {
                     ? null
                     : () {
                         widget.onApply(_categoryFilter!);
-                        Navigator.pop(context);
+                        context.pop();
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.primary,

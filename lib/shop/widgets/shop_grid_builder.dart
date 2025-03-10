@@ -68,7 +68,11 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> {
           ..pop()
           ..pushNamed(
             AppRoutes.createShopItem,
-            extra: {'existingItem': item, 'bloc': context.read<ShopBloc>()},
+            extra: {
+              'existingItem': item,
+              'shop': context.read<ShopBloc>(),
+              'category': context.read<CategoryBloc>(),
+            },
           );
       },
       onDelete: () => context.read<ShopBloc>().add(

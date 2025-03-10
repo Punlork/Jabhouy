@@ -6,6 +6,7 @@ export 'service/category_service.dart';
 export 'service/shop_service.dart';
 export 'views/category_page.dart';
 export 'views/shop_item_form_page.dart';
+export 'widgets/category_selection_dropdown.dart';
 export 'widgets/filter_card_sheet.dart';
 export 'widgets/setting_sheet_content.dart';
 export 'widgets/shop_grid_builder.dart';

@@ -4,45 +4,57 @@ import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
 class CategoryPage extends StatelessWidget {
-  const CategoryPage({required this.bloc, super.key});
-  final CategoryBloc bloc;
+  const CategoryPage({required this.category, required this.shop, super.key});
+  final CategoryBloc category;
+  final ShopBloc shop;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => bloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context).category),
-        ),
-        body: BlocConsumer<CategoryBloc, CategoryState>(
-          listener: (context, state) {
-            if (state is CategoryError) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: category),
+        BlocProvider.value(value: shop),
+      ],
+      child: const _CategoryPageContent(),
+    );
+  }
+}
+
+class _CategoryPageContent extends StatelessWidget {
+  const _CategoryPageContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).category),
+      ),
+      body: BlocConsumer<CategoryBloc, CategoryState>(
+        listener: (context, state) {
+          switch (state) {
+            case CategoryError():
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
               );
-            }
-          },
-          builder: (context, state) {
-            if (state is CategoryInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
 
-            final items = state.asLoaded?.items ?? [];
+            default:
+          }
+        },
+        builder: (context, state) {
+          final items = state.asLoaded?.items ?? [];
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: items.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _buildAddCategoryButton(context);
-                }
-                final item = items[index - 1];
-                return _buildCategoryTile(context, item);
-              },
-            );
-          },
-        ),
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _buildAddCategoryButton(context);
+              }
+              final item = items[index - 1];
+              return _buildCategoryTile(context, item);
+            },
+          );
+        },
       ),
     );
   }
@@ -111,14 +123,13 @@ class CategoryPage extends StatelessWidget {
               onPressed: () {
                 if (controller.text.isNotEmpty) {
                   final bloc = context.read<CategoryBloc>();
+                  final shopBloc = context.read<ShopBloc>();
                   if (isEdit) {
-                    bloc.add(
-                      CategoryEditEvent(
-                        body: item.copyWith(
-                          name: controller.text,
-                        ),
-                      ),
-                    );
+                    final body = item.copyWith(name: controller.text);
+                    bloc.add(CategoryEditEvent(body: body));
+                    if (shopBloc.state.asLoaded?.categoryFilter == item) {
+                      context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: body));
+                    }
                   } else {
                     bloc.add(
                       CategoryCreateEvent(

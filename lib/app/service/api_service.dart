@@ -53,7 +53,7 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
-        endpoint,
+        uri,
         () => _client.get(uri, headers: tempHeaders).timeout(_timeout),
       );
 
@@ -99,7 +99,7 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
-        endpoint,
+        uri,
         () => _client.post(uri, headers: tempHeaders, body: encodeBody).timeout(_timeout),
       );
 
@@ -145,7 +145,7 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
-        endpoint,
+        uri,
         () => _client
             .put(
               uri,
@@ -186,7 +186,7 @@ class ApiService {
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
       final response = await interceptRequest(
-        endpoint,
+        uri,
         () => _client.delete(uri, headers: tempHeaders).timeout(_timeout),
       );
 

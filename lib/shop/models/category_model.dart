@@ -1,8 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:equatable/equatable.dart';
 import 'package:my_app/app/app.dart';
 
-class CategoryItemModel {
-  CategoryItemModel({
+class CategoryItemModel extends Equatable {
+  const CategoryItemModel({
     required this.id,
     required this.name,
     this.userId,
@@ -21,11 +22,7 @@ class CategoryItemModel {
   final String? userId;
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'userId': userId,
-    };
+    return {'name': name};
   }
 
   CategoryItemModel copyWith({
@@ -39,4 +36,7 @@ class CategoryItemModel {
       userId: userId ?? this.userId,
     );
   }
+
+  @override
+  List<Object?> get props => [id, name, userId];
 }

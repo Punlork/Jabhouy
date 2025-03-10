@@ -16,8 +16,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   CategoryBloc(this._service) : super(const CategoryInitial()) {
     on<CategoryGetEvent>(_onGetItems);
     on<CategoryCreateEvent>(_onCreateItem);
-    on<CategoryEditEvent>(_onDeleteItem);
-    on<CategoryDeleteEvent>(_onEditItem);
+    on<CategoryEditEvent>(_onEditItem);
+    on<CategoryDeleteEvent>(_onDeleteItem);
   }
 
   final CategoryService _service;
@@ -28,7 +28,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       final response = await _service.createCategory(event.body);
       if (!response.success) return;
 
-      showSuccessSnackBar(null, 'Created ${response.data?.name}');
+      showSuccessSnackBar(null, 'Created: ${response.data?.name}');
 
       final updatedItems = [response.data!, ...?state.asLoaded?.items];
 
@@ -40,7 +40,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onEditItem(CategoryDeleteEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onEditItem(CategoryEditEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
       final response = await _service.updateCategory(event.body);
@@ -49,9 +49,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       showSuccessSnackBar(null, 'Updated: ${response.data?.name}');
 
       final currentItems = state.asLoaded?.items ?? <CategoryItemModel>[];
-      final updatedItems = currentItems.map((item) {
-        return item.id == event.body.id ? response.data! : item;
-      }).toList();
+      final updatedItems = currentItems
+          .map(
+            (item) => item.id == event.body.id ? response.data! : item,
+          )
+          .toList();
 
       emit(CategoryLoaded(items: updatedItems));
     } catch (e) {
@@ -61,7 +63,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onDeleteItem(CategoryEditEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onDeleteItem(CategoryDeleteEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
       final response = await _service.deleteCategory(event.body);

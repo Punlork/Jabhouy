@@ -44,6 +44,7 @@ class AppRoutes {
   static final allowedAuthenticated = {
     home.toPath,
     '${home.toPath}${createShopItem.toPath}',
+    '${home.toPath}${category.toPath}',
     loading.toPath,
   };
 
@@ -86,8 +87,15 @@ class AppRoutes {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: BlocProvider(
-              create: (context) => ShopBloc(getIt<ShopService>()),
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => ShopBloc(getIt<ShopService>()),
+                ),
+                BlocProvider(
+                  create: (context) => CategoryBloc(getIt<CategoryService>()),
+                ),
+              ],
               child: const HomePage(),
             ),
             transitionsBuilder: _rightToLeftTransition,
@@ -102,13 +110,15 @@ class AppRoutes {
               final extra = state.extra! as Map<String, dynamic>;
               final onAdd = extra['onAdd'] as void Function(ShopItemModel)?;
               final existingItem = extra['existingItem'] as ShopItemModel?;
-              final bloc = extra['bloc'] as ShopBloc;
+              final shop = extra['shop'] as ShopBloc;
+              final category = extra['category'] as CategoryBloc;
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: ShopItemFormPage(
                   onSaved: onAdd ?? (_) {},
                   existingItem: existingItem,
-                  bloc: bloc,
+                  shop: shop,
+                  category: category,
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );
@@ -120,11 +130,13 @@ class AppRoutes {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra! as Map<String, dynamic>;
               GlobalContext.currentContext = context;
-              final bloc = extra['bloc'] as CategoryBloc;
+              final category = extra['category'] as CategoryBloc;
+              final shop = extra['shop'] as ShopBloc;
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: CategoryPage(
-                  bloc: bloc,
+                  category: category,
+                  shop: shop,
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );
