@@ -250,5 +250,21 @@
   "discard": "បោះបង់",
   "@discard": {
     "description": "Text for the discard button in dialogs"
+  },
+  "addCategory": "បន្ថែមប្រភេទ",
+  "@addCategory": {
+    "description": "Text for the addCategory button in dialogs"
+  },
+  "editCategory": "កែសម្រួលប្រភេទ",
+  "@editCategory": {
+    "description": "Text for the editCategory button in dialogs"
+  },
+  "deleteCategory": "លុបប្រភេទ",
+  "@deleteCategory": {
+    "description": "Text for the deleteCategory button in dialogs"
+  },
+  "add": "បន្ថែម",
+  "@add": {
+    "description": "Text for the add button in dialogs"
   }
 }

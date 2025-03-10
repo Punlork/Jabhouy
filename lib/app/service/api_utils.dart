@@ -51,12 +51,13 @@ Future<http.Response> interceptRequest(
     printTime: false,
   );
   final startTime = DateTime.now();
-  final endTime = DateTime.now();
   final timeFormatter = DateFormat('MMMM d, yyyy h:mm:ss a');
 
   logger.i('Request $endpoint started: ${timeFormatter.format(startTime.toLocal())}');
 
   final response = await request();
+
+  final endTime = DateTime.now();
 
   logger.i('Response $endpoint  received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
   return response;

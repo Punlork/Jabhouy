@@ -1,6 +1,10 @@
+export 'bloc/category/category_bloc.dart';
 export 'bloc/shop_bloc.dart';
+export 'models/category_model.dart';
 export 'models/shop_item_model.dart';
+export 'service/category_service.dart';
 export 'service/shop_service.dart';
+export 'views/category_page.dart';
 export 'views/shop_item_form_page.dart';
 export 'widgets/filter_card_sheet.dart';
 export 'widgets/setting_sheet_content.dart';

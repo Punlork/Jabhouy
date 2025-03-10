@@ -14,7 +14,7 @@ class ShopGetItemsEvent extends ShopEvent {
   });
 
   final String? searchQuery;
-  final String? categoryFilter;
+  final CategoryItemModel? categoryFilter;
   final String? buyerFilter;
   final bool forceRefresh;
   final int? pageSize;

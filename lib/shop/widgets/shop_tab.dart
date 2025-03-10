@@ -17,6 +17,9 @@ class ShopTab extends StatelessWidget {
         BlocProvider(
           create: (context) => SignoutBloc(getIt<AuthService>()),
         ),
+        BlocProvider(
+          create: (context) => CategoryBloc(getIt<CategoryService>()),
+        ),
       ],
       child: const _ShopTabView(),
     );
@@ -37,6 +40,7 @@ class _ShopTabState extends State<_ShopTabView> {
   void initState() {
     super.initState();
     context.read<ShopBloc>().add(ShopGetItemsEvent());
+    context.read<CategoryBloc>().add(CategoryGetEvent());
   }
 
   @override
@@ -50,28 +54,34 @@ class _ShopTabState extends State<_ShopTabView> {
   }
 
   void _showFilterSheet() {
-    // Uncomment and implement if needed
-    // showModalBottomSheet<ShopItem>(
-    //   context: context,o
-    //   shape: const RoundedRectangleBorder(
-    //     borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    //   ),~
-    //   builder: (_) => BlocProvider.value(
-    //     value: context.read<ShopBloc>(),
-    //     child: FilterSheet(
-    //       initialCategoryFilter: context.read<ShopBloc>().state.categoryFilter,
-    //       initialBuyerFilter: context.read<ShopBloc>().state.buyerFilter,
-    //       onApply: (category, buyer) => context.read<ShopBloc>().add(FilterItemsEvent(category, buyer)),
-    //     ),
-    //   ),
-    // );
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => BlocProvider.value(
+        value: context.read<ShopBloc>(),
+        child: BlocProvider.value(
+          value: context.read<CategoryBloc>(),
+          child: FilterSheet(
+            initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+            onApply: (category) => context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: category)),
+          ),
+        ),
+      ),
+    );
   }
 
-  void _showSettingsSheet(BuildContext context, VoidCallback onSignout) {
+  void _showSettingsSheet(VoidCallback onSignout) {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => SettingsSheet(onSignout: onSignout),
+      builder: (_) => BlocProvider.value(
+        value: context.read<CategoryBloc>(),
+        child: SettingsSheet(
+          onSignout: onSignout,
+        ),
+      ),
     );
   }
 
@@ -215,8 +225,9 @@ class _ShopTabState extends State<_ShopTabView> {
         icon: Icons.settings,
         color: Colors.black,
         onPressed: () => _showSettingsSheet(
-          context,
-          () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
+          () => context.read<SignoutBloc>().add(
+                const SignoutSubmitted(),
+              ),
         ),
         colorScheme: colorScheme,
       ),

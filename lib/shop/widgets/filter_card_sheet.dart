@@ -1,30 +1,30 @@
 // New FilterSheet widget
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/shop/shop.dart';
 
 class FilterSheet extends StatefulWidget {
   const FilterSheet({
     required this.initialCategoryFilter,
-    required this.initialBuyerFilter,
     required this.onApply,
     super.key,
   });
-  final String initialCategoryFilter;
-  final String initialBuyerFilter;
-  final void Function(String category, String buyer) onApply;
+  final CategoryItemModel? initialCategoryFilter;
+  final void Function(CategoryItemModel category) onApply;
 
   @override
   State<FilterSheet> createState() => _FilterSheetState();
 }
 
 class _FilterSheetState extends State<FilterSheet> {
-  late String _categoryFilter;
-  late String _buyerFilter;
+  late CategoryItemModel? _categoryFilter;
+
+  bool get isDisabled => _categoryFilter == null;
 
   @override
   void initState() {
     super.initState();
     _categoryFilter = widget.initialCategoryFilter;
-    _buyerFilter = widget.initialBuyerFilter;
   }
 
   @override
@@ -42,32 +42,31 @@ class _FilterSheetState extends State<FilterSheet> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _categoryFilter,
-            items: ['All', 'Electronics', 'Accessories', 'Beverages']
-                .map(
-                  (value) => DropdownMenuItem(value: value, child: Text(value)),
-                )
-                .toList(),
-            onChanged: (value) => setState(() => _categoryFilter = value!),
-            decoration: const InputDecoration(
-              labelText: 'Category',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _buyerFilter,
-            items: ['All', 'Customer Only', 'Seller Only']
-                .map(
-                  (value) => DropdownMenuItem(value: value, child: Text(value)),
-                )
-                .toList(),
-            onChanged: (value) => setState(() => _buyerFilter = value!),
-            decoration: const InputDecoration(
-              labelText: 'Buyer Type',
-              border: OutlineInputBorder(),
-            ),
+          BlocBuilder<CategoryBloc, CategoryState>(
+            builder: (context, state) {
+              if (state is CategoryLoaded) {
+                return DropdownButtonFormField<CategoryItemModel>(
+                  value: _categoryFilter,
+                  items: state.items
+                      .map(
+                        (value) => DropdownMenuItem(
+                          value: value,
+                          child: Text(value.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    _categoryFilter = value;
+                    setState(() {});
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                );
+              }
+              return SizedBox.fromSize();
+            },
           ),
           const SizedBox(height: 24),
           Row(
@@ -79,18 +78,21 @@ class _FilterSheetState extends State<FilterSheet> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: () {
-                  widget.onApply(_categoryFilter, _buyerFilter);
-                  Navigator.pop(context);
-                },
+                onPressed: isDisabled
+                    ? null
+                    : () {
+                        widget.onApply(_categoryFilter!);
+                        Navigator.pop(context);
+                      },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
+                  backgroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.primary,
+                  foregroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.onPrimary,
                 ),
                 child: const Text('Apply'),
               ),
             ],
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );

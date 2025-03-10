@@ -12,7 +12,7 @@ class ShopService extends BaseService {
     int page = 1,
     int pageSize = 10,
     String searchQuery = '',
-    String categoryFilter = 'All',
+    String categoryFilter = '',
     String buyerFilter = 'All',
   }) {
     return get(
@@ -21,6 +21,7 @@ class ShopService extends BaseService {
         'page': page.toString(),
         'pageSize': pageSize.toString(),
         'search': searchQuery,
+        'categoryFilter': categoryFilter,
       },
       parser: (value) {
         if (value is Map) {

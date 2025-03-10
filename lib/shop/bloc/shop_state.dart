@@ -19,13 +19,13 @@ class ShopLoaded extends ShopState {
   const ShopLoaded({
     required this.paginatedItems,
     this.searchQuery = '',
-    this.categoryFilter = 'All',
+    this.categoryFilter,
     this.buyerFilter = 'All',
   });
 
   final PaginatedResponse<ShopItemModel> paginatedItems;
   final String searchQuery;
-  final String categoryFilter;
+  final CategoryItemModel? categoryFilter;
   final String buyerFilter;
 
   List<ShopItemModel> get items => paginatedItems.items;
@@ -34,7 +34,7 @@ class ShopLoaded extends ShopState {
   ShopLoaded copyWith({
     PaginatedResponse<ShopItemModel>? paginatedItems,
     String? searchQuery,
-    String? categoryFilter,
+    CategoryItemModel? categoryFilter,
     String? buyerFilter,
     bool? isMoreLoading,
   }) {

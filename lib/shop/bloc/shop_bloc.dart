@@ -56,7 +56,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
             pagination: state.asLoaded!.pagination,
           ),
           searchQuery: state.asLoaded?.searchQuery ?? '',
-          categoryFilter: state.asLoaded?.categoryFilter ?? 'All',
+          categoryFilter: state.asLoaded?.categoryFilter,
           buyerFilter: state.asLoaded?.buyerFilter ?? 'All',
         ),
       );
@@ -87,7 +87,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
             pagination: state.asLoaded!.pagination,
           ),
           searchQuery: state.asLoaded?.searchQuery ?? '',
-          categoryFilter: state.asLoaded?.categoryFilter ?? 'All',
+          categoryFilter: state.asLoaded?.categoryFilter,
           buyerFilter: state.asLoaded?.buyerFilter ?? 'All',
         ),
       );
@@ -126,7 +126,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
                   ),
           ),
           searchQuery: state.asLoaded?.searchQuery ?? '',
-          categoryFilter: state.asLoaded?.categoryFilter ?? 'All',
+          categoryFilter: state.asLoaded?.categoryFilter,
           buyerFilter: state.asLoaded?.buyerFilter ?? 'All',
         ),
       );
@@ -141,7 +141,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     final currentState = state.asLoaded;
 
     final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
-    final newCategoryFilter = event.categoryFilter ?? currentState?.categoryFilter ?? 'All';
+    final newCategoryFilter = event.categoryFilter ?? currentState?.categoryFilter;
     final newBuyerFilter = event.buyerFilter ?? currentState?.buyerFilter ?? 'All';
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
     final newPageSize = event.pageSize ?? (currentState?.pagination.pageSize ?? 10);
@@ -163,7 +163,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         page: effectivePage,
         pageSize: newPageSize,
         searchQuery: newSearchQuery,
-        categoryFilter: newCategoryFilter,
+        categoryFilter: newCategoryFilter?.name ?? '',
         buyerFilter: newBuyerFilter,
       );
 

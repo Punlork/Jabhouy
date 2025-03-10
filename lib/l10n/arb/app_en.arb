@@ -250,5 +250,21 @@
   "discard": "Discard",
   "@discard": {
     "description": "Text for the discard button in dialogs"
+  },
+  "addCategory": "Add Category",
+  "@addCategory": {
+    "description": "Text for the addCategory button in dialogs"
+  },
+  "editCategory": "Edit Category",
+  "@editCategory": {
+    "description": "Text for the editCategory button in dialogs"
+  },
+  "deleteCategory": "Delete Category",
+  "@deleteCategory": {
+    "description": "Text for the deleteCategory button in dialogs"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Text for the add button in dialogs"
   }
 }

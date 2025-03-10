@@ -1,8 +1,9 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/shop/shop.dart';
 
 class SettingsSheet extends StatelessWidget {
   const SettingsSheet({
@@ -21,7 +22,24 @@ class SettingsSheet extends StatelessWidget {
         children: [
           Text(
             l10n.settings,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.category, color: Colors.blue),
+            title: Text(l10n.category),
+            onTap: () {
+              context.goNamed(
+                AppRoutes.category,
+                extra: {
+                  'bloc': context.read<CategoryBloc>(),
+                },
+              );
+              Navigator.pop(context);
+            },
           ),
           const SizedBox(height: 16),
           ListTile(
@@ -36,8 +54,18 @@ class SettingsSheet extends StatelessWidget {
                   title: Text(l10n.signOut),
                   content: Text(l10n.confirmSignOut),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
-                    TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.signOut)),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(
+                        l10n.cancel,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(
+                        l10n.signOut,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -62,6 +90,7 @@ class SettingsSheet extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );

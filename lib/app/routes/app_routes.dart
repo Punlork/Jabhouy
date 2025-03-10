@@ -33,6 +33,7 @@ class AppRoutes {
   static const signup = 'signup';
   static const loading = 'loading';
   static const createShopItem = 'create_shop_item';
+  static const category = 'category';
 
   static final allowedUnauthenticated = {
     signin.toPath,
@@ -107,6 +108,22 @@ class AppRoutes {
                 child: ShopItemFormPage(
                   onSaved: onAdd ?? (_) {},
                   existingItem: existingItem,
+                  bloc: bloc,
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: category.toPath,
+            name: category,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra! as Map<String, dynamic>;
+              GlobalContext.currentContext = context;
+              final bloc = extra['bloc'] as CategoryBloc;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: CategoryPage(
                   bloc: bloc,
                 ),
                 transitionsBuilder: _rightToLeftTransition,

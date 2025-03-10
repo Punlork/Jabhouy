@@ -16,9 +16,11 @@ Future<void> setupDependencies() async {
     ..registerSingleton<ApiService>(apiService)
     ..registerLazySingleton(() => ShopService(getIt<ApiService>()))
     ..registerLazySingleton(() => AuthService(getIt<ApiService>()))
+    ..registerLazySingleton(() => CategoryService(getIt<ApiService>()))
     ..registerFactory(AppBloc.new)
     ..registerFactory(() => AuthBloc(getIt<AuthService>())..add(AuthCheckRequested()))
     ..registerFactory(() => ShopBloc(getIt<ShopService>()))
+    ..registerFactory(() => CategoryBloc(getIt<CategoryService>()))
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
     ..registerFactory(() => SignupBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()));
