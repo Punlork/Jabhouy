@@ -60,7 +60,7 @@ Future<http.Response> interceptRequest(
 
   if (response.body.isNotEmpty) {
     try {
-      final jsonResponse = jsonDecode(response.body);
+      final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
       logger.d('Response body: ${jsonEncode(jsonResponse)}');
     } catch (e) {
       logger.e('Failed to parse response body: $e');
