@@ -5,12 +5,12 @@ ApiResponse<T> handleResponse<T>(
   T Function(dynamic) parser,
 ) {
   final statusCode = response.statusCode;
-  final rawBody = response.body.isEmpty || response.body == 'null' ? null : response.body;
+  final rawBody = response.bodyBytes.isEmpty ? null : response.bodyBytes;
 
   dynamic responseBody;
   if (rawBody != null) {
     try {
-      responseBody = jsonDecode(rawBody);
+      responseBody = jsonDecode(utf8.decode(rawBody));
     } catch (e) {
       throw ApiException(
         'Failed to parse response: $e',
@@ -23,8 +23,8 @@ ApiResponse<T> handleResponse<T>(
     try {
       return ApiResponse<T>(
         success: true,
-        data: parser(responseBody),
-        message: responseBody is Map ? responseBody['message']?.toString() : null,
+        data: responseBody != null ? parser(responseBody) : null,
+        message: responseBody is Map<String, dynamic> ? responseBody['message']?.toString() : null,
       );
     } catch (e) {
       throw ApiException(
