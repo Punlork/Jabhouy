@@ -123,17 +123,17 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         const SizedBox(height: 40),
                         Text(
                           l10n.createAccount,
-                          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                color: colorScheme.onPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: AppTextTheme.headline.copyWith(
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold, // Already w700, explicit for clarity
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           l10n.signUpToGetStarted,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onPrimary.withValues(alpha: .8),
-                              ),
+                          style: AppTextTheme.body.copyWith(
+                            color: colorScheme.onPrimary.withValues(alpha: .8),
+                          ),
                         ),
                         const SizedBox(height: 40),
                         CustomTextFormField(
@@ -147,6 +147,9 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             }
                             return null;
                           },
+                          decoration: const InputDecoration(
+                            labelStyle: AppTextTheme.body, // Apply to label
+                          ),
                         ),
                         const SizedBox(height: 20),
                         CustomTextFormField(
@@ -164,6 +167,9 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             }
                             return null;
                           },
+                          decoration: InputDecoration(
+                            labelStyle: AppTextTheme.body, // Apply to label
+                          ),
                         ),
                         const SizedBox(height: 20),
                         CustomTextFormField(
@@ -183,6 +189,9 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             }
                             return null;
                           },
+                          decoration: InputDecoration(
+                            labelStyle: AppTextTheme.body, // Apply to label
+                          ),
                         ),
                         const SizedBox(height: 30),
                         BlocBuilder<SignupBloc, SignupState>(
@@ -209,10 +218,10 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                                     )
                                   : Text(
                                       l10n.signUp,
-                                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                            color: colorScheme.onPrimary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                      style: AppTextTheme.body.copyWith(
+                                        color: colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                             );
                           },
@@ -228,7 +237,9 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                               ),
                               child: Text(
                                 l10n.signIn,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: AppTextTheme.caption.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],

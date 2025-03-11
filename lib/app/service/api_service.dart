@@ -47,7 +47,6 @@ class ApiService {
         queryParameters,
       );
 
-      logger.i(uri.path + uri.queryParameters.toString());
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};

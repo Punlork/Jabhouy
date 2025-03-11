@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -27,16 +28,23 @@ class _CategoryPageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).category),
+        title: Text(
+          AppLocalizations.of(context).category,
+          style: AppTextTheme.title,
+        ),
       ),
       body: BlocConsumer<CategoryBloc, CategoryState>(
         listener: (context, state) {
           switch (state) {
             case CategoryError():
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
+                SnackBar(
+                  content: Text(
+                    state.message,
+                    style: AppTextTheme.body,
+                  ),
+                ),
               );
-
             default:
           }
         },
@@ -65,7 +73,10 @@ class _CategoryPageContent extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: () => _showCategoryDialog(context),
         icon: const Icon(Icons.add),
-        label: Text(AppLocalizations.of(context).add),
+        label: Text(
+          AppLocalizations.of(context).add,
+          style: AppTextTheme.body,
+        ),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 50),
         ),
@@ -78,7 +89,10 @@ class _CategoryPageContent extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 12),
-        title: Text(item.name),
+        title: Text(
+          item.name,
+          style: AppTextTheme.body,
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -107,17 +121,22 @@ class _CategoryPageContent extends StatelessWidget {
         child: AlertDialog(
           title: Text(
             isEdit ? AppLocalizations.of(context).editCategory : AppLocalizations.of(context).addCategory,
+            style: AppTextTheme.title,
           ),
           content: TextField(
             controller: controller,
             decoration: InputDecoration(
-              labelText: AppLocalizations.of(context).category, // Add to AppLocalizations
+              labelText: AppLocalizations.of(context).category,
+              labelStyle: AppTextTheme.body,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).cancel),
+              child: Text(
+                AppLocalizations.of(context).cancel,
+                style: AppTextTheme.caption,
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -136,7 +155,6 @@ class _CategoryPageContent extends StatelessWidget {
                         body: CategoryItemModel(
                           id: 0,
                           name: controller.text,
-                          userId: '',
                         ),
                       ),
                     );
@@ -146,6 +164,7 @@ class _CategoryPageContent extends StatelessWidget {
               },
               child: Text(
                 isEdit ? AppLocalizations.of(context).saveChanges : AppLocalizations.of(context).addItem,
+                style: AppTextTheme.caption,
               ),
             ),
           ],
@@ -160,21 +179,31 @@ class _CategoryPageContent extends StatelessWidget {
       builder: (_) => BlocProvider.value(
         value: context.read<CategoryBloc>(),
         child: AlertDialog(
-          title: Text(AppLocalizations.of(context).deleteCategory),
+          title: Text(
+            AppLocalizations.of(context).deleteCategory,
+            style: AppTextTheme.title,
+          ),
           content: Text(
             '${AppLocalizations.of(context).confirmDelete} ${item.name}?',
+            style: AppTextTheme.body,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).cancel),
+              child: Text(
+                AppLocalizations.of(context).cancel,
+                style: AppTextTheme.caption,
+              ),
             ),
             TextButton(
               onPressed: () {
                 context.read<CategoryBloc>().add(CategoryDeleteEvent(body: item));
                 Navigator.pop(context);
               },
-              child: Text(AppLocalizations.of(context).delete),
+              child: Text(
+                AppLocalizations.of(context).delete,
+                style: AppTextTheme.caption,
+              ),
             ),
           ],
         ),

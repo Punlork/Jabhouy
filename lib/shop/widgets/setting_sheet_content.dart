@@ -15,6 +15,7 @@ class SettingsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -22,15 +23,18 @@ class SettingsSheet extends StatelessWidget {
         children: [
           Text(
             l10n.settings,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: AppTextTheme.headline.copyWith(
+              fontWeight: FontWeight.bold, // Already w700, explicit for clarity
+            ),
           ),
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.category, color: Colors.blue),
-            title: Text(l10n.category),
+            title: Text(
+              l10n.category,
+              style: AppTextTheme.body,
+            ),
             onTap: () {
               context.goNamed(
                 AppRoutes.category,
@@ -46,25 +50,36 @@ class SettingsSheet extends StatelessWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: Text(l10n.signOut),
+            title: Text(
+              l10n.signOut,
+              style: AppTextTheme.body,
+            ),
             onTap: () async {
               Navigator.pop(context);
               final shouldSignOut = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(l10n.signOut),
-                  content: Text(l10n.confirmSignOut),
+                  title: Text(
+                    l10n.signOut,
+                    style: AppTextTheme.title,
+                  ),
+                  content: Text(
+                    l10n.confirmSignOut,
+                    style: AppTextTheme.body,
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
                       child: Text(
                         l10n.cancel,
+                        style: AppTextTheme.caption,
                       ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
                       child: Text(
                         l10n.signOut,
+                        style: AppTextTheme.caption,
                       ),
                     ),
                   ],
@@ -82,8 +97,14 @@ class SettingsSheet extends StatelessWidget {
               return ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.language),
-                title: Text(l10n.switchLanguage),
-                subtitle: Text(currentLocale == 'en' ? l10n.languageEnglish : l10n.languageKhmer),
+                title: Text(
+                  l10n.switchLanguage,
+                  style: AppTextTheme.body,
+                ),
+                subtitle: Text(
+                  currentLocale == 'en' ? l10n.languageEnglish : l10n.languageKhmer,
+                  style: AppTextTheme.caption,
+                ),
                 onTap: () {
                   context.read<AppBloc>().add(SwitchLanguage(currentLocale));
                   Navigator.pop(context);

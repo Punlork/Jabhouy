@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/shop/shop.dart';
 
 class ShopItemModel extends Equatable {
   const ShopItemModel({
@@ -24,7 +25,9 @@ class ShopItemModel extends Equatable {
       sellerPrice: tryCast<int>(json['sellerPrice']),
       note: tryCast<String>(json['note']),
       imageUrl: tryCast<String>(json['imageUrl']),
-      category: tryCast<String>(json['category']),
+      category: tryCast<CategoryItemModel>(
+        json['category'] != null ? CategoryItemModel.fromJson(json['category'] as Map<String, dynamic>) : null,
+      ),
       createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
       updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
     );
@@ -37,7 +40,7 @@ class ShopItemModel extends Equatable {
   final int? sellerPrice;
   final String? note;
   final String? imageUrl;
-  final String? category;
+  final CategoryItemModel? category;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -49,7 +52,7 @@ class ShopItemModel extends Equatable {
       'sellerPrice': sellerPrice,
       'note': note,
       'imageUrl': imageUrl,
-      // 'category': category,
+      'category': category?.name,
       // 'createdAt': createdAt?.toIso8601String(),
       // 'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -78,7 +81,7 @@ class ShopItemModel extends Equatable {
     int? sellerPrice,
     String? note,
     String? imageUrl,
-    String? category,
+    CategoryItemModel? category,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {

@@ -27,7 +27,7 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
 }
 
 class ShopBloc extends Bloc<ShopEvent, ShopState> {
-  ShopBloc(this._service) : super(const ShopInitial()) {
+  ShopBloc(this._service, this.upload) : super(const ShopInitial()) {
     on<ShopGetItemsEvent>(
       _onGetItems,
       transformer: throttleDroppable(throttleDuration),
@@ -38,6 +38,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   }
 
   final ShopService _service;
+  final UploadBloc upload;
 
   Future<void> _onCreateItem(ShopCreateItemEvent event, Emitter<ShopState> emit) async {
     LoadingOverlay.show();

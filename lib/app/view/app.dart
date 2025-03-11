@@ -37,6 +37,7 @@ class _MyApp extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             ),
             useMaterial3: true,
+            fontFamily: 'NotoSansKhmer',
           ),
           builder: (context, child) => Overlay(
             initialEntries: [

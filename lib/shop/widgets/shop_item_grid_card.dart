@@ -16,7 +16,6 @@ class GridShopItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
       onTap: () => onEdit(item), // Tap to edit
@@ -33,7 +32,7 @@ class GridShopItemCard extends StatelessWidget {
                 child: ColoredBox(
                   color: Colors.white,
                   child: FadeInImage.memoryNetwork(
-                    image: item.imageUrl ?? '',
+                    image: item.imageUrl ?? 'https://picsum.photos/seed/513/600s',
                     fadeInDuration: const Duration(milliseconds: 15),
                     fit: BoxFit.cover,
                     width: 40,
@@ -58,16 +57,17 @@ class GridShopItemCard extends StatelessWidget {
                     // Title
                     Text(
                       item.name,
-                      style: textTheme.titleMedium?.copyWith(
+                      style: AppTextTheme.title.copyWith(
                         color: colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.bold, // Override w600 to bold (w700)
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    // Price
                     Text(
-                      '${item.customerPrice?.toInt()} រៀល',
-                      style: textTheme.bodySmall?.copyWith(
+                      '${item.customerPrice} រៀល',
+                      style: AppTextTheme.caption.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),

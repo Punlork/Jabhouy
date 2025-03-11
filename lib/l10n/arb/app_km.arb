@@ -187,9 +187,14 @@
   "@addNewItem": {
     "description": "AppBar title when adding a new item"
   },
-  "nameRequired": "ឈ្មោះត្រូវបានទាមទារ",
+  "nameRequired": "{name}ត្រូវបានទាមទារ",
   "@nameRequired": {
-    "description": "Validation message when name is empty"
+    "description": "Validation message when name is empty",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "defaultPrice": "តម្លៃដើម",
   "@defaultPrice": {
@@ -266,5 +271,54 @@
   "add": "បន្ថែម",
   "@add": {
     "description": "Text for the add button in dialogs"
+  },
+  "image": "រូបភាព",
+  "@image": {
+    "description": "Text for the image button in dialogs"
+  },
+  "uploadImage": "បន្ថែមរូបភាព",
+  "@uploadImage": {
+    "description": "Text for the uploadImage button in dialogs"
+  },
+  "selectImageSource": "ជ្រើសរើសប្រភពរូបភាព",
+  "@selectImageSource": {
+    "description": "Text for the selectImageSource button in dialogs"
+  },
+  "takePhoto": "ថតរូប",
+  "@takePhoto": {
+    "description": "Text for the takePhoto button in dialogs"
+  },
+  "chooseFromGallery": "ជ្រើសរើសពីវិចិត្រសាល",
+  "@chooseFromGallery": {
+    "description": "Text for the chooseFromGallery button in dialogs"
+  },
+  "gettingReady": "កំពុងរៀបចំ",
+  "@gettingReady": {
+    "description": "Text displayed when the app is getting ready"
+  },
+  "preparingExperience": "កំពុងរៀបចំបទពិសោធន៍របស់អ្នក...",
+  "@preparingExperience": {
+    "description": "Text displayed when the app is preparing the user's experience"
+  },
+  "loadingContent": "កំពុងផ្ទុកមាតិការបស់អ្នក...",
+  "@loadingContent": {
+    "description": "Text displayed when the app is loading content"
+  },
+  "almostThere": "ជិតរួចរាល់...",
+  "@almostThere": {
+    "description": "Text displayed when the app is almost ready"
+  },
+  "imageUploadedSuccessfully": "រូបភាពបានបង្ហោះដោយជោគជ័យ",
+  "@imageUploadedSuccessfully": {
+    "description": "Message displayed when the app is almost ready"
+  },
+  "appVersion": "v{version}",
+  "@appVersion": {
+    "description": "Text displaying the app version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

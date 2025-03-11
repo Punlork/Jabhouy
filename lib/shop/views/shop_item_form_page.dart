@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/l10n.dart';
 
@@ -51,7 +52,7 @@ class _ShopItemFormPageContent extends StatefulWidget {
 class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
-  CategoryItemModel? _categoryFilter; // Changed from String to CategoryItemModel?
+  CategoryItemModel? _categoryFilter;
   bool _hasChanges = false;
 
   @override
@@ -63,7 +64,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       'customerPrice': TextEditingController(),
       'sellerPrice': TextEditingController(),
       'note': TextEditingController(),
-      'imageUrl': TextEditingController(),
     };
 
     if (widget.existingItem != null) {
@@ -73,9 +73,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       _controllers['customerPrice']!.text = item.customerPrice?.toString() ?? '';
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
-      _controllers['imageUrl']!.text = item.imageUrl ?? '';
-      // Assuming category in ShopItemModel is now a String that matches CategoryItemModel.id
-      _categoryFilter = null; // Will be set by CategoryDropdown based on existing item's category
+      _categoryFilter = null; // Will be set by CategoryDropdown
     }
 
     _controllers.forEach((key, controller) {
@@ -90,7 +88,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   }
 
   void _detectChanges() {
-    setState(() => _hasChanges = _controllers.values.any((c) => c.text.isNotEmpty));
+    setState(() => _hasChanges =
+        _controllers.values.any((c) => c.text.isNotEmpty) || context.read<ShopBloc>().upload.selectedImage != null);
   }
 
   Future<bool> _onWillPop() async {
@@ -100,17 +99,17 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     final shouldPop = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.unsavedChanges),
-        content: Text(l10n.confirmDiscardChanges),
+        title: Text(l10n.unsavedChanges, style: AppTextTheme.title),
+        content: Text(l10n.confirmDiscardChanges, style: AppTextTheme.body),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
+            child: Text(l10n.cancel, style: AppTextTheme.caption),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: Text(l10n.discard),
+            child: Text(l10n.discard, style: AppTextTheme.caption),
           ),
         ],
       ),
@@ -122,6 +121,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   void _submitItem() {
     if (!_formKey.currentState!.validate()) return;
 
+    final shopBloc = context.read<ShopBloc>();
+    final uploadBloc = shopBloc.upload;
     final item = ShopItemModel(
       id: widget.existingItem?.id ?? 0,
       name: _controllers['name']!.text,
@@ -131,14 +132,18 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       sellerPrice:
           _controllers['sellerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['sellerPrice']!.text) : null,
       note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
-      imageUrl: _controllers['imageUrl']!.text.isEmpty ? null : _controllers['imageUrl']!.text,
-      category: _categoryFilter?.id.toString() ?? '', // Updated to use CategoryItemModel id
+      imageUrl: uploadBloc.selectedImage?.path, // Temporary path; updated with URL after upload
+      category: _categoryFilter,
     );
 
-    if (widget.existingItem != null) {
-      context.read<ShopBloc>().add(ShopEditItemEvent(body: item));
+    if (uploadBloc.selectedImage != null) {
+      uploadBloc.add(UploadImageEvent(uploadBloc.selectedImage!)); // Trigger upload
     } else {
-      context.read<ShopBloc>().add(ShopCreateItemEvent(body: item));
+      if (widget.existingItem != null) {
+        shopBloc.add(ShopEditItemEvent(body: item));
+      } else {
+        shopBloc.add(ShopCreateItemEvent(body: item));
+      }
     }
   }
 
@@ -155,20 +160,17 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       padding: const EdgeInsets.only(bottom: 16),
       child: CustomTextFormField(
         controller: _controllers[key]!,
-        hintText: '',
+        hintText: '', 
         labelText: required ? '$label *' : label,
         keyboardType: isPrice ? TextInputType.number : keyboardType,
         action: textInputAction,
         useCustomBorder: false,
-        validator: required ? (value) => value!.isEmpty ? l10n.nameRequired.replaceAll('Name', label) : null : null,
+        validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
         decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          labelStyle: AppTextTheme.body,
           suffixText: isPrice ? 'រៀល' : null,
-          suffixStyle: isPrice
-              ? const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                )
-              : null,
+          suffixStyle: isPrice ? AppTextTheme.caption : null,
         ),
       ),
     );
@@ -189,7 +191,10 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.existingItem != null ? l10n.editItem : l10n.addNewItem),
+          title: Text(
+            widget.existingItem != null ? l10n.editItem : l10n.addNewItem,
+            style: AppTextTheme.title,
+          ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -202,88 +207,175 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
             },
           ),
         ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTextField(
-                  key: 'name',
-                  label: l10n.name,
-                ),
-                _buildTextField(
-                  key: 'customerPrice',
-                  label: l10n.customerPrice,
-                  isPrice: true,
-                  required: true,
-                  keyboardType: TextInputType.number,
-                ),
-                _buildTextField(
-                  key: 'defaultPrice',
-                  label: l10n.defaultPrice,
-                  isPrice: true,
-                  keyboardType: TextInputType.number,
-                ),
-                _buildTextField(
-                  key: 'sellerPrice',
-                  label: l10n.sellerPrice,
-                  isPrice: true,
-                  keyboardType: TextInputType.number,
-                ),
-                // Padding(
-                //   padding: const EdgeInsets.only(bottom: 16),
-                //   child: CategoryDropdown(
-                //     initialValue: widget.existingItem != null
-                //         ? CategoryItemModel(
-                //             id: widget.existingItem!.id,
-                //             name: widget.existingItem!.name,
-                //           )
-                //         : null,
-                //     onChanged: (value) {
-                //       _categoryFilter = value;
-                //       _hasChanges = true;
-                //     },
-                //     decoration: InputDecoration(
-                //       labelText: l10n.category,
-                //       border: const OutlineInputBorder(
-                //         borderRadius: BorderRadius.all(Radius.circular(8)),
-                //       ),
-                //       contentPadding: const EdgeInsets.symmetric(
-                //         horizontal: 16,
-                //         vertical: 12,
-                //       ),
-                //       filled: true,
-                //       fillColor: Theme.of(context).colorScheme.surface,
-                //     ),
-                //   ),
-                // ),
-                _buildTextField(
-                  key: 'note',
-                  label: l10n.note,
-                ),
-                _buildTextField(
-                  key: 'imageUrl',
-                  label: l10n.imageUrl,
-                  textInputAction: TextInputAction.done,
-                ),
-                const SizedBox(height: 24),
-                BlocListener<ShopBloc, ShopState>(
-                  listener: (context, state) {
-                    if (state is ShopLoaded) context.pop();
-                  },
-                  child: ElevatedButton(
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<UploadBloc, UploadState>(
+              bloc: context.read<ShopBloc>().upload,
+              listener: (context, state) {
+                if (state is UploadSuccess) {
+                  final shopBloc = context.read<ShopBloc>();
+                  final item = ShopItemModel(
+                    id: widget.existingItem?.id ?? 0,
+                    name: _controllers['name']!.text,
+                    defaultPrice: int.tryParse(_controllers['defaultPrice']!.text) ?? 0,
+                    customerPrice: _controllers['customerPrice']!.text.isNotEmpty
+                        ? int.tryParse(_controllers['customerPrice']!.text)
+                        : null,
+                    sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
+                        ? int.tryParse(_controllers['sellerPrice']!.text)
+                        : null,
+                    note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+                    imageUrl: state.imageUrl, // Use uploaded URL
+                    category: _categoryFilter,
+                  );
+                  if (widget.existingItem != null) {
+                    shopBloc.add(ShopEditItemEvent(body: item));
+                  } else {
+                    shopBloc.add(ShopCreateItemEvent(body: item));
+                  }
+                  showSuccessSnackBar(context, l10n.imageUploadedSuccessfully);
+                } else if (state is UploadFailure) {
+                  showErrorSnackBar(context, 'Upload failed: ${state.error}');
+                }
+              },
+            ),
+            BlocListener<ShopBloc, ShopState>(
+              listener: (context, state) {
+                if (state is ShopLoaded) context.pop();
+              },
+            ),
+          ],
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextField(
+                    key: 'name',
+                    label: l10n.name,
+                    required: true,
+                  ),
+                  _buildTextField(
+                    key: 'customerPrice',
+                    label: l10n.customerPrice,
+                    isPrice: true,
+                    required: true,
+                    keyboardType: TextInputType.number,
+                  ),
+                  _buildTextField(
+                    key: 'defaultPrice',
+                    label: l10n.defaultPrice,
+                    keyboardType: TextInputType.number,
+                  ),
+                  _buildTextField(
+                    key: 'sellerPrice',
+                    label: l10n.sellerPrice,
+                    isPrice: true,
+                    keyboardType: TextInputType.number,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: CategoryDropdown(
+                      initialValue: widget.existingItem?.category,
+                      onChanged: (value) {
+                        _categoryFilter = value;
+                        _hasChanges = true;
+                      },
+                      decoration: InputDecoration(
+                        labelText: l10n.category,
+                        labelStyle: AppTextTheme.body,
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.surface,
+                      ),
+                    ),
+                  ),
+                  _buildTextField(
+                    key: 'note',
+                    label: l10n.note,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.image,
+                          style: AppTextTheme.body,
+                        ),
+                        const SizedBox(height: 8),
+                        BlocBuilder<UploadBloc, UploadState>(
+                          bloc: context.read<ShopBloc>().upload,
+                          builder: (context, state) {
+                            return Row(
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    if (state is UploadInProgress) return;
+                                    final bloc = context.read<ShopBloc>().upload;
+                                    bloc.showImageSourceDialog(
+                                      context,
+                                      onTakePhoto: () => bloc.add(
+                                        SelectImageEvent(ImageSource.camera),
+                                      ),
+                                      onChoseFromGallery: () => bloc.add(
+                                        SelectImageEvent(ImageSource.gallery),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.upload),
+                                  label: Text(
+                                    l10n.uploadImage,
+                                    style: AppTextTheme.body,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: colorScheme.onSurface,
+                                    backgroundColor: colorScheme.surface,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                if (state is UploadImageSelected)
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      state.selectedImage,
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                else if (state is UploadInProgress)
+                                  const CircularProgressIndicator(),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
                     onPressed: _submitItem,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                     ),
-                    child: Text(widget.existingItem != null ? l10n.saveChanges : l10n.addItem),
+                    child: Text(
+                      widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
+                      style: AppTextTheme.body,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

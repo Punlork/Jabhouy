@@ -54,14 +54,14 @@ Future<http.Response> interceptRequest(
   final startTime = DateTime.now();
   final timeFormatter = DateFormat('MMMM d, yyyy h:mm:ss a');
 
-  logger.i('Request $pathWithQuery started: ${timeFormatter.format(startTime.toLocal())}');
+  logger.d('Request $pathWithQuery started: ${timeFormatter.format(startTime.toLocal())}');
 
   final response = await request();
 
   if (response.body.isNotEmpty) {
     try {
       final jsonResponse = jsonDecode(response.body);
-      logger.i('Response body: ${jsonEncode(jsonResponse)}');
+      logger.d('Response body: ${jsonEncode(jsonResponse)}');
     } catch (e) {
       logger.e('Failed to parse response body: $e');
     }
@@ -69,7 +69,7 @@ Future<http.Response> interceptRequest(
 
   final endTime = DateTime.now();
 
-  logger.i('Response $pathWithQuery received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
+  logger.d('Response $pathWithQuery received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
 
   return response;
 }

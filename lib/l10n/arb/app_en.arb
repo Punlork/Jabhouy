@@ -187,9 +187,14 @@
   "@addNewItem": {
     "description": "AppBar title when adding a new item"
   },
-  "nameRequired": "Name is required",
+  "nameRequired": "{name} is required",
   "@nameRequired": {
-    "description": "Validation message when name is empty"
+    "description": "Validation message when name is empty",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "defaultPrice": "Default Price (per unit)",
   "@defaultPrice": {
@@ -266,5 +271,54 @@
   "add": "Add",
   "@add": {
     "description": "Text for the add button in dialogs"
+  },
+  "image": "Image",
+  "@image": {
+    "description": "Text for the image button in dialogs"
+  },
+  "selectImageSource": "Select Image Source",
+  "@selectImageSource": {
+    "description": "Text for the selectImageSource button in dialogs"
+  },
+  "uploadImage": "Upload Image",
+  "@uploadImage": {
+    "description": "Text for the uploadImage button in dialogs"
+  },
+  "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Text for the takePhoto button in dialogs"
+  },
+  "chooseFromGallery": "Choose from Gallery",
+  "@chooseFromGallery": {
+    "description": "Text for the chooseFromGallery button in dialogs"
+  },
+  "gettingReady": "Getting Ready",
+  "@gettingReady": {
+    "description": "Message displayed when the app is getting ready"
+  },
+  "preparingExperience": "Preparing your experience...",
+  "@preparingExperience": {
+    "description": "Message displayed when the app is preparing the user experience"
+  },
+  "loadingContent": "Loading your content...",
+  "@loadingContent": {
+    "description": "Message displayed when the app is loading content"
+  },
+  "almostThere": "Almost there...",
+  "@almostThere": {
+    "description": "Message displayed when the app is almost ready"
+  },
+  "imageUploadedSuccessfully": "Image Uploaded Successfully",
+  "@imageUploadedSuccessfully": {
+    "description": "Message displayed when the app is almost ready"
+  },
+  "appVersion": "v{version}",
+  "@appVersion": {
+    "description": "App version display",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

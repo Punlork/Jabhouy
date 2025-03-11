@@ -17,20 +17,18 @@ class AppBlocObserver extends BlocObserver {
   void onChange(BlocBase<dynamic> bloc, Change<dynamic> change) {
     super.onChange(bloc, change);
     logger.d(
-      '''
-      onChange(${bloc.runtimeType})
-      {
-        'currentState': ${change.currentState},
-        'nextState': ${change.nextState},
-      }
-      ''',
+      'Bloc: ${bloc.runtimeType}\n'
+      'Current State: ${change.currentState}\n'
+      'Next State: ${change.nextState}',
     );
   }
 
   @override
   void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
     logger.e(
-      'onError(${bloc.runtimeType}, $error)',
+      'Bloc: ${bloc.runtimeType}\n'
+      'Error: $error\n'
+      'Stack Trace: $stackTrace',
       error: error,
       stackTrace: stackTrace,
     );
@@ -41,8 +39,17 @@ class AppBlocObserver extends BlocObserver {
 
 Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
   FlutterError.onError = (details) {
-    logger.e(
-      'FlutterError: ${details.exceptionAsString()}',
+    LoggerFactory.createLogger(
+      printTime: false,
+      lineLength: 80,
+      errorMethodCount: 2,
+      methodCount: 0,
+    ).e(
+      'Flutter Error:\n'
+      'Exception: ${details.exceptionAsString()}\n'
+      'Library: ${details.library}\n'
+      'Context: ${details.context}\n'
+      'Stack Trace: ${details.stack}',
       error: details.exception,
       stackTrace: details.stack,
     );

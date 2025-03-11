@@ -59,13 +59,17 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Cancel'),
-                  ),
+                    ),
                   ],
                 ),
               );
             },
-            child: DropdownButtonFormField<CategoryItemModel>(
-              value: _categoryFilter,
+            child: DropdownButtonFormField<CategoryItemModel?>(
+              value: _categoryFilter != null
+                  ? state.items.firstWhere(
+                      (element) => element.id == _categoryFilter?.id,
+                    )
+                  : null,
               isExpanded: true,
               items: state.items
                   .map(

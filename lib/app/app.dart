@@ -1,10 +1,12 @@
 export 'bloc/app_bloc.dart';
+export 'bloc/upload/upload_bloc.dart';
 export 'constant/app_assets.dart';
 export 'injection/dependency_injection.dart';
 export 'models/pagination_model.dart';
 export 'routes/app_routes.dart';
 export 'service/api_service.dart';
 export 'service/base_service.dart';
+export 'theme/text_theme.dart';
 export 'utils/logger.dart';
 export 'utils/overlay_loading.dart';
 export 'utils/snack_bar.dart';

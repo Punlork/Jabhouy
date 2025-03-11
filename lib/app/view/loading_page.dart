@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
+import 'package:my_app/l10n/l10n.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});
@@ -15,17 +16,14 @@ class LoadingPage extends StatefulWidget {
 }
 
 class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin {
-  // Multiple animation controllers for layered effects
   late AnimationController _pulseController;
   late AnimationController _rotationController;
   late AnimationController _fadeController;
 
-  // Various animations
   late Animation<double> _pulseAnimation;
   late Animation<double> _rotationAnimation;
   late Animation<double> _fadeAnimation;
 
-  // For particle effect
   final List<ParticleModel> _particles = [];
   final Random _random = Random();
 
@@ -70,14 +68,12 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
       const Duration(milliseconds: 300),
       () {
         if (!context.mounted) return;
-        // ignore: use_build_context_synchronously
         context.read<AuthBloc>().add(AuthCheckRequested());
       },
     );
   }
 
   void _initializeParticles() {
-    // Create floating particles for the background
     for (var i = 0; i < 20; i++) {
       _particles.add(
         ParticleModel(
@@ -106,23 +102,15 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
+    final l10n = AppLocalizations.of(context); // Access translations
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is Authenticated) {
-          // Add fade out effect before navigation
           context.goNamed(AppRoutes.home);
-          // _fadeController.reverse().then((_) {});
         } else if (state is Unauthenticated) {
           context.goNamed(AppRoutes.signin);
-          // _fadeController.reverse().then((_) {});
         }
-
-        // else if (state is AuthError) {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(content: Text(state.message)),
-        //   );
-        // }
       },
       child: Scaffold(
         body: Stack(
@@ -133,9 +121,9 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primaryContainer,
-                    Theme.of(context).colorScheme.secondary.withValues(alpha: .8),
+                    colorScheme.primary,
+                    colorScheme.primaryContainer,
+                    colorScheme.secondary.withValues(alpha: .8),
                   ],
                   stops: const [0.0, 0.6, 1.0],
                 ),
@@ -146,14 +134,11 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
               builder: (context, child) {
                 return Transform.rotate(
                   angle: _rotationAnimation.value,
-                  origin: Offset(
-                    size.width,
-                    size.height,
-                  ),
+                  origin: Offset(size.width, size.height),
                   child: CustomPaint(
                     size: Size(size.width, size.height),
                     painter: BackgroundPatternPainter(
-                      color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: .1),
+                      color: colorScheme.onPrimary.withValues(alpha: .1),
                     ),
                   ),
                 );
@@ -163,7 +148,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
               size: Size(size.width, size.height),
               painter: ParticlesPainter(
                 particles: _particles,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: colorScheme.onPrimary,
               ),
             ),
             FadeTransition(
@@ -195,7 +180,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                             height: 80,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: .15),
+                              color: colorScheme.onPrimary.withValues(alpha: .15),
                             ),
                           ),
                         ),
@@ -207,14 +192,14 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: .7),
+                                color: colorScheme.onPrimary.withValues(alpha: .7),
                                 width: 4,
                                 strokeAlign: BorderSide.strokeAlignOutside,
                               ),
                               gradient: SweepGradient(
                                 colors: [
-                                  Theme.of(context).colorScheme.onPrimary.withValues(alpha: .1),
-                                  Theme.of(context).colorScheme.onPrimary.withValues(alpha: .8),
+                                  colorScheme.onPrimary.withValues(alpha: .1),
+                                  colorScheme.onPrimary.withValues(alpha: .8),
                                 ],
                                 stops: const [0.0, 0.7],
                               ),
@@ -226,10 +211,10 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                           height: 20,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: colorScheme.onPrimary,
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: .5),
+                                color: colorScheme.onPrimary.withValues(alpha: .5),
                                 blurRadius: 10,
                                 spreadRadius: 2,
                               ),
@@ -250,10 +235,10 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                         ),
                       ),
                       child: Text(
-                        'Getting Ready',
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
+                        l10n.gettingReady, // Translated
+                        style: AppTextTheme.headline.copyWith(
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold, // Already w700
                           shadows: [
                             Shadow(
                               color: Colors.black.withValues(alpha: .4),
@@ -271,30 +256,30 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                         repeatForever: true,
                         animatedTexts: [
                           TypewriterAnimatedText(
-                            'Preparing your experience...',
-                            textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: .9),
-                                  fontSize: 18,
-                                  letterSpacing: 0.5,
-                                ),
+                            l10n.preparingExperience, // Translated
+                            textStyle: AppTextTheme.body.copyWith(
+                              color: colorScheme.onPrimary.withValues(alpha: .9),
+                              fontSize: 18, // Override to match original
+                              letterSpacing: 0.5,
+                            ),
                             speed: const Duration(milliseconds: 80),
                           ),
                           TypewriterAnimatedText(
-                            'Loading your content...',
-                            textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: .9),
-                                  fontSize: 18,
-                                  letterSpacing: 0.5,
-                                ),
+                            l10n.loadingContent, // Translated
+                            textStyle: AppTextTheme.body.copyWith(
+                              color: colorScheme.onPrimary.withValues(alpha: .9),
+                              fontSize: 18, // Override to match original
+                              letterSpacing: 0.5,
+                            ),
                             speed: const Duration(milliseconds: 80),
                           ),
                           TypewriterAnimatedText(
-                            'Almost there...',
-                            textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: .9),
-                                  fontSize: 18,
-                                  letterSpacing: 0.5,
-                                ),
+                            l10n.almostThere, // Translated
+                            textStyle: AppTextTheme.body.copyWith(
+                              color: colorScheme.onPrimary.withValues(alpha: .9),
+                              fontSize: 18, // Override to match original
+                              letterSpacing: 0.5,
+                            ),
                             speed: const Duration(milliseconds: 80),
                           ),
                         ],
@@ -315,10 +300,10 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                 ),
                 child: Center(
                   child: Text(
-                    'v1.0.0',
-                    style: TextStyle(
+                    l10n.appVersion('1.0.0'), // Translated with parameter
+                    style: AppTextTheme.caption.copyWith(
                       color: colorScheme.onPrimary.withValues(alpha: .6),
-                      fontSize: 14,
+                      fontSize: 14, // Override to match original
                     ),
                   ),
                 ),

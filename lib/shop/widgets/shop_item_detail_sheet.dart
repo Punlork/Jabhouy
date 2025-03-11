@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 void showShopItemDetailSheet({
   required BuildContext context,
@@ -31,6 +32,7 @@ class ShopItemDetailSheet extends StatelessWidget {
     required this.onDelete,
     super.key,
   });
+
   final ShopItemModel item;
   final VoidCallback onEdit;
   final dynamic Function() onDelete;
@@ -56,17 +58,18 @@ class ShopItemDetailSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with image and name
           Row(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  item.imageUrl ?? '',
+                child: FadeInImage.memoryNetwork(
+                  image: item.imageUrl ?? '',
+                  fadeInDuration: const Duration(milliseconds: 15),
+                  fit: BoxFit.cover,
                   width: 80,
                   height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const AppLogo(
+                  placeholder: kTransparentImage,
+                  imageErrorBuilder: (context, url, error) => const AppLogo(
                     shape: BoxShape.rectangle,
                     useBg: false,
                   ),
@@ -79,16 +82,16 @@ class ShopItemDetailSheet extends StatelessWidget {
                   children: [
                     Text(
                       item.name,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: AppTextTheme.headline.copyWith(
+                        fontWeight: FontWeight.bold, // Already w700, but explicit for clarity
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.category ?? l10n.na,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
+                      item.category?.name ?? l10n.na,
+                      style: AppTextTheme.body.copyWith(
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),
@@ -100,18 +103,17 @@ class ShopItemDetailSheet extends StatelessWidget {
           // Price Details
           _buildDetailRow(
             l10n.defaultPrice,
-            item.defaultPrice != null ? '${item.defaultPrice!.toInt()} រៀល' : l10n.na,
+            item.defaultPrice != null ? '${item.defaultPrice!} រៀល' : l10n.na,
             context,
           ),
           _buildDetailRow(
             l10n.customerPrice,
-            item.customerPrice != null ? '${item.customerPrice!.toInt()} រៀល' : l10n.na,
+            item.customerPrice != null ? '${item.customerPrice!} រៀល' : l10n.na,
             context,
           ),
-
           _buildDetailRow(
             l10n.sellerPrice,
-            item.sellerPrice != null ? '${item.sellerPrice!.toInt()} រៀល' : l10n.na,
+            item.sellerPrice != null ? '${item.sellerPrice!} រៀល' : l10n.na,
             context,
           ),
 
@@ -120,14 +122,14 @@ class ShopItemDetailSheet extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               l10n.note,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: AppTextTheme.title.copyWith(
+                fontWeight: FontWeight.bold, // Override w600 to w700
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               item.note!,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: AppTextTheme.body,
             ),
           ],
 
@@ -144,7 +146,12 @@ class ShopItemDetailSheet extends StatelessWidget {
                     Icons.edit,
                     color: Colors.white,
                   ),
-                  label: Text(l10n.edit),
+                  label: Text(
+                    l10n.edit,
+                    style: AppTextTheme.body.copyWith(
+                      color: Colors.white, // Match foregroundColor
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -156,7 +163,10 @@ class ShopItemDetailSheet extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _confirmDelete(context),
                   icon: const Icon(Icons.delete),
-                  label: Text(l10n.delete),
+                  label: Text(
+                    l10n.delete,
+                    style: AppTextTheme.body,
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.error,
                     side: BorderSide(color: Theme.of(context).colorScheme.error),
@@ -177,21 +187,21 @@ class ShopItemDetailSheet extends StatelessWidget {
     BuildContext context,
   ) =>
       Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade700,
-                  ),
+              style: AppTextTheme.body.copyWith(
+                color: Colors.grey.shade700,
+              ),
             ),
             Text(
               value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: AppTextTheme.body.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -202,12 +212,21 @@ class ShopItemDetailSheet extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.confirmDelete),
-        content: Text(l10n.confirmDeleteMessage(item.name)),
+        title: Text(
+          l10n.confirmDelete,
+          style: AppTextTheme.title,
+        ),
+        content: Text(
+          l10n.confirmDeleteMessage(item.name),
+          style: AppTextTheme.body,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(l10n.cancel),
+            child: Text(
+              l10n.cancel,
+              style: AppTextTheme.caption,
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -218,7 +237,10 @@ class ShopItemDetailSheet extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: Text(l10n.delete),
+            child: Text(
+              l10n.delete,
+              style: AppTextTheme.caption,
+            ),
           ),
         ],
       ),

@@ -90,7 +90,10 @@ class AppRoutes {
             child: MultiBlocProvider(
               providers: [
                 BlocProvider(
-                  create: (context) => ShopBloc(getIt<ShopService>()),
+                  create: (context) => ShopBloc(
+                    getIt<ShopService>(),
+                    getIt<UploadBloc>(),
+                  ),
                 ),
                 BlocProvider(
                   create: (context) => CategoryBloc(getIt<CategoryService>()),
