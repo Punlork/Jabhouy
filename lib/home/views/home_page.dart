@@ -1,3 +1,4 @@
+import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,27 +13,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-  int _selectedIndex = 0; // Tracks the current tab
+  int _selectedIndex = 0;
 
-  // List of pages corresponding to bottom nav items
   static const List<Widget> _pages = <Widget>[
-    ShopTab(), // Your existing shop tab
-    LoanerView(), // Placeholder for loaner view
-    // Add more views here (e.g., ProfileTab()) if needed
+    ShopTab(),
+    LoanerView(),
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
+    if (_selectedIndex != index) {
       _selectedIndex = index;
-    });
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    final iconList = <IconData>[
+      Icons.store_rounded,
+      Icons.handshake_rounded,
+    ];
+
     return Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -40,10 +46,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               colorScheme.primary,
               colorScheme.primaryContainer,
             ],
+            stops: const [0.0, 0.7],
           ),
         ),
         child: SafeArea(
-          child: _pages[_selectedIndex], // Display the selected page
+          bottom: false,
+          child: _pages[_selectedIndex],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -54,31 +62,41 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               'shop': context.read<ShopBloc>(),
               'category': context.read<CategoryBloc>(),
               'onAdd': (ShopItemModel item) {
-                // defaultShopList.add(item); // Uncomment if needed
+                // Handler for adding item
               },
             },
           );
         },
-        backgroundColor: colorScheme.primary,
-        child: Icon(Icons.add, color: colorScheme.onPrimary),
+        backgroundColor: colorScheme.primaryContainer,
+        foregroundColor: colorScheme.onPrimaryContainer,
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      bottomNavigationBar: AnimatedBottomNavigationBar.builder(
+        itemCount: iconList.length,
+        tabBuilder: (int index, bool isActive) => Icon(
+          iconList[index],
+          size: 24,
+          color: isActive ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: .6),
+        ),
+        activeIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.onSurface.withValues(alpha: .6),
+        gapLocation: GapLocation.end,
+        notchSmoothness: NotchSmoothness.defaultEdge,
+        notchMargin: 16,
+        leftCornerRadius: 16,
         backgroundColor: colorScheme.surface,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            label: 'Shop',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.handshake),
-            label: 'Loans',
-          ),
-          // Add more items here if needed (e.g., Profile)
-        ],
+        splashColor: colorScheme.primary.withValues(alpha: .1),
+        shadow: BoxShadow(
+          offset: const Offset(0, 1),
+          blurRadius: 12,
+          spreadRadius: 0.5,
+          color: Colors.black.withValues(alpha: .1),
+        ),
       ),
     );
   }
