@@ -25,3 +25,11 @@ class ClearImageEvent extends UploadEvent {
   @override
   List<Object?> get props => [];
 }
+
+class LoadExistingImageEvent extends UploadEvent {
+  LoadExistingImageEvent({this.imageUrl});
+  final String? imageUrl;
+
+  @override
+  List<Object?> get props => [imageUrl];
+}

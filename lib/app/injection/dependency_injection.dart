@@ -14,11 +14,12 @@ Future<void> setupDependencies() async {
   await apiService.cookies.initCookies();
   getIt
     ..registerSingleton<ApiService>(apiService)
+    ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ShopService(getIt<ApiService>()))
     ..registerLazySingleton(() => AuthService(getIt<ApiService>()))
     ..registerLazySingleton(() => CategoryService(getIt<ApiService>()))
     ..registerFactory(AppBloc.new)
-    ..registerFactory(UploadBloc.new)
+    ..registerFactory(() => UploadBloc(getIt<UploadService>()))
     ..registerFactory(() => AuthBloc(getIt<AuthService>())..add(AuthCheckRequested()))
     ..registerFactory(() => ShopBloc(getIt<ShopService>(), getIt<UploadBloc>()))
     ..registerFactory(() => CategoryBloc(getIt<CategoryService>()))

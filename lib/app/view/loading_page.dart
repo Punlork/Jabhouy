@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:math';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -65,7 +67,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
     _initializeParticles();
 
     Future.delayed(
-      const Duration(milliseconds: 300),
+      const Duration(milliseconds: 500),
       () {
         if (!context.mounted) return;
         context.read<AuthBloc>().add(AuthCheckRequested());

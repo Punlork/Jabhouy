@@ -13,15 +13,23 @@ part 'upload_event.dart';
 part 'upload_state.dart';
 
 class UploadBloc extends Bloc<UploadEvent, UploadState> {
-  UploadBloc() : super(const UploadInitial()) {
+  UploadBloc(this._service) : super(const UploadInitial()) {
     on<SelectImageEvent>(_onSelectImage);
     on<UploadImageEvent>(_onUploadImage);
     on<ClearImageEvent>(_onClearImage);
+    on<LoadExistingImageEvent>(_onLoadExistingImage);
   }
+
+  final UploadService _service;
 
   File? _selectedImage;
 
   File? get selectedImage => _selectedImage;
+
+  Future<void> _onLoadExistingImage(LoadExistingImageEvent event, Emitter<UploadState> emit) async {
+    if (event.imageUrl != null && event.imageUrl!.isNotEmpty) {}
+    emit(UploadImageUrlLoaded(event.imageUrl!));
+  }
 
   Future<void> _onSelectImage(SelectImageEvent event, Emitter<UploadState> emit) async {
     final picker = ImagePicker();
@@ -33,15 +41,15 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
   }
 
   Future<void> _onUploadImage(UploadImageEvent event, Emitter<UploadState> emit) async {
-    // emit(const UploadInProgress());
     LoadingOverlay.show();
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(const UploadSuccess('imageUrl'));
-      LoadingOverlay.hide();
-
-      // final imageUrl = await _uploadImageToServer(event.image); // Implement this in subclasses
-      // emit(UploadSuccess(imageUrl));
+      final response = await _service.upload(
+        file: event.image,
+        fileName: 'image ',
+      );
+      if (response.success) {
+        emit(UploadSuccess(response.data!));
+      }
     } catch (e) {
       emit(UploadFailure(e.toString()));
     }

@@ -164,7 +164,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         page: effectivePage,
         pageSize: newPageSize,
         searchQuery: newSearchQuery,
-        categoryFilter: newCategoryFilter?.name ?? '',
+        categoryFilter: newCategoryFilter?.id.toString() ?? '',
         buyerFilter: newBuyerFilter,
       );
 

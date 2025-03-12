@@ -20,7 +20,7 @@ class ShopItemModel extends Equatable {
     return ShopItemModel(
       id: tryCast<int>(json['id'])!,
       name: tryCast<String>(json['name'])!,
-      defaultPrice: tryCast<int>(json['basePrice'], fallback: 0),
+      defaultPrice: tryCast<int>(json['basePrice']),
       customerPrice: tryCast<int>(json['customerPrice']),
       sellerPrice: tryCast<int>(json['sellerPrice']),
       note: tryCast<String>(json['note']),
@@ -52,9 +52,7 @@ class ShopItemModel extends Equatable {
       'sellerPrice': sellerPrice,
       'note': note,
       'imageUrl': imageUrl,
-      'category': category?.name,
-      // 'createdAt': createdAt?.toIso8601String(),
-      // 'updatedAt': updatedAt?.toIso8601String(),
+      'categoryId': category?.id,
     };
   }
 

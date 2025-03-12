@@ -38,3 +38,11 @@ class UploadFailure extends UploadState {
   @override
   List<Object> get props => [error];
 }
+
+class UploadImageUrlLoaded extends UploadState {
+  const UploadImageUrlLoaded(this.imageUrl);
+  final String imageUrl;
+
+  @override
+  List<Object> get props => [imageUrl];
+}

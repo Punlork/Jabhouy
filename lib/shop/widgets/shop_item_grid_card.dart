@@ -30,13 +30,14 @@ class GridShopItemCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 child: ColoredBox(
-                  color: Colors.white,
+                  color: item.imageUrl?.isEmpty ?? true ? Colors.white : Colors.transparent,
                   child: FadeInImage.memoryNetwork(
-                    image: item.imageUrl ?? 'https://picsum.photos/seed/513/600s',
-                    fadeInDuration: const Duration(milliseconds: 15),
+                    image: item.imageUrl ?? '',
                     fit: BoxFit.cover,
                     width: 40,
                     height: 40,
+                    imageCacheHeight: 150,
+                    imageCacheWidth: 150,
                     placeholder: kTransparentImage,
                     imageErrorBuilder: (context, url, error) => const AppLogo(
                       shape: BoxShape.rectangle,

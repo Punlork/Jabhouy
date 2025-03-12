@@ -21,7 +21,7 @@ class ShopService extends BaseService {
         'page': page.toString(),
         'pageSize': pageSize.toString(),
         'search': searchQuery,
-        'categoryFilter': categoryFilter,
+        'category': categoryFilter,
       },
       parser: (value) {
         if (value is Map) {

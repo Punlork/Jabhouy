@@ -54,8 +54,15 @@ class _FilterSheetState extends State<FilterSheet> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                onPressed: () {
+                  widget.onApply(
+                    const CategoryItemModel(id: 0, name: 'All'),
+                  );
+                  context.pop();
+                },
+                child: const Text(
+                  'Cancel',
+                ),
               ),
               const SizedBox(width: 8),
               ElevatedButton(

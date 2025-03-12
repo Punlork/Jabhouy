@@ -84,6 +84,8 @@ class ShopItemCard extends StatelessWidget {
                     image: item.imageUrl ?? '',
                     fadeInDuration: const Duration(milliseconds: 15),
                     fit: BoxFit.cover,
+                    height: 100,
+                    width: 100,
                     placeholder: kTransparentImage,
                     imageErrorBuilder: (context, url, error) => const AppLogo(
                       shape: BoxShape.rectangle,

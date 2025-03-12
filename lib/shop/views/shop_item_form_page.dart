@@ -23,14 +23,14 @@ class ShopItemFormPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: shop,
-      child: BlocProvider.value(
-        value: category,
-        child: _ShopItemFormPageContent(
-          onSaved: onSaved,
-          existingItem: existingItem,
-        ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: shop),
+        BlocProvider.value(value: category),
+      ],
+      child: _ShopItemFormPageContent(
+        onSaved: onSaved,
+        existingItem: existingItem,
       ),
     );
   }
@@ -73,7 +73,17 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       _controllers['customerPrice']!.text = item.customerPrice?.toString() ?? '';
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
-      _categoryFilter = null; // Will be set by CategoryDropdown
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ShopBloc>().upload.add(ClearImageEvent());
+        if (item.imageUrl?.isNotEmpty ?? false) {
+          context.read<ShopBloc>().upload.add(
+                LoadExistingImageEvent(
+                  imageUrl: item.imageUrl,
+                ),
+              );
+        }
+      });
     }
 
     _controllers.forEach((key, controller) {
@@ -88,8 +98,11 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   }
 
   void _detectChanges() {
-    setState(() => _hasChanges =
-        _controllers.values.any((c) => c.text.isNotEmpty) || context.read<ShopBloc>().upload.selectedImage != null);
+    final valueChange = _controllers.values.any(
+      (c) => c.text.isNotEmpty,
+    );
+    _hasChanges = valueChange || context.read<ShopBloc>().upload.selectedImage != null;
+    setState(() {});
   }
 
   Future<bool> _onWillPop() async {
@@ -137,7 +150,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     );
 
     if (uploadBloc.selectedImage != null) {
-      uploadBloc.add(UploadImageEvent(uploadBloc.selectedImage!)); // Trigger upload
+      uploadBloc.add(UploadImageEvent(uploadBloc.selectedImage!));
     } else {
       if (widget.existingItem != null) {
         shopBloc.add(ShopEditItemEvent(body: item));
@@ -160,7 +173,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       padding: const EdgeInsets.only(bottom: 16),
       child: CustomTextFormField(
         controller: _controllers[key]!,
-        hintText: '', 
+        hintText: '',
         labelText: required ? '$label *' : label,
         keyboardType: isPrice ? TextInputType.number : keyboardType,
         action: textInputAction,
@@ -233,7 +246,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                   } else {
                     shopBloc.add(ShopCreateItemEvent(body: item));
                   }
-                  showSuccessSnackBar(context, l10n.imageUploadedSuccessfully);
                 } else if (state is UploadFailure) {
                   showErrorSnackBar(context, 'Upload failed: ${state.error}');
                 }
@@ -342,18 +354,29 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                if (state is UploadImageSelected)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.file(
-                                      state.selectedImage,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
+                                switch (state) {
+                                  UploadImageSelected() => ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.file(
+                                        state.selectedImage,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                      ),
                                     ),
-                                  )
-                                else if (state is UploadInProgress)
-                                  const CircularProgressIndicator(),
+                                  UploadImageUrlLoaded() => ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        state.imageUrl,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                      ),
+                                    ),
+                                  _ => const SizedBox.shrink(),
+                                },
                               ],
                             );
                           },

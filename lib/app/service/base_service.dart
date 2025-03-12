@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
 
 abstract class BaseService {
@@ -28,12 +31,20 @@ abstract class BaseService {
     Map<String, dynamic>? body,
     T Function(dynamic)? parser,
     Map<String, dynamic> Function()? bodyParser,
+    BuildContext? context,
+    bool showSnackBar = true,
+    File? imageFile,
+    String imageFieldName = 'image',
   }) async {
     final response = await _apiService.post(
       '$basePath$endpoint',
       body: body ?? {},
       parser: parser,
       bodyParser: bodyParser,
+      imageFile: imageFile,
+      imageFieldName: imageFieldName,
+      context: context,
+      showSnackBar: showSnackBar,
     );
     return ApiResponse<T>(
       success: response.success,

@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -80,27 +81,65 @@ class ApiService {
     T Function(dynamic)? parser,
     BuildContext? context,
     bool showSnackBar = true,
+    File? imageFile,
+    String imageFieldName = 'image',
   }) async {
     try {
-      final tempBody = <String, dynamic>{};
-
-      if (body.isNotEmpty) {
-        tempBody.addAll(body);
-      } else if (bodyParser != null) {
-        tempBody.addAll(bodyParser());
-      }
-
-      final encodeBody = json.encode(tempBody);
       var tempHeaders = getHeaders();
       final uri = Uri.https(_baseUrl, endpoint);
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
 
-      final response = await interceptRequest(
-        uri,
-        () => _client.post(uri, headers: tempHeaders, body: encodeBody).timeout(_timeout),
-      );
+      http.Response response;
+
+      if (imageFile != null) {
+        final request = http.MultipartRequest('POST', uri)
+          ..headers.addAll(tempHeaders)
+          ..files.add(
+            await http.MultipartFile.fromPath(
+              'image',
+              imageFile.path,
+              filename: imageFieldName,
+            ),
+          );
+
+        if (body.isNotEmpty) {
+          request.fields.addAll(
+            body.map((key, value) => MapEntry(key, value.toString())),
+          );
+        } else if (bodyParser != null) {
+          request.fields.addAll(
+            bodyParser().map(
+              (key, value) => MapEntry(
+                key,
+                value.toString(),
+              ),
+            ),
+          );
+        }
+
+        response = await interceptRequest(
+          uri,
+          () async {
+            final streamedResponse = await request.send().timeout(_timeout);
+            return http.Response.fromStream(streamedResponse);
+          },
+        );
+      } else {
+        final tempBody = <String, dynamic>{};
+        if (body.isNotEmpty) {
+          tempBody.addAll(body);
+        } else if (bodyParser != null) {
+          tempBody.addAll(bodyParser());
+        }
+        final encodeBody = json.encode(tempBody);
+
+        response = await interceptRequest(
+          uri,
+          () => _client.post(uri, headers: tempHeaders, body: encodeBody).timeout(_timeout),
+        );
+      }
 
       cookies.updateCookies(uri, response);
       return handleResponse(response, parser ?? (data) => data as T);

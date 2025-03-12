@@ -2,7 +2,6 @@ part of 'api_service.dart';
 
 class ApiCookies {
   ApiCookies() {
-    // Domain -> Cookie Name -> Value
     _cookies = <String, Map<String, String>>{};
   }
 
@@ -18,8 +17,11 @@ class ApiCookies {
           (key, value) => MapEntry(key, (value as Map).cast<String, String>()),
         );
       } catch (e) {
-        developer.log('Failed to load cookies: $e', level: 1000);
-        _cookies = <String, Map<String, String>>{}; // Reset on error
+        developer.log(
+          'Failed to load cookies: $e',
+          level: 1000,
+        );
+        _cookies = <String, Map<String, String>>{};
       }
     }
   }
@@ -40,11 +42,10 @@ class ApiCookies {
           _cookies[domain]![name] = value;
         }
       }
-      _saveCookies(); // Persist cookies after updating
+      _saveCookies();
     }
   }
 
-  // Save cookies to SharedPreferences
   Future<void> _saveCookies() async {
     final sharePref = await SharedPreferences.getInstance();
     try {
@@ -64,9 +65,9 @@ class ApiCookies {
     final sharePref = await SharedPreferences.getInstance();
     try {
       if (domain != null && _cookies.isNotEmpty) {
-        await sharePref.setString('cookies', jsonEncode(_cookies)); // Update remaining cookies
+        await sharePref.setString('cookies', jsonEncode(_cookies));
       } else {
-        await sharePref.remove('cookies'); // Clear all
+        await sharePref.remove('cookies');
       }
       developer.log('Cookies cleared successfully${domain != null ? ' for $domain' : ''}');
     } catch (e) {
@@ -74,7 +75,6 @@ class ApiCookies {
     }
   }
 
-  // Helper to manage cookies
   String? getCookieHeader(Uri uri) {
     final domainCookies = _cookies[uri.host];
     if (domainCookies == null || domainCookies.isEmpty) return null;
