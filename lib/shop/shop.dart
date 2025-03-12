@@ -10,6 +10,7 @@ export 'widgets/category_selection_dropdown.dart';
 export 'widgets/filter_card_sheet.dart';
 export 'widgets/setting_sheet_content.dart';
 export 'widgets/shop_grid_builder.dart';
+export 'widgets/shop_header.dart';
 export 'widgets/shop_item_card.dart';
 export 'widgets/shop_item_detail_sheet.dart';
 export 'widgets/shop_item_grid_card.dart';

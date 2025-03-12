@@ -73,6 +73,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       _controllers['customerPrice']!.text = item.customerPrice?.toString() ?? '';
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
+      _categoryFilter = item.category;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<ShopBloc>().upload.add(ClearImageEvent());
@@ -145,7 +146,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       sellerPrice:
           _controllers['sellerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['sellerPrice']!.text) : null,
       note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
-      imageUrl: uploadBloc.selectedImage?.path, // Temporary path; updated with URL after upload
+      imageUrl: uploadBloc.selectedImage?.path ?? widget.existingItem?.imageUrl,
       category: _categoryFilter,
     );
 

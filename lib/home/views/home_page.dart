@@ -12,18 +12,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  int _selectedIndex = 0; // Tracks the current tab
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+  // List of pages corresponding to bottom nav items
+  static const List<Widget> _pages = <Widget>[
+    ShopTab(), // Your existing shop tab
+    LoanerView(), // Placeholder for loaner view
+    // Add more views here (e.g., ProfileTab()) if needed
+  ];
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -41,8 +42,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ],
           ),
         ),
-        child: const SafeArea(
-          child: ShopTab(),
+        child: SafeArea(
+          child: _pages[_selectedIndex], // Display the selected page
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -53,13 +54,48 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               'shop': context.read<ShopBloc>(),
               'category': context.read<CategoryBloc>(),
               'onAdd': (ShopItemModel item) {
-                // defaultShopList.add(item);
+                // defaultShopList.add(item); // Uncomment if needed
               },
             },
           );
         },
         backgroundColor: colorScheme.primary,
         child: Icon(Icons.add, color: colorScheme.onPrimary),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: colorScheme.primary,
+        unselectedItemColor: colorScheme.onSurface.withValues(alpha: .6),
+        backgroundColor: colorScheme.surface,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.store),
+            label: 'Shop',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.handshake),
+            label: 'Loans',
+          ),
+          // Add more items here if needed (e.g., Profile)
+        ],
+      ),
+    );
+  }
+}
+
+class LoanerView extends StatelessWidget {
+  const LoanerView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.white,
+      child: Center(
+        child: Text(
+          'Coming Soon',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
       ),
     );
   }
