@@ -279,6 +279,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                   ),
                   _buildTextField(
                     key: 'defaultPrice',
+                    isPrice: true,
                     label: l10n.defaultPrice,
                     keyboardType: TextInputType.number,
                   ),
