@@ -55,9 +55,13 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   CategoryItemModel? _categoryFilter;
   bool _hasChanges = false;
 
+  late Map<String, String> _initialTextValues;
+  late CategoryItemModel? _initialCategory;
+
   @override
   void initState() {
     super.initState();
+
     _controllers = {
       'name': TextEditingController(),
       'defaultPrice': TextEditingController(),
@@ -65,6 +69,11 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       'sellerPrice': TextEditingController(),
       'note': TextEditingController(),
     };
+
+    _initialTextValues = {};
+    _initialCategory = null;
+
+    context.read<ShopBloc>().upload.add(ClearImageEvent());
 
     if (widget.existingItem != null) {
       final item = widget.existingItem!;
@@ -75,8 +84,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       _controllers['note']!.text = item.note ?? '';
       _categoryFilter = item.category;
 
+      _initialTextValues['name'] = item.name;
+      _initialTextValues['defaultPrice'] = item.defaultPrice.toString();
+      _initialTextValues['customerPrice'] = item.customerPrice?.toString() ?? '';
+      _initialTextValues['sellerPrice'] = item.sellerPrice?.toString() ?? '';
+      _initialTextValues['note'] = item.note ?? '';
+      _initialCategory = item.category;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ShopBloc>().upload.add(ClearImageEvent());
         if (item.imageUrl?.isNotEmpty ?? false) {
           context.read<ShopBloc>().upload.add(
                 LoadExistingImageEvent(
@@ -85,6 +100,12 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
               );
         }
       });
+    } else {
+      _initialTextValues['name'] = '';
+      _initialTextValues['defaultPrice'] = '';
+      _initialTextValues['customerPrice'] = '';
+      _initialTextValues['sellerPrice'] = '';
+      _initialTextValues['note'] = '';
     }
 
     _controllers.forEach((key, controller) {
@@ -99,10 +120,12 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   }
 
   void _detectChanges() {
-    final valueChange = _controllers.values.any(
-      (c) => c.text.isNotEmpty,
+    final hasTextChanges = _controllers.entries.any(
+      (entry) => entry.value.text != _initialTextValues[entry.key],
     );
-    _hasChanges = valueChange || context.read<ShopBloc>().upload.selectedImage != null;
+    final hasCategoryChanges = _categoryFilter != _initialCategory;
+
+    _hasChanges = hasTextChanges || hasCategoryChanges;
     setState(() {});
   }
 
@@ -295,7 +318,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                       initialValue: widget.existingItem?.category,
                       onChanged: (value) {
                         _categoryFilter = value;
-                        _hasChanges = true;
+                        _detectChanges();
                       },
                       decoration: InputDecoration(
                         labelText: l10n.category,

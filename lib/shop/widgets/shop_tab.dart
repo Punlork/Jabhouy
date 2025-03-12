@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
@@ -56,14 +55,14 @@ class _ShopTabState extends State<_ShopTabView> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => BlocProvider.value(
-        value: context.read<ShopBloc>(),
-        child: BlocProvider.value(
-          value: context.read<CategoryBloc>(),
-          child: FilterSheet(
-            initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
-            onApply: (category) => context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: category)),
-          ),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<CategoryBloc>()),
+          BlocProvider.value(value: context.read<ShopBloc>()),
+        ],
+        child: FilterSheet(
+          initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+          onApply: (category) => context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: category)),
         ),
       ),
     );
