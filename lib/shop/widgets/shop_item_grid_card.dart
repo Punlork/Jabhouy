@@ -28,12 +28,14 @@ class GridShopItemCard extends StatelessWidget {
             Expanded(
               flex: 2,
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(12),
+                ),
                 child: ColoredBox(
-                  color: item.imageUrl?.isEmpty ?? true ? Colors.white : Colors.transparent,
+                  color: item.imageUrl?.isEmpty ?? true ? AppColorTheme.logoBG : Colors.transparent,
                   child: FadeInImage.memoryNetwork(
                     image: item.imageUrl ?? '',
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     width: 40,
                     height: 40,
                     imageCacheHeight: 150,

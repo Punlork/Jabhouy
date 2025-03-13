@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/auth.dart';
-import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -11,14 +9,7 @@ class ShopTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => SignoutBloc(getIt<AuthService>()),
-        ),
-      ],
-      child: const _ShopTabView(),
-    );
+    return const _ShopTabView();
   }
 }
 
@@ -29,59 +20,7 @@ class _ShopTabView extends StatefulWidget {
   State<_ShopTabView> createState() => _ShopTabState();
 }
 
-class _ShopTabState extends State<_ShopTabView> {
-  final _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<ShopBloc>().add(ShopGetItemsEvent());
-    context.read<CategoryBloc>().add(CategoryGetEvent());
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _onSearchChanged(String? value) {
-    context.read<ShopBloc>().add(ShopGetItemsEvent(searchQuery: value));
-  }
-
-  void _showFilterSheet() {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: context.read<CategoryBloc>()),
-          BlocProvider.value(value: context.read<ShopBloc>()),
-        ],
-        child: FilterSheet(
-          initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
-          onApply: (category) => context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: category)),
-        ),
-      ),
-    );
-  }
-
-  void _showSettingsSheet(VoidCallback onSignout) {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: context.read<CategoryBloc>()),
-          BlocProvider.value(value: context.read<ShopBloc>()),
-        ],
-        child: SettingsSheet(onSignout: onSignout),
-      ),
-    );
-  }
-
+class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMixin {
   Future<void> _refreshItems() async {
     context.read<ShopBloc>().add(
           ShopGetItemsEvent(
@@ -95,7 +34,7 @@ class _ShopTabState extends State<_ShopTabView> {
 
   @override
   Widget build(BuildContext context) {
-    AppLocalizations.of(context);
+    super.build(context);
     final counts = context.watch<ShopBloc>().state.asLoaded?.pagination.total ?? 0;
 
     return Scaffold(
@@ -103,14 +42,6 @@ class _ShopTabState extends State<_ShopTabView> {
         children: [
           Column(
             children: [
-              ShopHeader(
-                onSettingsPressed: () => _showSettingsSheet(
-                  () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
-                ),
-                onSearchChanged: _onSearchChanged,
-                onFilterPressed: _showFilterSheet,
-                searchController: _searchController,
-              ),
               ShopList(onRefresh: _refreshItems),
             ],
           ),
@@ -119,6 +50,9 @@ class _ShopTabState extends State<_ShopTabView> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class ShopList extends StatelessWidget {

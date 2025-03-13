@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
+import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/shop/shop.dart';
 
 final getIt = GetIt.instance;
@@ -25,7 +26,8 @@ Future<void> setupDependencies() async {
     ..registerFactory(() => CategoryBloc(getIt<CategoryService>()))
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
     ..registerFactory(() => SignupBloc(getIt<AuthService>()))
-    ..registerFactory(() => SignoutBloc(getIt<AuthService>()));
+    ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
+    ..registerFactory(LoanerBloc.new);
 
   log('Dependencies setup successfully');
 }

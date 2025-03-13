@@ -5,6 +5,7 @@ import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/home/views/home_page.dart';
+import 'package:my_app/loaner/bloc/loaner_bloc.dart';
 import 'package:my_app/shop/shop.dart';
 
 extension StringExtension on String {
@@ -96,7 +97,13 @@ class AppRoutes {
                   ),
                 ),
                 BlocProvider(
+                  create: (context) => SignoutBloc(getIt<AuthService>()),
+                ),
+                BlocProvider(
                   create: (context) => CategoryBloc(getIt<CategoryService>()),
+                ),
+                BlocProvider(
+                  create: (context) => LoanerBloc(),
                 ),
               ],
               child: const HomePage(),

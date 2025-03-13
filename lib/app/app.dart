@@ -7,6 +7,7 @@ export 'routes/app_routes.dart';
 export 'service/api_service.dart';
 export 'service/base_service.dart';
 export 'service/upload_service.dart';
+export 'theme/color_theme.dart';
 export 'theme/text_theme.dart';
 export 'utils/logger.dart';
 export 'utils/overlay_loading.dart';
