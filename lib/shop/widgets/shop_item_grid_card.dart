@@ -18,7 +18,7 @@ class GridShopItemCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
-      onTap: () => onEdit(item), // Tap to edit
+      onTap: () => onEdit(item),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -27,24 +27,28 @@ class GridShopItemCard extends StatelessWidget {
           children: [
             Expanded(
               flex: 2,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(12),
-                ),
-                child: ColoredBox(
-                  color: item.imageUrl?.isEmpty ?? true ? AppColorTheme.logoBG : Colors.transparent,
-                  child: FadeInImage.memoryNetwork(
-                    image: item.imageUrl ?? '',
-                    fit: BoxFit.contain,
-                    width: 40,
-                    height: 40,
-                    imageCacheHeight: 150,
-                    imageCacheWidth: 150,
-                    placeholder: kTransparentImage,
-                    imageErrorBuilder: (context, url, error) => const AppLogo(
-                      shape: BoxShape.rectangle,
-                      useBg: false,
-                      size: 40,
+              child: Padding(
+                padding: const EdgeInsets.all(8).copyWith(bottom: 0),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                  child: ColoredBox(
+                    color: item.imageUrl?.isEmpty ?? true ? AppColorTheme.logoBG : Colors.transparent,
+                    child: FadeInImage.memoryNetwork(
+                      image: item.imageUrl ?? '',
+                      fit: BoxFit.fill,
+                      imageCacheHeight: 150,
+                      imageCacheWidth: 150,
+                      placeholder: kTransparentImage,
+                      imageErrorBuilder: (context, url, error) => const AppLogo(
+                        shape: BoxShape.rectangle,
+                        useBg: false,
+                        size: 40,
+                      ),
                     ),
                   ),
                 ),
@@ -57,12 +61,11 @@ class GridShopItemCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Title
                     Text(
                       item.name,
                       style: AppTextTheme.title.copyWith(
                         color: colorScheme.onSurface,
-                        fontWeight: FontWeight.bold, // Override w600 to bold (w700)
+                        fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

@@ -18,7 +18,7 @@ extension ShopStateExtension on ShopState {
   ShopLoaded? get asLoaded => this is ShopLoaded ? this as ShopLoaded : null;
 }
 
-const throttleDuration = Duration(milliseconds: 100);
+const throttleDuration = Duration(milliseconds: 300);
 
 EventTransformer<E> throttleDroppable<E>(Duration duration) {
   return (events, mapper) {
