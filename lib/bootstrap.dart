@@ -42,7 +42,7 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
     LoggerFactory.createLogger(
       printTime: false,
       lineLength: 80,
-      errorMethodCount: 2,
+      errorMethodCount: 0,
       methodCount: 0,
     ).e(
       'Flutter Error:\n'

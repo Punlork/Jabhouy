@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/home/home.dart';
 import 'package:my_app/shop/shop.dart';
 
 class ShopGridBuilder extends StatefulWidget {
@@ -14,31 +15,30 @@ class ShopGridBuilder extends StatefulWidget {
 }
 
 class _ShopGridBuilderState extends State<ShopGridBuilder> {
-  late final ScrollController _scrollController;
-
   Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        final controller = ScrollControllerManager.of(context)?.getController(0);
+        controller?.addListener(_onScroll);
+      },
+    );
   }
 
   @override
   void dispose() {
-    _scrollController
-      ..removeListener(_onScroll)
-      ..dispose();
     _debounceTimer?.cancel();
     super.dispose();
   }
 
   bool get _isScrollAtBottom {
-    if (!_scrollController.hasClients) return false;
-
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
+    final controller = ScrollControllerManager.of(context)?.getController(0);
+    if (controller == null || !controller.hasClients) return false;
+    final maxScroll = controller.position.maxScrollExtent;
+    final currentScroll = controller.offset;
     return currentScroll >= (maxScroll * 0.9);
   }
 
@@ -58,30 +58,9 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> {
     }
   }
 
-  void _showEditSheet(BuildContext context, ShopItemModel item) {
-    showShopItemDetailSheet(
-      context: context,
-      item: item,
-      onEdit: () {
-        context
-          ..pop()
-          ..pushNamed(
-            AppRoutes.createShopItem,
-            extra: {
-              'existingItem': item,
-              'shop': context.read<ShopBloc>(),
-              'category': context.read<CategoryBloc>(),
-            },
-          );
-      },
-      onDelete: () => context.read<ShopBloc>().add(
-            ShopDeleteItemEvent(body: item),
-          ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final controller = ScrollControllerManager.of(context)?.getController(0);
     return BlocBuilder<ShopBloc, ShopState>(
       buildWhen: (previous, current) {
         if (previous is ShopLoaded && current is ShopLoaded) {
@@ -90,18 +69,16 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> {
               return true;
             }
           }
-
           return previous.searchQuery != current.searchQuery ||
               previous.categoryFilter != current.categoryFilter ||
               previous.items.length != current.items.length;
         }
-
         return true;
       },
       builder: (context, state) => switch (state) {
         ShopLoading() => const Center(child: CustomLoading()),
         ShopLoaded(:final items, :final pagination) => CustomScrollView(
-            controller: _scrollController,
+            controller: controller,
             physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
             slivers: [
               SliverPadding(
@@ -125,13 +102,11 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> {
                 child: Builder(
                   builder: (context) {
                     Widget child = const SizedBox.shrink();
-
                     if (pagination.hasNext) {
                       child = const CustomLoading();
                     } else {
                       child = const _EndOfListIndicator();
                     }
-
                     return child;
                   },
                 ),
@@ -141,6 +116,28 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> {
         ShopError(:final message) => Center(child: Text(message)),
         _ => const SizedBox.shrink(),
       },
+    );
+  }
+
+  void _showEditSheet(BuildContext context, ShopItemModel item) {
+    showShopItemDetailSheet(
+      context: context,
+      item: item,
+      onEdit: () {
+        context
+          ..pop()
+          ..pushNamed(
+            AppRoutes.createShopItem,
+            extra: {
+              'existingItem': item,
+              'shop': context.read<ShopBloc>(),
+              'category': context.read<CategoryBloc>(),
+            },
+          );
+      },
+      onDelete: () => context.read<ShopBloc>().add(
+            ShopDeleteItemEvent(body: item),
+          ),
     );
   }
 }

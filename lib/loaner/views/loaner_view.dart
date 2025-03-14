@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/home/home.dart';
 import 'package:my_app/loaner/loaner.dart';
 
 void showAddLoanerDialog(BuildContext context, LoanerBloc loanerBloc) {
@@ -72,6 +73,8 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
   Widget build(BuildContext context) {
     super.build(context);
 
+    final controller = ScrollControllerManager.of(context)?.getController(1);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocBuilder<LoanerBloc, LoanerState>(
@@ -82,14 +85,16 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
             return RefreshIndicator(
               onRefresh: () async {
                 context.read<LoanerBloc>().add(LoadLoaners());
-                // Wait for the bloc to process the event
                 // ignore: inference_failure_on_instance_creation
                 await Future.delayed(const Duration(milliseconds: 500));
               },
               child: state.loaners.isEmpty
                   ? const Center(child: Text('No loaners available'))
                   : ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(), // Ensure scrollable even with few items
+                      controller: controller,
+                      physics: const BouncingScrollPhysics().applyTo(
+                        const AlwaysScrollableScrollPhysics(),
+                      ),
                       padding: const EdgeInsets.all(16),
                       itemCount: state.loaners.length,
                       itemBuilder: (context, index) {
