@@ -34,7 +34,7 @@ abstract class BaseService {
     BuildContext? context,
     bool showSnackBar = true,
     File? imageFile,
-    String imageFieldName = 'image',
+    String imageFieldName = 'image', 
   }) async {
     final response = await _apiService.post(
       '$basePath$endpoint',

@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_dynamic_calls
 
 import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/auth.dart';
 
 class AuthService extends BaseService {
   factory AuthService(ApiService apiService) => AuthService._(apiService);

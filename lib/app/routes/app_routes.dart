@@ -6,6 +6,7 @@ import 'package:my_app/auth/auth.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/home/views/home_page.dart';
 import 'package:my_app/loaner/bloc/loaner_bloc.dart';
+import 'package:my_app/profile/profile.dart';
 import 'package:my_app/shop/shop.dart';
 
 extension StringExtension on String {
@@ -35,6 +36,7 @@ class AppRoutes {
   static const loading = 'loading';
   static const createShopItem = 'create_shop_item';
   static const category = 'category';
+  static const profile = 'profile';
 
   static final allowedUnauthenticated = {
     signin.toPath,
@@ -44,9 +46,10 @@ class AppRoutes {
 
   static final allowedAuthenticated = {
     home.toPath,
+    loading.toPath,
     '${home.toPath}${createShopItem.toPath}',
     '${home.toPath}${category.toPath}',
-    loading.toPath,
+    '${home.toPath}${profile.toPath}',
   };
 
   static final GoRouter router = GoRouter(
@@ -64,7 +67,7 @@ class AppRoutes {
           return signin.toPath;
         }
       }
-      if (authState is Authenticated && state.matchedLocation == signin.toPath) {
+      if (authState is Authenticated) {
         if (!allowedAuthenticated.contains(currentPath)) {
           return home.toPath;
         }
@@ -147,6 +150,29 @@ class AppRoutes {
                 child: CategoryPage(
                   category: category,
                   shop: shop,
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: profile.toPath,
+            name: profile,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (context) => ProfileBloc(
+                        getIt<UploadBloc>(),
+                        getIt<ProfileService>(),
+                      ),
+                    ),
+                  ],
+                  child: const ProfilePage(),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

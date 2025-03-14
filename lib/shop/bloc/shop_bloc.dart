@@ -18,7 +18,7 @@ extension ShopStateExtension on ShopState {
   ShopLoaded? get asLoaded => this is ShopLoaded ? this as ShopLoaded : null;
 }
 
-const throttleDuration = Duration(milliseconds: 300);
+const throttleDuration = Duration(milliseconds: 100);
 
 EventTransformer<E> throttleDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -58,7 +58,6 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
           ),
           searchQuery: state.asLoaded?.searchQuery ?? '',
           categoryFilter: state.asLoaded?.categoryFilter,
-          buyerFilter: state.asLoaded?.buyerFilter ?? 'All',
         ),
       );
     } catch (e) {
@@ -89,7 +88,6 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
           ),
           searchQuery: state.asLoaded?.searchQuery ?? '',
           categoryFilter: state.asLoaded?.categoryFilter,
-          buyerFilter: state.asLoaded?.buyerFilter ?? 'All',
         ),
       );
     } catch (e) {
@@ -128,7 +126,6 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
           ),
           searchQuery: state.asLoaded?.searchQuery ?? '',
           categoryFilter: state.asLoaded?.categoryFilter,
-          buyerFilter: state.asLoaded?.buyerFilter ?? 'All',
         ),
       );
     } catch (e) {
@@ -142,14 +139,12 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     final currentState = state.asLoaded;
 
     final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
-    final newCategoryFilter = event.categoryFilter ?? currentState?.categoryFilter;
-    final newBuyerFilter = event.buyerFilter ?? currentState?.buyerFilter ?? 'All';
+    final newCategoryFilter = event.categoryFilter;
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
     final newPageSize = event.pageSize ?? (currentState?.pagination.pageSize ?? 10);
 
-    final isFilterChange = newSearchQuery != currentState?.searchQuery ||
-        newCategoryFilter != currentState?.categoryFilter ||
-        newBuyerFilter != currentState?.buyerFilter;
+    final isFilterChange =
+        newSearchQuery != currentState?.searchQuery || newCategoryFilter != currentState?.categoryFilter;
 
     final effectivePage = isFilterChange ? 1 : newPage;
 
@@ -165,7 +160,6 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         pageSize: newPageSize,
         searchQuery: newSearchQuery,
         categoryFilter: newCategoryFilter?.id.toString() ?? '',
-        buyerFilter: newBuyerFilter,
       );
 
       if (response.success && response.data != null) {
@@ -188,7 +182,6 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
             ),
             searchQuery: newSearchQuery,
             categoryFilter: newCategoryFilter,
-            buyerFilter: newBuyerFilter,
           ),
         );
       }

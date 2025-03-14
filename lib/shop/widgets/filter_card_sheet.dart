@@ -10,7 +10,7 @@ class FilterSheet extends StatefulWidget {
     super.key,
   });
   final CategoryItemModel? initialCategoryFilter;
-  final void Function(CategoryItemModel category) onApply;
+  final void Function(CategoryItemModel? category) onApply;
 
   @override
   State<FilterSheet> createState() => _FilterSheetState();
@@ -55,13 +55,11 @@ class _FilterSheetState extends State<FilterSheet> {
             children: [
               TextButton(
                 onPressed: () {
-                  widget.onApply(
-                    const CategoryItemModel(id: 0, name: 'All'),
-                  );
+                  widget.onApply.call(null);
                   context.pop();
                 },
                 child: const Text(
-                  'Cancel',
+                  'Reset',
                 ),
               ),
               const SizedBox(width: 8),
@@ -69,7 +67,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 onPressed: isDisabled
                     ? null
                     : () {
-                        widget.onApply(_categoryFilter!);
+                        widget.onApply(_categoryFilter);
                         context.pop();
                       },
                 style: ElevatedButton.styleFrom(

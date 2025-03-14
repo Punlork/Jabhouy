@@ -20,13 +20,11 @@ class ShopLoaded extends ShopState {
     required this.paginatedItems,
     this.searchQuery = '',
     this.categoryFilter,
-    this.buyerFilter = 'All',
   });
 
   final PaginatedResponse<ShopItemModel> paginatedItems;
   final String searchQuery;
   final CategoryItemModel? categoryFilter;
-  final String buyerFilter;
 
   List<ShopItemModel> get items => paginatedItems.items;
   Pagination get pagination => paginatedItems.pagination;
@@ -42,7 +40,6 @@ class ShopLoaded extends ShopState {
       paginatedItems: paginatedItems ?? this.paginatedItems,
       searchQuery: searchQuery ?? this.searchQuery,
       categoryFilter: categoryFilter ?? this.categoryFilter,
-      buyerFilter: buyerFilter ?? this.buyerFilter,
     );
   }
 
@@ -50,7 +47,6 @@ class ShopLoaded extends ShopState {
   List<Object?> get props => [
         searchQuery,
         categoryFilter,
-        buyerFilter,
         paginatedItems,
         items.length,
         ...items,

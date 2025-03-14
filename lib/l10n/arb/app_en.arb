@@ -216,6 +216,22 @@
   "@category": {
     "description": "Label for the category dropdown"
   },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Label for the profile"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Label for the save"
+  },
+  "editProfile": "Edit Profile",
+  "@editProfile": {
+    "description": "Label for the editProfile"
+  },
+  "profileUpdated": "Profile updated",
+  "@profileUpdated": {
+    "description": "Label for the profileUpdated"
+  },
   "electronics": "Electronics",
   "@electronics": {
     "description": "Category option for electronics"

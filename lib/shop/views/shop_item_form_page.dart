@@ -49,7 +49,7 @@ class _ShopItemFormPageContent extends StatefulWidget {
   State<_ShopItemFormPageContent> createState() => _ShopItemFormPageState();
 }
 
-class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
+class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {    
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
   CategoryItemModel? _categoryFilter;

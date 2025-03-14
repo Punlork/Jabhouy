@@ -52,7 +52,6 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> {
                 pageSize: state.pagination.pageSize,
                 searchQuery: state.searchQuery,
                 categoryFilter: state.categoryFilter,
-                buyerFilter: state.buyerFilter,
               ),
             );
       }
@@ -94,7 +93,6 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> {
 
           return previous.searchQuery != current.searchQuery ||
               previous.categoryFilter != current.categoryFilter ||
-              previous.buyerFilter != current.buyerFilter ||
               previous.items.length != current.items.length;
         }
 

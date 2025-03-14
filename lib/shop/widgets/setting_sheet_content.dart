@@ -24,8 +24,23 @@ class SettingsSheet extends StatelessWidget {
           Text(
             l10n.settings,
             style: AppTextTheme.headline.copyWith(
-              fontWeight: FontWeight.bold, // Already w700, explicit for clarity
+              fontWeight: FontWeight.bold,
             ),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.person, color: Colors.green),
+            title: Text(
+              l10n.profile,
+              style: AppTextTheme.body,
+            ),
+            onTap: () {
+              context.goNamed(
+                AppRoutes.profile,
+              );
+              Navigator.pop(context);
+            },
           ),
           const SizedBox(height: 16),
           ListTile(

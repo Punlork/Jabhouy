@@ -54,7 +54,12 @@ class ApiService {
 
       final response = await interceptRequest(
         uri,
-        () => _client.get(uri, headers: tempHeaders).timeout(_timeout),
+        () => _client
+            .get(
+              uri,
+              headers: tempHeaders,
+            )
+            .timeout(_timeout),
       );
 
       cookies.updateCookies(uri, response);
@@ -137,7 +142,14 @@ class ApiService {
 
         response = await interceptRequest(
           uri,
-          () => _client.post(uri, headers: tempHeaders, body: encodeBody).timeout(_timeout),
+          () => _client
+              .post(
+                uri,
+                headers: tempHeaders,
+                body: encodeBody,
+              )
+              .timeout(_timeout),
+          body: tempBody,
         );
       }
 
@@ -191,6 +203,7 @@ class ApiService {
               body: encodeBody,
             )
             .timeout(_timeout),
+        body: tempBody,
       );
 
       cookies.updateCookies(uri, response);

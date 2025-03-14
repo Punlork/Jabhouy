@@ -168,7 +168,7 @@ To use the latest translations changes, you will need to generate them:
 ```sh
 flutter gen-l10n --arb-dir="lib/l10n/arb"
 ```
-
+    
 Alternatively, run `flutter run` and code generation will take place automatically.
 
 [coverage_badge]: coverage_badge.svg

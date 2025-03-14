@@ -119,7 +119,6 @@ class EmptyView extends StatelessWidget {
   }
 }
 
-// Error View Widget
 class ErrorView extends StatelessWidget {
   const ErrorView({required this.message, super.key});
   final String message;

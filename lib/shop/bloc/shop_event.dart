@@ -7,7 +7,6 @@ class ShopGetItemsEvent extends ShopEvent {
   ShopGetItemsEvent({
     this.searchQuery,
     this.categoryFilter,
-    this.buyerFilter,
     this.forceRefresh = false,
     this.pageSize,
     this.page,
@@ -15,7 +14,7 @@ class ShopGetItemsEvent extends ShopEvent {
 
   final String? searchQuery;
   final CategoryItemModel? categoryFilter;
-  final String? buyerFilter;
+
   final bool forceRefresh;
   final int? pageSize;
   final int? page;

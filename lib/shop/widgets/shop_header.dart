@@ -65,14 +65,25 @@ class _UserProfile extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {},
-      child: Row(
-        children: [
-          const AppLogo(size: 40, useBg: false),
-          const SizedBox(width: 8),
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is Authenticated) {
-                return Row(
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state is Authenticated) {
+            return Row(
+              children: [
+                if (state.user.image != null)
+                  ClipOval(
+                    child: Image.network(
+                      state.user.image!,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                    ),
+                  )
+                else
+                  const AppLogo(size: 40, useBg: false),
+                const SizedBox(width: 8),
+                Row(
                   children: [
                     Text(
                       state.user.name ?? l10n.noName,
@@ -84,12 +95,12 @@ class _UserProfile extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                   ],
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ],
+                ),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }

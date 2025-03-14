@@ -44,8 +44,9 @@ ApiResponse<T> handleResponse<T>(
 
 Future<http.Response> interceptRequest(
   Uri uri,
-  Future<http.Response> Function() request,
-) async {
+  Future<http.Response> Function() request, {
+  Map<String, dynamic>? body,
+}) async {
   final logger = LoggerFactory.createLogger(
     methodCount: 0,
     printTime: false,
@@ -56,15 +57,12 @@ Future<http.Response> interceptRequest(
 
   logger.d('Request $pathWithQuery started: ${timeFormatter.format(startTime.toLocal())}');
 
+  if (body != null) logger.d('Request body: ${jsonEncode(body)}');
+
   final response = await request();
 
   if (response.body.isNotEmpty) {
-    try {
-      final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
-      logger.d('Response body: ${jsonEncode(jsonResponse)}');
-    } catch (e) {
-      logger.e('Failed to parse response body: $e');
-    }
+    logger.d('Response body: ${response.body}');
   }
 
   final endTime = DateTime.now();

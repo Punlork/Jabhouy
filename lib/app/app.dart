@@ -3,6 +3,7 @@ export 'bloc/upload/upload_bloc.dart';
 export 'constant/app_assets.dart';
 export 'injection/dependency_injection.dart';
 export 'models/pagination_model.dart';
+export 'models/user_model.dart';
 export 'routes/app_routes.dart';
 export 'service/api_service.dart';
 export 'service/base_service.dart';

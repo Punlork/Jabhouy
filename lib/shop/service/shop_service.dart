@@ -13,7 +13,6 @@ class ShopService extends BaseService {
     int pageSize = 10,
     String searchQuery = '',
     String categoryFilter = '',
-    String buyerFilter = 'All',
   }) {
     return get(
       '',
@@ -22,7 +21,9 @@ class ShopService extends BaseService {
         'pageSize': pageSize.toString(),
         'search': searchQuery,
         'category': categoryFilter,
-      },
+      }..removeWhere(
+          (key, value) => value.toString().isEmpty,
+        ),
       parser: (value) {
         if (value is Map) {
           return PaginatedResponse.fromJson(
