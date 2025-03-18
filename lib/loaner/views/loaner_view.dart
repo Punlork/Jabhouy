@@ -73,108 +73,105 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
   Widget build(BuildContext context) {
     super.build(context);
 
-    final controller = ScrollControllerManager.of(context)?.getController(1);
+    final controller = TabScrollManager.of(context)?.getController(1);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: BlocBuilder<LoanerBloc, LoanerState>(
-        builder: (context, state) {
-          if (state is LoanerLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is LoanerLoaded) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<LoanerBloc>().add(LoadLoaners());
-                // ignore: inference_failure_on_instance_creation
-                await Future.delayed(const Duration(milliseconds: 500));
-              },
-              child: state.loaners.isEmpty
-                  ? const Center(child: Text('No loaners available'))
-                  : ListView.builder(
-                      controller: controller,
-                      physics: const BouncingScrollPhysics().applyTo(
-                        const AlwaysScrollableScrollPhysics(),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.loaners.length,
-                      itemBuilder: (context, index) {
-                        final loaner = state.loaners[index];
-                        return Card(
-                          elevation: 4,
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16).copyWith(right: 12),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .1),
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+    return BlocBuilder<LoanerBloc, LoanerState>(
+      builder: (context, state) {
+        if (state is LoanerLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is LoanerLoaded) {
+          return RefreshIndicator(
+            onRefresh: () async {
+              context.read<LoanerBloc>().add(LoadLoaners());
+              // ignore: inference_failure_on_instance_creation
+              await Future.delayed(const Duration(milliseconds: 500));
+            },
+            child: state.loaners.isEmpty
+                ? const Center(child: Text('No loaners available'))
+                : ListView.builder(
+                    controller: controller,
+                    physics: const BouncingScrollPhysics().applyTo(
+                      const AlwaysScrollableScrollPhysics(),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: state.loaners.length,
+                    itemBuilder: (context, index) {
+                      final loaner = state.loaners[index];
+                      return Card(
+                        elevation: 4,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16).copyWith(right: 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .1),
+                                child: Icon(
+                                  Icons.person,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        loaner.name,
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Amount: \$${loaner.amount.toStringAsFixed(2)}',
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                              color: Colors.grey[700],
-                                            ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Note: ${loaner.note.isEmpty ? 'No note' : loaner.note}',
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              color: Colors.grey[600],
-                                              fontStyle: loaner.note.isEmpty ? FontStyle.italic : FontStyle.normal,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      color: Theme.of(context).colorScheme.primary,
-                                      onPressed: () => _showEditDialog(context, loaner),
+                                    Text(
+                                      loaner.name,
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      color: Colors.red,
-                                      onPressed: () => context.read<LoanerBloc>().add(DeleteLoaner(loaner.id)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Amount: \$${loaner.amount.toStringAsFixed(2)}',
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            color: Colors.grey[700],
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Note: ${loaner.note.isEmpty ? 'No note' : loaner.note}',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: Colors.grey[600],
+                                            fontStyle: loaner.note.isEmpty ? FontStyle.italic : FontStyle.normal,
+                                          ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    color: Theme.of(context).colorScheme.primary,
+                                    onPressed: () => _showEditDialog(context, loaner),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    color: Colors.red,
+                                    onPressed: () => context.read<LoanerBloc>().add(DeleteLoaner(loaner.id)),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
-            );
-          } else if (state is LoanerError) {
-            return Center(child: Text(state.message));
-          }
-          return const Center(child: Text('Start by loading loaners'));
-        },
-      ),
+                        ),
+                      );
+                    },
+                  ),
+          );
+        } else if (state is LoanerError) {
+          return Center(child: Text(state.message));
+        }
+        return const Center(child: Text('Start by loading loaners'));
+      },
     );
   }
 

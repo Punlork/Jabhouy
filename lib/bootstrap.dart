@@ -11,6 +11,7 @@ class AppBlocObserver extends BlocObserver {
   static final logger = LoggerFactory.createLogger(
     methodCount: 0,
     printTime: false,
+    lineLength: 200,
   );
 
   @override

@@ -27,7 +27,6 @@ class ShopHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -49,6 +48,7 @@ class ShopHeader extends StatelessWidget {
             onChanged: onSearchChanged,
             onFilterPressed: onFilterPressed,
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );

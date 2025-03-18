@@ -21,44 +21,6 @@ class _ShopTabView extends StatefulWidget {
 }
 
 class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMixin {
-  Future<void> _refreshItems() async {
-    context.read<ShopBloc>().add(
-          ShopGetItemsEvent(
-            forceRefresh: true,
-            page: 1,
-            pageSize: 10,
-          ),
-        );
-    context.read<CategoryBloc>().add(CategoryGetEvent());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    final counts = context.watch<ShopBloc>().state.asLoaded?.pagination.total ?? 0;
-
-    return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              ShopList(onRefresh: _refreshItems),
-            ],
-          ),
-          ItemCount(counts: counts),
-        ],
-      ),
-    );
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-}
-
-class ShopList extends StatelessWidget {
-  const ShopList({required this.onRefresh, super.key});
-  final Future<void> Function() onRefresh;
-
   bool _shouldRebuild(ShopState previous, ShopState current) {
     if (previous is ShopLoaded && current is ShopLoaded) {
       return previous.items != current.items;
@@ -68,39 +30,28 @@ class ShopList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: BlocBuilder<ShopBloc, ShopState>(
-        buildWhen: _shouldRebuild,
-        builder: (context, state) => switch (state) {
-          ShopInitial() || ShopLoading() => const Center(child: CustomLoading()),
-          ShopLoaded(:final items) => ItemsView(items: items, onRefresh: onRefresh),
-          ShopError(:final message) => ErrorView(message: message),
-        },
-      ),
+    super.build(context);
+    final counts = context.watch<ShopBloc>().state.asLoaded?.pagination.total ?? 0;
+
+    return Stack(
+      children: [
+        BlocBuilder<ShopBloc, ShopState>(
+          buildWhen: _shouldRebuild,
+          builder: (context, state) => switch (state) {
+            ShopInitial() || ShopLoading() => const Center(child: CustomLoading()),
+            ShopLoaded(:final items) => items.isEmpty ? const EmptyView() : const ShopGridBuilder(),
+            ShopError(:final message) => ErrorView(message: message),
+          },
+        ),
+        ItemCount(counts: counts),
+      ],
     );
   }
-}
-
-class ItemsView extends StatelessWidget {
-  const ItemsView({required this.items, required this.onRefresh, super.key});
-  final List<ShopItemModel> items;
-  final Future<void> Function() onRefresh;
 
   @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (items.isEmpty) return const EmptyView();
-
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      color: colorScheme.primary,
-      child: const ShopGridBuilder(),
-    );
-  }
+  bool get wantKeepAlive => true;
 }
 
-// Empty View Widget
 class EmptyView extends StatelessWidget {
   const EmptyView({super.key});
 
