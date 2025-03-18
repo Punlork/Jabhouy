@@ -25,6 +25,7 @@ class ShopHeader extends StatelessWidget {
     AppLocalizations.of(context);
 
     return Container(
+      // height: 100,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(

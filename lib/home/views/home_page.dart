@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ],
               ),
               Container(
-                margin: const EdgeInsets.only(top: 200),
+                margin: EdgeInsets.only(top: statusBarHeight + 140),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadiusDirectional.vertical(
