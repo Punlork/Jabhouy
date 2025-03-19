@@ -5,7 +5,7 @@ import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/home/views/home_page.dart';
-import 'package:my_app/loaner/bloc/loaner_bloc.dart';
+import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/profile/profile.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -34,7 +34,8 @@ class AppRoutes {
   static const signin = 'signin';
   static const signup = 'signup';
   static const loading = 'loading';
-  static const createShopItem = 'create_shop_item';
+  static const formShop = 'form_shop';
+  static const formLoaner = 'form_loaner';
   static const category = 'category';
   static const profile = 'profile';
 
@@ -47,7 +48,8 @@ class AppRoutes {
   static final allowedAuthenticated = {
     home.toPath,
     loading.toPath,
-    '${home.toPath}${createShopItem.toPath}',
+    '${home.toPath}${formShop.toPath}',
+    '${home.toPath}${formLoaner.toPath}',
     '${home.toPath}${category.toPath}',
     '${home.toPath}${profile.toPath}',
   };
@@ -93,21 +95,10 @@ class AppRoutes {
             key: state.pageKey,
             child: MultiBlocProvider(
               providers: [
-                BlocProvider(
-                  create: (context) => ShopBloc(
-                    getIt<ShopService>(),
-                    getIt<UploadBloc>(),
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) => SignoutBloc(getIt<AuthService>()),
-                ),
-                BlocProvider(
-                  create: (context) => CategoryBloc(getIt<CategoryService>()),
-                ),
-                BlocProvider(
-                  create: (context) => LoanerBloc(),
-                ),
+                BlocProvider(create: (context) => ShopBloc(getIt<ShopService>(), getIt<UploadBloc>())),
+                BlocProvider(create: (context) => SignoutBloc(getIt<AuthService>())),
+                BlocProvider(create: (context) => CategoryBloc(getIt<CategoryService>())),
+                BlocProvider(create: (context) => LoanerBloc(getIt<LoanerService>())),
               ],
               child: const HomePage(),
             ),
@@ -116,8 +107,8 @@ class AppRoutes {
         },
         routes: [
           GoRoute(
-            path: createShopItem.toPath,
-            name: createShopItem,
+            path: formShop.toPath,
+            name: formShop,
             pageBuilder: (BuildContext context, GoRouterState state) {
               GlobalContext.currentContext = context;
               final extra = state.extra! as Map<String, dynamic>;
@@ -132,6 +123,24 @@ class AppRoutes {
                   existingItem: existingItem,
                   shop: shop,
                   category: category,
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: formLoaner.toPath,
+            name: formLoaner,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              final existingLoaner = extra['existingLoaner'] as LoanerModel?;
+              final loanerBloc = extra['loanerBloc'] as LoanerBloc;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: LoanerFormPage(
+                  loanerBloc: loanerBloc,
+                  existingLoaner: existingLoaner,
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

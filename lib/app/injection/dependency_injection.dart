@@ -17,6 +17,7 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
     ..registerLazySingleton(() => ShopService(getIt<ApiService>()))
+    ..registerLazySingleton(() => LoanerService(getIt<ApiService>()))
     ..registerLazySingleton(() => AuthService(getIt<ApiService>()))
     ..registerLazySingleton(() => CategoryService(getIt<ApiService>()))
     ..registerFactory(AppBloc.new)
@@ -28,7 +29,7 @@ Future<void> setupDependencies() async {
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
     ..registerFactory(() => SignupBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
-    ..registerFactory(LoanerBloc.new);
+    ..registerFactory(() => LoanerBloc(getIt<LoanerService>()));
 
   log('Dependencies setup successfully');
 }

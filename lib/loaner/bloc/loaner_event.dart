@@ -26,9 +26,9 @@ class UpdateLoaner extends LoanerEvent {
 }
 
 class DeleteLoaner extends LoanerEvent {
-  const DeleteLoaner(this.id);
-  final String id;
+  const DeleteLoaner(this.body);
+  final LoanerModel body;
 
   @override
-  List<Object> get props => [id];
+  List<Object> get props => [body];
 }

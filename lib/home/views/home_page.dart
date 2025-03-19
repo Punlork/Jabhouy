@@ -199,7 +199,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               onPressed: () {
                 if (_selectedIndex == 0) {
                   context.pushNamed(
-                    AppRoutes.createShopItem,
+                    AppRoutes.formShop,
                     extra: {
                       'shop': context.read<ShopBloc>(),
                       'category': context.read<CategoryBloc>(),
@@ -207,9 +207,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     },
                   );
                 } else if (_selectedIndex == 1) {
-                  showAddLoanerDialog(
-                    context,
-                    context.read<LoanerBloc>(),
+                  context.pushNamed(
+                    AppRoutes.formLoaner,
+                    extra: {
+                      'loanerBloc': context.read<LoanerBloc>(),
+                    },
                   );
                 }
               },

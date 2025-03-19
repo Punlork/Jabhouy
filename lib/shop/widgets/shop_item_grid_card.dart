@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class GridShopItemCard extends StatelessWidget {
@@ -79,6 +80,64 @@ class GridShopItemCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GridShopItemShimmer extends StatelessWidget {
+  const GridShopItemShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8).copyWith(bottom: 0),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                  child: Container(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            // const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 16,
+                    color: Colors.white,
+                  ),
+                  Container(
+                    width: 80,
+                    height: 12,
+                    color: Colors.white,
+                  ),
+                ],
               ),
             ),
           ],

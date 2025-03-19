@@ -20,6 +20,7 @@ class CustomTextFormField extends StatefulWidget {
     this.floatingLabelBehavior,
     this.onChanged,
     this.useCustomBorder = true,
+    this.maxLines,
   });
 
   final TextEditingController controller;
@@ -38,6 +39,7 @@ class CustomTextFormField extends StatefulWidget {
   final InputDecoration? decoration;
   final FloatingLabelBehavior? floatingLabelBehavior;
   final bool useCustomBorder;
+  final int? maxLines;
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -147,6 +149,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             hintStyle: widget.decoration!.hintStyle,
             suffixText: widget.decoration!.suffixText,
             suffixStyle: widget.decoration!.suffixStyle,
+
             //! Add other properties as needed
           )
         : baseDecoration;
@@ -160,6 +163,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       decoration: mergedDecoration,
       validator: widget.validator,
       onChanged: widget.onChanged,
+      maxLines: widget.maxLines,
     );
   }
 }

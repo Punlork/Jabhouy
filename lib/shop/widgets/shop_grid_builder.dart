@@ -44,7 +44,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAli
   }
 
   void _onScrollToBottom() {
-    if (!mounted) return; // Double-check for safety
+    if (!mounted) return;
     final state = context.read<ShopBloc>().state.asLoaded;
     if (state != null && state.pagination.hasNext) {
       context.read<ShopBloc>().add(
@@ -58,39 +58,12 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAli
     }
   }
 
-  Future<void> _refreshItems() async {
-    if (!mounted) return;
-    context.read<ShopBloc>().add(
-          ShopGetItemsEvent(
-            forceRefresh: true,
-            page: 1,
-            pageSize: 10,
-          ),
-        );
-    context.read<CategoryBloc>().add(CategoryGetEvent());
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return RefreshIndicator(
-      onRefresh: _refreshItems,
-      child: BlocBuilder<ShopBloc, ShopState>(
-        buildWhen: (previous, current) {
-          if (previous is ShopLoaded && current is ShopLoaded) {
-            for (var i = 0; i < previous.asLoaded!.items.length; i++) {
-              if (previous.items[i] != current.items[i]) {
-                return true;
-              }
-            }
-            return previous.searchQuery != current.searchQuery ||
-                previous.categoryFilter != current.categoryFilter ||
-                previous.items.length != current.items.length;
-          }
-          return true;
-        },
-        builder: (context, state) => switch (state) {
-          ShopLoading() => const Center(child: CustomLoading()),
+    return BlocBuilder<ShopBloc, ShopState>(
+      builder: (context, state) {
+        return switch (state) {
           ShopLoaded(:final items, :final pagination) => CustomScrollView(
               controller: _controller,
               physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
@@ -127,10 +100,9 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAli
                 ),
               ],
             ),
-          ShopError(:final message) => Center(child: Text(message)),
           _ => const SizedBox.shrink(),
-        },
-      ),
+        };
+      },
     );
   }
 
@@ -144,7 +116,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAli
         context
           ..pop()
           ..pushNamed(
-            AppRoutes.createShopItem,
+            AppRoutes.formShop,
             extra: {
               'existingItem': item,
               'shop': context.read<ShopBloc>(),
@@ -163,7 +135,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAli
 
   @override
   void dispose() {
-    _controller?.removeListener(_onScroll); // Remove the listener here
+    _controller?.removeListener(_onScroll);
     super.dispose();
   }
 

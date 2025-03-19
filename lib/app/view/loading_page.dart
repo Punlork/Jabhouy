@@ -65,14 +65,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
     );
 
     _initializeParticles();
-
-    Future.delayed(
-      const Duration(milliseconds: 500),
-      () {
-        if (!context.mounted) return;
-        context.read<AuthBloc>().add(AuthCheckRequested());
-      },
-    );
+    context.read<AuthBloc>().add(AuthCheckRequested());
   }
 
   void _initializeParticles() {
@@ -89,7 +82,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
           opacity: _random.nextDouble() * 0.6 + 0.2,
         ),
       );
-    }
+    } 
   }
 
   @override

@@ -49,7 +49,7 @@ class _ShopItemFormPageContent extends StatefulWidget {
   State<_ShopItemFormPageContent> createState() => _ShopItemFormPageState();
 }
 
-class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {    
+class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
   CategoryItemModel? _categoryFilter;
@@ -191,6 +191,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     bool isPrice = false,
     TextInputType keyboardType = TextInputType.text,
     TextInputAction textInputAction = TextInputAction.next,
+    int? maxLines,
   }) {
     final l10n = AppLocalizations.of(context);
     return Padding(
@@ -203,6 +204,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
         action: textInputAction,
         useCustomBorder: false,
         validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
+        maxLines: maxLines,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           labelStyle: AppTextTheme.body,
@@ -337,6 +339,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                   ),
                   _buildTextField(
                     key: 'note',
+                    maxLines: 3,
                     label: l10n.note,
                   ),
                   Padding(
