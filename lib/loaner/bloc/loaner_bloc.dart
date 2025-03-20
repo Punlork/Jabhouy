@@ -3,9 +3,11 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/loaner/loaner.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 part 'loaner_event.dart';
 part 'loaner_state.dart';
@@ -16,20 +18,74 @@ extension ShopStateExtension on LoanerState {
 
 class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   LoanerBloc(this._service) : super(LoanerInitial()) {
-    on<LoadLoaners>(_onLoadLoaners);
+    on<LoadLoaners>(
+      _onLoadLoaners,
+      transformer: (events, mapper) {
+        final searchEvents = events.where((e) => e.isSearch).debounce(throttleDuration);
+        final scrollEvents = events.where((e) => !e.isSearch).throttle(throttleDuration);
+        return droppable<LoadLoaners>().call(
+          searchEvents.merge(scrollEvents),
+          mapper,
+        );
+      },
+    );
     on<AddLoaner>(_onAddLoaner);
     on<UpdateLoaner>(_onUpdateLoaner);
     on<DeleteLoaner>(_onDeleteLoaner);
   }
+  static const throttleDuration = Duration(milliseconds: 300);
 
   final LoanerService _service;
 
   Future<void> _onLoadLoaners(LoadLoaners event, Emitter<LoanerState> emit) async {
-    emit(LoanerLoading());
+    final currentState = state.asLoaded;
+
+    final newPage = event.page ?? (currentState?.pagination.page ?? 1);
+    final newLimit = event.limit ?? (currentState?.pagination.limit ?? 10);
+
+    final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
+
+    final isFilterChange = newSearchQuery != currentState?.searchQuery;
+
+    final effectivePage = isFilterChange ? 1 : newPage;
+
+    final showFilterLoading = effectivePage == 1 && isFilterChange;
+
+    if (state is LoanerInitial || (event.forceRefresh && effectivePage == 1) || showFilterLoading) {
+      emit(LoanerLoading());
+    }
+
     try {
-      final response = await _service.getLoaners();
-      if (!response.success) return;
-      emit(LoanerLoaded(response.data!));
+      final response = await _service.getLoaners(
+        limit: newLimit,
+        page: effectivePage,
+        searchQuery: newSearchQuery,
+      );
+
+      if (response.success && response.data != null) {
+        final paginatedItems = response.data!.items;
+        final pagination = response.data!.pagination;
+
+        var allItems = <LoanerModel>[];
+
+        if (event.forceRefresh || isFilterChange || effectivePage == 1) {
+          allItems = paginatedItems;
+        } else if (currentState != null) {
+          allItems = [...currentState.items, ...paginatedItems];
+        } else {
+          allItems = paginatedItems;
+        }
+
+        emit(
+          LoanerLoaded(
+            response: PaginatedResponse(
+              items: allItems,
+              pagination: pagination,
+            ),
+            searchQuery: newSearchQuery,
+          ),
+        );
+      }
     } catch (e) {
       emit(LoanerError('Failed to load items: $e'));
     }
@@ -46,9 +102,15 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
 
       showSuccessSnackBar(null, 'Created ${response.data?.name}');
 
-      final updateLoaners = [response.data!, ...currentState.loaners];
+      final updateLoaners = [response.data!, ...currentState.response.items];
 
-      emit(LoanerLoaded(updateLoaners));
+      emit(
+        currentState.copyWith(
+          response: currentState.response.copyWith(
+            items: updateLoaners,
+          ),
+        ),
+      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create loaner: $e');
     } finally {
@@ -65,13 +127,19 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       if (!response.success) return;
       showSuccessSnackBar(null, 'Updated ${response.data?.name}');
 
-      final updateLoaners = currentState.loaners
+      final updateLoaners = currentState.response.items
           .map(
             (loaner) => loaner.id == event.loaner.id ? response.data! : loaner,
           )
           .toList();
 
-      emit(LoanerLoaded(updateLoaners));
+      emit(
+        currentState.copyWith(
+          response: currentState.response.copyWith(
+            items: updateLoaners,
+          ),
+        ),
+      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update loaner: $e');
     } finally {
@@ -93,12 +161,18 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       showSuccessSnackBar(null, 'Deleted ${event.body.name}');
 
       final updatedLoaner = List<LoanerModel>.from(
-        currentState.loaners,
+        currentState.response.items,
       )..removeWhere(
           (item) => item.id == event.body.id,
         );
 
-      emit(LoanerLoaded(updatedLoaner));
+      emit(
+        currentState.copyWith(
+          response: currentState.response.copyWith(
+            items: updatedLoaner,
+          ),
+        ),
+      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete loaner: $e');
     } finally {

@@ -40,7 +40,7 @@ class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMix
           ShopGetItemsEvent(
             forceRefresh: true,
             page: 1,
-            pageSize: 10,
+            limit: 10,
           ),
         );
     context.read<CategoryBloc>().add(CategoryGetEvent());
@@ -57,7 +57,7 @@ class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMix
           buildWhen: _shouldRebuild,
           builder: (context, state) => switch (state) {
             ShopInitial() || ShopLoading() => CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
+                physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
                 slivers: [
                   SliverPadding(
                     padding: const EdgeInsets.all(16),

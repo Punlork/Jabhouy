@@ -12,45 +12,20 @@ class ShopGridBuilder extends StatefulWidget {
   State<ShopGridBuilder> createState() => _ShopGridBuilderState();
 }
 
-class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAliveClientMixin {
-  ScrollController? _controller;
+class _ShopGridBuilderState extends State<ShopGridBuilder>
+    with AutomaticKeepAliveClientMixin, InfiniteScrollMixin<ShopGridBuilder> {
+  @override
+  ScrollController? getScrollController(BuildContext context) => TabScrollManager.of(context)?.getController(0);
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) {
-        if (mounted) {
-          _controller = TabScrollManager.of(context)?.getController(0);
-          _controller?.addListener(_onScroll);
-          setState(() {});
-        }
-      },
-    );
-  }
-
-  bool _isScrollAtBottom() {
-    if (_controller == null || !_controller!.hasClients) return false;
-    final maxScroll = _controller!.position.maxScrollExtent;
-    final currentScroll = _controller!.offset;
-    return currentScroll >= (maxScroll * 0.9);
-  }
-
-  void _onScroll() {
-    if (!mounted) return;
-    if (_isScrollAtBottom()) {
-      _onScrollToBottom();
-    }
-  }
-
-  void _onScrollToBottom() {
+  void onScrollToBottom() {
     if (!mounted) return;
     final state = context.read<ShopBloc>().state.asLoaded;
     if (state != null && state.pagination.hasNext) {
       context.read<ShopBloc>().add(
             ShopGetItemsEvent(
               page: state.pagination.page + 1,
-              pageSize: state.pagination.pageSize,
+              limit: state.pagination.limit,
               searchQuery: state.searchQuery,
               categoryFilter: state.categoryFilter,
             ),
@@ -59,49 +34,53 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAli
   }
 
   @override
+  void initState() {
+    super.initState();
+    setupScrollListener(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return BlocBuilder<ShopBloc, ShopState>(
-      builder: (context, state) {
-        return switch (state) {
-          ShopLoaded(:final items, :final pagination) => CustomScrollView(
-              controller: _controller,
-              physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverGrid.builder(
-                    itemCount: items.length,
-                    itemBuilder: (context, index) => GridShopItemCard(
-                      key: ValueKey(items[index].id),
-                      item: items[index],
-                      onEdit: (item) => _showEditSheet(context, item),
-                    ),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.8,
-                    ),
+      builder: (context, state) => switch (state) {
+        ShopLoaded(:final items, :final pagination) => CustomScrollView(
+            controller: controller,
+            physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverGrid.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) => GridShopItemCard(
+                    key: ValueKey(items[index].id),
+                    item: items[index],
+                    onEdit: (item) => _showEditSheet(context, item),
+                  ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.8,
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: Builder(
-                    builder: (context) {
-                      Widget child = const SizedBox.shrink();
-                      if (pagination.hasNext) {
-                        child = const CustomLoading();
-                      } else {
-                        child = const _EndOfListIndicator();
-                      }
-                      return child;
-                    },
-                  ),
+              ),
+              SliverToBoxAdapter(
+                child: Builder(
+                  builder: (context) {
+                    Widget child = const SizedBox.shrink();
+                    if (pagination.hasNext) {
+                      child = const CustomLoading();
+                    } else {
+                      child = const _EndOfListIndicator();
+                    }
+                    return child;
+                  },
                 ),
-              ],
-            ),
-          _ => const SizedBox.shrink(),
-        };
+              ),
+            ],
+          ),
+        _ => const SizedBox.shrink(),
       },
     );
   }
@@ -135,7 +114,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder> with AutomaticKeepAli
 
   @override
   void dispose() {
-    _controller?.removeListener(_onScroll);
+    disposeScrollListener();
     super.dispose();
   }
 

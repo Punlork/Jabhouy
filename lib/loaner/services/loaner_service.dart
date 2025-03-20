@@ -7,34 +7,32 @@ class LoanerService extends BaseService {
   @override
   String get basePath => '/loans';
 
-  Future<ApiResponse<List<LoanerModel>>> getLoaners({
+  Future<ApiResponse<PaginatedResponse<LoanerModel>>> getLoaners({
     int page = 1,
-    int pageSize = 10,
+    int limit = 10,
     String searchQuery = '',
     String categoryFilter = '',
-  }) {
-    return get(
-      '',
-      queryParameters: {
-        'page': page.toString(),
-        'pageSize': pageSize.toString(),
-        'search': searchQuery,
-        'category': categoryFilter,
-      }..removeWhere(
-          (key, value) => value.toString().isEmpty,
-        ),
-      parser: (value) {
-        if (value is List) {
-          return value
-              .map<LoanerModel>(
-                (json) => LoanerModel.fromJson(json as Map<String, dynamic>),
+  }) =>
+      get(
+        '',
+        queryParameters: {
+          'page': page.toString(),
+          'limit': limit.toString(),
+          'name': searchQuery,
+          'category': categoryFilter,
+        }..removeWhere(
+            (key, value) => value.toString().isEmpty,
+          ),
+        parser: (value) => value is Map
+            ? PaginatedResponse.fromJson(
+                value as Map<String, dynamic>,
+                LoanerModel.fromJson,
               )
-              .toList();
-        }
-        return <LoanerModel>[];
-      },
-    );
-  }
+            : PaginatedResponse(
+                items: [],
+                pagination: Pagination(),
+              ),
+      );
 
   Future<ApiResponse<LoanerModel?>> createLoaner(LoanerModel body) => post(
         '',

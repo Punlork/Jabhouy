@@ -8,16 +8,17 @@ class ShopGetItemsEvent extends ShopEvent {
     this.searchQuery,
     this.categoryFilter,
     this.forceRefresh = false,
-    this.pageSize,
+    this.limit,
     this.page,
-  });
+  }) : isSearch = searchQuery != null && searchQuery.isNotEmpty;
 
   final String? searchQuery;
   final CategoryItemModel? categoryFilter;
 
   final bool forceRefresh;
-  final int? pageSize;
+  final int? limit;
   final int? page;
+  final bool isSearch;
 }
 
 class ShopCreateItemEvent extends ShopEvent {

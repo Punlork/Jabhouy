@@ -7,7 +7,20 @@ abstract class LoanerEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadLoaners extends LoanerEvent {}
+class LoadLoaners extends LoanerEvent {
+  LoadLoaners({
+    this.limit,
+    this.page,
+    this.searchQuery,
+    this.forceRefresh = false,
+  }) : isSearch = searchQuery != null && searchQuery.isNotEmpty;
+
+  final String? searchQuery;
+  final int? limit;
+  final int? page;
+  final bool forceRefresh;
+  final bool isSearch;
+}
 
 class AddLoaner extends LoanerEvent {
   const AddLoaner(this.loaner);

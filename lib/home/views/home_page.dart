@@ -61,7 +61,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _onSearchChanged(String? value) {
-    context.read<ShopBloc>().add(ShopGetItemsEvent(searchQuery: value));
+    switch (_selectedIndex) {
+      case 0:
+        context.read<ShopBloc>().add(ShopGetItemsEvent(searchQuery: value));
+      case 1:
+        context.read<LoanerBloc>().add(LoadLoaners(searchQuery: value));
+    }
   }
 
   void _showFilterSheet() {
@@ -183,8 +188,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         ),
                       ),
                       Container(
-                        height: viewPaddingBottom + 15,
-                        color: Colors.black,
+                        height: viewPaddingBottom + 72,
+                        color: Colors.transparent,
                       ),
                     ],
                   ),
@@ -197,22 +202,23 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             width: 64,
             child: FloatingActionButton(
               onPressed: () {
-                if (_selectedIndex == 0) {
-                  context.pushNamed(
-                    AppRoutes.formShop,
-                    extra: {
-                      'shop': context.read<ShopBloc>(),
-                      'category': context.read<CategoryBloc>(),
-                      'onAdd': (ShopItemModel item) {},
-                    },
-                  );
-                } else if (_selectedIndex == 1) {
-                  context.pushNamed(
-                    AppRoutes.formLoaner,
-                    extra: {
-                      'loanerBloc': context.read<LoanerBloc>(),
-                    },
-                  );
+                switch (_selectedIndex) {
+                  case 0:
+                    context.pushNamed(
+                      AppRoutes.formShop,
+                      extra: {
+                        'shop': context.read<ShopBloc>(),
+                        'category': context.read<CategoryBloc>(),
+                        'onAdd': (ShopItemModel item) {},
+                      },
+                    );
+                  case 1:
+                    context.pushNamed(
+                      AppRoutes.formLoaner,
+                      extra: {
+                        'loanerBloc': context.read<LoanerBloc>(),
+                      },
+                    );
                 }
               },
               backgroundColor: colorScheme.primary,

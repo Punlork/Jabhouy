@@ -10,7 +10,7 @@ class ShopService extends BaseService {
 
   Future<ApiResponse<PaginatedResponse<ShopItemModel>>> getShopItems({
     int page = 1,
-    int pageSize = 10,
+    int limit = 10,
     String searchQuery = '',
     String categoryFilter = '',
   }) {
@@ -18,7 +18,7 @@ class ShopService extends BaseService {
       '',
       queryParameters: {
         'page': page.toString(),
-        'pageSize': pageSize.toString(),
+        'limit': limit.toString(),
         'search': searchQuery,
         'category': categoryFilter,
       }..removeWhere(

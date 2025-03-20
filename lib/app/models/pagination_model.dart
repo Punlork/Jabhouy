@@ -14,7 +14,7 @@ class Pagination {
   Pagination({
     this.total,
     this.page = 1,
-    this.pageSize = 10,
+    this.limit = 10,
     this.totalPage,
   });
 
@@ -22,13 +22,13 @@ class Pagination {
     return Pagination(
       total: tryCast<int>(json['total']) ?? 0,
       page: tryCast<int>(json['page']) ?? 1,
-      pageSize: tryCast<int>(json['pageSize']) ?? 10,
+      limit: tryCast<int>(json['limit']) ?? 10,
       totalPage: tryCast<int>(json['totalPages']) ?? 1,
     );
   }
   final int? total;
   final int page;
-  final int pageSize;
+  final int limit;
   final int? totalPage;
 
   bool get hasNext => page < (totalPage ?? 1);
@@ -37,7 +37,7 @@ class Pagination {
     return {
       'total': total,
       'page': page,
-      'pageSize': pageSize,
+      'limit': limit,
       'totalPage': totalPage,
     };
   }
@@ -45,13 +45,13 @@ class Pagination {
   Pagination copyWith({
     int? total,
     int? page,
-    int? pageSize,
+    int? limit,
     int? totalPage,
   }) {
     return Pagination(
       total: total ?? this.total,
       page: page ?? this.page,
-      pageSize: pageSize ?? this.pageSize,
+      limit: limit ?? this.limit,
       totalPage: totalPage ?? this.totalPage,
     );
   }
@@ -64,7 +64,7 @@ class PaginatedResponse<T> {
   });
 
   factory PaginatedResponse.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) itemParser) {
-    final items = (json['items'] as List).map((item) => itemParser(item as Map<String, dynamic>)).toList();
+    final items = (json['data'] as List).map((item) => itemParser(item as Map<String, dynamic>)).toList();
     final pagination = Pagination.fromJson(json['pagination'] as Map<String, dynamic>);
     return PaginatedResponse<T>(
       items: items,

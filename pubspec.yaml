@@ -30,6 +30,7 @@ dependencies:
   meta: ^1.15.0
   shared_preferences: ^2.5.2
   shimmer: ^3.0.0
+  stream_transform: ^2.1.1
   transparent_image: ^2.0.1
 
 dev_dependencies:

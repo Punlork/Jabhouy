@@ -12,12 +12,39 @@ class LoanerView extends StatefulWidget {
   State<LoanerView> createState() => _LoanerViewState();
 }
 
-class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMixin {
+class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMixin, InfiniteScrollMixin<LoanerView> {
+  @override
+  void initState() {
+    super.initState();
+    setupScrollListener(context);
+  }
+
+  @override
+  ScrollController? getScrollController(BuildContext context) => TabScrollManager.of(context)?.getController(1);
+
+  @override
+  void onScrollToBottom() {
+    if (!mounted) return;
+    final state = context.read<LoanerBloc>().state.asLoaded;
+    if (state != null && state.pagination.hasNext) {
+      context.read<LoanerBloc>().add(
+            LoadLoaners(
+              page: state.pagination.page + 1,
+              limit: state.pagination.limit,
+            ),
+          );
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    disposeScrollListener();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    final controller = TabScrollManager.of(context)?.getController(1);
 
     return BlocBuilder<LoanerBloc, LoanerState>(
       builder: (context, state) {
@@ -29,17 +56,23 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
               itemCount: 5,
               itemBuilder: (context, index) => const LoanerItemShimmer(),
             ),
-          LoanerLoaded(:final loaners) => RefreshIndicator(
-              onRefresh: () async => context.read<LoanerBloc>().add(LoadLoaners()),
-              child: loaners.isEmpty
+          LoanerLoaded(:final items) => RefreshIndicator(
+              onRefresh: () async => context.read<LoanerBloc>().add(
+                    LoadLoaners(
+                      forceRefresh: true,
+                      page: 1,
+                      limit: 10,
+                    ),
+                  ),
+              child: items.isEmpty
                   ? const Center(child: Text('No loaners available'))
                   : ListView.builder(
                       controller: controller,
                       physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
                       padding: const EdgeInsets.all(16),
-                      itemCount: loaners.length,
+                      itemCount: items.length,
                       itemBuilder: (context, index) {
-                        final loaner = loaners[index];
+                        final loaner = items[index];
                         return LoanerItem(
                           loaner: loaner,
                           onEdit: (loaner) => context.pushNamed(
