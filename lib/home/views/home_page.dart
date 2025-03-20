@@ -128,74 +128,67 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final viewPaddingBottom = MediaQuery.paddingOf(context).bottom;
+
     final iconList = <IconData>[
       Icons.store_rounded,
       Icons.handshake_rounded,
     ];
+
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
 
     return StatefulBuilder(
       builder: (context, setState) => TabScrollManager(
         controllers: _scrollControllers,
         child: Scaffold(
-          extendBodyBehindAppBar: true,
           extendBody: true,
-          body: Stack(
-            children: [
-              Column(
-                children: <Widget>[
-                  Container(
-                    height: statusBarHeight,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.primary,
-                          colorScheme.primaryContainer,
-                        ],
-                      ),
-                    ),
-                  ),
-                  ShopHeader(
-                    onSettingsPressed: () => _showSettingsSheet(
-                      () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
-                    ),
-                    onSearchChanged: _onSearchChanged,
-                    onFilterPressed: _showFilterSheet,
-                    searchController: _searchController,
-                  ),
-                ],
-              ),
-              Container(
-                margin: EdgeInsets.only(top: statusBarHeight + 140),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadiusDirectional.vertical(
-                    top: Radius.circular(20),
-                  ),
-                ),
-                child: MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(value: context.read<LoanerBloc>()),
-                  ],
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: PageView(
-                          controller: _pageController,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: _pages,
+          body: Padding(
+            padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+            child: Stack(
+              children: [
+                Column(
+                  children: <Widget>[
+                    Container(
+                      height: statusBarHeight,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            colorScheme.primary,
+                            colorScheme.primaryContainer,
+                          ],
                         ),
                       ),
-                      Container(
-                        height: viewPaddingBottom + 72,
-                        color: Colors.transparent,
+                    ),
+                    ShopHeader(
+                      onSettingsPressed: () => _showSettingsSheet(
+                        () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
                       ),
+                      onSearchChanged: _onSearchChanged,
+                      onFilterPressed: _showFilterSheet,
+                      searchController: _searchController,
+                    ),
+                  ],
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: statusBarHeight + 140),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadiusDirectional.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider.value(value: context.read<LoanerBloc>()),
                     ],
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: _pages,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           floatingActionButton: SizedBox(
             height: 64,

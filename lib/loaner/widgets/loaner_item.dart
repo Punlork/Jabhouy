@@ -28,7 +28,7 @@ class LoanerItem extends StatelessWidget {
           children: [
             Expanded(
               child: Column(
-                spacing: 12, // Assuming Column has a spacing property; if not, use SizedBox
+                spacing: 12,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(

@@ -72,7 +72,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
                     if (pagination.hasNext) {
                       child = const CustomLoading();
                     } else {
-                      child = const _EndOfListIndicator();
+                      child = const EndOfListIndicator();
                     }
                     return child;
                   },
@@ -120,25 +120,4 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
 
   @override
   bool get wantKeepAlive => true;
-}
-
-class _EndOfListIndicator extends StatelessWidget {
-  const _EndOfListIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      child: const Center(
-        child: Text(
-          'No more items',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-        ),
-      ),
-    );
-  }
 }

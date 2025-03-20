@@ -46,52 +46,61 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
   Widget build(BuildContext context) {
     super.build(context);
 
-    return BlocBuilder<LoanerBloc, LoanerState>(
-      builder: (context, state) {
-        return switch (state) {
-          LoanerLoading() => ListView.builder(
-              controller: controller,
-              physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-              padding: const EdgeInsets.all(16),
-              itemCount: 5,
-              itemBuilder: (context, index) => const LoanerItemShimmer(),
-            ),
-          LoanerLoaded(:final items) => RefreshIndicator(
-              onRefresh: () async => context.read<LoanerBloc>().add(
-                    LoadLoaners(
-                      forceRefresh: true,
-                      page: 1,
-                      limit: 10,
-                    ),
+    final child = BlocBuilder<LoanerBloc, LoanerState>(
+      builder: (context, state) => switch (state) {
+        LoanerLoading() => ListView.builder(
+            controller: controller,
+            physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+            padding: const EdgeInsets.all(16),
+            itemCount: 5,
+            itemBuilder: (context, index) => const LoanerItemShimmer(),
+          ),
+        LoanerLoaded(:final items, :final pagination) => RefreshIndicator(
+            onRefresh: () async => context.read<LoanerBloc>().add(
+                  LoadLoaners(
+                    forceRefresh: true,
+                    page: 1,
+                    limit: 10,
                   ),
-              child: items.isEmpty
-                  ? const Center(child: Text('No loaners available'))
-                  : ListView.builder(
-                      controller: controller,
-                      physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-                      padding: const EdgeInsets.all(16),
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final loaner = items[index];
-                        return LoanerItem(
-                          loaner: loaner,
-                          onEdit: (loaner) => context.pushNamed(
-                            AppRoutes.formLoaner,
-                            extra: {
-                              'existingLoaner': loaner,
-                              'loanerBloc': context.read<LoanerBloc>(),
-                            },
-                          ),
-                          onDelete: (loaner) => context.read<LoanerBloc>().add(DeleteLoaner(loaner)),
-                        );
-                      },
-                    ),
-            ),
-          LoanerError() => Center(child: Text(state.message)),
-          _ => const SizedBox.shrink(),
-        };
+                ),
+            child: items.isEmpty
+                ? const Center(child: Text('No loaners available'))
+                : ListView.builder(
+                    controller: controller,
+                    physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: items.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == items.length) {
+                        if (pagination.hasNext) {
+                          return const CustomLoading();
+                        } else {
+                          return const EndOfListIndicator();
+                        }
+                      }
+
+                      // Otherwise, show the loaner item
+                      final loaner = items[index];
+                      return LoanerItem(
+                        loaner: loaner,
+                        onEdit: (loaner) => context.pushNamed(
+                          AppRoutes.formLoaner,
+                          extra: {
+                            'existingLoaner': loaner,
+                            'loanerBloc': context.read<LoanerBloc>(),
+                          },
+                        ),
+                        onDelete: (loaner) => context.read<LoanerBloc>().add(DeleteLoaner(loaner)),
+                      );
+                    },
+                  ),
+          ),
+        LoanerError() => Center(child: Text(state.message)),
+        _ => const SizedBox.shrink(),
       },
     );
+
+    return child;
   }
 
   @override

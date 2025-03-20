@@ -21,7 +21,7 @@ mixin InfiniteScrollMixin<T extends StatefulWidget> on State<T> {
     if (_scrollController == null || !_scrollController!.hasClients) return false;
     final maxScroll = _scrollController!.position.maxScrollExtent;
     final currentScroll = _scrollController!.offset;
-    return currentScroll >= (maxScroll * 0.9); // Trigger at 90%
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void _onScroll() {

@@ -158,6 +158,10 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       controller: widget.controller,
       keyboardType: widget.keyboardType,
       obscureText: widget.obscureText,
+      onTapOutside: (event) {
+        if (!_focusNode.hasFocus) return;
+        _focusNode.unfocus();
+      },
       textInputAction: widget.action,
       focusNode: _focusNode,
       decoration: mergedDecoration,

@@ -16,14 +16,6 @@ extension ShopStateExtension on ShopState {
   ShopLoaded? get asLoaded => this is ShopLoaded ? this as ShopLoaded : null;
 }
 
-// EventTransformer<E> debounce<E>(Duration duration) => (events, mapper) => events.debounce(duration).switchMap(
-//       mapper,
-//     );
-
-// EventTransformer<E> throttleDroppable<E>(Duration duration) {
-//   return (events, mapper) => droppable<E>().call(events.throttle(duration), mapper);
-// }
-
 class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ShopBloc(this._service, this.upload) : super(const ShopInitial()) {
     on<ShopGetItemsEvent>(
