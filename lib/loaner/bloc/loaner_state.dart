@@ -10,15 +10,24 @@ abstract class LoanerState extends Equatable {
 
 class LoanerInitial extends LoanerState {}
 
-class LoanerLoading extends LoanerState {}
+class LoanerLoading extends LoanerState {
+  const LoanerLoading();
+}
 
 class LoanerLoaded extends LoanerState {
-  const LoanerLoaded({
-    required this.response,
-    this.searchQuery,
-  });
   final PaginatedResponse<LoanerModel> response;
-  final String? searchQuery;
+  final String searchQuery;
+  final DateTime? fromDate;
+  final DateTime? toDate;
+  final String? loanerFilter;
+
+  const LoanerLoaded(
+    this.response, {
+    this.searchQuery = '',
+    this.fromDate,
+    this.toDate,
+    this.loanerFilter,
+  });
 
   List<LoanerModel> get items => response.items;
   Pagination get pagination => response.pagination;
@@ -27,15 +36,24 @@ class LoanerLoaded extends LoanerState {
   List<Object?> get props => [
         response,
         searchQuery,
+        fromDate,
+        toDate,
+        loanerFilter,
       ];
 
   LoanerLoaded copyWith({
     PaginatedResponse<LoanerModel>? response,
     String? searchQuery,
+    DateTime? fromDate,
+    DateTime? toDate,
+    String? loanerFilter,
   }) {
     return LoanerLoaded(
-      response: response ?? this.response,
+      response ?? this.response,
       searchQuery: searchQuery ?? this.searchQuery,
+      fromDate: fromDate ?? this.fromDate,
+      toDate: toDate ?? this.toDate,
+      loanerFilter: loanerFilter ?? this.loanerFilter,
     );
   }
 }

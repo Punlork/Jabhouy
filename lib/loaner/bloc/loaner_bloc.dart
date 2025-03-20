@@ -42,17 +42,21 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
 
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
     final newLimit = event.limit ?? (currentState?.pagination.limit ?? 10);
-
     final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
+    final newFromDate = event.fromDate;
+    final newToDate = event.toDate;
+    final newLoanerFilter = event.loanerFilter;
 
-    final isFilterChange = newSearchQuery != currentState?.searchQuery;
+    final isFilterChange = newSearchQuery != currentState?.searchQuery ||
+        newFromDate != currentState?.fromDate ||
+        newToDate != currentState?.toDate ||
+        newLoanerFilter != currentState?.loanerFilter;
 
     final effectivePage = isFilterChange ? 1 : newPage;
-
     final showFilterLoading = effectivePage == 1 && isFilterChange;
 
     if (state is LoanerInitial || (event.forceRefresh && effectivePage == 1) || showFilterLoading) {
-      emit(LoanerLoading());
+      emit(const LoanerLoading());
     }
 
     try {
@@ -60,6 +64,9 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
         limit: newLimit,
         page: effectivePage,
         searchQuery: newSearchQuery,
+        // fromDate: newFromDate,
+        // toDate: newToDate,
+        // loanerFilter: newLoanerFilter,
       );
 
       if (response.success && response.data != null) {
@@ -67,7 +74,6 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
         final pagination = response.data!.pagination;
 
         var allItems = <LoanerModel>[];
-
         if (event.forceRefresh || isFilterChange || effectivePage == 1) {
           allItems = paginatedItems;
         } else if (currentState != null) {
@@ -78,11 +84,11 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
 
         emit(
           LoanerLoaded(
-            response: PaginatedResponse(
-              items: allItems,
-              pagination: pagination,
-            ),
+            PaginatedResponse(items: allItems, pagination: pagination),
             searchQuery: newSearchQuery,
+            fromDate: newFromDate,
+            toDate: newToDate,
+            loanerFilter: newLoanerFilter,
           ),
         );
       }

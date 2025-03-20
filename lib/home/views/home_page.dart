@@ -70,22 +70,49 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _showFilterSheet() {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: context.read<CategoryBloc>()),
-          BlocProvider.value(value: context.read<ShopBloc>()),
-        ],
-        child: FilterSheet(
-          initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
-          onApply: (category) => context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: category)),
-        ),
-      ),
-    );
+    switch (_selectedIndex) {
+      case 0:
+        showModalBottomSheet<void>(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: context.read<CategoryBloc>()),
+              BlocProvider.value(value: context.read<ShopBloc>()),
+            ],
+            child: FilterSheet(
+              initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+              onApply: (category) => context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: category)),
+            ),
+          ),
+        );
+      case 1:
+        showModalBottomSheet<void>(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: context.read<LoanerBloc>()),
+            ],
+            child: LoanerFilterSheet(
+              initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
+              initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
+              initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
+              onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
+                    LoadLoaners(
+                      fromDate: fromDate,
+                      toDate: toDate,
+                      loanerFilter: loanerFilter,
+                    ),
+                  ),
+            ),
+          ),
+        );
+    }
   }
 
   void _showSettingsSheet(VoidCallback onSignout) {

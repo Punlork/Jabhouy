@@ -11,8 +11,11 @@ class LoadLoaners extends LoanerEvent {
   LoadLoaners({
     this.limit,
     this.page,
+    this.fromDate,
+    this.toDate,
     this.searchQuery,
     this.forceRefresh = false,
+    this.loanerFilter,
   }) : isSearch = searchQuery != null && searchQuery.isNotEmpty;
 
   final String? searchQuery;
@@ -20,6 +23,9 @@ class LoadLoaners extends LoanerEvent {
   final int? page;
   final bool forceRefresh;
   final bool isSearch;
+  final DateTime? fromDate;
+  final DateTime? toDate;
+  final String? loanerFilter;
 }
 
 class AddLoaner extends LoanerEvent {
