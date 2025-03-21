@@ -25,11 +25,13 @@ class LoadLoaners extends LoanerEvent {
   final bool isSearch;
   final DateTime? fromDate;
   final DateTime? toDate;
-  final String? loanerFilter;
+  final CustomerModel? loanerFilter;
 }
 
 class AddLoaner extends LoanerEvent {
-  const AddLoaner(this.loaner);
+  const AddLoaner(
+    this.loaner,
+  );
   final LoanerModel loaner;
 
   @override

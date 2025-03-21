@@ -19,7 +19,7 @@ class LoanerLoaded extends LoanerState {
   final String searchQuery;
   final DateTime? fromDate;
   final DateTime? toDate;
-  final String? loanerFilter;
+  final CustomerModel? loanerFilter;
 
   const LoanerLoaded(
     this.response, {
@@ -46,7 +46,7 @@ class LoanerLoaded extends LoanerState {
     String? searchQuery,
     DateTime? fromDate,
     DateTime? toDate,
-    String? loanerFilter,
+    CustomerModel? loanerFilter,
   }) {
     return LoanerLoaded(
       response ?? this.response,

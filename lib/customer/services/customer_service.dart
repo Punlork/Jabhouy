@@ -1,17 +1,17 @@
 import 'package:my_app/app/app.dart';
-import 'package:my_app/loaner/loaner.dart';
+import 'package:my_app/customer/customer.dart';
 
-class LoanerService extends BaseService {
-  LoanerService(super.apiService);
+class CustomerService extends BaseService {
+  CustomerService(super.apiService);
 
   @override
-  String get basePath => '/loans';
+  String get basePath => '/customers';
 
-  Future<ApiResponse<PaginatedResponse<LoanerModel>>> getLoaners({
-    int page = 1,
-    int limit = 10,
+  Future<ApiResponse<PaginatedResponse<CustomerModel>>> getCustomers({
+    int? page = 1,
+    int? limit = 10,
     String searchQuery = '',
-    String? customer,
+    String categoryFilter = '',
   }) =>
       get(
         '',
@@ -19,14 +19,14 @@ class LoanerService extends BaseService {
           'page': page.toString(),
           'limit': limit.toString(),
           'name': searchQuery,
-          'customer': customer,
+          'category': categoryFilter,
         }..removeWhere(
-            (key, value) => value.toString().isEmpty || value == null,
+            (key, value) => value.toString().isEmpty,
           ),
         parser: (value) => value is Map
             ? PaginatedResponse.fromJson(
                 value as Map<String, dynamic>,
-                LoanerModel.fromJson,
+                CustomerModel.fromJson,
               )
             : PaginatedResponse(
                 items: [],
@@ -34,27 +34,27 @@ class LoanerService extends BaseService {
               ),
       );
 
-  Future<ApiResponse<LoanerModel?>> createLoaner(LoanerModel body) => post(
+  Future<ApiResponse<CustomerModel?>> createCustomer(CustomerModel body) => post(
         '',
         bodyParser: body.toJson,
         parser: (value) => value is Map
-            ? LoanerModel.fromJson(
+            ? CustomerModel.fromJson(
                 value as Map<String, dynamic>,
               )
             : null,
       );
 
-  Future<ApiResponse<LoanerModel?>> updateLoaner(LoanerModel body) => put(
+  Future<ApiResponse<CustomerModel?>> updateCustomer(CustomerModel body) => put(
         '/${body.id}',
         bodyParser: body.toJson,
         parser: (value) => value is Map
-            ? LoanerModel.fromJson(
+            ? CustomerModel.fromJson(
                 value as Map<String, dynamic>,
               )
             : null,
       );
 
-  Future<ApiResponse<dynamic>> deleteLoaner(LoanerModel body) => delete(
+  Future<ApiResponse<dynamic>> deleteCustomer(CustomerModel body) => delete(
         '/${body.id}',
       );
 }

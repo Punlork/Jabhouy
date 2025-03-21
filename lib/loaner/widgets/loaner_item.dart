@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:shimmer/shimmer.dart';
 
 class LoanerItem extends StatelessWidget {
   const LoanerItem({
     required this.loaner,
-    required this.onEdit,
-    required this.onDelete,
     super.key,
   });
-
   final LoanerModel loaner;
-  final void Function(LoanerModel) onEdit;
-  final void Function(LoanerModel) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -21,59 +18,36 @@ class LoanerItem extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16).copyWith(right: 0),
-        child: Row(
+      margin: EdgeInsets.zero,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                spacing: 12,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    loaner.name,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    '${loaner.amount} រៀល',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[700],
-                        ),
-                  ),
-                  Text(
-                    'Note: ${(loaner.note?.isEmpty ?? true) ? 'No note' : loaner.note}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                          fontStyle: (loaner.note?.isEmpty ?? true) ? FontStyle.italic : FontStyle.normal,
-                        ),
-                  ),
-                ],
+            Text(
+              loaner.customer?.name ?? 'Unknown',
+              style: AppTextTheme.title,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Amount: ${loaner.amount} រៀល',
+              style: AppTextTheme.body,
+            ),
+            if (loaner.note != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Note: ${loaner.note}',
+                style: AppTextTheme.caption,
               ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.edit,
-                    size: 30,
-                  ),
-                  color: Theme.of(context).colorScheme.primary,
-                  onPressed: () => onEdit(loaner),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete,
-                    size: 30,
-                  ),
-                  color: Colors.red,
-                  onPressed: () => onDelete(loaner),
-                ),
-              ],
-            ),
+            ],
+            if (loaner.createdAt != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Created: ${DateFormat('dd MMM yyyy, hh:mm a').format(loaner.createdAt!)}',
+                style: AppTextTheme.caption.copyWith(color: Colors.grey),
+              ),
+            ],
           ],
         ),
       ),
@@ -91,53 +65,36 @@ class LoanerItemShimmer extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.zero,
       child: Shimmer.fromColors(
         baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          width: double.infinity,
+          child: Column(
+            spacing: 12,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 150,
-                      height: 20,
-                      color: Colors.white, // Name placeholder
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      width: 100,
-                      height: 16,
-                      color: Colors.white, // Amount placeholder
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      width: 200,
-                      height: 16,
-                      color: Colors.white, // Note placeholder
-                    ),
-                  ],
-                ),
+              Container(
+                width: 150,
+                height: 20,
+                color: Colors.white, // Name placeholder
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    color: Colors.white, // Edit button placeholder
-                  ),
-                  const SizedBox(width: 16),
-                  Container(
-                    width: 30,
-                    height: 30,
-                    color: Colors.white, // Delete button placeholder
-                  ),
-                ],
+              Container(
+                width: 100,
+                height: 16,
+                color: Colors.white, // Amount placeholder
+              ),
+              Container(
+                width: 200,
+                height: 16,
+                color: Colors.white, // Note placeholder
+              ),
+              Container(
+                width: 200,
+                height: 16,
+                color: Colors.white, // Created date placeholder
               ),
             ],
           ),

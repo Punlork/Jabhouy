@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:get_it/get_it.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/profile/profile.dart';
 import 'package:my_app/shop/shop.dart';
@@ -18,6 +19,7 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
     ..registerLazySingleton(() => ShopService(getIt<ApiService>()))
     ..registerLazySingleton(() => LoanerService(getIt<ApiService>()))
+    ..registerLazySingleton(() => CustomerService(getIt<ApiService>()))
     ..registerLazySingleton(() => AuthService(getIt<ApiService>()))
     ..registerLazySingleton(() => CategoryService(getIt<ApiService>()))
     ..registerFactory(AppBloc.new)
@@ -29,7 +31,8 @@ Future<void> setupDependencies() async {
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
     ..registerFactory(() => SignupBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
-    ..registerFactory(() => LoanerBloc(getIt<LoanerService>()));
+    ..registerFactory(() => LoanerBloc(getIt<LoanerService>()))
+    ..registerFactory(() => CustomerBloc(getIt<CustomerService>()));
 
   log('Dependencies setup successfully');
 }

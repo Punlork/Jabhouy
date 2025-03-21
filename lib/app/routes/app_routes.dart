@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/home/views/home_page.dart';
 import 'package:my_app/loaner/loaner.dart';
@@ -99,6 +100,7 @@ class AppRoutes {
                 BlocProvider(create: (context) => SignoutBloc(getIt<AuthService>())),
                 BlocProvider(create: (context) => CategoryBloc(getIt<CategoryService>())),
                 BlocProvider(create: (context) => LoanerBloc(getIt<LoanerService>())),
+                BlocProvider(create: (context) => CustomerBloc(getIt<CustomerService>())),
               ],
               child: const HomePage(),
             ),
@@ -136,10 +138,12 @@ class AppRoutes {
               final extra = state.extra! as Map<String, dynamic>;
               final existingLoaner = extra['existingLoaner'] as LoanerModel?;
               final loanerBloc = extra['loanerBloc'] as LoanerBloc;
+              final customerBloc = extra['customerBloc'] as CustomerBloc;
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: LoanerFormPage(
                   loanerBloc: loanerBloc,
+                  customerBloc: customerBloc,
                   existingLoaner: existingLoaner,
                 ),
                 transitionsBuilder: _rightToLeftTransition,

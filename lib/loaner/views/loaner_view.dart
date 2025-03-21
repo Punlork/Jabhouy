@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/loaner/loaner.dart';
 
@@ -46,7 +48,7 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
   Widget build(BuildContext context) {
     super.build(context);
 
-    final child = BlocBuilder<LoanerBloc, LoanerState>(
+    return BlocBuilder<LoanerBloc, LoanerState>(
       builder: (context, state) => switch (state) {
         LoanerLoading() => ListView.builder(
             controller: controller,
@@ -65,7 +67,15 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                 ),
             child: items.isEmpty
                 ? const Center(child: Text('No loaners available'))
-                : ListView.builder(
+                : ListView.separated(
+                    separatorBuilder: (context, index) => index != items.length - 1
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Divider(
+                              color: Colors.grey.shade200,
+                            ),
+                          )
+                        : const SizedBox(),
                     controller: controller,
                     physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
                     padding: const EdgeInsets.all(16),
@@ -79,19 +89,8 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                         }
                       }
 
-                      // Otherwise, show the loaner item
                       final loaner = items[index];
-                      return LoanerItem(
-                        loaner: loaner,
-                        onEdit: (loaner) => context.pushNamed(
-                          AppRoutes.formLoaner,
-                          extra: {
-                            'existingLoaner': loaner,
-                            'loanerBloc': context.read<LoanerBloc>(),
-                          },
-                        ),
-                        onDelete: (loaner) => context.read<LoanerBloc>().add(DeleteLoaner(loaner)),
-                      );
+                      return _buildLoanerItem(context, loaner);
                     },
                   ),
           ),
@@ -99,8 +98,83 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
         _ => const SizedBox.shrink(),
       },
     );
+  }
 
-    return child;
+  Widget _buildLoanerItem(
+    BuildContext context,
+    LoanerModel loaner,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Builder(
+            builder: (context) => Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [colorScheme.primary, colorScheme.primaryContainer],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+        Slidable(
+          key: ValueKey(loaner.id),
+          endActionPane: ActionPane(
+            motion: const StretchMotion(),
+            children: [
+              Theme(
+                data: Theme.of(context).copyWith(
+                  outlinedButtonTheme: const OutlinedButtonThemeData(
+                    style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Colors.white),
+                    ),
+                  ),
+                ),
+                child: SlidableAction(
+                  onPressed: (context) {
+                    context.pushNamed(
+                      AppRoutes.formLoaner,
+                      extra: {
+                        'existingLoaner': loaner,
+                        'loanerBloc': context.read<LoanerBloc>(),
+                        'customerBloc': context.read<CustomerBloc>(),
+                      },
+                    );
+                  },
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  icon: Icons.edit,
+                ),
+              ),
+              Theme(
+                data: Theme.of(context).copyWith(
+                  outlinedButtonTheme: const OutlinedButtonThemeData(
+                    style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Colors.red),
+                    ),
+                  ),
+                ),
+                child: SlidableAction(
+                  onPressed: (context) {
+                    context.read<LoanerBloc>().add(DeleteLoaner(loaner));
+                  },
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.red,
+                  icon: Icons.delete,
+                ),
+              ),
+            ],
+          ),
+          child: LoanerItem(
+            loaner: loaner,
+          ),
+        ),
+      ],
+    );
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -97,6 +98,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           builder: (_) => MultiBlocProvider(
             providers: [
               BlocProvider.value(value: context.read<LoanerBloc>()),
+              BlocProvider.value(value: context.read<CustomerBloc>()),
             ],
             child: LoanerFilterSheet(
               initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
@@ -140,6 +142,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.read<LoanerBloc>().add(LoadLoaners());
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<CategoryBloc>().add(CategoryGetEvent());
+    context.read<CustomerBloc>().add(LoadCustomers());
   }
 
   @override
@@ -237,6 +240,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       AppRoutes.formLoaner,
                       extra: {
                         'loanerBloc': context.read<LoanerBloc>(),
+                        'customerBloc': context.read<CustomerBloc>(),
                       },
                     );
                 }

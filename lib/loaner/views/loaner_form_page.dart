@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/app/extension/state_extension.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/loaner/loaner.dart';
 
 class LoanerFormPage extends StatelessWidget {
   const LoanerFormPage({
     required this.loanerBloc,
+    required this.customerBloc,
     this.existingLoaner,
     super.key,
   });
 
   final LoanerModel? existingLoaner;
   final LoanerBloc loanerBloc;
+  final CustomerBloc customerBloc;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: loanerBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: loanerBloc),
+        BlocProvider.value(value: customerBloc),
+      ],
       child: _LoanerFormPageContent(
         existingLoaner: existingLoaner,
       ),
@@ -41,8 +49,8 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
   bool _hasChanges = false;
-
   late Map<String, String> _initialTextValues;
+  CustomerModel? _selectedCustomer;
 
   @override
   void initState() {
@@ -58,11 +66,11 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
 
     if (widget.existingLoaner != null) {
       final loaner = widget.existingLoaner!;
-      _controllers['name']!.text = loaner.name;
+      _controllers['name']!.text = loaner.customer?.name ?? '';
       _controllers['amount']!.text = loaner.amount.toString();
       _controllers['note']!.text = loaner.note ?? '';
 
-      _initialTextValues['name'] = loaner.name;
+      _initialTextValues['name'] = loaner.customer?.name ?? '';
       _initialTextValues['amount'] = loaner.amount.toString();
       _initialTextValues['note'] = loaner.note ?? '';
     } else {
@@ -74,6 +82,79 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
     _controllers.forEach((key, controller) {
       controller.addListener(_detectChanges);
     });
+  }
+
+  Widget _buildCustomerAutocomplete() {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: BlocBuilder<CustomerBloc, CustomerState>(
+        builder: (context, state) => TypeAheadField<CustomerModel>(
+          builder: (context, controller, focusNode) => _buildTextField(
+            key: 'name',
+            padding: EdgeInsets.zero,
+            label: l10n.name,
+            required: true,
+            focusNode: focusNode,
+          ),
+          suggestionsCallback: (pattern) async {
+            final currentState = state.asType<CustomerLoaded>();
+            if (currentState != null) {
+              return currentState.customers
+                  .where(
+                    (customer) => customer.name.toLowerCase().contains(
+                          pattern.toLowerCase(),
+                        ),
+                  )
+                  .toList();
+            }
+            return [];
+          },
+          itemBuilder: (context, CustomerModel suggestion) {
+            return ListTile(
+              title: Text(suggestion.name),
+            );
+          },
+          onSelected: (CustomerModel suggestion) {
+            _controllers['name']!.text = suggestion.name;
+            _selectedCustomer = suggestion;
+          },
+        ),
+      ),
+    );
+  }
+
+  void _submitLoaner() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final loanerBloc = context.read<LoanerBloc>();
+    final customerBloc = context.read<CustomerBloc>();
+    final name = _controllers['name']!.text;
+
+    if (_selectedCustomer == null) {
+      final newCustomer = CustomerModel(
+        id: -1,
+        name: name,
+      );
+
+      customerBloc.add(CreateCustomerEvent(newCustomer));
+    } else {
+      _submitLoanerWithCustomer(_selectedCustomer!, loanerBloc);
+    }
+  }
+
+  void _submitLoanerWithCustomer(CustomerModel customer, LoanerBloc loanerBloc) {
+    final loaner = LoanerModel(
+      id: customer.id,
+      amount: int.tryParse(_controllers['amount']!.text) ?? 0,
+      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+    );
+
+    if (widget.existingLoaner != null) {
+      loanerBloc.add(UpdateLoaner(loaner));
+    } else {
+      loanerBloc.add(AddLoaner(loaner));
+    }
   }
 
   @override
@@ -118,24 +199,6 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
     return shouldPop ?? false;
   }
 
-  void _submitLoaner() {
-    if (!_formKey.currentState!.validate()) return;
-
-    final loanerBloc = context.read<LoanerBloc>();
-    final loaner = LoanerModel(
-      id: widget.existingLoaner?.id ?? -1,
-      name: _controllers['name']!.text,
-      amount: int.tryParse(_controllers['amount']!.text) ?? 0,
-      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
-    );
-
-    if (widget.existingLoaner != null) {
-      loanerBloc.add(UpdateLoaner(loaner));
-    } else {
-      loanerBloc.add(AddLoaner(loaner));
-    }
-  }
-
   Widget _buildTextField({
     required String key,
     required String label,
@@ -144,12 +207,15 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
     TextInputType keyboardType = TextInputType.text,
     TextInputAction textInputAction = TextInputAction.next,
     int? maxLines,
+    FocusNode? focusNode,
+    EdgeInsetsGeometry? padding,
   }) {
     final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: padding ?? const EdgeInsets.only(bottom: 16),
       child: CustomTextFormField(
         controller: _controllers[key]!,
+        focusNode: focusNode,
         hintText: '',
         labelText: required ? '$label *' : label,
         keyboardType: maxLines != null ? TextInputType.multiline : (isAmount ? TextInputType.number : keyboardType),
@@ -198,10 +264,21 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
             },
           ),
         ),
-        body: BlocListener<LoanerBloc, LoanerState>(
-          listener: (context, state) {
-            if (state is LoanerLoaded) context.pop();
-          },
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<LoanerBloc, LoanerState>(
+              listener: (context, state) {
+                if (state is LoanerLoaded) context.pop();
+              },
+            ),
+            BlocListener<CustomerBloc, CustomerState>(
+              listener: (context, state) {
+                if (state is CustomerCreated && context.mounted) {
+                  _submitLoanerWithCustomer(state.customer, context.read<LoanerBloc>());
+                }
+              },
+            ),
+          ],
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -209,11 +286,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTextField(
-                    key: 'name',
-                    label: l10n.name,
-                    required: true,
-                  ),
+                  _buildCustomerAutocomplete(),
                   _buildTextField(
                     key: 'amount',
                     label: 'Amount',

@@ -26,10 +26,12 @@ ApiResponse<T> handleResponse<T>(
         data: responseBody != null ? parser(responseBody) : null,
         message: responseBody is Map<String, dynamic> ? responseBody['message']?.toString() : null,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      
       throw ApiException(
         'Failed to parse response data: $e',
         statusCode: statusCode,
+        stackTrace: stackTrace, 
       );
     }
   } else {
@@ -38,6 +40,7 @@ ApiResponse<T> handleResponse<T>(
           ? responseBody['message'].toString()
           : 'Error: $statusCode',
       statusCode: statusCode,
+      stackTrace: StackTrace.current, 
     );
   }
 }

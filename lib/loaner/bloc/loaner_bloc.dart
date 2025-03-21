@@ -6,6 +6,7 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -64,9 +65,9 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
         limit: newLimit,
         page: effectivePage,
         searchQuery: newSearchQuery,
+        customer: newLoanerFilter?.id.toString(),
         // fromDate: newFromDate,
         // toDate: newToDate,
-        // loanerFilter: newLoanerFilter,
       );
 
       if (response.success && response.data != null) {
@@ -106,7 +107,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
 
       if (!response.success) return;
 
-      showSuccessSnackBar(null, 'Created ${response.data?.name}');
+      showSuccessSnackBar(null, 'Created ${response.data?.customer?.name}');
 
       final updateLoaners = [response.data!, ...currentState.response.items];
 
@@ -129,9 +130,11 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     try {
       final currentState = state.asLoaded;
       if (currentState == null) return;
-      final response = await _service.updateLoaner(event.loaner);
+      final response = await _service.updateLoaner(
+        event.loaner,
+      );
       if (!response.success) return;
-      showSuccessSnackBar(null, 'Updated ${response.data?.name}');
+      showSuccessSnackBar(null, 'Updated ${response.data?.customer?.name}');
 
       final updateLoaners = currentState.response.items
           .map(
@@ -164,7 +167,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
 
       if (!response.success) return;
 
-      showSuccessSnackBar(null, 'Deleted ${event.body.name}');
+      showSuccessSnackBar(null, 'Deleted ${event.body.customer?.name}');
 
       final updatedLoaner = List<LoanerModel>.from(
         currentState.response.items,

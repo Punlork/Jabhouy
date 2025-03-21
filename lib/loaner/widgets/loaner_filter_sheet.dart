@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/customer/customer.dart';
 
 class LoanerFilterSheet extends StatefulWidget {
   const LoanerFilterSheet({
@@ -12,8 +13,8 @@ class LoanerFilterSheet extends StatefulWidget {
 
   final DateTime? initialFromDate;
   final DateTime? initialToDate;
-  final String? initialLoanerFilter;
-  final void Function(DateTime? fromDate, DateTime? toDate, String? loanerFilter) onApply;
+  final CustomerModel? initialLoanerFilter;
+  final void Function(DateTime? fromDate, DateTime? toDate, CustomerModel? loanerFilter) onApply;
 
   @override
   State<LoanerFilterSheet> createState() => _LoanerFilterSheetState();
@@ -22,14 +23,7 @@ class LoanerFilterSheet extends StatefulWidget {
 class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   late DateTime? _fromDate = widget.initialFromDate;
   late DateTime? _toDate = widget.initialToDate;
-  late String? _loanerFilter;
-
-  final List<String> _loanerOptions = [
-    '',
-    'John Doe',
-    'Jane Smith',
-    'Alex Johnson',
-  ];
+  late CustomerModel? _loanerFilter;
 
   bool get isDisabled => _fromDate == null && _toDate == null && _loanerFilter == null;
 
@@ -111,26 +105,35 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             )..addListener(() {}),
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _loanerFilter,
-            decoration: InputDecoration(
-              labelText: 'Loaner',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            items: _loanerOptions.map((option) {
-              return DropdownMenuItem<String>(
-                value: option.isEmpty ? null : option,
-                child: Text(option.isEmpty ? 'Not Set' : option),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _loanerFilter = value;
-              });
+          BlocBuilder<CustomerBloc, CustomerState>(
+            builder: (context, state) {
+              if (state is CustomerLoaded) {
+                return DropdownButtonFormField<CustomerModel>(
+                  value: _loanerFilter,
+                  decoration: InputDecoration(
+                    labelText: 'Loaner',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  items: state.customers.map(
+                    (option) {
+                      return DropdownMenuItem<CustomerModel>(
+                        value: option,
+                        child: Text(option.name),
+                      );
+                    },
+                  ).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _loanerFilter = value;
+                    });
+                  },
+                  hint: const Text('Select Loaner'),
+                );
+              }
+              return const SizedBox.shrink();
             },
-            hint: const Text('Select Loaner'),
           ),
           const SizedBox(height: 24),
           Row(
