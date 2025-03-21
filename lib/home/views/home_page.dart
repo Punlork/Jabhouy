@@ -92,6 +92,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       case 1:
         showModalBottomSheet<void>(
           context: context,
+          isScrollControlled: true,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
@@ -100,17 +101,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               BlocProvider.value(value: context.read<LoanerBloc>()),
               BlocProvider.value(value: context.read<CustomerBloc>()),
             ],
-            child: LoanerFilterSheet(
-              initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
-              initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
-              initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
-              onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
-                    LoadLoaners(
-                      fromDate: fromDate,
-                      toDate: toDate,
-                      loanerFilter: loanerFilter,
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: LoanerFilterSheet(
+                initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
+                initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
+                initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
+                onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
+                      LoadLoaners(
+                        fromDate: fromDate,
+                        toDate: toDate,
+                        loanerFilter: loanerFilter,
+                      ),
                     ),
-                  ),
+              ),
             ),
           ),
         );

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/app/extension/state_extension.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/loaner/loaner.dart';
@@ -84,50 +82,9 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
     });
   }
 
-  Widget _buildCustomerAutocomplete() {
-    final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: BlocBuilder<CustomerBloc, CustomerState>(
-        builder: (context, state) => TypeAheadField<CustomerModel>(
-          builder: (context, controller, focusNode) => _buildTextField(
-            key: 'name',
-            padding: EdgeInsets.zero,
-            label: l10n.name,
-            required: true,
-            focusNode: focusNode,
-          ),
-          suggestionsCallback: (pattern) async {
-            final currentState = state.asType<CustomerLoaded>();
-            if (currentState != null) {
-              return currentState.customers
-                  .where(
-                    (customer) => customer.name.toLowerCase().contains(
-                          pattern.toLowerCase(),
-                        ),
-                  )
-                  .toList();
-            }
-            return [];
-          },
-          itemBuilder: (context, CustomerModel suggestion) {
-            return ListTile(
-              title: Text(suggestion.name),
-            );
-          },
-          onSelected: (CustomerModel suggestion) {
-            _controllers['name']!.text = suggestion.name;
-            _selectedCustomer = suggestion;
-          },
-        ),
-      ),
-    );
-  }
-
   void _submitLoaner() {
     if (!_formKey.currentState!.validate()) return;
 
-    final loanerBloc = context.read<LoanerBloc>();
     final customerBloc = context.read<CustomerBloc>();
     final name = _controllers['name']!.text;
 
@@ -136,14 +93,14 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
         id: -1,
         name: name,
       );
-
       customerBloc.add(CreateCustomerEvent(newCustomer));
     } else {
-      _submitLoanerWithCustomer(_selectedCustomer!, loanerBloc);
+      _submitLoanerWithCustomer(_selectedCustomer!);
     }
   }
 
-  void _submitLoanerWithCustomer(CustomerModel customer, LoanerBloc loanerBloc) {
+  void _submitLoanerWithCustomer(CustomerModel customer) {
+    final loanerBloc = context.read<LoanerBloc>();
     final loaner = LoanerModel(
       id: customer.id,
       amount: int.tryParse(_controllers['amount']!.text) ?? 0,
@@ -209,12 +166,13 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
     int? maxLines,
     FocusNode? focusNode,
     EdgeInsetsGeometry? padding,
+    TextEditingController? controller,
   }) {
     final l10n = AppLocalizations.of(context);
     return Padding(
       padding: padding ?? const EdgeInsets.only(bottom: 16),
       child: CustomTextFormField(
-        controller: _controllers[key]!,
+        controller: controller ?? _controllers[key]!,
         focusNode: focusNode,
         hintText: '',
         labelText: required ? '$label *' : label,
@@ -274,7 +232,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
             BlocListener<CustomerBloc, CustomerState>(
               listener: (context, state) {
                 if (state is CustomerCreated && context.mounted) {
-                  _submitLoanerWithCustomer(state.customer, context.read<LoanerBloc>());
+                  _submitLoanerWithCustomer(state.customer);
                 }
               },
             ),
@@ -286,7 +244,17 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCustomerAutocomplete(),
+                  CustomerAutocompleteField(
+                    controller: _controllers['name']!,
+                    label: l10n.name,
+                    required: true,
+                    onSelected: (customer) {
+                      _selectedCustomer = customer;
+                      _controllers['name']?.text = customer.name;
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      setState(() {});
+                    },
+                  ),
                   _buildTextField(
                     key: 'amount',
                     label: 'Amount',

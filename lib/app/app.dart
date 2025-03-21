@@ -1,6 +1,7 @@
 export 'bloc/app_bloc.dart';
 export 'bloc/upload/upload_bloc.dart';
 export 'constant/app_assets.dart';
+export 'extension/state_extension.dart';
 export 'injection/dependency_injection.dart';
 export 'mixin/infinite_scroll_mixin.dart';
 export 'models/pagination_model.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_app/customer/customer.dart';
+import 'package:my_app/l10n/l10n.dart';
 
 class LoanerFilterSheet extends StatefulWidget {
   const LoanerFilterSheet({
@@ -24,6 +24,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   late DateTime? _fromDate = widget.initialFromDate;
   late DateTime? _toDate = widget.initialToDate;
   late CustomerModel? _loanerFilter;
+  final TextEditingController _loanerController = TextEditingController();
 
   bool get isDisabled => _fromDate == null && _toDate == null && _loanerFilter == null;
 
@@ -31,10 +32,12 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   void initState() {
     super.initState();
     _loanerFilter = widget.initialLoanerFilter;
+    _loanerController.text = _loanerFilter?.name ?? '';
   }
 
   @override
   void dispose() {
+    _loanerController.dispose();
     super.dispose();
   }
 
@@ -105,34 +108,16 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             )..addListener(() {}),
           ),
           const SizedBox(height: 16),
-          BlocBuilder<CustomerBloc, CustomerState>(
-            builder: (context, state) {
-              if (state is CustomerLoaded) {
-                return DropdownButtonFormField<CustomerModel>(
-                  value: _loanerFilter,
-                  decoration: InputDecoration(
-                    labelText: 'Loaner',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  items: state.customers.map(
-                    (option) {
-                      return DropdownMenuItem<CustomerModel>(
-                        value: option,
-                        child: Text(option.name),
-                      );
-                    },
-                  ).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _loanerFilter = value;
-                    });
-                  },
-                  hint: const Text('Select Loaner'),
-                );
-              }
-              return const SizedBox.shrink();
+          CustomerAutocompleteField(
+            controller: _loanerController,
+            label: context.l10n.name,
+            required: true,
+            direction: VerticalDirection.up,
+            onSelected: (customer) {
+              _loanerFilter = customer;
+              _loanerController.text = customer.name;
+              FocusManager.instance.primaryFocus?.unfocus();
+              setState(() {});
             },
           ),
           const SizedBox(height: 24),
@@ -162,7 +147,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 16), // Matches FilterSheet bottom padding
+          const SizedBox(height: 16),
         ],
       ),
     );

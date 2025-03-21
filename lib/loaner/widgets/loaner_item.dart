@@ -60,43 +60,46 @@ class LoanerItemShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      margin: EdgeInsets.zero,
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          width: double.infinity,
-          child: Column(
-            spacing: 12,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 150,
-                height: 20,
-                color: Colors.white, // Name placeholder
-              ),
-              Container(
-                width: 100,
-                height: 16,
-                color: Colors.white, // Amount placeholder
-              ),
-              Container(
-                width: 200,
-                height: 16,
-                color: Colors.white, // Note placeholder
-              ),
-              Container(
-                width: 200,
-                height: 16,
-                color: Colors.white, // Created date placeholder
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: EdgeInsets.zero,
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            child: Column(
+              spacing: 12,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 150,
+                  height: 20,
+                  color: Colors.white, // Name placeholder
+                ),
+                Container(
+                  width: 100,
+                  height: 16,
+                  color: Colors.white, // Amount placeholder
+                ),
+                Container(
+                  width: 200,
+                  height: 16,
+                  color: Colors.white, // Note placeholder
+                ),
+                Container(
+                  width: 200,
+                  height: 16,
+                  color: Colors.white, // Created date placeholder
+                ),
+              ],
+            ),
           ),
         ),
       ),

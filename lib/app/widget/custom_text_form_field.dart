@@ -21,6 +21,7 @@ class CustomTextFormField extends StatefulWidget {
     this.onChanged,
     this.useCustomBorder = true,
     this.maxLines,
+    this.onCleared,
   });
 
   final TextEditingController controller;
@@ -40,6 +41,7 @@ class CustomTextFormField extends StatefulWidget {
   final FloatingLabelBehavior? floatingLabelBehavior;
   final bool useCustomBorder;
   final int? maxLines;
+  final VoidCallback? onCleared;
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -70,6 +72,11 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   }
 
   void _clearText() {
+    if (widget.onCleared != null) {
+      widget.onCleared?.call();
+      return;
+    }
+
     widget.controller.clear();
     widget.onChanged?.call('');
     _focusNode.unfocus();
