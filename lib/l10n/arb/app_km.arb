@@ -336,5 +336,25 @@
   "profileUpdated": "ធ្វើបច្ចុប្បន្នភាពគណនី",
   "@profileUpdated": {
     "description": "Label for the profileUpdated"
+  },
+  "customers": "អតិថិជន",
+  "editCustomer": "កែសម្រួលអតិថិជន",
+  "addCustomer": "បន្ថែមអតិថិជន",
+  "customerName": "ឈ្មោះអតិថិជន",
+  "deleteCustomer": "លុបអតិថិជន",
+  "@customers": {
+    "description": "ស្លាកសម្រាប់ផ្នែកឬទំព័រអតិថិជន"
+  },
+  "@editCustomer": {
+    "description": "ស្លាកសម្រាប់ការកែសម្រួលអតិថិជន"
+  },
+  "@addCustomer": {
+    "description": "ស្លាកសម្រាប់ការបន្ថែមអតិថិជនថ្មី"
+  },
+  "@customerName": {
+    "description": "ស្លាកសម្រាប់វាលបញ្ចូលឈ្មោះអតិថិជន"
+  },
+  "@deleteCustomer": {
+    "description": "ស្លាកសម្រាប់ការលុបអតិថិជន"
   }
 }

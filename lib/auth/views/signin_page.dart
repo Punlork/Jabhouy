@@ -73,7 +73,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context); // Access translations
+    final l10n = context.l10n;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -150,7 +150,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                             }
                             return null;
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelStyle: AppTextTheme.body, // Apply to label
                           ),
                         ),
@@ -161,7 +161,6 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                           labelText: l10n.password,
                           prefixIcon: Icons.lock_rounded,
                           obscureText: _obscurePassword,
-                          showVisibilityIcon: true,
                           onVisibilityToggle: _togglePasswordVisibility,
                           validator: (value) {
                             if (value == null || value.isEmpty) {

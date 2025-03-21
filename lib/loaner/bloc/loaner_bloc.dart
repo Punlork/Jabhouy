@@ -130,9 +130,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     try {
       final currentState = state.asLoaded;
       if (currentState == null) return;
-      final response = await _service.updateLoaner(
-        event.loaner,
-      );
+      final response = await _service.updateLoaner(event.loaner);
       if (!response.success) return;
       showSuccessSnackBar(null, 'Updated ${response.data?.customer?.name}');
 
@@ -144,9 +142,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
 
       emit(
         currentState.copyWith(
-          response: currentState.response.copyWith(
-            items: updateLoaners,
-          ),
+          response: currentState.response.copyWith(items: updateLoaners),
         ),
       );
     } catch (e) {

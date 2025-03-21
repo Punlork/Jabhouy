@@ -25,3 +25,18 @@ class CustomerError extends CustomerState {
   const CustomerError(this.message);
   final String message;
 }
+
+class CustomerDeleted extends CustomerState {
+  const CustomerDeleted();
+
+  @override
+  List<Object> get props => [];
+}
+
+class CustomerUpdated extends CustomerState {
+  const CustomerUpdated(this.customer);
+  final CustomerModel customer;
+
+  @override
+  List<Object> get props => [customer];
+}

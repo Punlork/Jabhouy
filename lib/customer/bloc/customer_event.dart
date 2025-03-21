@@ -14,3 +14,21 @@ class CreateCustomerEvent extends CustomerEvent {
 
   final CustomerModel customer;
 }
+
+class UpdateCustomerEvent extends CustomerEvent {
+  const UpdateCustomerEvent(this.customer);
+
+  final CustomerModel customer;
+
+  @override
+  List<Object> get props => [customer];
+}
+
+class DeleteCustomerEvent extends CustomerEvent {
+  const DeleteCustomerEvent(this.customer);
+
+  final CustomerModel customer;
+
+  @override
+  List<Object> get props => [customer];
+}

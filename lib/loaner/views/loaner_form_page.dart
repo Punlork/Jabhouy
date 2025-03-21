@@ -71,6 +71,8 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       _initialTextValues['name'] = loaner.customer?.name ?? '';
       _initialTextValues['amount'] = loaner.amount.toString();
       _initialTextValues['note'] = loaner.note ?? '';
+
+      _selectedCustomer = loaner.customer;
     } else {
       _initialTextValues['name'] = '';
       _initialTextValues['amount'] = '';
@@ -102,7 +104,8 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
   void _submitLoanerWithCustomer(CustomerModel customer) {
     final loanerBloc = context.read<LoanerBloc>();
     final loaner = LoanerModel(
-      id: customer.id,
+      id: widget.existingLoaner?.id ?? -1,
+      customerId: customer.id,
       amount: int.tryParse(_controllers['amount']!.text) ?? 0,
       note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
     );

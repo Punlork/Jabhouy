@@ -131,6 +131,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         providers: [
           BlocProvider.value(value: context.read<CategoryBloc>()),
           BlocProvider.value(value: context.read<ShopBloc>()),
+          BlocProvider.value(value: context.read<CustomerBloc>()),
         ],
         child: SettingsSheet(onSignout: onSignout),
       ),

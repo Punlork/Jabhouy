@@ -60,6 +60,7 @@ class ApiService {
               headers: tempHeaders,
             )
             .timeout(_timeout),
+        method: 'GET',
       );
 
       cookies.updateCookies(uri, response);
@@ -150,6 +151,7 @@ class ApiService {
               )
               .timeout(_timeout),
           body: tempBody,
+          method: 'POST',
         );
       }
 
@@ -203,6 +205,7 @@ class ApiService {
               body: encodeBody,
             )
             .timeout(_timeout),
+        method: 'PUT',
         body: tempBody,
       );
 
@@ -239,6 +242,7 @@ class ApiService {
       final response = await interceptRequest(
         uri,
         () => _client.delete(uri, headers: tempHeaders).timeout(_timeout),
+        method: 'DELETE',
       );
 
       cookies.updateCookies(uri, response);

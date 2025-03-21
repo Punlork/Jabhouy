@@ -13,7 +13,6 @@ class CustomTextFormField extends StatefulWidget {
     this.validator,
     this.onVisibilityToggle,
     this.action,
-    this.showVisibilityIcon = false,
     this.showClearButton = false,
     this.decoration,
     this.focusNode,
@@ -34,7 +33,6 @@ class CustomTextFormField extends StatefulWidget {
   final String? Function(String?)? validator;
   final void Function(String?)? onChanged;
   final VoidCallback? onVisibilityToggle;
-  final bool showVisibilityIcon;
   final bool showClearButton;
   final FocusNode? focusNode;
   final InputDecoration? decoration;
@@ -118,7 +116,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
               ),
               onPressed: _clearText,
             ),
-          if (widget.showVisibilityIcon && widget.onVisibilityToggle != null)
+          if (widget.onVisibilityToggle != null)
             IconButton(
               icon: Icon(
                 widget.obscureText ? Icons.visibility_off : Icons.visibility,
@@ -174,7 +172,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       decoration: mergedDecoration,
       validator: widget.validator,
       onChanged: widget.onChanged,
-      maxLines: widget.maxLines,
+      maxLines: widget.obscureText ? null : widget.maxLines,
     );
   }
 }

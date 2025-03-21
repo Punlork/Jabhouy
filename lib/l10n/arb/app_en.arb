@@ -336,5 +336,25 @@
         "type": "String"
       }
     }
+  },
+  "customers": "Customers",
+  "editCustomer": "Edit Customer",
+  "addCustomer": "Add Customer",
+  "customerName": "Customer Name",
+  "deleteCustomer": "Delete Customer",
+  "@customers": {
+    "description": "Label for the customers section or page"
+  },
+  "@editCustomer": {
+    "description": "Label for editing a customer"
+  },
+  "@addCustomer": {
+    "description": "Label for adding a new customer"
+  },
+  "@customerName": {
+    "description": "Label for the customer name input field"
+  },
+  "@deleteCustomer": {
+    "description": "Label for deleting a customer"
   }
 }

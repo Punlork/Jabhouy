@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
 
@@ -9,6 +10,7 @@ class LoanerModel extends Equatable {
     required this.note,
     this.createdAt,
     this.customer,
+    this.customerId,
     this.updatedAt,
   });
 
@@ -23,7 +25,17 @@ class LoanerModel extends Equatable {
     );
   }
 
+  String get displayDate {
+    final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+
+    if (updatedAt != null && createdAt != null && updatedAt!.isAfter(createdAt!)) {
+      return dateFormat.format(updatedAt!);
+    }
+    return createdAt != null ? dateFormat.format(createdAt!) : 'N/A';
+  }
+
   final int id;
+  final int? customerId;
   final int amount;
   final String? note;
   final DateTime? createdAt;
@@ -31,11 +43,11 @@ class LoanerModel extends Equatable {
   final CustomerModel? customer;
 
   Map<String, dynamic> toJson() => {
-        'customerId': id,
+        'customerId': customerId,
         'amount': amount,
         'note': note,
       };
 
   @override
-  List<Object?> get props => [id, amount, note, createdAt, updatedAt, customer];
+  List<Object?> get props => [id, amount, note, createdAt, updatedAt, customer, customerId];
 }

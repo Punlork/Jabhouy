@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -56,6 +57,24 @@ class SettingsSheet extends StatelessWidget {
                 extra: {
                   'shop': context.read<ShopBloc>(),
                   'category': context.read<CategoryBloc>(),
+                },
+              );
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.people, color: Colors.orange),
+            title: Text(
+              l10n.customers,
+              style: AppTextTheme.body,
+            ),
+            onTap: () {
+              context.goNamed(
+                AppRoutes.customer,
+                extra: {
+                  'customerBloc': context.read<CustomerBloc>(),
                 },
               );
               Navigator.pop(context);

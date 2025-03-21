@@ -49,6 +49,7 @@ Future<http.Response> interceptRequest(
   Uri uri,
   Future<http.Response> Function() request, {
   Map<String, dynamic>? body,
+  String? method,
 }) async {
   final logger = LoggerFactory.createLogger(
     methodCount: 0,
@@ -58,7 +59,7 @@ Future<http.Response> interceptRequest(
   final startTime = DateTime.now();
   final timeFormatter = DateFormat('MMMM d, yyyy h:mm:ss a');
 
-  logger.d('Request $pathWithQuery started: ${timeFormatter.format(startTime.toLocal())}');
+  logger.d('$method $pathWithQuery started: ${timeFormatter.format(startTime.toLocal())}');
 
   if (body != null) logger.d('Request body: ${jsonEncode(body)}');
 
@@ -70,8 +71,7 @@ Future<http.Response> interceptRequest(
 
   final endTime = DateTime.now();
 
-  logger.d('Response $pathWithQuery received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
-
+  logger.d('$method response $pathWithQuery received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
   return response;
 }
 

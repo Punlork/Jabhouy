@@ -38,6 +38,7 @@ class AppRoutes {
   static const formShop = 'form_shop';
   static const formLoaner = 'form_loaner';
   static const category = 'category';
+  static const customer = 'customer';
   static const profile = 'profile';
 
   static final allowedUnauthenticated = {
@@ -53,6 +54,7 @@ class AppRoutes {
     '${home.toPath}${formLoaner.toPath}',
     '${home.toPath}${category.toPath}',
     '${home.toPath}${profile.toPath}',
+    '${home.toPath}${customer.toPath}',
   };
 
   static final GoRouter router = GoRouter(
@@ -164,6 +166,20 @@ class AppRoutes {
                   category: category,
                   shop: shop,
                 ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: customer.toPath,
+            name: customer,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra! as Map<String, dynamic>;
+              GlobalContext.currentContext = context;
+              final customer = extra['customerBloc'] as CustomerBloc;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: CustomerPage(customerBloc: customer),
                 transitionsBuilder: _rightToLeftTransition,
               );
             },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -25,27 +25,38 @@ class LoanerItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              loaner.customer?.name ?? 'Unknown',
-              style: AppTextTheme.title,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Amount: ${loaner.amount} រៀល',
-              style: AppTextTheme.body,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      loaner.customer?.name ?? 'Unknown',
+                      style: AppTextTheme.title,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${loaner.amount} រៀល',
+                      style: AppTextTheme.body,
+                    ),
+                  ],
+                ),
+                if (loaner.createdAt != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    loaner.displayDate,
+                    style: AppTextTheme.caption.copyWith(color: Colors.grey),
+                  ),
+                ],
+              ],
             ),
             if (loaner.note != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Note: ${loaner.note}',
+                '${context.l10n.note}: ${loaner.note}',
                 style: AppTextTheme.caption,
-              ),
-            ],
-            if (loaner.createdAt != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Created: ${DateFormat('dd MMM yyyy, hh:mm a').format(loaner.createdAt!)}',
-                style: AppTextTheme.caption.copyWith(color: Colors.grey),
               ),
             ],
           ],

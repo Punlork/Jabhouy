@@ -167,7 +167,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             }
                             return null;
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelStyle: AppTextTheme.body, // Apply to label
                           ),
                         ),
@@ -178,7 +178,6 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                           labelText: l10n.password,
                           prefixIcon: Icons.lock_rounded,
                           obscureText: _obscurePassword,
-                          showVisibilityIcon: true,
                           onVisibilityToggle: _togglePasswordVisibility,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -189,7 +188,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             }
                             return null;
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelStyle: AppTextTheme.body, // Apply to label
                           ),
                         ),
