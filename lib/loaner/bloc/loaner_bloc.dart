@@ -66,8 +66,8 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
         page: effectivePage,
         searchQuery: newSearchQuery,
         customer: newLoanerFilter?.id.toString(),
-        // fromDate: newFromDate,
-        // toDate: newToDate,
+        fromDate: newFromDate,
+        toDate: newToDate,
       );
 
       if (response.success && response.data != null) {

@@ -7,11 +7,17 @@ class LoanerService extends BaseService {
   @override
   String get basePath => '/loans';
 
+  String _formatToRFC3339Date(DateTime date) {
+    return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
   Future<ApiResponse<PaginatedResponse<LoanerModel>>> getLoaners({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
     String? customer,
+    DateTime? toDate,
+    DateTime? fromDate,
   }) =>
       get(
         '',
@@ -20,6 +26,8 @@ class LoanerService extends BaseService {
           'limit': limit.toString(),
           'name': searchQuery,
           'customer': customer,
+          'to': toDate != null ? _formatToRFC3339Date(toDate) : null,
+          'from': fromDate != null ? _formatToRFC3339Date(fromDate) : null,
         }..removeWhere(
             (key, value) => value.toString().isEmpty || value == null,
           ),

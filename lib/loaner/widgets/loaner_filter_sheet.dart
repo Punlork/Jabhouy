@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/loaner/loaner.dart';
 
 class LoanerFilterSheet extends StatefulWidget {
   const LoanerFilterSheet({
@@ -59,6 +61,11 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
     }
   }
 
+  String _formatToRFC3339Date(DateTime? date) {
+    if (date == null) return 'Not Set';
+    return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -87,7 +94,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             ),
             controller: TextEditingController(
-              text: _fromDate?.toString().split(' ')[0] ?? 'Not Set',
+              text: _formatToRFC3339Date(_fromDate),
             )..addListener(() {}),
           ),
           const SizedBox(height: 16),
@@ -104,7 +111,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             ),
             controller: TextEditingController(
-              text: _toDate?.toString().split(' ')[0] ?? 'Not Set',
+              text: _formatToRFC3339Date(_toDate),
             )..addListener(() {}),
           ),
           const SizedBox(height: 16),
@@ -126,7 +133,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             children: [
               TextButton(
                 onPressed: () {
-                  widget.onApply(null, null, null); // Reset all filters
+                  context.read<LoanerBloc>().add(LoadLoaners(forceRefresh: true));
                   Navigator.pop(context);
                 },
                 child: const Text('Reset'),
@@ -136,7 +143,14 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                 onPressed: isDisabled
                     ? null
                     : () {
-                        widget.onApply(_fromDate, _toDate, _loanerFilter);
+                        context.read<LoanerBloc>().add(
+                              LoadLoaners(
+                                fromDate: _fromDate,
+                                toDate: _toDate,
+                                loanerFilter: _loanerFilter,
+                                forceRefresh: true,
+                              ),
+                            );
                         Navigator.pop(context);
                       },
                 style: ElevatedButton.styleFrom(
