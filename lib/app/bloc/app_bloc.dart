@@ -8,18 +8,16 @@ part 'app_event.dart';
 part 'app_state.dart';
 
 class AppBloc extends Bloc<AppEvent, AppState> {
-  AppBloc() : super(const AppState(locale: Locale('en'), isGridView: true)) {
+  AppBloc() : super(const AppState(locale: Locale('km'), isGridView: true)) {
     on<InitializeApp>(_onInitializeApp);
     on<SwitchLanguage>(_onSwitchLanguage);
     on<SwitchViewMode>(_onSwitchViewMode);
     add(const InitializeApp());
   }
-    
-  
 
   Future<void> _onInitializeApp(InitializeApp event, Emitter<AppState> emit) async {
     final sharedPref = await SharedPreferences.getInstance();
-    final savedLocale = sharedPref.getString('locale') ?? 'en';
+    final savedLocale = sharedPref.getString('locale') ?? 'km';
     final savedIsGridView = sharedPref.getBool('isGridView') ?? true;
 
     emit(AppState(locale: Locale(savedLocale), isGridView: savedIsGridView));

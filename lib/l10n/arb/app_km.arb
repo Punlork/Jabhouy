@@ -356,5 +356,77 @@
   },
   "@deleteCustomer": {
     "description": "ស្លាកសម្រាប់ការលុបអតិថិជន"
+  },
+  "displayName": "ឈ្មោះបង្ហាញ",
+  "@displayName": {
+    "description": "Label for nickname"
+  },
+  "filterLoaners": "ត្រងអ្នកខ្ចី",
+  "@filterLoaners": {
+    "description": "Title for the loaner filter sheet"
+  },
+  "filterItems": "តម្រងធាតុ",
+  "@filterItems": {
+    "description": "Title for the loaner filter sheet"
+  },
+  "fromDate": "ចាប់ពីថ្ងៃ",
+  "@fromDate": {
+    "description": "Label for the start date field in the filter"
+  },
+  "toDate": "ដល់ថ្ងៃ",
+  "@toDate": {
+    "description": "Label for the end date field in the filter"
+  },
+  "notSet": "មិនបានកំណត់",
+  "@notSet": {
+    "description": "Placeholder text when no date is selected"
+  },
+  "reset": "កំណត់ឡើងវិញ",
+  "@reset": {
+    "description": "Text for the reset button in the filter sheet"
+  },
+  "apply": "អនុវត្ត",
+  "@apply": {
+    "description": "Text for the apply button in the filter sheet"
+  },
+  "noCategoriesAvailable": "មិនមានប្រភេទទេ",
+  "@noCategoriesAvailable": {
+    "description": "Title for the dialog when no categories are available"
+  },
+  "pleaseCreateCategoryFirst": "សូមបង្កើតប្រភេទជាមុនសិន",
+  "@pleaseCreateCategoryFirst": {
+    "description": "Message in the dialog prompting the user to create a category"
+  },
+  "createCategory": "បង្កើតប្រភេទ",
+  "@createCategory": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "noItemFound": "រកមិនឃើញធាតុ",
+  "@noItemFound": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "noLoanerFound": "រកមិនឃើញអ្នកខ្ចីទេ",
+  "@noLoanerFound": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "editLoaner": "កែសម្រួលអ្នកខ្ចី",
+  "@editLoaner": {
+    "description": "Title for the app bar when editing an existing loaner"
+  },
+  "addNewLoaner": "បន្ថែមអ្នកខ្ចីថ្មី",
+  "@addNewLoaner": {
+    "description": "Title for the app bar when adding a new loaner"
+  },
+  "amount": "ចំនួនទឹកប្រាក់",
+  "@amount": {
+    "description": "Label for the amount field in the loaner form"
+  },
+  "addLoaner": "បន្ថែមអ្នកខ្ចី",
+  "@addLoaner": {
+    "description": "Text for the button to add a new loaner"
+  },
+  "loading": "កំពុងផ្ទុក",
+  "@loading": {
+    "description": "Text for the button to add a new loaner"
   }
 }

@@ -35,7 +35,8 @@ class _ProfilePageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final nameController = TextEditingController(text: user?.name);
+    final displayNameController = TextEditingController(text: user?.name);
+    final usernameController = TextEditingController(text: user?.username);
 
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
@@ -58,12 +59,14 @@ class _ProfilePageContent extends StatelessWidget {
         bloc: context.read<ProfileBloc>().upload,
         listener: (context, state) {
           if (state is UploadSuccess) {
-            final newName = nameController.text.trim();
+            final newDisplayName = displayNameController.text.trim();
+            final newUsername = usernameController.text.trim();
 
             context.read<ProfileBloc>().add(
                   UpdateProfile(
-                    name: newName,
+                    name: newDisplayName,
                     image: state.imageUrl,
+                    username: newUsername,
                   ),
                 );
           }
@@ -143,11 +146,30 @@ class _ProfilePageContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.name,
-                    border: const OutlineInputBorder(),
+                CustomTextFormField(
+                  hintText: '',
+                  labelText: l10n.displayName,
+                  controller: displayNameController,
+                  useCustomBorder: false,
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                CustomTextFormField(
+                  hintText: '',
+                  labelText: l10n.name,
+                  controller: usernameController,
+                  useCustomBorder: false,
+                  decoration: const InputDecoration(
+                    enabled: false,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -156,16 +178,18 @@ class _ProfilePageContent extends StatelessWidget {
                     final profileBloc = context.read<ProfileBloc>();
                     final uploadBloc = profileBloc.upload;
 
-                    final newName = nameController.text.trim();
+                    final newDisplayName = displayNameController.text.trim();
+                    final newUsername = usernameController.text.trim();
 
                     if (uploadBloc.selectedImage != null) {
                       uploadBloc.add(UploadImageEvent(uploadBloc.selectedImage!));
                     } else {
-                      if (newName.isEmpty) return;
+                      if (newDisplayName.isEmpty || newUsername.isEmpty) return;
                       context.read<ProfileBloc>().add(
                             UpdateProfile(
-                              name: newName,
+                              name: newDisplayName,
                               image: user?.image,
+                              username: newUsername,
                             ),
                           );
                     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
 class CategoryDropdown extends StatefulWidget {
@@ -30,6 +31,8 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context); // Ensure non-null access
+
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (context, state) {
         if (state is CategoryLoaded) {
@@ -39,8 +42,8 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
               showDialog<void>(
                 context: context,
                 builder: (_) => AlertDialog(
-                  title: const Text('No Categories Available'),
-                  content: const Text('Please create a category first.'),
+                  title: Text(l10n.noCategoriesAvailable),
+                  content: Text(l10n.pleaseCreateCategoryFirst),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -54,11 +57,11 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                             },
                           );
                       },
-                      child: const Text('Create Category'),
+                      child: Text(l10n.createCategory),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                   ],
                 ),
@@ -88,9 +91,9 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                 widget.onChanged?.call(value);
               },
               decoration: widget.decoration ??
-                  const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
+                  InputDecoration(
+                    labelText: l10n.category,
+                    border: const OutlineInputBorder(),
                   ),
             ),
           );

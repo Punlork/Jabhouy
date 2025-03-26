@@ -204,7 +204,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
         action: textInputAction,
         useCustomBorder: false,
         validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
-        maxLines: maxLines,
+        maxLines: maxLines ?? 1,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           labelStyle: AppTextTheme.body,

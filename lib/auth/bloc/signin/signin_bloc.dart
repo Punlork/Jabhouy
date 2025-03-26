@@ -23,7 +23,7 @@ class SigninBloc extends Bloc<SigninEvent, SigninState> {
 
     try {
       final response = await apiService.signin(
-        email: event.email,
+        username: event.username,
         password: event.password,
       );
 

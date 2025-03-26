@@ -62,13 +62,14 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   }
 
   String _formatToRFC3339Date(DateTime? date) {
-    if (date == null) return 'Not Set';
+    if (date == null) return context.l10n.notSet;
     return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -76,17 +77,17 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Filter Loaners',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            l10n.filterLoaners,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           TextFormField(
             readOnly: true,
             onTap: () => _selectDate(context, true),
             decoration: InputDecoration(
-              labelText: 'From Date',
-              hintText: _fromDate == null ? 'Not Set' : null,
+              labelText: l10n.fromDate,
+              hintText: _fromDate == null ? l10n.notSet : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -102,8 +103,8 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             readOnly: true,
             onTap: () => _selectDate(context, false),
             decoration: InputDecoration(
-              labelText: 'To Date',
-              hintText: _toDate == null ? 'Not Set' : null,
+              labelText: l10n.toDate,
+              hintText: _toDate == null ? l10n.notSet : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -117,7 +118,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
           const SizedBox(height: 16),
           CustomerAutocompleteField(
             controller: _loanerController,
-            label: context.l10n.name,
+            label: l10n.name,
             required: true,
             direction: VerticalDirection.up,
             onSelected: (customer) {
@@ -136,7 +137,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                   context.read<LoanerBloc>().add(LoadLoaners(forceRefresh: true));
                   Navigator.pop(context);
                 },
-                child: const Text('Reset'),
+                child: Text(l10n.reset),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -157,7 +158,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                   backgroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.primary,
                   foregroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.onPrimary,
                 ),
-                child: const Text('Apply'),
+                child: Text(l10n.apply),
               ),
             ],
           ),

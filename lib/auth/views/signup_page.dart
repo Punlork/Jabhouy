@@ -76,9 +76,18 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context); // Access translations
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colorScheme.onPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -125,7 +134,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                           l10n.createAccount,
                           style: AppTextTheme.headline.copyWith(
                             color: colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold, // Already w700, explicit for clarity
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -148,7 +157,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             return null;
                           },
                           decoration: const InputDecoration(
-                            labelStyle: AppTextTheme.body, // Apply to label
+                            labelStyle: AppTextTheme.body,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -168,7 +177,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             return null;
                           },
                           decoration: const InputDecoration(
-                            labelStyle: AppTextTheme.body, // Apply to label
+                            labelStyle: AppTextTheme.body,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -189,7 +198,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             return null;
                           },
                           decoration: const InputDecoration(
-                            labelStyle: AppTextTheme.body, // Apply to label
+                            labelStyle: AppTextTheme.body,
                           ),
                         ),
                         const SizedBox(height: 30),
@@ -226,23 +235,6 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                           },
                         ),
                         const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () => context.pushNamed(AppRoutes.signin),
-                              style: TextButton.styleFrom(
-                                foregroundColor: colorScheme.onPrimary,
-                              ),
-                              child: Text(
-                                l10n.signIn,
-                                style: AppTextTheme.caption.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),

@@ -7,6 +7,7 @@ class User extends Equatable {
     this.name,
     this.emailVerified,
     this.image,
+    this.username,
   });
 
   factory User.fromJson(
@@ -17,6 +18,7 @@ class User extends Equatable {
       email: json['email'] as String?,
       name: json['name'] as String?,
       image: json['image'] as String?,
+      username: json['username'] as String?,
       emailVerified: json['emailVerified'] as bool?,
     );
   }
@@ -24,6 +26,7 @@ class User extends Equatable {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'name': name,
+      // 'username': username,
       'image': image,
     };
   }
@@ -32,6 +35,7 @@ class User extends Equatable {
     String? id,
     String? email,
     String? name,
+    String? username,
     String? image,
     bool? emailVerified,
   }) {
@@ -39,6 +43,7 @@ class User extends Equatable {
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
+      username: username ?? this.username,
       image: image ?? this.image,
       emailVerified: emailVerified ?? this.emailVerified,
     );
@@ -50,12 +55,14 @@ class User extends Equatable {
         email,
         name,
         image,
+        username,
         emailVerified,
       ];
 
   final String? id;
   final String? email;
   final String? name;
+  final String? username;
   final String? image;
   final bool? emailVerified;
 }

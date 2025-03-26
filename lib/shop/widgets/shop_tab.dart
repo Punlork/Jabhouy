@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -49,63 +50,39 @@ class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMix
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final counts = context.watch<ShopBloc>().state.asLoaded?.pagination.total ?? 0;
 
-    return Stack(
-      children: [
-        BlocBuilder<ShopBloc, ShopState>(
-          buildWhen: _shouldRebuild,
-          builder: (context, state) => switch (state) {
-            ShopInitial() || ShopLoading() => CustomScrollView(
-                physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverGrid.builder(
-                      itemCount: 6,
-                      itemBuilder: (context, index) => const GridShopItemShimmer(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.8,
-                      ),
-                    ),
+    return BlocBuilder<ShopBloc, ShopState>(
+      buildWhen: _shouldRebuild,
+      builder: (context, state) => switch (state) {
+        ShopInitial() || ShopLoading() => CustomScrollView(
+            physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverGrid.builder(
+                  itemCount: 6,
+                  itemBuilder: (context, index) => const GridShopItemShimmer(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.8,
                   ),
-                ],
+                ),
               ),
-            ShopLoaded(:final items) => RefreshIndicator(
-                onRefresh: _refreshItems,
-                child: items.isEmpty ? const EmptyView() : const ShopGridBuilder(),
-              ),
-            ShopError(:final message) => ErrorView(message: message),
-          },
-        ),
-        ItemCount(counts: counts),
-      ],
+            ],
+          ),
+        ShopLoaded(:final items) => RefreshIndicator(
+            onRefresh: _refreshItems,
+            child: items.isEmpty ? const EmptyView() : const ShopGridBuilder(),
+          ),
+        ShopError(:final message) => ErrorView(message: message),
+      },
     );
   }
 
   @override
   bool get wantKeepAlive => true;
-}
-
-class EmptyView extends StatelessWidget {
-  const EmptyView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('No items found', style: TextStyle(fontSize: 18, color: Colors.grey)),
-        ],
-      ),
-    );
-  }
 }
 
 class ErrorView extends StatelessWidget {

@@ -19,7 +19,7 @@ class CustomTextFormField extends StatefulWidget {
     this.floatingLabelBehavior,
     this.onChanged,
     this.useCustomBorder = true,
-    this.maxLines,
+    this.maxLines = 1,
     this.onCleared,
   });
 
@@ -38,7 +38,7 @@ class CustomTextFormField extends StatefulWidget {
   final InputDecoration? decoration;
   final FloatingLabelBehavior? floatingLabelBehavior;
   final bool useCustomBorder;
-  final int? maxLines;
+  final int maxLines;
   final VoidCallback? onCleared;
 
   @override
@@ -154,6 +154,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             hintStyle: widget.decoration!.hintStyle,
             suffixText: widget.decoration!.suffixText,
             suffixStyle: widget.decoration!.suffixStyle,
+            enabled: widget.decoration!.enabled,
 
             //! Add other properties as needed
           )
@@ -172,7 +173,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       decoration: mergedDecoration,
       validator: widget.validator,
       onChanged: widget.onChanged,
-      maxLines: widget.obscureText ? null : widget.maxLines,
+      maxLines: widget.maxLines,
     );
   }
 }

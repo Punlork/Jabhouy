@@ -27,6 +27,7 @@ class AuthService extends BaseService {
     String callbackURL = 'sad',
   }) async {
     final signupData = {
+      'username': name,
       'name': name,
       'email': email,
       'password': password,
@@ -40,17 +41,17 @@ class AuthService extends BaseService {
   }
 
   Future<ApiResponse<User>> signin({
-    required String email,
+    required String username,
     required String password,
     String callbackURL = 'sad',
   }) async {
     final signinData = {
-      'email': email,
+      'username': username,
       'password': password,
     };
 
     return post(
-      '/sign-in/email',
+      '/sign-in/username',
       body: signinData,
       parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
     );

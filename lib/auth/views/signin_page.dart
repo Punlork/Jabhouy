@@ -27,7 +27,7 @@ class _SigninPageContent extends StatefulWidget {
 class _SigninPageContentState extends State<_SigninPageContent> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  final _emailController = TextEditingController();
+  final _username = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
@@ -48,7 +48,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
   @override
   void dispose() {
     _animationController.dispose();
-    _emailController.dispose();
+    _username.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -58,7 +58,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
       FocusManager.instance.primaryFocus?.unfocus();
       context.read<SigninBloc>().add(
             SigninSubmitted(
-              email: _emailController.text,
+              username: _username.text,
               password: _passwordController.text,
             ),
           );
@@ -135,23 +135,21 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                         ),
                         const SizedBox(height: 40),
                         CustomTextFormField(
-                          controller: _emailController,
-                          hintText: l10n.enterYourEmail,
-                          labelText: l10n.email,
-                          prefixIcon: Icons.email_rounded,
+                          controller: _username,
+                          hintText: l10n.nameRequired(l10n.name),
+                          labelText: l10n.name,
+                          prefixIcon: Icons.person,
                           action: TextInputAction.next,
-                          keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return l10n.pleaseEnterYourEmail;
+                              return l10n.pleaseEnterYourName;
                             }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                              return l10n.pleaseEnterAValidEmail;
-                            }
+
                             return null;
                           },
+                          keyboardType: TextInputType.name,
                           decoration: const InputDecoration(
-                            labelStyle: AppTextTheme.body, // Apply to label
+                            labelStyle: AppTextTheme.body,
                           ),
                         ),
                         const SizedBox(height: 20),

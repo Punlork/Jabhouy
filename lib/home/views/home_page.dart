@@ -172,127 +172,130 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     ];
 
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
+    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
-    return StatefulBuilder(
-      builder: (context, setState) => TabScrollManager(
-        controllers: _scrollControllers,
-        child: Scaffold(
-          extendBody: true,
-          body: Padding(
-            padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-            child: Stack(
-              children: [
-                Column(
-                  children: <Widget>[
-                    Container(
-                      height: statusBarHeight,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colorScheme.primary,
-                            colorScheme.primaryContainer,
-                          ],
-                        ),
+    return TabScrollManager(
+      controllers: _scrollControllers,
+      child: Scaffold(
+        extendBody: true,
+        body: Padding(
+          padding: EdgeInsets.only(
+            bottom: isKeyboardVisible ? 0 : kBottomNavigationBarHeight,
+          ),
+          child: Stack(
+            children: [
+              Column(
+                children: <Widget>[
+                  Container(
+                    height: statusBarHeight,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          colorScheme.primary,
+                          colorScheme.primaryContainer,
+                        ],
                       ),
                     ),
-                    ShopHeader(
-                      onSettingsPressed: () => _showSettingsSheet(
-                        () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
-                      ),
-                      onSearchChanged: _onSearchChanged,
-                      onFilterPressed: _showFilterSheet,
-                      searchController: _searchController,
+                  ),
+                  ShopHeader(
+                    onSettingsPressed: () => _showSettingsSheet(
+                      () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
                     ),
+                    onSearchChanged: _onSearchChanged,
+                    onFilterPressed: _showFilterSheet,
+                    searchController: _searchController,
+                  ),
+                ],
+              ),
+              Container(
+                margin: EdgeInsets.only(
+                  top: statusBarHeight + 140,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadiusDirectional.vertical(
+                    top: Radius.circular(20),
+                  ),
+                ),
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: context.read<LoanerBloc>()),
                   ],
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: statusBarHeight + 140),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadiusDirectional.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  child: MultiBlocProvider(
-                    providers: [
-                      BlocProvider.value(value: context.read<LoanerBloc>()),
-                    ],
-                    child: PageView(
-                      controller: _pageController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: _pages,
-                    ),
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: _pages,
                   ),
                 ),
-              ],
-            ),
-          ),
-          floatingActionButton: SizedBox(
-            height: 64,
-            width: 64,
-            child: FloatingActionButton(
-              onPressed: () {
-                switch (_selectedIndex) {
-                  case 0:
-                    context.pushNamed(
-                      AppRoutes.formShop,
-                      extra: {
-                        'shop': context.read<ShopBloc>(),
-                        'category': context.read<CategoryBloc>(),
-                        'onAdd': (ShopItemModel item) {},
-                      },
-                    );
-                  case 1:
-                    context.pushNamed(
-                      AppRoutes.formLoaner,
-                      extra: {
-                        'loanerBloc': context.read<LoanerBloc>(),
-                        'customerBloc': context.read<CustomerBloc>(),
-                      },
-                    );
-                }
-              },
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimaryContainer,
-              elevation: 6,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
-                Icons.add,
-                size: 28,
-                color: Colors.white,
-              ),
-            ),
+            ],
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-          bottomNavigationBar: AnimatedBottomNavigationBar.builder(
-            height: 72,
-            itemCount: iconList.length,
-            tabBuilder: (int index, bool isActive) => Icon(
-              iconList[index],
-              size: 26,
-              color: isActive ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: .6),
-            ),
-            activeIndex: _selectedIndex,
-            onTap: (index) {
-              _pageController.jumpToPage(index);
-              _onItemTapped(index);
-              setState(() {});
+        ),
+        floatingActionButton: SizedBox(
+          height: 64,
+          width: 64,
+          child: FloatingActionButton(
+            onPressed: () {
+              switch (_selectedIndex) {
+                case 0:
+                  context.pushNamed(
+                    AppRoutes.formShop,
+                    extra: {
+                      'shop': context.read<ShopBloc>(),
+                      'category': context.read<CategoryBloc>(),
+                      'onAdd': (ShopItemModel item) {},
+                    },
+                  );
+                case 1:
+                  context.pushNamed(
+                    AppRoutes.formLoaner,
+                    extra: {
+                      'loanerBloc': context.read<LoanerBloc>(),
+                      'customerBloc': context.read<CustomerBloc>(),
+                    },
+                  );
+              }
             },
-            gapLocation: GapLocation.end,
-            notchSmoothness: NotchSmoothness.defaultEdge,
-            notchMargin: 20,
-            leftCornerRadius: 16,
-            backgroundColor: colorScheme.surface,
-            splashColor: colorScheme.primary.withValues(alpha: .3),
-            splashRadius: 30,
-            shadow: BoxShadow(
-              offset: const Offset(0, 1),
-              blurRadius: 12,
-              spreadRadius: 0.5,
-              color: Colors.black.withValues(alpha: .1),
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimaryContainer,
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
+            child: const Icon(
+              Icons.add,
+              size: 28,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        bottomNavigationBar: AnimatedBottomNavigationBar.builder(
+          height: 72,
+          itemCount: iconList.length,
+          tabBuilder: (int index, bool isActive) => Icon(
+            iconList[index],
+            size: 26,
+            color: isActive ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: .6),
+          ),
+          activeIndex: _selectedIndex,
+          onTap: (index) {
+            _pageController.jumpToPage(index);
+            _onItemTapped(index);
+            setState(() {});
+          },
+          gapLocation: GapLocation.end,
+          notchSmoothness: NotchSmoothness.defaultEdge,
+          notchMargin: 20,
+          leftCornerRadius: 16,
+          backgroundColor: colorScheme.surface,
+          splashColor: colorScheme.primary.withValues(alpha: .3),
+          splashRadius: 30,
+          shadow: BoxShadow(
+            offset: const Offset(0, 1),
+            blurRadius: 12,
+            spreadRadius: 0.5,
+            color: Colors.black.withValues(alpha: .1),
           ),
         ),
       ),

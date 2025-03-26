@@ -34,7 +34,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final response = await _service.editProfile(
         User(
           name: event.name,
-          image: event.image  ,
+          image: event.image,
+          username: event.username,
         ),
       );
 

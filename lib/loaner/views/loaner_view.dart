@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/home/home.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/loaner/loaner.dart';
 
 class LoanerView extends StatefulWidget {
@@ -66,7 +67,7 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                   ),
                 ),
             child: items.isEmpty
-                ? const Center(child: Text('No loaners available'))
+                ? EmptyView(msg: context.l10n.noLoanerFound)
                 : ListView.separated(
                     separatorBuilder: (context, index) => index != items.length - 1
                         ? Padding(

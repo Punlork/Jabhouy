@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/l10n/l10n.dart';
 
 class LoadingOverlay {
   static OverlayEntry? _overlayEntry;
@@ -115,7 +116,7 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Loading...',
+                      '${context.l10n.loading}...',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,

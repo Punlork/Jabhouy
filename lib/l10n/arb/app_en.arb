@@ -356,5 +356,77 @@
   },
   "@deleteCustomer": {
     "description": "Label for deleting a customer"
+  },
+  "displayName": "Display Name",
+  "@displayName": {
+    "description": "Label for nickname"
+  },
+  "filterLoaners": "Filter Loaners",
+  "@filterLoaners": {
+    "description": "Title for the loaner filter sheet"
+  },
+  "filterItems": "Filter Items",
+  "@filterItems": {
+    "description": "Title for the loaner filter sheet"
+  },
+  "fromDate": "From Date",
+  "@fromDate": {
+    "description": "Label for the start date field in the filter"
+  },
+  "toDate": "To Date",
+  "@toDate": {
+    "description": "Label for the end date field in the filter"
+  },
+  "notSet": "Not Set",
+  "@notSet": {
+    "description": "Placeholder text when no date is selected"
+  },
+  "reset": "Reset",
+  "@reset": {
+    "description": "Text for the reset button in the filter sheet"
+  },
+  "apply": "Apply",
+  "@apply": {
+    "description": "Text for the apply button in the filter sheet"
+  },
+  "noCategoriesAvailable": "No Categories Available",
+  "@noCategoriesAvailable": {
+    "description": "Title for the dialog when no categories are available"
+  },
+  "pleaseCreateCategoryFirst": "Please create a category first.",
+  "@pleaseCreateCategoryFirst": {
+    "description": "Message in the dialog prompting the user to create a category"
+  },
+  "createCategory": "Create Category",
+  "@createCategory": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "noItemFound": "No items found",
+  "@noItemFound": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "noLoanerFound": "No Loaner found",
+  "@noLoanerFound": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "editLoaner": "Edit Loaner",
+  "@editLoaner": {
+    "description": "Title for the app bar when editing an existing loaner"
+  },
+  "addNewLoaner": "Add New Loaner",
+  "@addNewLoaner": {
+    "description": "Title for the app bar when adding a new loaner"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Label for the amount field in the loaner form"
+  },
+  "addLoaner": "Add Loaner",
+  "@addLoaner": {
+    "description": "Text for the button to add a new loaner"
+  },
+  "loading": "Loading",
+  "@loading": {
+    "description": "Text for the button to add a new loaner"
   }
 }

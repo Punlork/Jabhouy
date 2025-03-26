@@ -1,6 +1,7 @@
 // New FilterSheet widget
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
 class FilterSheet extends StatefulWidget {
@@ -37,9 +38,12 @@ class _FilterSheetState extends State<FilterSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Filter Items',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            context.l10n.filterItems,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           CategoryDropdown(
@@ -58,9 +62,7 @@ class _FilterSheetState extends State<FilterSheet> {
                   widget.onApply.call(null);
                   context.pop();
                 },
-                child: const Text(
-                  'Reset',
-                ),
+                child: Text(context.l10n.reset),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -74,7 +76,7 @@ class _FilterSheetState extends State<FilterSheet> {
                   backgroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.primary,
                   foregroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.onPrimary,
                 ),
-                child: const Text('Apply'),
+                child: Text(context.l10n.apply),
               ),
             ],
           ),

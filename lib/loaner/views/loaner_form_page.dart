@@ -197,7 +197,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!; // Ensure non-null access
 
     return PopScope(
       canPop: !_hasChanges,
@@ -210,7 +210,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.existingLoaner != null ? 'Edit Loaner' : 'Add New Loaner',
+            widget.existingLoaner != null ? l10n.editLoaner : l10n.addNewLoaner,
             style: AppTextTheme.title,
           ),
           leading: IconButton(
@@ -260,7 +260,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                   ),
                   _buildTextField(
                     key: 'amount',
-                    label: 'Amount',
+                    label: l10n.amount,
                     required: true,
                     isAmount: true,
                     keyboardType: TextInputType.number,
@@ -280,7 +280,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                       foregroundColor: colorScheme.onPrimary,
                     ),
                     child: Text(
-                      widget.existingLoaner != null ? 'Save Changes' : 'Add Loaner',
+                      widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
                       style: AppTextTheme.body,
                     ),
                   ),
