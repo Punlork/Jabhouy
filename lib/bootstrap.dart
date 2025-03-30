@@ -59,8 +59,6 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
   Bloc.observer = const AppBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load();
   await setupDependencies();
-
   runApp(await builder());
 }
