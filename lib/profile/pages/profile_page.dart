@@ -194,6 +194,10 @@ class _ProfilePageContent extends StatelessWidget {
                           );
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  ),
                   child: Text(
                     l10n.save,
                     style: AppTextTheme.body,

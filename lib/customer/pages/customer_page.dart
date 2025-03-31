@@ -68,14 +68,19 @@ class _CustomerPageContent extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          minimumSize: const Size(double.infinity, 50),
+        ),
         onPressed: () => _showCustomerDialog(context),
-        icon: const Icon(Icons.add),
+        icon: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
         label: Text(
           context.l10n.add,
           style: AppTextTheme.body,
-        ),
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 50),
         ),
       ),
     );

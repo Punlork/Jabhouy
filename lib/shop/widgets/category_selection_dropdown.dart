@@ -46,6 +46,14 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                   content: Text(l10n.pleaseCreateCategoryFirst),
                   actions: [
                     TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(l10n.cancel),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      ),
                       onPressed: () {
                         context
                           ..pop()
@@ -58,10 +66,6 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                           );
                       },
                       child: Text(l10n.createCategory),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(l10n.cancel),
                     ),
                   ],
                 ),

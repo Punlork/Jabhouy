@@ -34,7 +34,13 @@ class _MyApp extends StatelessWidget {
           locale: state.locale,
           theme: ThemeData(
             appBarTheme: AppBarTheme(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              titleTextStyle: const TextStyle(
+                color: Colors.white,
+              ),
+              iconTheme: const IconThemeData(
+                color: Colors.white,
+              ),
             ),
             useMaterial3: true,
             fontFamily: 'NotoSansKhmer',
