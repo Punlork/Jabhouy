@@ -43,7 +43,7 @@ class LoanerItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (loaner.createdAt != null) ...[
+                ...[
                   const SizedBox(height: 8),
                   Text(
                     loaner.displayDate,

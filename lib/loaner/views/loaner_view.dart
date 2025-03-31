@@ -86,7 +86,7 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                         if (pagination.hasNext) {
                           return const CustomLoading();
                         } else {
-                          return const EndOfListIndicator();
+                          return const SizedBox.shrink();
                         }
                       }
 

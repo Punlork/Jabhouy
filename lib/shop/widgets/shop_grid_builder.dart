@@ -17,7 +17,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
   @override
   ScrollController? getScrollController(BuildContext context) => TabScrollManager.of(context)?.getController(0);
 
-  @override 
+  @override
   void onScrollToBottom() {
     if (!mounted) return;
     final state = context.read<ShopBloc>().state.asLoaded;
@@ -71,8 +71,6 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
                     Widget child = const SizedBox.shrink();
                     if (pagination.hasNext) {
                       child = const CustomLoading();
-                    } else {
-                      child = const EndOfListIndicator();
                     }
                     return child;
                   },

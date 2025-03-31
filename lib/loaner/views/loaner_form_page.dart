@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/l10n/l10n.dart';
@@ -49,6 +50,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
   bool _hasChanges = false;
   late Map<String, String> _initialTextValues;
   CustomerModel? _selectedCustomer;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -58,6 +60,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       'name': TextEditingController(),
       'amount': TextEditingController(),
       'note': TextEditingController(),
+      'date': TextEditingController(),
     };
 
     _initialTextValues = {};
@@ -67,21 +70,61 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       _controllers['name']!.text = loaner.customer?.name ?? '';
       _controllers['amount']!.text = loaner.amount.toString();
       _controllers['note']!.text = loaner.note ?? '';
+      _controllers['date']!.text = DateFormat('dd MMM yyyy').format(loaner.createdAt);
 
       _initialTextValues['name'] = loaner.customer?.name ?? '';
       _initialTextValues['amount'] = loaner.amount.toString();
       _initialTextValues['note'] = loaner.note ?? '';
+      _initialTextValues['date'] = DateFormat('dd MMM yyyy').format(loaner.createdAt);
 
       _selectedCustomer = loaner.customer;
+      _selectedDate = loaner.createdAt;
     } else {
       _initialTextValues['name'] = '';
       _initialTextValues['amount'] = '';
       _initialTextValues['note'] = '';
+      _initialTextValues['date'] = DateFormat('dd MMM yyyy').format(DateTime.now());
+      _controllers['date']!.text = DateFormat('dd MMM yyyy').format(DateTime.now());
     }
 
     _controllers.forEach((key, controller) {
       controller.addListener(_detectChanges);
     });
+  }
+
+  void _submitLoanerWithCustomer(CustomerModel customer) {
+    final loanerBloc = context.read<LoanerBloc>();
+    final loaner = LoanerModel(
+      id: widget.existingLoaner?.id ?? -1,
+      customerId: customer.id,
+      amount: int.tryParse(_controllers['amount']!.text) ?? 0,
+      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+      createdAt: _selectedDate,
+    );
+
+    if (widget.existingLoaner != null) {
+      loanerBloc.add(UpdateLoaner(loaner));
+    } else {
+      loanerBloc.add(AddLoaner(loaner));
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      helpText: l10n.toDate,
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _controllers['date']!.text = DateFormat('dd MMM yyyy').format(picked);
+        _hasChanges = true;
+      });
+    }
   }
 
   void _submitLoaner() {
@@ -98,22 +141,6 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       customerBloc.add(CreateCustomerEvent(newCustomer));
     } else {
       _submitLoanerWithCustomer(_selectedCustomer!);
-    }
-  }
-
-  void _submitLoanerWithCustomer(CustomerModel customer) {
-    final loanerBloc = context.read<LoanerBloc>();
-    final loaner = LoanerModel(
-      id: widget.existingLoaner?.id ?? -1,
-      customerId: customer.id,
-      amount: int.tryParse(_controllers['amount']!.text) ?? 0,
-      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
-    );
-
-    if (widget.existingLoaner != null) {
-      loanerBloc.add(UpdateLoaner(loaner));
-    } else {
-      loanerBloc.add(AddLoaner(loaner));
     }
   }
 
@@ -197,7 +224,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!; // Ensure non-null access
+    final l10n = AppLocalizations.of(context);
 
     return PopScope(
       canPop: !_hasChanges,
@@ -264,6 +291,25 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                     required: true,
                     isAmount: true,
                     keyboardType: TextInputType.number,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: TextFormField(
+                      controller: _controllers['date'],
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
+                      onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                      decoration: InputDecoration(
+                        labelText: l10n.toDate,
+                        labelStyle: AppTextTheme.body,
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        suffixIcon: const Icon(Icons.calendar_today, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      ),
+                      validator: (value) => value!.isEmpty ? l10n.nameRequired(l10n.toDate) : null,
+                    ),
                   ),
                   _buildTextField(
                     key: 'note',

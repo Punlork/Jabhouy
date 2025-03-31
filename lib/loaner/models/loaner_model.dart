@@ -3,16 +3,20 @@ import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
 
+String _formatToRFC3339Date(DateTime date) {
+  return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+}
+
 class LoanerModel extends Equatable {
-  const LoanerModel({
+  LoanerModel({
     required this.id,
     required this.amount,
-    required this.note,
-    this.createdAt,
+    this.note,
     this.customer,
     this.customerId,
     this.updatedAt,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   factory LoanerModel.fromJson(Map<String, dynamic> json) {
     return LoanerModel(
@@ -28,17 +32,18 @@ class LoanerModel extends Equatable {
   String get displayDate {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
 
-    if (updatedAt != null && createdAt != null && updatedAt!.isAfter(createdAt!)) {
+    if (updatedAt != null && updatedAt!.isAfter(createdAt)) {
       return dateFormat.format(updatedAt!);
     }
-    return createdAt != null ? dateFormat.format(createdAt!) : 'N/A';
+
+    return dateFormat.format(createdAt);
   }
 
   final int id;
   final int? customerId;
   final int amount;
   final String? note;
-  final DateTime? createdAt;
+  final DateTime createdAt;
   final DateTime? updatedAt;
   final CustomerModel? customer;
 
@@ -46,6 +51,7 @@ class LoanerModel extends Equatable {
         'customerId': customerId,
         'amount': amount,
         'note': note,
+        'createdAt': _formatToRFC3339Date(createdAt),
       };
 
   @override

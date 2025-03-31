@@ -50,6 +50,7 @@ class CustomerAutocompleteField extends StatelessWidget {
             ),
             onCleared: controller.clear,
           ),
+          emptyBuilder: (context) => const SizedBox(),
           suggestionsCallback: (pattern) async {
             final currentState = state.asType<CustomerLoaded>();
             if (currentState == null) return [];

@@ -32,6 +32,7 @@ class _MyApp extends StatelessWidget {
       builder: (context, state) {
         return MaterialApp.router(
           locale: state.locale,
+          debugShowCheckedModeBanner: false,
           theme: ThemeData(
             appBarTheme: AppBarTheme(
               backgroundColor: Theme.of(context).colorScheme.primary,

@@ -323,13 +323,10 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                         _detectChanges();
                       },
                       decoration: InputDecoration(
-                        labelText: l10n.category,
-                        labelStyle: AppTextTheme.body,
                         border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8)),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
                           vertical: 20,
                         ),
                         filled: true,

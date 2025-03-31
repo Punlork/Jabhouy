@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -71,7 +72,7 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                 ),
               );
             },
-            child: DropdownButtonFormField<CategoryItemModel?>(
+            child: DropdownButtonFormField2<CategoryItemModel?>(
               value: _categoryFilter != null
                   ? state.items.firstWhere(
                       (element) => element.id == _categoryFilter?.id,
@@ -80,12 +81,10 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
               isExpanded: true,
               items: state.items
                   .map(
-                    (value) => DropdownMenuItem(
+                    (value) => DropdownMenuItem<CategoryItemModel>(
                       value: value,
                       key: UniqueKey(),
-                      child: Text(
-                        value.name,
-                      ),
+                      child: Text(value.name),
                     ),
                   )
                   .toList(),
@@ -94,11 +93,35 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                 setState(() {});
                 widget.onChanged?.call(value);
               },
-              decoration: widget.decoration ??
-                  InputDecoration(
-                    labelText: l10n.category,
-                    border: const OutlineInputBorder(),
+              decoration: InputDecoration(
+                label: Container(
+                  margin: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    l10n.category,
+                    style: AppTextTheme.body,
                   ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                border: const OutlineInputBorder(),
+              ).copyWith(
+                label: widget.decoration?.label,
+                contentPadding: widget.decoration?.contentPadding,
+                border: widget.decoration?.border,
+                filled: widget.decoration?.filled,
+                fillColor: widget.decoration?.fillColor,
+              ),
+              buttonStyleData: const ButtonStyleData(
+                padding: EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                    // color: Colors.red,
+                    ),
+              ),
+              dropdownStyleData: DropdownStyleData(
+                maxHeight: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           );
         }
