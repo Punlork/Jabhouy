@@ -70,12 +70,12 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       _controllers['name']!.text = loaner.customer?.name ?? '';
       _controllers['amount']!.text = loaner.amount.toString();
       _controllers['note']!.text = loaner.note ?? '';
-      _controllers['date']!.text = DateFormat('dd MMM yyyy').format(loaner.createdAt);
+      _controllers['date']!.text = loaner.displayDate;
 
       _initialTextValues['name'] = loaner.customer?.name ?? '';
       _initialTextValues['amount'] = loaner.amount.toString();
       _initialTextValues['note'] = loaner.note ?? '';
-      _initialTextValues['date'] = DateFormat('dd MMM yyyy').format(loaner.createdAt);
+      _initialTextValues['date'] = loaner.displayDate;
 
       _selectedCustomer = loaner.customer;
       _selectedDate = loaner.createdAt;
@@ -315,7 +315,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                     key: 'note',
                     label: l10n.note,
                     maxLines: 3,
-                    textInputAction: TextInputAction.done,
+                    textInputAction: TextInputAction.newline,
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(

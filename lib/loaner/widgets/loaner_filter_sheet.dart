@@ -44,12 +44,17 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isFromDate) async {
+    final initialDate = (isFromDate ? _fromDate : _toDate) ?? DateTime.now();
+    final firstDate = DateTime(2000);
+    final lastDate = DateTime(2101);
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: (isFromDate ? _fromDate : _toDate) ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
+
     if (picked != null) {
       setState(() {
         if (isFromDate) {
@@ -58,6 +63,14 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
           _toDate = picked;
         }
       });
+    }
+  }
+
+  void _adjustDatesIfNeeded() {
+    if (_fromDate != null && _toDate != null && _fromDate!.isAfter(_toDate!)) {
+      final temp = _fromDate;
+      _fromDate = _toDate;
+      _toDate = temp;
     }
   }
 
@@ -92,7 +105,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                 borderRadius: BorderRadius.circular(8),
               ),
               suffixIcon: const Icon(Icons.calendar_today, size: 20),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
             ),
             controller: TextEditingController(
               text: _formatToRFC3339Date(_fromDate),
@@ -109,11 +122,11 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                 borderRadius: BorderRadius.circular(8),
               ),
               suffixIcon: const Icon(Icons.calendar_today, size: 20),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
             ),
             controller: TextEditingController(
               text: _formatToRFC3339Date(_toDate),
-            )..addListener(() {}),
+            ),
           ),
           const SizedBox(height: 16),
           CustomerAutocompleteField(
@@ -144,6 +157,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                 onPressed: isDisabled
                     ? null
                     : () {
+                        _adjustDatesIfNeeded();
                         context.read<LoanerBloc>().add(
                               LoadLoaners(
                                 fromDate: _fromDate,

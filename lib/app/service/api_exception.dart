@@ -12,7 +12,5 @@ class ApiException implements Exception {
   final StackTrace stackTrace;
 
   @override
-  String toString() {
-    return 'ApiException: $message (Status: $statusCode)\nStackTrace:\n$stackTrace';
-  }
-}
+  String toString() => 'ApiException: $message (Status: $statusCode) ';
+} 

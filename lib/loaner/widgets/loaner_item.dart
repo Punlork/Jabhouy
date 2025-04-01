@@ -46,7 +46,7 @@ class LoanerItem extends StatelessWidget {
                 ...[
                   const SizedBox(height: 8),
                   Text(
-                    loaner.displayDate,
+                    loaner.displayDateTime,
                     style: AppTextTheme.caption.copyWith(color: Colors.grey),
                   ),
                 ],

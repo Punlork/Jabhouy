@@ -30,7 +30,7 @@ class _MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AppBloc, AppState>(
       builder: (context, state) {
-        return MaterialApp.router(
+      return MaterialApp.router(
           locale: state.locale,
           debugShowCheckedModeBanner: false,
           theme: ThemeData(

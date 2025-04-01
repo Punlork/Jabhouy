@@ -149,6 +149,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                           controller: _nameController,
                           hintText: l10n.enterYourName,
                           labelText: l10n.name,
+                          action:  TextInputAction.next,
                           prefixIcon: Icons.person_rounded,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -167,6 +168,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                           labelText: l10n.email,
                           prefixIcon: Icons.email_rounded,
                           keyboardType: TextInputType.emailAddress,
+                          action:  TextInputAction.next,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return l10n.pleaseEnterYourEmail;
@@ -184,6 +186,7 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         CustomTextFormField(
                           controller: _passwordController,
                           hintText: l10n.enterYourPassword,
+                          action:  TextInputAction.done,
                           labelText: l10n.password,
                           prefixIcon: Icons.lock_rounded,
                           obscureText: _obscurePassword,

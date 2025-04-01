@@ -29,13 +29,13 @@ class LoanerModel extends Equatable {
     );
   }
 
-  String get displayDate {
+  String get displayDateTime {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    return dateFormat.format(createdAt);
+  }
 
-    if (updatedAt != null && updatedAt!.isAfter(createdAt)) {
-      return dateFormat.format(updatedAt!);
-    }
-
+  String get displayDate {
+    final dateFormat = DateFormat('dd MMM yyyy');
     return dateFormat.format(createdAt);
   }
 

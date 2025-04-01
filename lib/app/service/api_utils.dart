@@ -27,11 +27,10 @@ ApiResponse<T> handleResponse<T>(
         message: responseBody is Map<String, dynamic> ? responseBody['message']?.toString() : null,
       );
     } catch (e, stackTrace) {
-      
       throw ApiException(
         'Failed to parse response data: $e',
         statusCode: statusCode,
-        stackTrace: stackTrace, 
+        stackTrace: stackTrace,
       );
     }
   } else {
@@ -40,7 +39,7 @@ ApiResponse<T> handleResponse<T>(
           ? responseBody['message'].toString()
           : 'Error: $statusCode',
       statusCode: statusCode,
-      stackTrace: StackTrace.current, 
+      stackTrace: StackTrace.current,
     );
   }
 }
@@ -71,7 +70,8 @@ Future<http.Response> interceptRequest(
 
   final endTime = DateTime.now();
 
-  logger.d('$method response $pathWithQuery received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
+  logger.d(
+      '$method response $pathWithQuery received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
   return response;
 }
 
