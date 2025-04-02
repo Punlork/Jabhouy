@@ -21,6 +21,7 @@ class CustomTextFormField extends StatefulWidget {
     this.useCustomBorder = true,
     this.maxLines = 1,
     this.onCleared,
+    this.textCapitalization,
   });
 
   final TextEditingController controller;
@@ -40,6 +41,7 @@ class CustomTextFormField extends StatefulWidget {
   final bool useCustomBorder;
   final int maxLines;
   final VoidCallback? onCleared;
+  final TextCapitalization? textCapitalization;
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -168,6 +170,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         if (!_focusNode.hasFocus) return;
         _focusNode.unfocus();
       },
+      textCapitalization: widget.textCapitalization ?? TextCapitalization.none,
       textInputAction: widget.action,
       focusNode: _focusNode,
       decoration: mergedDecoration,

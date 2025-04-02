@@ -169,7 +169,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       sellerPrice:
           _controllers['sellerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['sellerPrice']!.text) : null,
       note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
-      imageUrl: uploadBloc.selectedImage?.path ?? widget.existingItem?.imageUrl,
+      imageUrl: uploadBloc.selectedImage?.path,
       category: _categoryFilter,
     );
 
@@ -192,6 +192,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     TextInputType keyboardType = TextInputType.text,
     TextInputAction textInputAction = TextInputAction.next,
     int? maxLines,
+    TextCapitalization? textCapitalization,
   }) {
     final l10n = AppLocalizations.of(context);
     return Padding(
@@ -199,6 +200,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
       child: CustomTextFormField(
         controller: _controllers[key]!,
         hintText: '',
+        textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
         keyboardType: maxLines != null ? TextInputType.multiline : (isPrice ? TextInputType.number : keyboardType),
         action: textInputAction,
@@ -291,6 +293,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTextField(
+                    textCapitalization: TextCapitalization.sentences,
                     key: 'name',
                     label: l10n.name,
                     required: true,

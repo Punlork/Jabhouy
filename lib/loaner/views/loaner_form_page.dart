@@ -197,6 +197,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
     FocusNode? focusNode,
     EdgeInsetsGeometry? padding,
     TextEditingController? controller,
+    TextCapitalization? textCapitalization,
   }) {
     final l10n = AppLocalizations.of(context);
     return Padding(
@@ -205,6 +206,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
         controller: controller ?? _controllers[key]!,
         focusNode: focusNode,
         hintText: '',
+        textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
         keyboardType: maxLines != null ? TextInputType.multiline : (isAmount ? TextInputType.number : keyboardType),
         action: textInputAction,

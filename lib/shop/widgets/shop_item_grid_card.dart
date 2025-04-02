@@ -60,18 +60,19 @@ class GridShopItemCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  spacing: 8,
                   children: [
                     Text(
                       item.name,
                       style: AppTextTheme.title.copyWith(
                         color: colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
+                        height: 0,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    // Price
                     Text(
                       '${item.customerPrice} រៀល',
                       style: AppTextTheme.caption.copyWith(

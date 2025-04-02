@@ -61,7 +61,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
                     crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 0.65,
                   ),
                 ),
               ),
