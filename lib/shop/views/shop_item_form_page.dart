@@ -200,7 +200,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
         controller: _controllers[key]!,
         hintText: '',
         labelText: required ? '$label *' : label,
-        keyboardType: isPrice ? TextInputType.number : keyboardType,
+        keyboardType: maxLines != null ? TextInputType.multiline : (isPrice ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
         validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
@@ -338,6 +338,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                     key: 'note',
                     maxLines: 3,
                     label: l10n.note,
+                    textInputAction: TextInputAction.newline,
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
@@ -352,18 +353,18 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                         BlocBuilder<UploadBloc, UploadState>(
                           bloc: context.read<ShopBloc>().upload,
                           builder: (context, state) {
+                            final uploadBloc = context.read<ShopBloc>().upload;
                             return Row(
                               children: [
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     if (state is UploadInProgress) return;
-                                    final bloc = context.read<ShopBloc>().upload;
-                                    bloc.showImageSourceDialog(
+                                    uploadBloc.showImageSourceDialog(
                                       context,
-                                      onTakePhoto: () => bloc.add(
+                                      onTakePhoto: () => uploadBloc.add(
                                         SelectImageEvent(ImageSource.camera),
                                       ),
-                                      onChoseFromGallery: () => bloc.add(
+                                      onChoseFromGallery: () => uploadBloc.add(
                                         SelectImageEvent(ImageSource.gallery),
                                       ),
                                     );
@@ -380,25 +381,79 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
                                 ),
                                 const SizedBox(width: 16),
                                 switch (state) {
-                                  UploadImageSelected() => ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(
-                                        state.selectedImage,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                                      ),
+                                  UploadImageSelected() => Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.file(
+                                            state.selectedImage,
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 5,
+                                          right: 5,
+                                          child: Container(
+                                            width: 24,
+                                            height: 24,
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(alpha: .5),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                uploadBloc.add(ClearImageEvent());
+                                                _detectChanges();
+                                              },
+                                              child: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  UploadImageUrlLoaded() => ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        state.imageUrl,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                                      ),
+                                  UploadImageUrlLoaded() => Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.network(
+                                            state.imageUrl,
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 5,
+                                          right: 5,
+                                          child: Container(
+                                            width: 24,
+                                            height: 24,
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(alpha: .5),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                uploadBloc.add(ClearImageEvent());
+                                                _detectChanges(); // Update form change status
+                                              },
+                                              child: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   _ => const SizedBox.shrink(),
                                 },
