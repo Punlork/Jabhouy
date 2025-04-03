@@ -12,12 +12,14 @@ class ShopHeader extends StatelessWidget {
     required this.onSearchChanged,
     required this.onFilterPressed,
     required this.searchController,
+    required this.hasFilter,
     super.key,
   });
   final VoidCallback onSettingsPressed;
   final ValueChanged<String?> onSearchChanged;
   final VoidCallback onFilterPressed;
   final TextEditingController searchController;
+  final bool hasFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class ShopHeader extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _SearchBar(
+            hasFilter: hasFilter,
             controller: searchController,
             onChanged: onSearchChanged,
             onFilterPressed: onFilterPressed,
@@ -149,10 +152,12 @@ class _SearchBar extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.onFilterPressed,
+    required this.hasFilter,
   });
   final TextEditingController controller;
   final ValueChanged<String?> onChanged;
   final VoidCallback onFilterPressed;
+  final bool hasFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -202,10 +207,28 @@ class _SearchBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          IconButtonWidget(
-            icon: Icons.filter_list,
-            onPressed: onFilterPressed,
-            colorScheme: colorScheme,
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButtonWidget(
+                icon: Icons.filter_list,
+                onPressed: onFilterPressed,
+                colorScheme: colorScheme,
+              ),
+              if (hasFilter)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

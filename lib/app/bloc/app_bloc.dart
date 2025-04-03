@@ -8,7 +8,7 @@ part 'app_event.dart';
 part 'app_state.dart';
 
 class AppBloc extends Bloc<AppEvent, AppState> {
-  AppBloc() : super(const AppState(locale: Locale('km'), isGridView: true)) {
+  AppBloc() : super(const AppState(locale: Locale('en'), isGridView: true)) {
     on<InitializeApp>(_onInitializeApp);
     on<SwitchLanguage>(_onSwitchLanguage);
     on<SwitchViewMode>(_onSwitchViewMode);

@@ -80,7 +80,7 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                     controller: controller,
                     physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
                     padding: const EdgeInsets.all(16),
-                    itemCount: items.length + 1,
+                    itemCount: items.length + 2,
                     itemBuilder: (context, index) {
                       if (index == items.length) {
                         if (pagination.hasNext) {
@@ -88,6 +88,9 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                         } else {
                           return const SizedBox.shrink();
                         }
+                      }
+                      if (index == items.length + 1) {
+                        return const SizedBox(height: 70);
                       }
 
                       final loaner = items[index];

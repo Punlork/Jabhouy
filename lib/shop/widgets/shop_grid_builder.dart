@@ -76,6 +76,9 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
                   },
                 ),
               ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 70),
+              ),
             ],
           ),
         _ => const SizedBox.shrink(),

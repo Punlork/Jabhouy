@@ -172,16 +172,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     ];
 
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
-    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+    // final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return TabScrollManager(
       controllers: _scrollControllers,
       child: Scaffold(
         extendBody: true,
-        body: Padding(
-          padding: EdgeInsets.only(
-            bottom: isKeyboardVisible ? 0 : kBottomNavigationBarHeight,
-          ),
+        body: SafeArea(
+          top: false,
+          maintainBottomViewPadding: true,
           child: Stack(
             children: [
               Column(
@@ -197,13 +196,35 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       ),
                     ),
                   ),
-                  ShopHeader(
-                    onSettingsPressed: () => _showSettingsSheet(
-                      () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
-                    ),
-                    onSearchChanged: _onSearchChanged,
-                    onFilterPressed: _showFilterSheet,
-                    searchController: _searchController,
+                  Builder(
+                    builder: (context) {
+                      Widget buildShopHeader({bool hasFilter = false}) {
+                        return ShopHeader(
+                          hasFilter: hasFilter,
+                          onSettingsPressed: () => _showSettingsSheet(
+                            () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
+                          ),
+                          onSearchChanged: _onSearchChanged,
+                          onFilterPressed: _showFilterSheet,
+                          searchController: _searchController,
+                        );
+                      }
+
+                      final blocBuilders = {
+                        0: BlocBuilder<ShopBloc, ShopState>(
+                          builder: (context, state) {
+                            return buildShopHeader(hasFilter: state.asLoaded?.categoryFilter != null);
+                          },
+                        ),
+                        1: BlocBuilder<LoanerBloc, LoanerState>(
+                          builder: (context, state) {
+                            return buildShopHeader(hasFilter: state.asLoaded?.hasFilter ?? false);
+                          },
+                        ),
+                      };
+
+                      return blocBuilders[_selectedIndex] ?? buildShopHeader();
+                    },
                   ),
                 ],
               ),

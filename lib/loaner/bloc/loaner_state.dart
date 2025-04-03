@@ -21,6 +21,10 @@ class LoanerLoaded extends LoanerState {
   final DateTime? toDate;
   final CustomerModel? loanerFilter;
 
+  bool get hasFilter {
+    return searchQuery.isNotEmpty || (fromDate != null && toDate != null) || loanerFilter != null;
+  }
+
   const LoanerLoaded(
     this.response, {
     this.searchQuery = '',
