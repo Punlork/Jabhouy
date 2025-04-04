@@ -39,6 +39,21 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
+  Future<void> forceCheckClipboardForImage() async {
+    try {
+      final clipboard = SystemClipboard.instance;
+      if (clipboard == null) return;
+
+      final reader = await clipboard.read();
+      final file = await _getFileFromReader(reader);
+      if (file != null && mounted) {
+        onImageFound(file);
+      }
+    } catch (e) {
+      // logger.i('Error accessing clipboard: $e');
+    }
+  }
+
   Future<File?> _getFileFromReader(ClipboardReader reader) async {
     final completer = Completer<File?>();
 
@@ -93,12 +108,12 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
       ),
       backgroundColor: Colors.white,
       margin: const EdgeInsets.all(16),
-      content: StatefulBuilder(
-        builder: (context, setState) => Row(
-          children: [
-            GestureDetector(
-              onTap: () => onImageSelected(file),
-              child: ClipRRect(
+      content: GestureDetector(
+        onTap: () => onImageSelected(file),
+        child: StatefulBuilder(
+          builder: (context, setState) => Row(
+            children: [
+              ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: Image.file(
                   file,
@@ -108,15 +123,15 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
                   errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                context.l10n.imgFound,
-                style: Theme.of(context).textTheme.bodyMedium,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  context.l10n.imgFound,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       action: SnackBarAction(

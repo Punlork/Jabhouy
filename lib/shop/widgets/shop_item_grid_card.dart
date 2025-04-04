@@ -26,63 +26,58 @@ class GridShopItemCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8).copyWith(bottom: 0),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                  child: ColoredBox(
-                    color: item.imageUrl?.isEmpty ?? true ? AppColorTheme.logoBG : Colors.transparent,
-                    child: FadeInImage.memoryNetwork(
-                      image: item.imageUrl ?? '',
-                      fit: BoxFit.fill,
-                      imageCacheHeight: 150,
-                      imageCacheWidth: 150,
-                      placeholder: kTransparentImage,
-                      imageErrorBuilder: (context, url, error) => const AppLogo(
-                        shape: BoxShape.rectangle,
-                        useBg: false,
-                        size: 40,
-                      ),
+            Container(
+              height: 200,
+              padding: const EdgeInsets.all(8).copyWith(bottom: 0),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(8),
+                ),
+                child: ColoredBox(
+                  color: item.imageUrl?.isEmpty ?? true ? AppColorTheme.logoBG : Colors.transparent,
+                  child: FadeInImage.memoryNetwork(
+                    image: item.imageUrl ?? '',
+                    fit: BoxFit.fill,
+                    imageCacheHeight: 150,
+                    imageCacheWidth: 150,
+                    height: 200,
+                    placeholder: kTransparentImage,
+                    imageErrorBuilder: (context, url, error) => const AppLogo(
+                      shape: BoxShape.rectangle,
+                      useBg: false,
+                      size: 40,
                     ),
                   ),
                 ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  spacing: 8,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        item.name,
-                        style: AppTextTheme.title.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                          height: 0,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                spacing: 8,
+                children: [
+                  Text(
+                    item.name,
+                    style: AppTextTheme.title.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                      height: 0,
                     ),
-                    Text(
-                      '${item.customerPrice} រៀល',
-                      style: AppTextTheme.caption.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${item.customerPrice} រៀល',
+                    style: AppTextTheme.caption.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

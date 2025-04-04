@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/home/home.dart';
@@ -50,18 +51,23 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
             slivers: [
               SliverPadding(
                 padding: const EdgeInsets.all(16),
-                sliver: SliverGrid.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) => GridShopItemCard(
-                    key: ValueKey(items[index].id),
-                    item: items[index],
-                    onEdit: (item) => _showEditSheet(context, item),
-                  ),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.65,
+                sliver: SliverToBoxAdapter(
+                  child: MasonryGridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) => GridShopItemCard(
+                      key: ValueKey(items[index].id),
+                      item: items[index],
+                      onEdit: (item) => _showEditSheet(context, item),
+                    ),
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    padding: EdgeInsets.zero,
+                    gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                      // childAspectRatio: 0.65,
+                    ),
                   ),
                 ),
               ),

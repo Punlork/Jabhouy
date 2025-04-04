@@ -113,6 +113,10 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
       _initialTextValues['note'] = '';
     }
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      forceCheckClipboardForImage();
+    });
+
     _controllers.forEach((key, controller) {
       controller.addListener(_detectChanges);
     });
