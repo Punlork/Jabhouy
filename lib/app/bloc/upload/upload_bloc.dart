@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -18,6 +19,12 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     on<UploadImageEvent>(_onUploadImage);
     on<ClearImageEvent>(_onClearImage);
     on<LoadExistingImageEvent>(_onLoadExistingImage);
+    on<SelectUiImageEvent>(
+      (event, emit) {
+        _selectedImage = event.image;
+        emit(UploadImageSelected(_selectedImage!));
+      },
+    );
   }
 
   final UploadService _service;

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +51,8 @@ class _ShopItemFormPageContent extends StatefulWidget {
   State<_ShopItemFormPageContent> createState() => _ShopItemFormPageState();
 }
 
-class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
+class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
+    with ClipboardImageMixin<_ShopItemFormPageContent> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
   CategoryItemModel? _categoryFilter;
@@ -61,6 +64,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   @override
   void initState() {
     super.initState();
+
+    registerClipboardObserver();
 
     _controllers = {
       'name': TextEditingController(),
@@ -78,14 +83,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     if (widget.existingItem != null) {
       final item = widget.existingItem!;
       _controllers['name']!.text = item.name;
-      _controllers['defaultPrice']!.text = item.defaultPrice.toString();
+      _controllers['defaultPrice']!.text = item.defaultPrice?.toString() ?? '';
       _controllers['customerPrice']!.text = item.customerPrice?.toString() ?? '';
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
       _categoryFilter = item.category;
 
       _initialTextValues['name'] = item.name;
-      _initialTextValues['defaultPrice'] = item.defaultPrice.toString();
+      _initialTextValues['defaultPrice'] = item.defaultPrice?.toString() ?? '';
       _initialTextValues['customerPrice'] = item.customerPrice?.toString() ?? '';
       _initialTextValues['sellerPrice'] = item.sellerPrice?.toString() ?? '';
       _initialTextValues['note'] = item.note ?? '';
@@ -114,8 +119,19 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   }
 
   @override
+  void onImageFound(File file) => showImagePreviewSnackBar(file);
+
+  @override
+  void onImageSelected(File file) {
+    context.read<ShopBloc>().upload.add(SelectUiImageEvent(image: file));
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    _detectChanges();
+  }
+
+  @override
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
+    unregisterClipboardObserver();
     super.dispose();
   }
 
@@ -163,7 +179,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     final item = ShopItemModel(
       id: widget.existingItem?.id ?? 0,
       name: _controllers['name']!.text,
-      defaultPrice: int.tryParse(_controllers['defaultPrice']!.text) ?? 0,
+      defaultPrice:
+          _controllers['defaultPrice']!.text.isNotEmpty ? int.tryParse(_controllers['defaultPrice']!.text) : null,
       customerPrice:
           _controllers['customerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['customerPrice']!.text) : null,
       sellerPrice:

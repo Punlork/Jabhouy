@@ -38,7 +38,7 @@ class ShopItemModel extends Equatable {
   final int? defaultPrice;
   final int? customerPrice;
   final int? sellerPrice;
-  final String? note;
+final String? note;
   final String? imageUrl;
   final CategoryItemModel? category;
   final DateTime? createdAt;

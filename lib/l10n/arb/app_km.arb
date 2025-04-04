@@ -428,5 +428,9 @@
   "loading": "កំពុងផ្ទុក",
   "@loading": {
     "description": "Text for the button to add a new loaner"
+  },
+  "imgFound": "រូបភាពមាននៅក្នុងក្តារតម្បៀតខ្ទាស់។ប៉ះដើម្បីប្រើវា។",
+  "@imgFound": {
+    "description": "Image found in clipboard. Tap to use it."
   }
 }

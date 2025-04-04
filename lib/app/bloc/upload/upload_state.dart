@@ -46,3 +46,8 @@ class UploadImageUrlLoaded extends UploadState {
   @override
   List<Object> get props => [imageUrl];
 }
+
+class UploadUiImageSelected extends UploadState {
+  const UploadUiImageSelected(this.image);
+  final ui.Image image;
+}
