@@ -30,7 +30,7 @@ class _MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AppBloc, AppState>(
       builder: (context, state) {
-      return MaterialApp.router(
+        return MaterialApp.router(
           locale: state.locale,
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
@@ -49,7 +49,9 @@ class _MyApp extends StatelessWidget {
           builder: (context, child) => Overlay(
             initialEntries: [
               OverlayEntry(
-                builder: (context) => child!,
+                builder: (context) => AppUpgrader(
+                  child: child!,
+                ),
               ),
             ],
           ),

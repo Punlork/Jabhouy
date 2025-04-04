@@ -1,6 +1,6 @@
 name: my_app
 description: Shop management
-version: 1.0.1+2
+version: 1.0.2+3
 publish_to: none
 
 environment:
@@ -34,6 +34,7 @@ dependencies:
   shimmer: ^3.0.0
   stream_transform: ^2.1.1
   transparent_image: ^2.0.1
+  upgrader: ^11.3.1
 
 dev_dependencies:
   bloc_test: ^9.1.7
@@ -67,6 +68,6 @@ flutter:
         - asset: fonts/NotoSansKhmer-Thin.ttf
           weight: 100
   assets:
-  - .env
-  - .env.dev
-  - assets/
+    - .env
+    - .env.dev
+    - assets/

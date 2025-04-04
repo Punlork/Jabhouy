@@ -18,6 +18,7 @@ export 'utils/snack_bar.dart';
 export 'view/app.dart';
 export 'view/loading_page.dart';
 export 'widget/app_logo.dart';
+export 'widget/app_upgrader.dart';
 export 'widget/custom_loading.dart';
 export 'widget/custom_outline_border.dart';
 export 'widget/custom_text_form_field.dart';
