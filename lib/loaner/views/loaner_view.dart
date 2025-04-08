@@ -71,7 +71,7 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                 : ListView.separated(
                     separatorBuilder: (context, index) => index != items.length - 1
                         ? Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Divider(
                               color: Colors.grey.shade200,
                             ),
