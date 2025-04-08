@@ -16,29 +16,29 @@ class ShopItemModel extends Equatable {
     this.updatedAt,
   });
 
-    factory ShopItemModel.fromJson(Map<String, dynamic> json) {
-      return ShopItemModel(
-        id: tryCast<int>(json['id'])!,
-        name: tryCast<String>(json['name'])!,
-        defaultPrice: tryCast<int>(json['basePrice']),
-        customerPrice: tryCast<int>(json['customerPrice']),
-        sellerPrice: tryCast<int>(json['sellerPrice']),
-        note: tryCast<String>(json['note']),
-        imageUrl: tryCast<String>(json['imageUrl']),
-        category: tryCast<CategoryItemModel>(
-          json['category'] != null ? CategoryItemModel.fromJson(json['category'] as Map<String, dynamic>) : null,
-        ),
-        createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
-        updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
-      );
-    }
+  factory ShopItemModel.fromJson(Map<String, dynamic> json) {
+    return ShopItemModel(
+      id: tryCast<int>(json['id'])!,
+      name: tryCast<String>(json['name'])!,
+      defaultPrice: tryCast<int>(json['basePrice']),
+      customerPrice: tryCast<int>(json['customerPrice']),
+      sellerPrice: tryCast<int>(json['sellerPrice']),
+      note: tryCast<String>(json['note']),
+      imageUrl: tryCast<String>(json['imageUrl']),
+      category: tryCast<CategoryItemModel>(
+        json['category'] != null ? CategoryItemModel.fromJson(json['category'] as Map<String, dynamic>) : null,
+      ),
+      createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
+      updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
+    );
+  }
 
   final int id;
   final String name;
   final int? defaultPrice;
   final int? customerPrice;
   final int? sellerPrice;
-final String? note;
+  final String? note;
   final String? imageUrl;
   final CategoryItemModel? category;
   final DateTime? createdAt;

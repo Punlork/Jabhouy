@@ -7,9 +7,12 @@ import 'package:shimmer/shimmer.dart';
 class LoanerItem extends StatelessWidget {
   const LoanerItem({
     required this.loaner,
+    this.onMarkAsPaid,
     super.key,
   });
+
   final LoanerModel loaner;
+  final void Function({bool isPaid})? onMarkAsPaid;
 
   @override
   Widget build(BuildContext context) {
@@ -19,48 +22,83 @@ class LoanerItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       margin: EdgeInsets.zero,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      color: loaner.isPaid ? Colors.green[50] : null,
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      loaner.customer?.name ?? 'Unknown',
-                      style: AppTextTheme.title,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          children: [
+                            Text(
+                              loaner.customer?.name ?? 'Unknown',
+                              style: AppTextTheme.title,
+                            ),
+                            if (loaner.isPaid) ...[
+                              const SizedBox(width: 8),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${loaner.amount} រៀល',
+                          style: AppTextTheme.body,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
                     Text(
-                      '${loaner.amount} រៀល',
-                      style: AppTextTheme.body,
+                      loaner.displayDate,
+                      style: AppTextTheme.caption.copyWith(color: Colors.grey),
                     ),
                   ],
                 ),
-                ...[
+                if (loaner.note != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    loaner.displayDateTime,
-                    style: AppTextTheme.caption.copyWith(color: Colors.grey),
+                    '${context.l10n.note}: ${loaner.note}',
+                    style: AppTextTheme.caption,
                   ),
                 ],
               ],
             ),
-            if (loaner.note != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                '${context.l10n.note}: ${loaner.note}',
-                style: AppTextTheme.caption,
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: GestureDetector(
+              onTap: () => onMarkAsPaid?.call(
+                isPaid: !loaner.isPaid,
               ),
-            ],
-          ],
-        ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  loaner.isPaid ? context.l10n.unpaid : context.l10n.paid,
+                  style: AppTextTheme.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -85,27 +123,34 @@ class LoanerItemShimmer extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             width: double.infinity,
-            child: Column(
-              spacing: 12,
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 150,
-                  height: 20,
-                  color: Colors.white, // Name placeholder
+                Expanded(
+                  child: Column(
+                    spacing: 12,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 150,
+                        height: 20,
+                        color: Colors.white, // Name placeholder
+                      ),
+                      Container(
+                        width: 100,
+                        height: 16,
+                        color: Colors.white, // Amount placeholder
+                      ),
+                      Container(
+                        width: 200,
+                        height: 16,
+                        color: Colors.white, // Note placeholder
+                      ),
+                    ],
+                  ),
                 ),
                 Container(
                   width: 100,
-                  height: 16,
-                  color: Colors.white, // Amount placeholder
-                ),
-                Container(
-                  width: 200,
-                  height: 16,
-                  color: Colors.white, // Note placeholder
-                ),
-                Container(
-                  width: 200,
                   height: 16,
                   color: Colors.white, // Created date placeholder
                 ),

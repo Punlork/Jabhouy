@@ -175,6 +175,14 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
           ),
           child: LoanerItem(
             loaner: loaner,
+            onMarkAsPaid: ({bool isPaid = false}) => context.read<LoanerBloc>().add(
+                  UpdateLoaner(
+                    loaner.copyWith(
+                      isPaid: isPaid,
+                      customerId: loaner.customer?.id,
+                    ),
+                  ),
+                ),
           ),
         ),
       ],

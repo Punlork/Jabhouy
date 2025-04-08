@@ -432,5 +432,13 @@
   "imgFound": "រូបភាពមាននៅក្នុងក្តារតម្បៀតខ្ទាស់។ប៉ះដើម្បីប្រើវា។",
   "@imgFound": {
     "description": "Image found in clipboard. Tap to use it."
+  },
+  "paid": "បានសង",
+  "@paid": {
+    "description": "ស្លាកបង្ហាញថាប្រាក់កម្ចីត្រូវបានសង"
+  },
+  "unpaid": "មិនបានសង",
+  "@unpaid": {
+    "description": "ស្លាកបង្ហាញថាប្រាក់កម្ចីត្រូវបានសង"
   }
 }
