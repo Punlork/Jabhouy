@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
@@ -211,6 +212,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
         keyboardType: maxLines != null ? TextInputType.multiline : (isAmount ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
+        onTapOutside: (_) {},
         validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -254,88 +256,119 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
             },
           ),
         ),
-        body: MultiBlocListener(
-          listeners: [
-            BlocListener<LoanerBloc, LoanerState>(
-              listener: (context, state) {
-                if (state is LoanerLoaded) context.pop();
-              },
+        body: Stack(
+          children: [
+            MultiBlocListener(
+              listeners: [
+                BlocListener<LoanerBloc, LoanerState>(
+                  listener: (context, state) {
+                    if (state is LoanerLoaded) context.pop();
+                  },
+                ),
+                BlocListener<CustomerBloc, CustomerState>(
+                  listener: (context, state) {
+                    if (state is CustomerCreated && context.mounted) {
+                      _submitLoanerWithCustomer(state.customer);
+                    }
+                  },
+                ),
+              ],
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomerAutocompleteField(
+                        controller: _controllers['name']!,
+                        label: l10n.name,
+                        required: true,
+                        onSelected: (customer) {
+                          _selectedCustomer = customer;
+                          _controllers['name']?.text = customer.name;
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          setState(() {});
+                        },
+                      ),
+                      _buildTextField(
+                        key: 'amount',
+                        label: l10n.amount,
+                        required: true,
+                        isAmount: true,
+                        keyboardType: TextInputType.number,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: TextFormField(
+                          controller: _controllers['date'],
+                          readOnly: true,
+                          onTap: () => _selectDate(context),
+                          onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                          decoration: InputDecoration(
+                            labelText: l10n.toDate,
+                            labelStyle: AppTextTheme.body,
+                            border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(8)),
+                            ),
+                            suffixIcon: const Icon(Icons.calendar_today, size: 20),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                          ),
+                          validator: (value) => value!.isEmpty ? l10n.nameRequired(l10n.toDate) : null,
+                        ),
+                      ),
+                      _buildTextField(
+                        key: 'note',
+                        label: l10n.note,
+                        maxLines: 3,
+                        textInputAction: TextInputAction.newline,
+                      ),
+                      const SizedBox(height: 80),
+                      // Button removed from here
+                    ],
+                  ),
+                ),
+              ),
             ),
-            BlocListener<CustomerBloc, CustomerState>(
-              listener: (context, state) {
-                if (state is CustomerCreated && context.mounted) {
-                  _submitLoanerWithCustomer(state.customer);
+            KeyboardVisibilityBuilder(
+              builder: (context, isKeyboardVisible) {
+                if (!isKeyboardVisible) {
+                  return Positioned(
+                    bottom: 16,
+                    left: 16,
+                    right: 16,
+                    child: ElevatedButton(
+                      onPressed: _submitLoaner,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                      ),
+                      child: Text(
+                        widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
+                        style: AppTextTheme.body,
+                      ),
+                    ),
+                  );
+                } else {
+                  return Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: FloatingActionButton.extended(
+                      onPressed: _submitLoaner,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      label: Text(
+                        widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
+                        style: AppTextTheme.body,
+                      ),
+                      icon: const Icon(Icons.save),
+                    ),
+                  );
                 }
               },
             ),
           ],
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomerAutocompleteField(
-                    controller: _controllers['name']!,
-                    label: l10n.name,
-                    required: true,
-                    onSelected: (customer) {
-                      _selectedCustomer = customer;
-                      _controllers['name']?.text = customer.name;
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      setState(() {});
-                    },
-                  ),
-                  _buildTextField(
-                    key: 'amount',
-                    label: l10n.amount,
-                    required: true,
-                    isAmount: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: TextFormField(
-                      controller: _controllers['date'],
-                      readOnly: true,
-                      onTap: () => _selectDate(context),
-                      onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
-                      decoration: InputDecoration(
-                        labelText: l10n.toDate,
-                        labelStyle: AppTextTheme.body,
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                        ),
-                        suffixIcon: const Icon(Icons.calendar_today, size: 20),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                      ),
-                      validator: (value) => value!.isEmpty ? l10n.nameRequired(l10n.toDate) : null,
-                    ),
-                  ),
-                  _buildTextField(
-                    key: 'note',
-                    label: l10n.note,
-                    maxLines: 3,
-                    textInputAction: TextInputAction.newline,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _submitLoaner,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                    ),
-                    child: Text(
-                      widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
-                      style: AppTextTheme.body,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
       ),
     );

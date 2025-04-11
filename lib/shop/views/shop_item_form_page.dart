@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_app/app/app.dart';
@@ -219,6 +220,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: CustomTextFormField(
+        onTapOutside: (_) {},
         controller: _controllers[key]!,
         hintText: '',
         textCapitalization: textCapitalization,
@@ -269,242 +271,273 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
             },
           ),
         ),
-        body: MultiBlocListener(
-          listeners: [
-            BlocListener<UploadBloc, UploadState>(
-              bloc: context.read<ShopBloc>().upload,
-              listener: (context, state) {
-                if (state is UploadSuccess) {
-                  final shopBloc = context.read<ShopBloc>();
-                  final item = ShopItemModel(
-                    id: widget.existingItem?.id ?? 0,
-                    name: _controllers['name']!.text,
-                    defaultPrice: int.tryParse(_controllers['defaultPrice']!.text) ?? 0,
-                    customerPrice: _controllers['customerPrice']!.text.isNotEmpty
-                        ? int.tryParse(_controllers['customerPrice']!.text)
-                        : null,
-                    sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
-                        ? int.tryParse(_controllers['sellerPrice']!.text)
-                        : null,
-                    note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
-                    imageUrl: state.imageUrl, // Use uploaded URL
-                    category: _categoryFilter,
+        body: Stack(
+          children: [
+            MultiBlocListener(
+              listeners: [
+                BlocListener<UploadBloc, UploadState>(
+                  bloc: context.read<ShopBloc>().upload,
+                  listener: (context, state) {
+                    if (state is UploadSuccess) {
+                      final shopBloc = context.read<ShopBloc>();
+                      final item = ShopItemModel(
+                        id: widget.existingItem?.id ?? 0,
+                        name: _controllers['name']!.text,
+                        defaultPrice: int.tryParse(_controllers['defaultPrice']!.text) ?? 0,
+                        customerPrice: _controllers['customerPrice']!.text.isNotEmpty
+                            ? int.tryParse(_controllers['customerPrice']!.text)
+                            : null,
+                        sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
+                            ? int.tryParse(_controllers['sellerPrice']!.text)
+                            : null,
+                        note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+                        imageUrl: state.imageUrl, // Use uploaded URL
+                        category: _categoryFilter,
+                      );
+                      if (widget.existingItem != null) {
+                        shopBloc.add(ShopEditItemEvent(body: item));
+                      } else {
+                        shopBloc.add(ShopCreateItemEvent(body: item));
+                      }
+                    } else if (state is UploadFailure) {
+                      showErrorSnackBar(context, 'Upload failed: ${state.error}');
+                    }
+                  },
+                ),
+                BlocListener<ShopBloc, ShopState>(
+                  listener: (context, state) {
+                    if (state is ShopLoaded) context.pop();
+                  },
+                ),
+              ],
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTextField(
+                        textCapitalization: TextCapitalization.sentences,
+                        key: 'name',
+                        label: l10n.name,
+                        required: true,
+                      ),
+                      _buildTextField(
+                        key: 'customerPrice',
+                        label: l10n.customerPrice,
+                        isPrice: true,
+                        required: true,
+                        keyboardType: TextInputType.number,
+                      ),
+                      _buildTextField(
+                        key: 'defaultPrice',
+                        isPrice: true,
+                        label: l10n.defaultPrice,
+                        keyboardType: TextInputType.number,
+                      ),
+                      _buildTextField(
+                        key: 'sellerPrice',
+                        label: l10n.sellerPrice,
+                        isPrice: true,
+                        keyboardType: TextInputType.number,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: CategoryDropdown(
+                          initialValue: widget.existingItem?.category,
+                          onChanged: (value) {
+                            _categoryFilter = value;
+                            _detectChanges();
+                          },
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(8)),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 20,
+                            ),
+                            filled: true,
+                            fillColor: colorScheme.surface,
+                          ),
+                        ),
+                      ),
+                      _buildTextField(
+                        key: 'note',
+                        maxLines: 3,
+                        label: l10n.note,
+                        textInputAction: TextInputAction.newline,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.image,
+                              style: AppTextTheme.body,
+                            ),
+                            const SizedBox(height: 8),
+                            BlocBuilder<UploadBloc, UploadState>(
+                              bloc: context.read<ShopBloc>().upload,
+                              builder: (context, state) {
+                                final uploadBloc = context.read<ShopBloc>().upload;
+                                return Row(
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        if (state is UploadInProgress) return;
+                                        uploadBloc.showImageSourceDialog(
+                                          context,
+                                          onTakePhoto: () => uploadBloc.add(
+                                            SelectImageEvent(ImageSource.camera),
+                                          ),
+                                          onChoseFromGallery: () => uploadBloc.add(
+                                            SelectImageEvent(ImageSource.gallery),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(Icons.upload),
+                                      label: Text(
+                                        l10n.uploadImage,
+                                        style: AppTextTheme.body,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        foregroundColor: colorScheme.onSurface,
+                                        backgroundColor: colorScheme.surface,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    switch (state) {
+                                      UploadImageSelected() => Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: Image.file(
+                                                state.selectedImage,
+                                                width: 80,
+                                                height: 80,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 5,
+                                              right: 5,
+                                              child: Container(
+                                                width: 24,
+                                                height: 24,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: .5),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    uploadBloc.add(ClearImageEvent());
+                                                    _detectChanges();
+                                                  },
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.white,
+                                                    size: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      UploadImageUrlLoaded() => Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: Image.network(
+                                                state.imageUrl,
+                                                width: 80,
+                                                height: 80,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 5,
+                                              right: 5,
+                                              child: Container(
+                                                width: 24,
+                                                height: 24,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: .5),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    uploadBloc.add(ClearImageEvent());
+                                                    _detectChanges();
+                                                  },
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.white,
+                                                    size: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      _ => const SizedBox.shrink(),
+                                    },
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 80), // Extra space for FAB
+                      // Button removed from here
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            KeyboardVisibilityBuilder(
+              builder: (context, isKeyboardVisible) {
+                if (!isKeyboardVisible) {
+                  return Positioned(
+                    bottom: 16,
+                    left: 16,
+                    right: 16,
+                    child: ElevatedButton(
+                      onPressed: _submitItem,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                      ),
+                      child: Text(
+                        widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
+                        style: AppTextTheme.body,
+                      ),
+                    ),
                   );
-                  if (widget.existingItem != null) {
-                    shopBloc.add(ShopEditItemEvent(body: item));
-                  } else {
-                    shopBloc.add(ShopCreateItemEvent(body: item));
-                  }
-                } else if (state is UploadFailure) {
-                  showErrorSnackBar(context, 'Upload failed: ${state.error}');
+                } else {
+                  return Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: FloatingActionButton.extended(
+                      onPressed: _submitItem,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      label: Text(
+                        widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
+                        style: AppTextTheme.body,
+                      ),
+                      icon: const Icon(Icons.save),
+                    ),
+                  );
                 }
               },
             ),
-            BlocListener<ShopBloc, ShopState>(
-              listener: (context, state) {
-                if (state is ShopLoaded) context.pop();
-              },
-            ),
           ],
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTextField(
-                    textCapitalization: TextCapitalization.sentences,
-                    key: 'name',
-                    label: l10n.name,
-                    required: true,
-                  ),
-                  _buildTextField(
-                    key: 'customerPrice',
-                    label: l10n.customerPrice,
-                    isPrice: true,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'defaultPrice',
-                    isPrice: true,
-                    label: l10n.defaultPrice,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _buildTextField(
-                    key: 'sellerPrice',
-                    label: l10n.sellerPrice,
-                    isPrice: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: CategoryDropdown(
-                      initialValue: widget.existingItem?.category,
-                      onChanged: (value) {
-                        _categoryFilter = value;
-                        _detectChanges();
-                      },
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                        ),
-                        filled: true,
-                        fillColor: colorScheme.surface,
-                      ),
-                    ),
-                  ),
-                  _buildTextField(
-                    key: 'note',
-                    maxLines: 3,
-                    label: l10n.note,
-                    textInputAction: TextInputAction.newline,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.image,
-                          style: AppTextTheme.body,
-                        ),
-                        const SizedBox(height: 8),
-                        BlocBuilder<UploadBloc, UploadState>(
-                          bloc: context.read<ShopBloc>().upload,
-                          builder: (context, state) {
-                            final uploadBloc = context.read<ShopBloc>().upload;
-                            return Row(
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    if (state is UploadInProgress) return;
-                                    uploadBloc.showImageSourceDialog(
-                                      context,
-                                      onTakePhoto: () => uploadBloc.add(
-                                        SelectImageEvent(ImageSource.camera),
-                                      ),
-                                      onChoseFromGallery: () => uploadBloc.add(
-                                        SelectImageEvent(ImageSource.gallery),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.upload),
-                                  label: Text(
-                                    l10n.uploadImage,
-                                    style: AppTextTheme.body,
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: colorScheme.onSurface,
-                                    backgroundColor: colorScheme.surface,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                switch (state) {
-                                  UploadImageSelected() => Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: Image.file(
-                                            state.selectedImage,
-                                            width: 80,
-                                            height: 80,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 5,
-                                          right: 5,
-                                          child: Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withValues(alpha: .5),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                uploadBloc.add(ClearImageEvent());
-                                                _detectChanges();
-                                              },
-                                              child: const Icon(
-                                                Icons.close,
-                                                color: Colors.white,
-                                                size: 16,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  UploadImageUrlLoaded() => Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: Image.network(
-                                            state.imageUrl,
-                                            width: 80,
-                                            height: 80,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 5,
-                                          right: 5,
-                                          child: Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withValues(alpha: .5),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                uploadBloc.add(ClearImageEvent());
-                                                _detectChanges(); // Update form change status
-                                              },
-                                              child: const Icon(
-                                                Icons.close,
-                                                color: Colors.white,
-                                                size: 16,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  _ => const SizedBox.shrink(),
-                                },
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _submitItem,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                    ),
-                    child: Text(
-                      widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
-                      style: AppTextTheme.body,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
       ),
     );
