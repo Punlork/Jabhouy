@@ -68,15 +68,7 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                 ),
             child: items.isEmpty
                 ? EmptyView(msg: context.l10n.noLoanerFound)
-                : ListView.separated(
-                    separatorBuilder: (context, index) => index != items.length - 1
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(
-                              color: Colors.grey.shade200,
-                            ),
-                          )
-                        : const SizedBox(),
+                : ListView.builder(
                     controller: controller,
                     physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
                     padding: const EdgeInsets.all(16),
@@ -94,7 +86,10 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                       }
 
                       final loaner = items[index];
-                      return _buildLoanerItem(context, loaner);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildLoanerItem(context, loaner),
+                      );
                     },
                   ),
           ),
