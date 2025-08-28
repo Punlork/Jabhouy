@@ -49,11 +49,13 @@ class LoanerItem extends StatelessWidget {
                             ],
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${loaner.amount} រៀល',
-                          style: AppTextTheme.body,
-                        ),
+                        if (loaner.amount != 0) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            '${loaner.amount} រៀល',
+                            style: AppTextTheme.body,
+                          ),
+                        ]
                       ],
                     ),
                     Text(
@@ -63,7 +65,7 @@ class LoanerItem extends StatelessWidget {
                   ],
                 ),
                 if (loaner.note != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 2),
                   Text(
                     '${context.l10n.note}: ${loaner.note}',
                     style: AppTextTheme.caption,

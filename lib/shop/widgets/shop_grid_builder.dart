@@ -98,15 +98,17 @@ class CategoryChips extends StatelessWidget {
                             5,
                             (index) => Padding(
                               padding: EdgeInsets.only(
-                                right: index == 4 ? 0 : 8,
+                                right: index == 4 ? 0 : 4,
                               ),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.grey[300]!,
                                 highlightColor: Colors.grey[100]!,
                                 child: Chip(
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   label: Container(
-                                    width: 40,
+                                    width: 30,
                                     height: 20,
                                     color: Colors.white,
                                   ),
