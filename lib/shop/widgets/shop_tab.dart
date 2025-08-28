@@ -37,7 +37,7 @@ class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMix
           ShopGetItemsEvent(
             forceRefresh: true,
             page: 1,
-            limit: 10,
+            limit: 100,
           ),
         );
     context.read<CategoryBloc>().add(CategoryGetEvent());

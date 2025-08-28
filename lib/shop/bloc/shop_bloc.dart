@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
@@ -140,7 +139,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
     final newCategoryFilter = event.categoryFilter;
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
-    final newPageSize = event.limit ?? (currentState?.pagination.limit ?? 10);
+    final newPageSize = event.limit ?? (currentState?.pagination.limit ?? 100);
 
     final isFilterChange = newSearchQuery != currentState?.searchQuery;
     final isCategoryChange = newCategoryFilter != currentState?.categoryFilter;

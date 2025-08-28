@@ -56,22 +56,18 @@ Future<http.Response> interceptRequest(
   );
   final pathWithQuery = uri.query.isNotEmpty ? '${uri.path}?${uri.query}' : uri.path;
   final startTime = DateTime.now();
-  final timeFormatter = DateFormat('MMMM d, yyyy h:mm:ss a');
 
-  logger.d('$method $pathWithQuery started: ${timeFormatter.format(startTime.toLocal())}');
+  logger.d('Starting: $method $pathWithQuery');
 
   if (body != null) logger.d('Request body: ${jsonEncode(body)}');
 
   final response = await request();
 
-  if (response.body.isNotEmpty) {
-    logger.d('Response body: ${response.body}');
-  }
-
   final endTime = DateTime.now();
 
   logger.d(
-      '$method response $pathWithQuery received: ${response.statusCode} at ${timeFormatter.format(endTime.toLocal())}');
+    'Finished: $method $pathWithQuery ${response.statusCode} (${endTime.difference(startTime).inSeconds} sec)',
+  );
   return response;
 }
 
