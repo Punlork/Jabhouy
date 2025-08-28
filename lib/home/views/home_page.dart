@@ -310,11 +310,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             _onItemTapped(index);
             setState(() {});
           },
+          backgroundGradient: LinearGradient(
+            colors: [
+              colorScheme.primaryContainer,
+              colorScheme.primary,
+            ],
+          ),
           gapLocation: GapLocation.end,
           notchSmoothness: NotchSmoothness.defaultEdge,
           notchMargin: 20,
           leftCornerRadius: 16,
-          backgroundColor: colorScheme.surface,
           splashColor: colorScheme.primary.withOpacity(.3),
           splashRadius: 30,
           shadow: BoxShadow(

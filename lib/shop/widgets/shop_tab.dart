@@ -95,7 +95,9 @@ class ShopGridLoading extends StatelessWidget {
       physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+            bottom: 52,
+          ),
           sliver: SliverGrid.builder(
             itemCount: 6,
             itemBuilder: (context, index) => const GridShopItemShimmer(),
@@ -103,7 +105,7 @@ class ShopGridLoading extends StatelessWidget {
               crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 0.85,
+              childAspectRatio: 0.95,
             ),
           ),
         ),
