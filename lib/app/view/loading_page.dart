@@ -82,7 +82,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
           opacity: _random.nextDouble() * 0.6 + 0.2,
         ),
       );
-    } 
+    }
   }
 
   @override
@@ -118,7 +118,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                   colors: [
                     colorScheme.primary,
                     colorScheme.primaryContainer,
-                    colorScheme.secondary.withValues(alpha: .8),
+                    colorScheme.secondary.withOpacity(.8),
                   ],
                   stops: const [0.0, 0.6, 1.0],
                 ),
@@ -133,7 +133,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                   child: CustomPaint(
                     size: Size(size.width, size.height),
                     painter: BackgroundPatternPainter(
-                      color: colorScheme.onPrimary.withValues(alpha: .1),
+                      color: colorScheme.onPrimary.withOpacity(.1),
                     ),
                   ),
                 );
@@ -175,7 +175,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                             height: 80,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colorScheme.onPrimary.withValues(alpha: .15),
+                              color: colorScheme.onPrimary.withOpacity(.15),
                             ),
                           ),
                         ),
@@ -187,14 +187,14 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: colorScheme.onPrimary.withValues(alpha: .7),
+                                color: colorScheme.onPrimary.withOpacity(.7),
                                 width: 4,
                                 strokeAlign: BorderSide.strokeAlignOutside,
                               ),
                               gradient: SweepGradient(
                                 colors: [
-                                  colorScheme.onPrimary.withValues(alpha: .1),
-                                  colorScheme.onPrimary.withValues(alpha: .8),
+                                  colorScheme.onPrimary.withOpacity(.1),
+                                  colorScheme.onPrimary.withOpacity(.8),
                                 ],
                                 stops: const [0.0, 0.7],
                               ),
@@ -209,7 +209,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                             color: colorScheme.onPrimary,
                             boxShadow: [
                               BoxShadow(
-                                color: colorScheme.onPrimary.withValues(alpha: .5),
+                                color: colorScheme.onPrimary.withOpacity(.5),
                                 blurRadius: 10,
                                 spreadRadius: 2,
                               ),
@@ -236,7 +236,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                           fontWeight: FontWeight.bold, // Already w700
                           shadows: [
                             Shadow(
-                              color: Colors.black.withValues(alpha: .4),
+                              color: Colors.black.withOpacity(.4),
                               blurRadius: 10,
                               offset: const Offset(2, 2),
                             ),
@@ -253,7 +253,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                           TypewriterAnimatedText(
                             l10n.preparingExperience, // Translated
                             textStyle: AppTextTheme.body.copyWith(
-                              color: colorScheme.onPrimary.withValues(alpha: .9),
+                              color: colorScheme.onPrimary.withOpacity(.9),
                               fontSize: 18, // Override to match original
                               letterSpacing: 0.5,
                             ),
@@ -262,7 +262,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                           TypewriterAnimatedText(
                             l10n.loadingContent, // Translated
                             textStyle: AppTextTheme.body.copyWith(
-                              color: colorScheme.onPrimary.withValues(alpha: .9),
+                              color: colorScheme.onPrimary.withOpacity(.9),
                               fontSize: 18, // Override to match original
                               letterSpacing: 0.5,
                             ),
@@ -271,7 +271,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                           TypewriterAnimatedText(
                             l10n.almostThere, // Translated
                             textStyle: AppTextTheme.body.copyWith(
-                              color: colorScheme.onPrimary.withValues(alpha: .9),
+                              color: colorScheme.onPrimary.withOpacity(.9),
                               fontSize: 18, // Override to match original
                               letterSpacing: 0.5,
                             ),
@@ -297,7 +297,7 @@ class _LoadingPageState extends State<LoadingPage> with TickerProviderStateMixin
                   child: Text(
                     l10n.appVersion('1.0.0'), // Translated with parameter
                     style: AppTextTheme.caption.copyWith(
-                      color: colorScheme.onPrimary.withValues(alpha: .6),
+                      color: colorScheme.onPrimary.withOpacity(.6),
                       fontSize: 14, // Override to match original
                     ),
                   ),
@@ -394,7 +394,7 @@ class ParticlesPainter extends CustomPainter {
       particle.update(size);
 
       final paint = Paint()
-        ..color = color.withValues(alpha: particle.opacity)
+        ..color = color.withOpacity(particle.opacity)
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(

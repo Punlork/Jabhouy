@@ -128,23 +128,24 @@ class LoanerItemShimmer extends StatelessWidget {
               children: [
                 Expanded(
                   child: Column(
-                    spacing: 12,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
                         width: 150,
                         height: 20,
-                        color: Colors.white, // Name placeholder
+                        color: Colors.white,
                       ),
+                      const SizedBox(height: 12),
                       Container(
                         width: 100,
                         height: 16,
-                        color: Colors.white, // Amount placeholder
+                        color: Colors.white,
                       ),
+                      const SizedBox(height: 12),
                       Container(
                         width: 200,
                         height: 16,
-                        color: Colors.white, // Note placeholder
+                        color: Colors.white,
                       ),
                     ],
                   ),

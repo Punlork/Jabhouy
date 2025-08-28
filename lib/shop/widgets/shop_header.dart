@@ -24,11 +24,10 @@ class ShopHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    AppLocalizations.of(context);
 
     return Container(
       // height: 100,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -38,19 +37,20 @@ class ShopHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              const _UserProfile(),
-              const Spacer(),
-              _SettingsButton(onPressed: onSettingsPressed),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     const _UserProfile(),
+          //     const Spacer(),
+          //     _SettingsButton(onPressed: onSettingsPressed),
+          //   ],
+          // ),
           const SizedBox(height: 8),
           _SearchBar(
             hasFilter: hasFilter,
             controller: searchController,
             onChanged: onSearchChanged,
             onFilterPressed: onFilterPressed,
+            onSettingsPressed: onSettingsPressed,
           ),
           const SizedBox(height: 20),
         ],
@@ -152,11 +152,13 @@ class _SearchBar extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.onFilterPressed,
+    required this.onSettingsPressed,
     required this.hasFilter,
   });
   final TextEditingController controller;
   final ValueChanged<String?> onChanged;
   final VoidCallback onFilterPressed;
+  final VoidCallback onSettingsPressed;
   final bool hasFilter;
 
   @override
@@ -175,6 +177,10 @@ class _SearchBar extends StatelessWidget {
               labelText: '',
               prefixIcon: Icons.search,
               onChanged: onChanged,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
               action: TextInputAction.search,
               showClearButton: true,
               floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -182,7 +188,7 @@ class _SearchBar extends StatelessWidget {
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withValues(alpha: .8),
+                      color: Colors.white.withOpacity(.8),
                       fontWeight: FontWeight.w300,
                     ),
                 border: OutlineInputBorder(
@@ -202,34 +208,12 @@ class _SearchBar extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: .3),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(.3),
               ),
             ),
           ),
           const SizedBox(width: 8),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButtonWidget(
-                icon: Icons.filter_list,
-                onPressed: onFilterPressed,
-                colorScheme: colorScheme,
-              ),
-              if (hasFilter)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          _SettingsButton(onPressed: onSettingsPressed),
         ],
       ),
     );

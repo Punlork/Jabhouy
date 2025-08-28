@@ -428,7 +428,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                 width: 24,
                                                 height: 24,
                                                 decoration: BoxDecoration(
-                                                  color: Colors.black.withValues(alpha: .5),
+                                                  color: Colors.black.withOpacity(.5),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: GestureDetector(
@@ -465,7 +465,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                 width: 24,
                                                 height: 24,
                                                 decoration: BoxDecoration(
-                                                  color: Colors.black.withValues(alpha: .5),
+                                                  color: Colors.black.withOpacity(.5),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: GestureDetector(

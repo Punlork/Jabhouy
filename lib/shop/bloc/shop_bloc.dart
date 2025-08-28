@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
@@ -141,14 +142,23 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
     final newPageSize = event.limit ?? (currentState?.pagination.limit ?? 10);
 
-    final isFilterChange =
-        newSearchQuery != currentState?.searchQuery || newCategoryFilter != currentState?.categoryFilter;
+    final isFilterChange = newSearchQuery != currentState?.searchQuery;
+    final isCategoryChange = newCategoryFilter != currentState?.categoryFilter;
 
-    final effectivePage = isFilterChange ? 1 : newPage;
+    final effectivePage = isFilterChange || isCategoryChange ? 1 : newPage;
+    final showFilterLoading = effectivePage == 1 && isFilterChange || isCategoryChange;
 
-    final showFilterLoading = effectivePage == 1 && isFilterChange;
-
-    if (state is ShopInitial || (event.forceRefresh && effectivePage == 1) || showFilterLoading) {
+    if (isCategoryChange || event.forceRefresh || isFilterChange) {
+      if (currentState != null) {
+        emit(
+          currentState.copyWith(
+            isFiltering: true,
+            categoryFilter: newCategoryFilter,
+            searchQuery: newSearchQuery,
+          ),
+        );
+      }
+    } else if (state is ShopInitial || effectivePage == 1 || showFilterLoading) {
       emit(const ShopLoading());
     }
 

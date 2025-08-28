@@ -85,6 +85,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onGetItems(CategoryGetEvent event, Emitter<CategoryState> emit) async {
+    emit(const CategoryLoading());
     try {
       final response = await _service.getCategory();
 

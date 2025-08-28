@@ -23,6 +23,7 @@ class CustomTextFormField extends StatefulWidget {
     this.onCleared,
     this.textCapitalization,
     this.onTapOutside,
+    this.style,
   });
 
   final TextEditingController controller;
@@ -44,6 +45,7 @@ class CustomTextFormField extends StatefulWidget {
   final VoidCallback? onCleared;
   final void Function(PointerDownEvent)? onTapOutside;
   final TextCapitalization? textCapitalization;
+  final TextStyle? style;
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -116,7 +118,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             IconButton(
               icon: Icon(
                 Icons.clear,
-                color: colorScheme.onSurface.withValues(alpha: .6),
+                color: colorScheme.onSurface.withOpacity(.6),
               ),
               onPressed: _clearText,
             ),
@@ -135,7 +137,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       focusedBorder: customBorder,
       disabledBorder: customBorder,
       labelStyle: TextStyle(
-        color: colorScheme.onSurface.withValues(alpha: .6),
+        color: colorScheme.onSurface.withOpacity(.6),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       floatingLabelBehavior: widget.floatingLabelBehavior,
@@ -159,12 +161,12 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             suffixText: widget.decoration!.suffixText,
             suffixStyle: widget.decoration!.suffixStyle,
             enabled: widget.decoration!.enabled,
-
             //! Add other properties as needed
           )
         : baseDecoration;
 
     return TextFormField(
+      style: widget.style,
       controller: widget.controller,
       keyboardType: widget.keyboardType,
       obscureText: widget.obscureText,

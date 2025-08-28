@@ -27,7 +27,7 @@ class GridShopItemCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 200,
+              height: 150,
               padding: const EdgeInsets.all(8).copyWith(bottom: 0),
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
@@ -59,7 +59,6 @@ class GridShopItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                spacing: 8,
                 children: [
                   Text(
                     item.name,
@@ -96,6 +95,7 @@ class GridShopItemShimmer extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Shimmer.fromColors(
+        // enabled: false,
         baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
         child: Column(
@@ -121,7 +121,6 @@ class GridShopItemShimmer extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8),
               child: Column(
-                spacing: 8,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -130,6 +129,7 @@ class GridShopItemShimmer extends StatelessWidget {
                     height: 16,
                     color: Colors.white,
                   ),
+                  const SizedBox(height: 8),
                   Container(
                     width: 80,
                     height: 12,

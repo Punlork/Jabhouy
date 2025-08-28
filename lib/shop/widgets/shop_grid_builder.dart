@@ -5,9 +5,136 @@ import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/shop/shop.dart';
+import 'package:shimmer/shimmer.dart';
+
+class CategoryChips extends StatelessWidget {
+  const CategoryChips({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ShopBloc, ShopState>(
+      builder: (context, shopState) {
+        final currentShopState = shopState.asLoaded;
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () => context.read<ShopBloc>().add(ShopGetItemsEvent()),
+                child: Chip(
+                  label: const Text('All'),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  backgroundColor: currentShopState?.categoryFilter == null
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.surface,
+                  labelStyle: TextStyle(
+                    color: currentShopState?.categoryFilter == null
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 2),
+              SizedBox(
+                height: 30,
+                child: VerticalDivider(
+                  color: Colors.grey[200],
+                ),
+              ),
+              BlocBuilder<CategoryBloc, CategoryState>(
+                builder: (context, state) {
+                  if (state is CategoryLoaded) {
+                    return Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: List.generate(
+                            state.items.length,
+                            (index) {
+                              final category = state.items[index];
+                              final isSelected = currentShopState?.categoryFilter?.name == category.name;
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  right: index == state.items.length - 1 ? 0 : 8,
+                                ),
+                                child: InkWell(
+                                  onTap: () => context.read<ShopBloc>().add(
+                                        ShopGetItemsEvent(categoryFilter: category),
+                                      ),
+                                  child: Chip(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    label: Text(category.name),
+                                    backgroundColor: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.surface,
+                                    labelStyle: TextStyle(
+                                      color: isSelected
+                                          ? Theme.of(context).colorScheme.onPrimary
+                                          : Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ).toList(),
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (state is CategoryLoading) {
+                    return Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: List.generate(
+                            5,
+                            (index) => Padding(
+                              padding: EdgeInsets.only(
+                                right: index == 4 ? 0 : 8,
+                              ),
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Chip(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  label: Container(
+                                    width: 40,
+                                    height: 20,
+                                    color: Colors.white,
+                                  ),
+                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                ),
+                              ),
+                            ),
+                          ).toList(),
+                        ),
+                      ),
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
 
 class ShopGridBuilder extends StatefulWidget {
-  const ShopGridBuilder({super.key});
+  const ShopGridBuilder({
+    required this.items,
+    required this.pagination,
+    super.key,
+  });
+
+  final List<ShopItemModel> items;
+  final Pagination pagination;
 
   @override
   State<ShopGridBuilder> createState() => _ShopGridBuilderState();
@@ -43,52 +170,46 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return BlocBuilder<ShopBloc, ShopState>(
-      builder: (context, state) => switch (state) {
-        ShopLoaded(:final items, :final pagination) => CustomScrollView(
-            controller: controller,
-            physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverToBoxAdapter(
-                  child: MasonryGridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) => GridShopItemCard(
-                      key: ValueKey(items[index].id),
-                      item: items[index],
-                      onEdit: (item) => _showEditSheet(context, item),
-                    ),
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    padding: EdgeInsets.zero,
-                    gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                      // childAspectRatio: 0.65,
-                    ),
-                  ),
-                ),
+    return CustomScrollView(
+      controller: controller,
+      physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 52),
+          sliver: SliverToBoxAdapter(
+            child: MasonryGridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: widget.items.length,
+              itemBuilder: (context, index) => GridShopItemCard(
+                key: ValueKey(widget.items[index].id),
+                item: widget.items[index],
+                onEdit: (item) => _showEditSheet(context, item),
               ),
-              SliverToBoxAdapter(
-                child: Builder(
-                  builder: (context) {
-                    Widget child = const SizedBox.shrink();
-                    if (pagination.hasNext) {
-                      child = const CustomLoading();
-                    }
-                    return child;
-                  },
-                ),
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              padding: EdgeInsets.zero,
+              gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
               ),
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 70),
-              ),
-            ],
+            ),
           ),
-        _ => const SizedBox.shrink(),
-      },
+        ),
+        SliverToBoxAdapter(
+          child: Builder(
+            builder: (context) {
+              Widget child = const SizedBox.shrink();
+              if (widget.pagination.hasNext) {
+                child = const CustomLoading();
+              }
+              return child;
+            },
+          ),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 70),
+        ),
+      ],
     );
   }
 

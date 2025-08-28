@@ -73,8 +73,8 @@ class _FilterSheetState extends State<FilterSheet> {
                         context.pop();
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.primary,
-                  foregroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.onPrimary,
+                  backgroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.primary,
+                  foregroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.onPrimary,
                 ),
                 child: Text(context.l10n.apply),
               ),

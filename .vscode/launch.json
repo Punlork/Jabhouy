@@ -10,6 +10,9 @@
       "type": "dart",
       "program": "lib/main_development.dart",
       "args": [
+        "fvm",
+        "flutter",
+        "run",
         "--flavor",
         "development",
         "--target",
@@ -22,7 +25,15 @@
       "request": "launch",
       "type": "dart",
       "program": "lib/main_staging.dart",
-      "args": ["--flavor", "staging", "--target", "lib/main_staging.dart"]
+      "args": [
+        "fvm",
+        "flutter",
+        "run",
+        "--flavor",
+        "staging",
+        "--target",
+        "lib/main_staging.dart"
+      ]
     },
     {
       "name": "Launch production",
@@ -30,6 +41,9 @@
       "type": "dart",
       "program": "lib/main_production.dart",
       "args": [
+        "fvm",
+        "flutter",
+        "run",
         "--flavor",
         "production",
         "--target",

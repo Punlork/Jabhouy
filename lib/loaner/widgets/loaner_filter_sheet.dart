@@ -169,8 +169,8 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                         Navigator.pop(context);
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.primary,
-                  foregroundColor: isDisabled ? colorScheme.onSurface.withValues(alpha: .38) : colorScheme.onPrimary,
+                  backgroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.primary,
+                  foregroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.onPrimary,
                 ),
                 child: Text(l10n.apply),
               ),

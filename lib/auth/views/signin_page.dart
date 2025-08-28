@@ -130,7 +130,7 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                         Text(
                           l10n.signInToContinue,
                           style: AppTextTheme.body.copyWith(
-                            color: colorScheme.onPrimary.withValues(alpha: .8),
+                            color: colorScheme.onPrimary.withOpacity(.8),
                           ),
                         ),
                         const SizedBox(height: 40),

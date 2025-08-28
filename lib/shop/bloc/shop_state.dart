@@ -20,13 +20,23 @@ class ShopLoaded extends ShopState {
     required this.paginatedItems,
     this.searchQuery = '',
     this.categoryFilter,
+    this.isFiltering,
   });
 
   final PaginatedResponse<ShopItemModel> paginatedItems;
   final String searchQuery;
   final CategoryItemModel? categoryFilter;
+  final bool? isFiltering;
 
   List<ShopItemModel> get items => paginatedItems.items;
+
+  List<CategoryItemModel> get itemCategories => paginatedItems.items
+      .map((e) => e.category)
+      .where((element) => element != null)
+      .toSet()
+      .toList()
+      .cast<CategoryItemModel>();
+
   Pagination get pagination => paginatedItems.pagination;
 
   ShopLoaded copyWith({
@@ -34,12 +44,13 @@ class ShopLoaded extends ShopState {
     String? searchQuery,
     CategoryItemModel? categoryFilter,
     String? buyerFilter,
-    bool? isMoreLoading,
+    bool? isFiltering,
   }) {
     return ShopLoaded(
       paginatedItems: paginatedItems ?? this.paginatedItems,
       searchQuery: searchQuery ?? this.searchQuery,
-      categoryFilter: categoryFilter ?? this.categoryFilter,
+      categoryFilter: categoryFilter,
+      isFiltering: isFiltering ?? this.isFiltering,
     );
   }
 
@@ -49,6 +60,7 @@ class ShopLoaded extends ShopState {
         categoryFilter,
         paginatedItems,
         items.length,
+        isFiltering,
         ...items,
       ];
 }

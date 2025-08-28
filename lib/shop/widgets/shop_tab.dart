@@ -22,15 +22,11 @@ class _ShopTabView extends StatefulWidget {
 
 class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMixin {
   bool _shouldRebuild(ShopState previous, ShopState current) {
+    if (previous.runtimeType != current.runtimeType) return true;
     if (previous is ShopLoaded && current is ShopLoaded) {
-      for (var i = 0; i < previous.asLoaded!.items.length; i++) {
-        if (previous.items[i] != current.items[i]) {
-          return true;
-        }
-      }
-      return previous.searchQuery != current.searchQuery ||
-          previous.categoryFilter != current.categoryFilter ||
-          previous.items.length != current.items.length;
+      return previous.items.length != current.items.length ||
+          previous.searchQuery != current.searchQuery ||
+          previous.itemCategories != current.itemCategories;
     }
     return true;
   }
@@ -51,38 +47,69 @@ class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMix
   Widget build(BuildContext context) {
     super.build(context);
 
-    return BlocBuilder<ShopBloc, ShopState>(
-      buildWhen: _shouldRebuild,
-      builder: (context, state) => switch (state) {
-        ShopInitial() || ShopLoading() => CustomScrollView(
-            physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverGrid.builder(
-                  itemCount: 6,
-                  itemBuilder: (context, index) => const GridShopItemShimmer(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.65,
+    return Column(
+      children: [
+        const CategoryChips(),
+        Expanded(
+          child: BlocBuilder<ShopBloc, ShopState>(
+            buildWhen: _shouldRebuild,
+            builder: (context, state) => switch (state) {
+              ShopInitial() || ShopLoading() => const ShopGridLoading(),
+              ShopLoaded(:final items, :final pagination, :final isFiltering) => RefreshIndicator(
+                  onRefresh: _refreshItems,
+                  child: Builder(
+                    builder: (context) {
+                      if (isFiltering != null && isFiltering) {
+                        return const ShopGridLoading();
+                      }
+                      if (items.isEmpty) {
+                        return const EmptyView();
+                      }
+                      return ShopGridBuilder(
+                        items: items,
+                        pagination: pagination,
+                      );
+                    },
                   ),
                 ),
-              ),
-            ],
+              ShopError(:final message) => ErrorView(message: message),
+            },
           ),
-        ShopLoaded(:final items) => RefreshIndicator(
-            onRefresh: _refreshItems,
-            child: items.isEmpty ? const EmptyView() : const ShopGridBuilder(),
-          ),
-        ShopError(:final message) => ErrorView(message: message),
-      },
+        ),
+      ],
     );
   }
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class ShopGridLoading extends StatelessWidget {
+  const ShopGridLoading({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverGrid.builder(
+            itemCount: 6,
+            itemBuilder: (context, index) => const GridShopItemShimmer(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class ErrorView extends StatelessWidget {

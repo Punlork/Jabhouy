@@ -64,7 +64,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void _onSearchChanged(String? value) {
     switch (_selectedIndex) {
       case 0:
-        context.read<ShopBloc>().add(ShopGetItemsEvent(searchQuery: value));
+        context.read<ShopBloc>().add(
+              ShopGetItemsEvent(
+                searchQuery: value,
+                categoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+              ),
+            );
       case 1:
         context.read<LoanerBloc>().add(LoadLoaners(searchQuery: value));
     }
@@ -230,7 +235,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ),
               Container(
                 margin: EdgeInsets.only(
-                  top: statusBarHeight + 140,
+                  top: statusBarHeight + 78,
                 ),
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -297,7 +302,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           tabBuilder: (int index, bool isActive) => Icon(
             iconList[index],
             size: 26,
-            color: isActive ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: .6),
+            color: isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(.6),
           ),
           activeIndex: _selectedIndex,
           onTap: (index) {
@@ -310,13 +315,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           notchMargin: 20,
           leftCornerRadius: 16,
           backgroundColor: colorScheme.surface,
-          splashColor: colorScheme.primary.withValues(alpha: .3),
+          splashColor: colorScheme.primary.withOpacity(.3),
           splashRadius: 30,
           shadow: BoxShadow(
             offset: const Offset(0, 1),
             blurRadius: 12,
             spreadRadius: 0.5,
-            color: Colors.black.withValues(alpha: .1),
+            color: Colors.black.withOpacity(.1),
           ),
         ),
       ),
