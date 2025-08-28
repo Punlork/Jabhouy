@@ -18,17 +18,19 @@ class CategoryChips extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
             children: [
               InkWell(
                 onTap: () => context.read<ShopBloc>().add(ShopGetItemsEvent()),
                 child: Chip(
                   label: const Text('All'),
+                  visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   backgroundColor: currentShopState?.categoryFilter == null
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.surface,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   labelStyle: TextStyle(
                     color: currentShopState?.categoryFilter == null
                         ? Theme.of(context).colorScheme.onPrimary
@@ -58,14 +60,16 @@ class CategoryChips extends StatelessWidget {
                               final isSelected = currentShopState?.categoryFilter?.name == category.name;
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  right: index == state.items.length - 1 ? 0 : 8,
+                                  right: index == state.items.length - 1 ? 0 : 4,
                                 ),
                                 child: InkWell(
                                   onTap: () => context.read<ShopBloc>().add(
                                         ShopGetItemsEvent(categoryFilter: category),
                                       ),
                                   child: Chip(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
                                     label: Text(category.name),
                                     backgroundColor: isSelected
                                         ? Theme.of(context).colorScheme.primary

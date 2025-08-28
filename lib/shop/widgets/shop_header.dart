@@ -26,7 +26,6 @@ class ShopHeader extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      // height: 100,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -44,7 +43,6 @@ class ShopHeader extends StatelessWidget {
           //     _SettingsButton(onPressed: onSettingsPressed),
           //   ],
           // ),
-          const SizedBox(height: 8),
           _SearchBar(
             hasFilter: hasFilter,
             controller: searchController,
@@ -167,7 +165,7 @@ class _SearchBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return SizedBox(
-      height: 48,
+      height: 34,
       child: Row(
         children: [
           Expanded(
@@ -193,19 +191,19 @@ class _SearchBar extends StatelessWidget {
                       fontWeight: FontWeight.w300,
                     ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,

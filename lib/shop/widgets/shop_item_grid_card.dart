@@ -27,7 +27,7 @@ class GridShopItemCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 150,
+              height: 120,
               padding: const EdgeInsets.all(8).copyWith(bottom: 0),
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
@@ -41,8 +41,8 @@ class GridShopItemCard extends StatelessWidget {
                   child: FadeInImage.memoryNetwork(
                     image: item.imageUrl ?? '',
                     fit: BoxFit.fill,
-                    imageCacheHeight: 150,
-                    imageCacheWidth: 150,
+                    imageCacheHeight: 120,
+                    imageCacheWidth: 120,
                     height: 200,
                     placeholder: kTransparentImage,
                     imageErrorBuilder: (context, url, error) => const AppLogo(
