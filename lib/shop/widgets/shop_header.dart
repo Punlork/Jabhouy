@@ -186,6 +186,7 @@ class _SearchBar extends StatelessWidget {
               floatingLabelBehavior: FloatingLabelBehavior.always,
               useCustomBorder: false,
               decoration: InputDecoration(
+                prefixIconColor: Colors.white.withOpacity(.8),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.white.withOpacity(.8),

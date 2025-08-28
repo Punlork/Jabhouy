@@ -108,7 +108,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       prefixIcon: widget.prefixIcon != null
           ? Icon(
               widget.prefixIcon,
-              color: colorScheme.primary,
+              color: widget.decoration?.prefixIconColor ?? colorScheme.primary,
             )
           : null,
       suffixIcon: Row(
@@ -160,6 +160,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             hintStyle: widget.decoration!.hintStyle,
             suffixText: widget.decoration!.suffixText,
             suffixStyle: widget.decoration!.suffixStyle,
+
             enabled: widget.decoration!.enabled,
             //! Add other properties as needed
           )

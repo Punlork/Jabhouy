@@ -18,7 +18,7 @@ class CategoryChips extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: Row(
             children: [
               InkWell(
@@ -39,6 +39,7 @@ class CategoryChips extends StatelessWidget {
               const SizedBox(width: 2),
               SizedBox(
                 height: 30,
+                width: 8,
                 child: VerticalDivider(
                   color: Colors.grey[200],
                 ),
