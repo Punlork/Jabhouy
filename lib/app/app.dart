@@ -17,7 +17,6 @@ export 'utils/logger.dart';
 export 'utils/overlay_loading.dart';
 export 'utils/snack_bar.dart';
 export 'view/app.dart';
-export 'view/loading_page.dart';
 export 'widget/app_logo.dart';
 export 'widget/app_upgrader.dart';
 export 'widget/custom_loading.dart';

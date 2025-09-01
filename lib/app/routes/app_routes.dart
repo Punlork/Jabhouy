@@ -34,7 +34,6 @@ class AppRoutes {
   static const home = 'home';
   static const signin = 'signin';
   static const signup = 'signup';
-  static const loading = 'loading';
   static const formShop = 'form_shop';
   static const formLoaner = 'form_loaner';
   static const category = 'category';
@@ -44,12 +43,10 @@ class AppRoutes {
   static final allowedUnauthenticated = {
     signin.toPath,
     signup.toPath,
-    loading.toPath,
   };
 
   static final allowedAuthenticated = {
     home.toPath,
-    loading.toPath,
     '${home.toPath}${formShop.toPath}',
     '${home.toPath}${formLoaner.toPath}',
     '${home.toPath}${category.toPath}',
@@ -58,14 +55,10 @@ class AppRoutes {
   };
 
   static final GoRouter router = GoRouter(
-    initialLocation: loading.toPath,
+    initialLocation: signin.toPath,
     redirect: (context, state) {
       final authState = BlocProvider.of<AuthBloc>(context).state;
       final currentPath = state.matchedLocation;
-
-      if (authState is AuthLoading) {
-        return loading.toPath;
-      }
 
       if (authState is Unauthenticated) {
         if (!allowedUnauthenticated.contains(currentPath)) {
@@ -80,15 +73,6 @@ class AppRoutes {
       return null;
     },
     routes: [
-      GoRoute(
-        path: loading.toPath,
-        name: loading,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const LoadingPage(),
-          transitionsBuilder: _fadeTransition,
-        ),
-      ),
       GoRoute(
         path: home.toPath,
         name: home,

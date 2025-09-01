@@ -1,0 +1,3 @@
+Jabhouy is designed to help shop owners keep track of the items they have in stock and the customers who have borrowed them.
+You can add items, customers, and loaners, and view the current status of all items and loaners.
+The app is designed to be easy to use and to help you keep track of your items and customers quickly and easily.
