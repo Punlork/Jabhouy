@@ -36,6 +36,19 @@ $ flutter run --flavor staging --target lib/main_staging.dart
 $ flutter run --flavor production --target lib/main_production.dart
 ```
 
+To build the desired flavor either use the launch configuration in VSCode/Android Studio or use the following commands:
+
+```sh
+# Development
+$ flutter buildApk --flavor development --target lib/main_development.dart
+
+# Staging
+$ flutter buildApk --flavor staging --target lib/main_staging.dart
+
+# Production
+$ flutter buildApk --flavor production --target lib/main_production.dart
+```
+
 _\*My App works on iOS, Android, Web, and Windows._
 
 ---
