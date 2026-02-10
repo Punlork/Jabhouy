@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
 import 'package:transparent_image/transparent_image.dart';
 

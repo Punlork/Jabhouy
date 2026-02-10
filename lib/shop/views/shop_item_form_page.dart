@@ -6,7 +6,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 
 import 'package:my_app/shop/shop.dart';
 

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/bloc/auth_bloc.dart';
 import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 
 class ShopHeader extends StatelessWidget {
   const ShopHeader({
@@ -31,7 +31,10 @@ class ShopHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [colorScheme.primary, colorScheme.primaryContainer],
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.8),
+            colorScheme.primaryContainer.withValues(alpha: 0.8),
+          ],
         ),
       ),
       child: Column(

@@ -18,23 +18,38 @@ class CategoryChips extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+          ),
           child: Row(
             children: [
               InkWell(
                 onTap: () => context.read<ShopBloc>().add(ShopGetItemsEvent()),
-                child: Chip(
-                  label: const Text('All'),
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  backgroundColor: currentShopState?.categoryFilter == null
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.surface,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  labelStyle: TextStyle(
-                    color: currentShopState?.categoryFilter == null
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onSurface,
+                child: Theme( 
+                  data: ThemeData(
+                    canvasColor: Colors.transparent,
+                  ),
+                  child: Chip(
+                    label: const Text('All'),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                    side: const BorderSide(
+                      width: 0,
+                      color: Colors.transparent,
+                    ),
+                    backgroundColor: currentShopState?.categoryFilter == null
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Colors.transparent,
+                    labelStyle: TextStyle(
+                      color: currentShopState?.categoryFilter == null
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Colors.grey,
+                    ),
                   ),
                 ),
               ),
@@ -46,6 +61,7 @@ class CategoryChips extends StatelessWidget {
                   color: Colors.grey[200],
                 ),
               ),
+              const SizedBox(width: 2),
               BlocBuilder<CategoryBloc, CategoryState>(
                 builder: (context, state) {
                   if (state is CategoryLoaded) {
@@ -66,18 +82,24 @@ class CategoryChips extends StatelessWidget {
                                   onTap: () => context.read<ShopBloc>().add(
                                         ShopGetItemsEvent(categoryFilter: category),
                                       ),
-                                  child: Chip(
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    label: Text(category.name),
-                                    backgroundColor: isSelected
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.surface,
-                                    labelStyle: TextStyle(
-                                      color: isSelected
-                                          ? Theme.of(context).colorScheme.onPrimary
-                                          : Theme.of(context).colorScheme.onSurface,
+                                  child: Theme(
+                                    data: ThemeData(canvasColor: Colors.transparent),
+                                    child: Chip(
+                                      side: const BorderSide(
+                                        width: 0,
+                                        color: Colors.transparent,
+                                      ),
+                                      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      visualDensity: VisualDensity.compact,
+                                      label: Text(category.name),
+                                      backgroundColor: isSelected
+                                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                                          : Colors.transparent,
+                                      labelStyle: TextStyle(
+                                        color: isSelected ? Theme.of(context).colorScheme.onPrimary : Colors.grey,
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_app/app/app.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
 
 class ShopTab extends StatelessWidget {
@@ -47,35 +47,33 @@ class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMix
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Column(
+    return Stack(
       children: [
-        const CategoryChips(),
-        Expanded(
-          child: BlocBuilder<ShopBloc, ShopState>(
-            buildWhen: _shouldRebuild,
-            builder: (context, state) => switch (state) {
-              ShopInitial() || ShopLoading() => const ShopGridLoading(),
-              ShopLoaded(:final items, :final pagination, :final isFiltering) => RefreshIndicator(
-                  onRefresh: _refreshItems,
-                  child: Builder(
-                    builder: (context) {
-                      if (isFiltering != null && isFiltering) {
-                        return const ShopGridLoading();
-                      }
-                      if (items.isEmpty) {
-                        return const EmptyView();
-                      }
-                      return ShopGridBuilder(
-                        items: items,
-                        pagination: pagination,
-                      );
-                    },
-                  ),
+        BlocBuilder<ShopBloc, ShopState>(
+          buildWhen: _shouldRebuild,
+          builder: (context, state) => switch (state) {
+            ShopInitial() || ShopLoading() => const ShopGridLoading(),
+            ShopLoaded(:final items, :final pagination, :final isFiltering) => RefreshIndicator(
+                onRefresh: _refreshItems,
+                child: Builder(
+                  builder: (context) {
+                    if (isFiltering != null && isFiltering) {
+                      return const ShopGridLoading();
+                    }
+                    if (items.isEmpty) {
+                      return const EmptyView();
+                    }
+                    return ShopGridBuilder(
+                      items: items,
+                      pagination: pagination,
+                    );
+                  },
                 ),
-              ShopError(:final message) => ErrorView(message: message),
-            },
-          ),
+              ),
+            ShopError(:final message) => ErrorView(message: message),
+          },
         ),
+        const CategoryChips(),
       ],
     );
   }

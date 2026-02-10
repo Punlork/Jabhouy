@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});

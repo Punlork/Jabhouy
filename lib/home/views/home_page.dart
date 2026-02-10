@@ -1,6 +1,6 @@
-import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   int _selectedIndex = 0;
   late final PageController _pageController;
 
-  static const List<Widget> _pages = <Widget>[
+  static const _pages = [
     ShopTab(),
     LoanerView(),
   ];
@@ -59,6 +59,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     } else {
       _selectedIndex = index;
     }
+    _pageController.jumpToPage(_selectedIndex);
   }
 
   void _onSearchChanged(String? value) {
@@ -179,156 +180,163 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
     // final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
-    return TabScrollManager(
-      controllers: _scrollControllers,
+    return DefaultTabController(
+      length: 2,
       child: Scaffold(
         extendBody: true,
-        body: SafeArea(
-          top: false,
-          maintainBottomViewPadding: true,
-          child: Stack(
-            children: [
-              Column(
-                children: <Widget>[
-                  Container(
-                    height: statusBarHeight,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.primary,
-                          colorScheme.primaryContainer,
-                        ],
+        backgroundColor: Colors.white,
+        body: BottomBar(
+          body: (context, controller) => SafeArea(
+            top: false,
+            maintainBottomViewPadding: true,
+            child: Column(
+              children: [
+                Column(
+                  children: <Widget>[
+                    Container(
+                      height: statusBarHeight,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            colorScheme.primary.withValues(alpha: .8),
+                            colorScheme.primaryContainer.withValues(alpha: .8),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Builder(
-                    builder: (context) {
-                      Widget buildShopHeader({bool hasFilter = false}) {
-                        return ShopHeader(
-                          hasFilter: hasFilter,
-                          onSettingsPressed: () => _showSettingsSheet(
-                            () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
+                    Builder(
+                      builder: (context) {
+                        Widget buildShopHeader({bool hasFilter = false}) {
+                          return ShopHeader(
+                            hasFilter: hasFilter,
+                            onSettingsPressed: () => _showSettingsSheet(
+                              () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
+                            ),
+                            onSearchChanged: _onSearchChanged,
+                            onFilterPressed: _showFilterSheet,
+                            searchController: _searchController,
+                          );
+                        }
+
+                        final blocBuilders = {
+                          0: BlocBuilder<ShopBloc, ShopState>(
+                            builder: (context, state) {
+                              return buildShopHeader(hasFilter: state.asLoaded?.categoryFilter != null);
+                            },
                           ),
-                          onSearchChanged: _onSearchChanged,
-                          onFilterPressed: _showFilterSheet,
-                          searchController: _searchController,
-                        );
-                      }
+                          1: BlocBuilder<LoanerBloc, LoanerState>(
+                            builder: (context, state) {
+                              return buildShopHeader(hasFilter: state.asLoaded?.hasFilter ?? false);
+                            },
+                          ),
+                        };
 
-                      final blocBuilders = {
-                        0: BlocBuilder<ShopBloc, ShopState>(
-                          builder: (context, state) {
-                            return buildShopHeader(hasFilter: state.asLoaded?.categoryFilter != null);
-                          },
-                        ),
-                        1: BlocBuilder<LoanerBloc, LoanerState>(
-                          builder: (context, state) {
-                            return buildShopHeader(hasFilter: state.asLoaded?.hasFilter ?? false);
-                          },
-                        ),
-                      };
-
-                      return blocBuilders[_selectedIndex] ?? buildShopHeader();
-                    },
+                        return blocBuilders[_selectedIndex] ?? buildShopHeader();
+                      },
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider.value(value: context.read<LoanerBloc>()),
+                    ],
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: _pages,
+                    ),
                   ),
+                ),
+              ],
+            ),
+          ),
+          barColor: Colors.transparent,
+          offset: 4,
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.primaryContainer,
                 ],
               ),
-              Container(
-                margin: EdgeInsets.only(
-                  top: statusBarHeight + 55,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadiusDirectional.vertical(
-                    top: Radius.circular(20),
-                  ),
-                ),
-                child: MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(value: context.read<LoanerBloc>()),
-                  ],
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: _pages,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: TabBar(
+              dividerColor: Colors.transparent,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: colorScheme.primary,
+              ),
+              onTap: (index) {
+                _pageController.jumpToPage(index);
+                _onItemTapped(index);
+                setState(() => _selectedIndex = index);
+              },
+              tabs: List.generate(
+                iconList.length,
+                (index) => Tab(
+                  icon: Icon(
+                    iconList[index],
+                    size: 26,
+                    color: _selectedIndex == index ? Colors.white : Colors.grey.shade300,
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-        floatingActionButton: SizedBox(
-          height: 64,
-          width: 64,
-          child: FloatingActionButton(
-            onPressed: () {
-              switch (_selectedIndex) {
-                case 0:
-                  context.pushNamed(
-                    AppRoutes.formShop,
-                    extra: {
-                      'shop': context.read<ShopBloc>(),
-                      'category': context.read<CategoryBloc>(),
-                      'onAdd': (ShopItemModel item) {},
-                    },
-                  );
-                case 1:
-                  context.pushNamed(
-                    AppRoutes.formLoaner,
-                    extra: {
-                      'loanerBloc': context.read<LoanerBloc>(),
-                      'customerBloc': context.read<CustomerBloc>(),
-                    },
-                  );
-              }
-            },
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimaryContainer,
-            elevation: 6,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.add,
-              size: 28,
-              color: Colors.white,
             ),
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        bottomNavigationBar: AnimatedBottomNavigationBar.builder(
-          height: 72,
-          itemCount: iconList.length,
-          tabBuilder: (int index, bool isActive) => Icon(
-            iconList[index],
-            size: 26,
-            color: isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(.6),
-          ),
-          activeIndex: _selectedIndex,
-          onTap: (index) {
-            _pageController.jumpToPage(index);
-            _onItemTapped(index);
-            setState(() {});
-          },
-          backgroundGradient: LinearGradient(
-            colors: [
-              colorScheme.primaryContainer,
-              colorScheme.primary,
-            ],
-          ),
-          gapLocation: GapLocation.end,
-          notchSmoothness: NotchSmoothness.defaultEdge,
-          notchMargin: 20,
-          leftCornerRadius: 16,
-          splashColor: colorScheme.primary.withOpacity(.3),
-          splashRadius: 30,
-          shadow: BoxShadow(
-            offset: const Offset(0, 1),
-            blurRadius: 12,
-            spreadRadius: 0.5,
-            color: Colors.black.withOpacity(.1),
+        floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 40),
+          child: SizedBox(
+            height: 54,
+            width: 54,
+            child: FloatingActionButton(
+              onPressed: () {
+                switch (_selectedIndex) {
+                  case 0:
+                    context.pushNamed(
+                      AppRoutes.formShop,
+                      extra: {
+                        'shop': context.read<ShopBloc>(),
+                        'category': context.read<CategoryBloc>(),
+                        'onAdd': (ShopItemModel item) {},
+                      },
+                    );
+                  case 1:
+                    context.pushNamed(
+                      AppRoutes.formLoaner,
+                      extra: {
+                        'loanerBloc': context.read<LoanerBloc>(),
+                        'customerBloc': context.read<CustomerBloc>(),
+                      },
+                    );
+                }
+              },
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimaryContainer,
+              elevation: 6,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10000),
+              ),
+              child: Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()..scale(-1.0, 1),
+                child: const Icon(
+                  Icons.add_comment_rounded,
+                  size: 24,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
         ),
+        persistentFooterAlignment: AlignmentDirectional.topEnd,
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }

@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/loaner/loaner.dart';
 
 class LoanerFormPage extends StatelessWidget {
