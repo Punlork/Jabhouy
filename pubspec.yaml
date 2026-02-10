@@ -1,6 +1,6 @@
 name: my_app
 description: Shop management
-version: 1.0.4+9
+version: 1.0.5+10
 publish_to: none
 
 environment:
@@ -35,7 +35,7 @@ dependencies:
   logger: ^2.5.0
   meta: ^1.15.0
   path_provider: ^2.1.5
-  shared_preferences: ^2.5.2
+  shared_preferences: ^2.5.4
   shimmer: ^3.0.0
   stream_transform: ^2.1.1
   super_clipboard: ^0.8.24

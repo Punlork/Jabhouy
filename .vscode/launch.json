@@ -44,11 +44,11 @@
         "fvm",
         "flutter",
         "run",
-        "--flavor", 
+        "--flavor",
         "production",
         "--target",
-        "lib/main_production.dart"
-        // "-v"
+        "lib/main_production.dart",
+        "-v"
       ]
     }
   ]
