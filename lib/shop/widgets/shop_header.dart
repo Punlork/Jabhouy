@@ -28,14 +28,7 @@ class ShopHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colorScheme.primary.withValues(alpha: 0.8),
-            colorScheme.primaryContainer.withValues(alpha: 0.8),
-          ],
-        ),
+        color: colorScheme.primary,
       ),
       child: Column(
         children: [
@@ -53,63 +46,63 @@ class ShopHeader extends StatelessWidget {
             onFilterPressed: onFilterPressed,
             onSettingsPressed: onSettingsPressed,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 4),
         ],
       ),
     );
   }
 }
 
-class _UserProfile extends StatelessWidget {
-  const _UserProfile();
+// class _UserProfile extends StatelessWidget {
+//   const _UserProfile();
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+//   @override
+//   Widget build(BuildContext context) {
+//     final l10n = AppLocalizations.of(context);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () async {},
-      child: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is Authenticated) {
-            return Row(
-              children: [
-                if (state.user.image != null)
-                  ClipOval(
-                    child: Image.network(
-                      state.user.image!,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                    ),
-                  )
-                else
-                  const AppLogo(size: 40, useBg: false),
-                const SizedBox(width: 8),
-                Row(
-                  children: [
-                    Text(
-                      state.user.name ?? l10n.noName,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                  ],
-                ),
-              ],
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-    );
-  }
-}
+//     return GestureDetector(
+//       behavior: HitTestBehavior.opaque,
+//       onTap: () async {},
+//       child: BlocBuilder<AuthBloc, AuthState>(
+//         builder: (context, state) {
+//           if (state is Authenticated) {
+//             return Row(
+//               children: [
+//                 if (state.user.image != null)
+//                   ClipOval(
+//                     child: Image.network(
+//                       state.user.image!,
+//                       width: 40,
+//                       height: 40,
+//                       fit: BoxFit.cover,
+//                       errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+//                     ),
+//                   )
+//                 else
+//                   const AppLogo(size: 40, useBg: false),
+//                 const SizedBox(width: 8),
+//                 Row(
+//                   children: [
+//                     Text(
+//                       state.user.name ?? l10n.noName,
+//                       style: TextStyle(
+//                         fontSize: 18,
+//                         fontWeight: FontWeight.bold,
+//                         color: Theme.of(context).colorScheme.onPrimary,
+//                       ),
+//                     ),
+//                     const SizedBox(width: 4),
+//                   ],
+//                 ),
+//               ],
+//             );
+//           }
+//           return const SizedBox.shrink();
+//         },
+//       ),
+//     );
+//   }
+// }
 
 class _SettingsButton extends StatelessWidget {
   const _SettingsButton({required this.onPressed});
@@ -140,7 +133,7 @@ class _SettingsButton extends StatelessWidget {
       ],
       child: IconButtonWidget(
         icon: Icons.settings,
-        color: Colors.black,
+        color: Colors.white.withValues(alpha: .8),
         onPressed: onPressed,
         colorScheme: colorScheme,
       ),
@@ -187,10 +180,10 @@ class _SearchBar extends StatelessWidget {
               floatingLabelBehavior: FloatingLabelBehavior.always,
               useCustomBorder: false,
               decoration: InputDecoration(
-                prefixIconColor: Colors.white.withOpacity(.8),
+                prefixIconColor: Colors.white.withValues(alpha: .8),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(.8),
+                      color: Colors.white.withValues(alpha: .8),
                       fontWeight: FontWeight.w300,
                     ),
                 border: OutlineInputBorder(
@@ -210,7 +203,7 @@ class _SearchBar extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(.3),
+                fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: .1),
               ),
             ),
           ),

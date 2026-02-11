@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/customer/customer.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -172,13 +173,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final iconList = <IconData>[
-      Icons.store_rounded,
-      Icons.handshake_rounded,
-    ];
-
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
     // final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
+    final bottomBars = <Map<String, dynamic>>[
+      {
+        'name': context.l10n.shop,
+        'icon': Icons.store_rounded,
+      },
+      {
+        'icon': Icons.handshake_rounded,
+        'name': context.l10n.loaner,
+      },
+    ];
 
     return DefaultTabController(
       length: 2,
@@ -196,12 +203,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     Container(
                       height: statusBarHeight,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colorScheme.primary.withValues(alpha: .8),
-                            colorScheme.primaryContainer.withValues(alpha: .8),
-                          ],
-                        ),
+                        color: colorScheme.primary,
                       ),
                     ),
                     Builder(
@@ -251,39 +253,47 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ],
             ),
           ),
-          barColor: Colors.transparent,
+          barColor: colorScheme.primary.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(16),
           offset: 4,
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  colorScheme.primary,
-                  colorScheme.primaryContainer,
-                ],
-              ),
+          child: TabBar(
+            dividerColor: Colors.transparent,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
+              color: colorScheme.onPrimaryContainer,
             ),
-            child: TabBar(
-              dividerColor: Colors.transparent,
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: colorScheme.primary,
-              ),
-              onTap: (index) {
-                _pageController.jumpToPage(index);
-                _onItemTapped(index);
-                setState(() => _selectedIndex = index);
-              },
-              tabs: List.generate(
-                iconList.length,
-                (index) => Tab(
-                  icon: Icon(
-                    iconList[index],
-                    size: 26,
-                    color: _selectedIndex == index ? Colors.white : Colors.grey.shade300,
-                  ),
+            onTap: (index) {
+              _pageController.jumpToPage(index);
+              _onItemTapped(index);
+              setState(() => _selectedIndex = index);
+            },
+            tabs: List.generate(
+              bottomBars.length,
+              (index) => Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Icon(
+                      bottomBars[index]['icon'] as IconData,
+                      size: 26,
+                      color: _selectedIndex == index ? Colors.white : Colors.grey,
+                    ),
+
+                    Opacity(
+                      opacity: _selectedIndex == index ? 1.0 : 0.0,
+                      child: Text(
+                        bottomBars[index]['name'] as String,
+                        style: TextStyle(
+                          color: _selectedIndex == index ? Colors.white : Colors.grey,
+                          fontSize: 16,
+                          fontWeight: _selectedIndex == index ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                    // if (_selectedIndex == index) ...[
+                    // ],
+                  ],
                 ),
               ),
             ),
@@ -291,10 +301,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ),
         floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
         floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 40),
+          padding: const EdgeInsets.only(bottom: 60),
           child: SizedBox(
-            height: 54,
-            width: 54,
+            height: 42,
+            width: 120,
             child: FloatingActionButton(
               onPressed: () {
                 switch (_selectedIndex) {
@@ -317,20 +327,39 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     );
                 }
               },
-              backgroundColor: colorScheme.primary,
+              backgroundColor: colorScheme.primary.withValues(alpha: 0.8),
               foregroundColor: colorScheme.onPrimaryContainer,
               elevation: 6,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10000),
-              ),
-              child: Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.identity()..scale(-1.0, 1),
-                child: const Icon(
-                  Icons.add_comment_rounded,
-                  size: 24,
-                  color: Colors.white,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                  topRight: Radius.circular(4),
+                  bottomLeft: Radius.circular(4),
                 ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..scale(-1.0, 1),
+                    child: const Icon(
+                      Icons.add_comment_rounded,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _selectedIndex == 0 ? context.l10n.addItem : context.l10n.addLoaner,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

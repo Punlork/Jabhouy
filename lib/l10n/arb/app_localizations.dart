@@ -721,6 +721,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'UNPAID'**
   String get unpaid;
+
+  /// Label for the shop section or page
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get shop;
+
+  /// Label for the loaner section or page
+  ///
+  /// In en, this message translates to:
+  /// **'Loaner'**
+  String get loaner;
 }
 
 class _AppLocalizationsDelegate

@@ -330,4 +330,10 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get unpaid => 'មិនបានសង';
+
+  @override
+  String get shop => 'ហាង';
+
+  @override
+  String get loaner => 'អ្នកខ្ចី';
 }

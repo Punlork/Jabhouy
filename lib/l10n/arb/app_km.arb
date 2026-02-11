@@ -440,5 +440,13 @@
   "unpaid": "មិនបានសង",
   "@unpaid": {
     "description": "ស្លាកបង្ហាញថាប្រាក់កម្ចីត្រូវបានសង"
+  },
+  "shop": "ហាង",
+  "@shop": {
+    "description": "Label for the shop section or page"
+  },
+  "loaner": "អ្នកខ្ចី",
+  "@loaner": {
+    "description": "Label for the loaner section or page"
   }
 }

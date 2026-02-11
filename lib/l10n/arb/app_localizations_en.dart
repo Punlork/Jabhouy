@@ -330,4 +330,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unpaid => 'UNPAID';
+
+  @override
+  String get shop => 'Shop';
+
+  @override
+  String get loaner => 'Loaner';
 }

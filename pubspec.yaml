@@ -1,13 +1,12 @@
 name: my_app
 description: Shop management
-version: 1.0.5+10
+version: 1.0.6+11
 publish_to: none
 
 environment:
   sdk: ^3.5.0
 
 dependencies:
-  animated_bottom_navigation_bar: ^1.4.0
   animated_text_kit: ^4.2.3
   bloc: ^8.1.4
   bloc_concurrency: ^0.2.5
