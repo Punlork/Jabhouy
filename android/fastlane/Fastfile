@@ -1,0 +1,57 @@
+# Fastlane for Android (Jabhouy)
+# Run from project root: cd android && bundle exec fastlane <lane>
+# Or from android/: bundle exec fastlane <lane>
+#
+# Setup: copy fastlane/metadata/android to android/fastlane/metadata if using supply (Play Store).
+
+default_platform(:android)
+
+# Project root (parent of android/)
+project_root = File.expand_path("../..", File.dirname(__FILE__))
+
+platform :android do
+  desc "Run Flutter tests and build debug APK"
+  lane :test do
+    sh("cd #{project_root} && flutter pub get")
+    sh("cd #{project_root} && flutter test")
+  end
+
+  desc "Build development debug APK"
+  lane :build_dev do
+    sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --debug")
+  end
+
+  desc "Build staging release APK (for internal testing)"
+  lane :build_staging do
+    sh("cd #{project_root} && flutter build apk --flavor staging -t lib/main_staging.dart --release")
+  end
+
+  desc "Build production release APK"
+  lane :build_release do
+    sh("cd #{project_root} && flutter build apk --flavor production -t lib/main_production.dart --release")
+  end
+
+  desc "Deploy to internal testing track (Google Play)"
+  lane :internal do
+    build_staging
+    supply(
+      track: "internal",
+      aab: false,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Deploy to beta track (Google Play)"
+  lane :beta do
+    build_release
+    supply(
+      track: "beta",
+      aab: false,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+end

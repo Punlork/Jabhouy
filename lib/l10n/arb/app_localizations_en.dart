@@ -336,4 +336,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loaner => 'Loaner';
+
+  @override
+  String get all => 'All';
 }

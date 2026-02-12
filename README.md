@@ -53,6 +53,16 @@ _\*My App works on iOS, Android, Web, and Windows._
 
 ---
 
+## CI/CD (Patrol & Fastlane) 🚀
+
+- **Patrol** runs native UI tests (see `patrol_test/`). Locally: `patrol test --flavor development` (with emulator/simulator running). Ensure Patrol CLI is installed: `dart pub global activate patrol_cli`.
+- **Fastlane** automates builds and store deployment. From `android/` or `ios/`: `bundle install` then `bundle exec fastlane <lane>` (e.g. `build_dev`, `build_release`, `beta`).
+- **GitHub Actions** workflow: `.github/workflows/patrol-fastlane.yaml` runs Patrol on Android and Fastlane build steps on push to `main`.
+
+Full setup and secrets: **[docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)**.
+
+---
+
 ## Running Tests 🧪
 
 To run all unit and widget tests use the following command:

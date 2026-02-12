@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
   late final PageController _pageController;
+  late final List<Map<String, dynamic>> bottomBars;
 
   static const _pages = [
     ShopTab(),
@@ -157,6 +158,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<CategoryBloc>().add(CategoryGetEvent());
     context.read<CustomerBloc>().add(LoadCustomers());
+    bottomBars = [
+      {
+        'name': context.l10n.shop,
+        'icon': Icons.store_rounded,
+      },
+      {
+        'icon': Icons.handshake_rounded,
+        'name': context.l10n.loaner,
+      },
+    ];
   }
 
   @override
@@ -172,20 +183,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
-    // final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-
-    final bottomBars = <Map<String, dynamic>>[
-      {
-        'name': context.l10n.shop,
-        'icon': Icons.store_rounded,
-      },
-      {
-        'icon': Icons.handshake_rounded,
-        'name': context.l10n.loaner,
-      },
-    ];
 
     return DefaultTabController(
       length: 2,

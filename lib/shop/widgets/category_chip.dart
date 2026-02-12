@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -26,7 +27,7 @@ class CategoryChips extends StatelessWidget {
                 onTap: () => context.read<ShopBloc>().add(ShopGetItemsEvent()),
                 child: _buildChip(
                   context,
-                  label: 'All',
+                  label: context.l10n.all,
                   isSelected: currentShopState?.categoryFilter == null,
                 ),
               ),
@@ -116,7 +117,11 @@ class CategoryChips extends StatelessWidget {
     );
   }
 
-  Widget _buildChip(BuildContext context, {required String label, required bool isSelected}) {
+  Widget _buildChip(
+    BuildContext context, {
+    required String label,
+    required bool isSelected,
+  }) {
     return Theme(
       data: ThemeData(canvasColor: Colors.transparent),
       child: Chip(

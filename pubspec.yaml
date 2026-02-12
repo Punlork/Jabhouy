@@ -46,6 +46,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
+  patrol: ^2.6.0
   very_good_analysis: ^6.0.0
 
 flutter:
@@ -76,3 +77,13 @@ flutter:
     - .env
     - .env.dev
     - assets/
+
+# Patrol UI testing (patrol test, patrol build)
+# See: https://patrol.leancode.pl/getting-started
+patrol:
+  app_name: Jabhouy
+  flavor: development
+  android:
+    package_name: com.pl.shop.management.dev
+  ios:
+    bundle_id: com.pl.shop_management.dev

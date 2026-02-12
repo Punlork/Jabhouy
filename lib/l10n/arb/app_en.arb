@@ -441,12 +441,16 @@
   "@unpaid": {
     "description": "Label indicating a loan has been paid"
   },
-"shop": "Shop",
-"@shop": {
-"description": "Label for the shop section or page"
-},
-"loaner": "Loaner",
-"@loaner": {
-"description": "Label for the loaner section or page"
-}
+  "shop": "Shop",
+  "@shop": {
+    "description": "Label for the shop section or page"
+  },
+  "loaner": "Loaner",
+  "@loaner": {
+    "description": "Label for the loaner section or page"
+  },
+  "all": "All",
+  "@all": {
+    "description": "Label for the all filter"
+  }
 }

@@ -336,4 +336,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get loaner => 'អ្នកខ្ចី';
+
+  @override
+  String get all => 'ទាំងអស់';
 }

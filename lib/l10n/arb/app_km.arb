@@ -448,5 +448,9 @@
   "loaner": "អ្នកខ្ចី",
   "@loaner": {
     "description": "Label for the loaner section or page"
+  },
+  "all": "ទាំងអស់",
+  "@all": {
+    "description": "Label for the all category"
   }
 }

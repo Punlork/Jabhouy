@@ -114,3 +114,6 @@ app.*.map.json
 
 .env
 .env.dev
+
+# Patrol generated test bundle (do not commit)
+patrol_test/test_bundle.dart

@@ -1,0 +1,143 @@
+# Patrol UI tests + Fastlane build/deploy
+# - Patrol: UI tests on Android emulator (and optionally iOS simulator on macOS)
+# - Fastlane: build and deploy via lanes (triggered manually or on release)
+
+name: Patrol & Fastlane CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  patrol-android:
+    name: Patrol (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install Patrol CLI
+        run: dart pub global activate patrol_cli
+
+      - name: Add Pub cache to PATH
+        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Enable KVM (Linux emulator acceleration)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Patrol tests on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          profile: pixel_7
+          script: |
+            export PATH="$PATH:$HOME/.pub-cache/bin"
+            patrol test --flavor development
+
+  fastlane-android-build:
+    name: Fastlane Android (build)
+    runs-on: ubuntu-latest
+    needs: [patrol-android]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Set up Ruby and Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: android
+
+      - name: Install Fastlane (Android)
+        working-directory: android
+        run: bundle install
+
+      - name: Build development APK (no signing required)
+        working-directory: android
+        run: bundle exec fastlane build_dev
+        # For release: run build_staging or build_release and set ANDROID_KEYSTORE_* secrets
+
+  fastlane-ios-build:
+    name: Fastlane iOS (build)
+    runs-on: macos-latest
+    needs: [patrol-android]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Set up Ruby and Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install Fastlane (iOS)
+        working-directory: ios
+        run: bundle install
+
+      - name: Install CocoaPods
+        run: cd ios && pod install
+
+      - name: Build staging (no codesign for CI)
+        working-directory: ios
+        run: bundle exec fastlane build_dev
+        env:
+          # For real signing/upload: set APP_STORE_CONNECT_API_KEY, MATCH_* etc.
+          FASTLANE_SKIP_UPDATE_CHECK: "1"

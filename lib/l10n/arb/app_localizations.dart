@@ -733,6 +733,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loaner'**
   String get loaner;
+
+  /// Label for the all filter
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
 }
 
 class _AppLocalizationsDelegate

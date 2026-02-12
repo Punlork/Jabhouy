@@ -1,0 +1,4 @@
+# Fastlane for iOS - run: cd ios && bundle install && bundle exec fastlane <lane>
+source "https://rubygems.org"
+gem "fastlane"
+gem "rake"

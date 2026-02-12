@@ -1,0 +1,63 @@
+# Fastlane for iOS (Jabhouy)
+# Run from project root: cd ios && bundle exec fastlane <lane>
+# Or from ios/: bundle exec fastlane <lane>
+#
+# For CI: set MATCH_PASSWORD, APP_STORE_CONNECT_API_KEY or use match/sigh with secrets.
+
+default_platform(:ios)
+
+# Project root (parent of ios/)
+project_root = File.expand_path("../..", File.dirname(__FILE__))
+
+platform :ios do
+  desc "Run Flutter tests"
+  lane :test do
+    sh("cd #{project_root} && flutter pub get")
+    sh("cd #{project_root} && flutter test")
+  end
+
+  desc "Build development (debug)"
+  lane :build_dev do
+    sh("cd #{project_root} && flutter build ios --flavor development -t lib/main_development.dart --debug --no-codesign")
+  end
+
+  desc "Build staging (for TestFlight/internal)"
+  lane :build_staging do
+    sh("cd #{project_root} && flutter build ios --flavor staging -t lib/main_staging.dart --release")
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "staging",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "Jabhouy-staging.ipa",
+    )
+  end
+
+  desc "Build production (for TestFlight/App Store)"
+  lane :build_release do
+    sh("cd #{project_root} && flutter build ios --flavor production -t lib/main_production.dart --release")
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "Jabhouy.ipa",
+    )
+  end
+
+  desc "Deploy staging to TestFlight"
+  lane :staging do
+    build_staging
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+    )
+  end
+
+  desc "Deploy production to TestFlight"
+  lane :beta do
+    build_release
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end
