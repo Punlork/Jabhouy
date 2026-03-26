@@ -55,7 +55,12 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
       physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 52),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+          ).copyWith(
+            bottom: 52,
+            top: 52,
+          ),
           sliver: SliverToBoxAdapter(
             child: MasonryGridView.builder(
               shrinkWrap: true,

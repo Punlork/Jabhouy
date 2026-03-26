@@ -42,7 +42,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
   late final PageController _pageController;
-  late final List<Map<String, dynamic>> bottomBars;
 
   static const _pages = [
     ShopTab(),
@@ -158,16 +157,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<CategoryBloc>().add(CategoryGetEvent());
     context.read<CustomerBloc>().add(LoadCustomers());
-    bottomBars = [
-      {
-        'name': context.l10n.shop,
-        'icon': Icons.store_rounded,
-      },
-      {
-        'icon': Icons.handshake_rounded,
-        'name': context.l10n.loaner,
-      },
-    ];
   }
 
   @override
@@ -184,6 +173,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
+
+    final bottomBars = [
+      {
+        'name': context.l10n.shop,
+        'icon': Icons.store_rounded,
+      },
+      {
+        'icon': Icons.handshake_rounded,
+        'name': context.l10n.loaner,
+      },
+    ];
 
     return DefaultTabController(
       length: 2,
@@ -273,7 +273,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Icon(
-                      bottomBars[index]['icon'] as IconData,
+                      bottomBars[index]['icon']! as IconData,
                       size: 26,
                       color: _selectedIndex == index ? Colors.white : Colors.grey,
                     ),
@@ -281,7 +281,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     Opacity(
                       opacity: _selectedIndex == index ? 1.0 : 0.0,
                       child: Text(
-                        bottomBars[index]['name'] as String,
+                        bottomBars[index]['name']! as String,
                         style: TextStyle(
                           color: _selectedIndex == index ? Colors.white : Colors.grey,
                           fontSize: 16,
