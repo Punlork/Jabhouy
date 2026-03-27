@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/app/service/database/app_database.dart';
+import 'package:my_app/customer/customer.dart';
 import 'package:my_app/loaner/loaner.dart';
 
 class LoanerService extends BaseService {
@@ -14,28 +17,111 @@ class LoanerService extends BaseService {
     return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  String? _encodeCustomer(CustomerModel? customer) {
+    if (customer == null) return null;
+    return jsonEncode({
+      'id': customer.id,
+      'name': customer.name,
+      if (customer.createdAt != null)
+        'createdAt': customer.createdAt!.toIso8601String(),
+      if (customer.updatedAt != null)
+        'updatedAt': customer.updatedAt!.toIso8601String(),
+      'syncStatus': customer.syncStatus,
+      'isDeleted': customer.isDeleted,
+    });
+  }
+
+  CustomerModel? _decodeCustomer(String? rawCustomer) {
+    if (rawCustomer == null || rawCustomer.isEmpty) return null;
+
+    final decoded = jsonDecode(rawCustomer);
+    if (decoded is! Map<String, dynamic>) return null;
+    return CustomerModel.fromJson(decoded);
+  }
+
+  CustomerModel? _mapCustomer(Customer? customer) {
+    if (customer == null || customer.isDeleted) return null;
+    return CustomerModel(
+      id: customer.id,
+      name: customer.name,
+      createdAt: customer.createdAt,
+      updatedAt: customer.updatedAt,
+      syncStatus: customer.syncStatus,
+      isDeleted: customer.isDeleted,
+    );
+  }
+
+  Future<void> _upsertCustomers(Iterable<CustomerModel?> customers) async {
+    final uniqueCustomers = <int, CustomerModel>{};
+    for (final customer in customers) {
+      if (customer == null) continue;
+      final value = customer;
+      uniqueCustomers[value.id] = value;
+    }
+
+    if (uniqueCustomers.isEmpty) return;
+
+    await _db.batch((batch) {
+      batch.insertAll(
+        _db.customers,
+        uniqueCustomers.values
+            .map(
+              (customer) => CustomersCompanion.insert(
+                id: Value(customer.id),
+                name: customer.name,
+                createdAt: Value(customer.createdAt),
+                updatedAt: Value(customer.updatedAt),
+                syncStatus: Value(customer.syncStatus),
+                isDeleted: Value(customer.isDeleted),
+              ),
+            )
+            .toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+    });
+  }
+
   Stream<List<LoanerModel>> watchLoaners() {
-    return (_db.select(_db.loaners)..where((t) => t.isDeleted.equals(false))).watch().map((rows) {
-      return rows
-          .map(
-            (row) => LoanerModel(
-              id: row.id,
-              amount: row.amount,
-              note: row.note,
-              customerId: row.customerId,
-              isPaid: row.isPaid,
-              createdAt: row.createdAt,
-              updatedAt: row.updatedAt,
-              syncStatus: row.syncStatus,
-              isDeleted: row.isDeleted,
-            ),
-          )
-          .toList();
+    final query = _db.select(_db.loaners).join(
+      [
+        leftOuterJoin(
+          _db.customers,
+          _db.customers.id.equalsExp(_db.loaners.customerId) &
+              _db.customers.isDeleted.equals(false),
+        ),
+      ],
+    )
+      ..where(_db.loaners.isDeleted.equals(false))
+      ..orderBy([
+        OrderingTerm.desc(_db.loaners.createdAt),
+        OrderingTerm.desc(_db.loaners.id),
+      ]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final loaner = row.readTable(_db.loaners);
+        final customer = row.readTableOrNull(_db.customers);
+
+        return LoanerModel(
+          id: loaner.id,
+          amount: loaner.amount,
+          note: loaner.note,
+          customerId: loaner.customerId,
+          isPaid: loaner.isPaid,
+          createdAt: loaner.createdAt,
+          updatedAt: loaner.updatedAt,
+          syncStatus: loaner.syncStatus,
+          isDeleted: loaner.isDeleted,
+          customer: _decodeCustomer(loaner.customer) ?? _mapCustomer(customer),
+        );
+      }).toList();
     });
   }
 
   Future<void> syncPendingChanges() async {
-    final pendingItems = await (_db.select(_db.loaners)..where((t) => t.syncStatus.equals(1))).get();
+    final pendingItems = await (_db.select(_db.loaners)
+          ..where((t) => t.syncStatus.equals(1)))
+        .get();
 
     for (final item in pendingItems) {
       try {
@@ -49,6 +135,7 @@ class LoanerService extends BaseService {
           updatedAt: item.updatedAt,
           syncStatus: item.syncStatus,
           isDeleted: item.isDeleted,
+          customer: _decodeCustomer(item.customer),
         );
 
         ApiResponse<LoanerModel?> response;
@@ -63,7 +150,8 @@ class LoanerService extends BaseService {
 
         if (response.success) {}
       } catch (e) {
-        await (_db.update(_db.loaners)..where((t) => t.id.equals(item.id))).write(
+        await (_db.update(_db.loaners)..where((t) => t.id.equals(item.id)))
+            .write(
           const LoanersCompanion(syncStatus: Value(2)),
         );
       }
@@ -103,7 +191,35 @@ class LoanerService extends BaseService {
 
     if (response.success && response.data != null) {
       final items = response.data!.items;
+      final customers = items.map((item) => item.customer);
+
       await _db.batch((batch) {
+        final uniqueCustomers = <int, CustomerModel>{};
+        for (final customer in customers) {
+          if (customer == null) continue;
+          final value = customer;
+          uniqueCustomers[value.id] = value;
+        }
+
+        if (uniqueCustomers.isNotEmpty) {
+          batch.insertAll(
+            _db.customers,
+            uniqueCustomers.values
+                .map(
+                  (customer) => CustomersCompanion.insert(
+                    id: Value(customer.id),
+                    name: customer.name,
+                    createdAt: Value(customer.createdAt),
+                    updatedAt: Value(customer.updatedAt),
+                    syncStatus: Value(customer.syncStatus),
+                    isDeleted: Value(customer.isDeleted),
+                  ),
+                )
+                .toList(),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+
         batch.insertAll(
           _db.loaners,
           items.map(
@@ -112,6 +228,7 @@ class LoanerService extends BaseService {
               amount: l.amount,
               note: Value(l.note),
               customerId: Value(l.customerId),
+              customer: Value(_encodeCustomer(l.customer)),
               isPaid: Value(l.isPaid),
               createdAt: l.createdAt,
               updatedAt: Value(l.updatedAt),
@@ -131,7 +248,9 @@ class LoanerService extends BaseService {
     LoanerModel body, {
     bool localOnly = true,
   }) async {
-    final id = body.id == 0 ? -(DateTime.now().millisecondsSinceEpoch % 1000000) : body.id;
+    final id = body.id == 0
+        ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
+        : body.id;
     final localItem = body.copyWith(id: id, syncStatus: 1);
 
     await _db.into(_db.loaners).insert(
@@ -140,6 +259,7 @@ class LoanerService extends BaseService {
             amount: localItem.amount,
             note: Value(localItem.note),
             customerId: Value(localItem.customerId),
+            customer: Value(_encodeCustomer(localItem.customer)),
             isPaid: Value(localItem.isPaid),
             createdAt: localItem.createdAt,
             updatedAt: Value(localItem.updatedAt),
@@ -149,7 +269,7 @@ class LoanerService extends BaseService {
         );
 
     if (localOnly) {
-      syncPendingChanges();
+      await syncPendingChanges();
       return ApiResponse(success: true, data: localItem);
     }
 
@@ -165,13 +285,16 @@ class LoanerService extends BaseService {
 
     if (response.success && response.data != null) {
       final l = response.data!;
-      await (_db.delete(_db.loaners)..where((t) => t.id.equals(localItem.id))).go();
+      await _upsertCustomers([l.customer]);
+      await (_db.delete(_db.loaners)..where((t) => t.id.equals(localItem.id)))
+          .go();
       await _db.into(_db.loaners).insert(
             LoanersCompanion.insert(
               id: Value(l.id),
               amount: l.amount,
               note: Value(l.note),
               customerId: Value(l.customerId),
+              customer: Value(_encodeCustomer(l.customer)),
               isPaid: Value(l.isPaid),
               createdAt: l.createdAt,
               updatedAt: Value(l.updatedAt),
@@ -194,6 +317,7 @@ class LoanerService extends BaseService {
             amount: body.amount,
             note: body.note,
             customerId: body.customerId,
+            customer: _encodeCustomer(body.customer),
             isPaid: body.isPaid,
             createdAt: body.createdAt,
             updatedAt: DateTime.now(),
@@ -203,7 +327,7 @@ class LoanerService extends BaseService {
         );
 
     if (localOnly) {
-      syncPendingChanges();
+      await syncPendingChanges();
       return ApiResponse(success: true, data: body);
     }
 
@@ -219,12 +343,14 @@ class LoanerService extends BaseService {
 
     if (response.success && response.data != null) {
       final l = response.data!;
+      await _upsertCustomers([l.customer]);
       await _db.update(_db.loaners).replace(
             Loaner(
               id: l.id,
               amount: l.amount,
               note: l.note,
               customerId: l.customerId,
+              customer: _encodeCustomer(l.customer),
               isPaid: l.isPaid,
               createdAt: l.createdAt,
               updatedAt: l.updatedAt,
@@ -249,7 +375,7 @@ class LoanerService extends BaseService {
     );
 
     if (localOnly) {
-      syncPendingChanges();
+      await syncPendingChanges();
       return ApiResponse(success: true);
     }
 

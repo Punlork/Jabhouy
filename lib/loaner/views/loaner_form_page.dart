@@ -100,11 +100,16 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
     final loaner = LoanerModel(
       id: widget.existingLoaner?.id ?? -1,
       customerId: customer.id,
+      customer: customer,
       amount: int.tryParse(_controllers['amount']!.text) ?? 0,
       note: _controllers['note']!.text.isEmpty
           ? null
           : _controllers['note']!.text,
       createdAt: _selectedDate,
+      updatedAt: widget.existingLoaner?.updatedAt,
+      isPaid: widget.existingLoaner?.isPaid ?? false,
+      syncStatus: widget.existingLoaner?.syncStatus ?? 0,
+      isDeleted: widget.existingLoaner?.isDeleted ?? false,
     );
 
     if (widget.existingLoaner != null) {

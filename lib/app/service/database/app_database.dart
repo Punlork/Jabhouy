@@ -14,7 +14,8 @@ class Customers extends Table {
   DateTimeColumn get createdAt => dateTime().nullable()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-  IntColumn get syncStatus => integer().withDefault(const Constant(0))(); // 0: synced, 1: pending, 2: error
+  IntColumn get syncStatus => integer()
+      .withDefault(const Constant(0))(); // 0: synced, 1: pending, 2: error
 
   @override
   Set<Column> get primaryKey => {id};
@@ -38,7 +39,8 @@ class ShopItems extends Table {
   IntColumn get sellerPrice => integer().nullable()();
   TextColumn get note => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
-  IntColumn get categoryId => integer().nullable().references(Categories, #id)();
+  IntColumn get categoryId =>
+      integer().nullable().references(Categories, #id)();
   DateTimeColumn get createdAt => dateTime().nullable()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
@@ -53,6 +55,7 @@ class Loaners extends Table {
   IntColumn get amount => integer()();
   TextColumn get note => text().nullable()();
   IntColumn get customerId => integer().nullable().references(Customers, #id)();
+  TextColumn get customer => text().nullable()();
   BoolColumn get isPaid => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
@@ -68,7 +71,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -90,6 +93,10 @@ class AppDatabase extends _$AppDatabase {
           // Add columns to Loaners
           await m.addColumn(loaners, loaners.isDeleted);
           await m.addColumn(loaners, loaners.syncStatus);
+        }
+
+        if (from < 3) {
+          await m.addColumn(loaners, loaners.customer);
         }
       },
     );

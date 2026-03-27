@@ -1229,6 +1229,12 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES customers (id)'));
+  static const VerificationMeta _customerMeta =
+      const VerificationMeta('customer');
+  @override
+  late final GeneratedColumn<String> customer = GeneratedColumn<String>(
+      'customer', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _isPaidMeta = const VerificationMeta('isPaid');
   @override
   late final GeneratedColumn<bool> isPaid = GeneratedColumn<bool>(
@@ -1274,6 +1280,7 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
         amount,
         note,
         customerId,
+        customer,
         isPaid,
         createdAt,
         updatedAt,
@@ -1308,6 +1315,10 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
           _customerIdMeta,
           customerId.isAcceptableOrUnknown(
               data['customer_id']!, _customerIdMeta));
+    }
+    if (data.containsKey('customer')) {
+      context.handle(_customerMeta,
+          customer.isAcceptableOrUnknown(data['customer']!, _customerMeta));
     }
     if (data.containsKey('is_paid')) {
       context.handle(_isPaidMeta,
@@ -1350,6 +1361,8 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
           .read(DriftSqlType.string, data['${effectivePrefix}note']),
       customerId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}customer_id']),
+      customer: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}customer']),
       isPaid: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_paid'])!,
       createdAt: attachedDatabase.typeMapping
@@ -1374,6 +1387,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
   final int amount;
   final String? note;
   final int? customerId;
+  final String? customer;
   final bool isPaid;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -1384,6 +1398,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       required this.amount,
       this.note,
       this.customerId,
+      this.customer,
       required this.isPaid,
       required this.createdAt,
       this.updatedAt,
@@ -1399,6 +1414,9 @@ class Loaner extends DataClass implements Insertable<Loaner> {
     }
     if (!nullToAbsent || customerId != null) {
       map['customer_id'] = Variable<int>(customerId);
+    }
+    if (!nullToAbsent || customer != null) {
+      map['customer'] = Variable<String>(customer);
     }
     map['is_paid'] = Variable<bool>(isPaid);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -1418,6 +1436,9 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       customerId: customerId == null && nullToAbsent
           ? const Value.absent()
           : Value(customerId),
+      customer: customer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customer),
       isPaid: Value(isPaid),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
@@ -1436,6 +1457,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       amount: serializer.fromJson<int>(json['amount']),
       note: serializer.fromJson<String?>(json['note']),
       customerId: serializer.fromJson<int?>(json['customerId']),
+      customer: serializer.fromJson<String?>(json['customer']),
       isPaid: serializer.fromJson<bool>(json['isPaid']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
@@ -1451,6 +1473,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       'amount': serializer.toJson<int>(amount),
       'note': serializer.toJson<String?>(note),
       'customerId': serializer.toJson<int?>(customerId),
+      'customer': serializer.toJson<String?>(customer),
       'isPaid': serializer.toJson<bool>(isPaid),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
@@ -1464,6 +1487,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
           int? amount,
           Value<String?> note = const Value.absent(),
           Value<int?> customerId = const Value.absent(),
+          Value<String?> customer = const Value.absent(),
           bool? isPaid,
           DateTime? createdAt,
           Value<DateTime?> updatedAt = const Value.absent(),
@@ -1474,6 +1498,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
         amount: amount ?? this.amount,
         note: note.present ? note.value : this.note,
         customerId: customerId.present ? customerId.value : this.customerId,
+        customer: customer.present ? customer.value : this.customer,
         isPaid: isPaid ?? this.isPaid,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -1487,6 +1512,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       note: data.note.present ? data.note.value : this.note,
       customerId:
           data.customerId.present ? data.customerId.value : this.customerId,
+      customer: data.customer.present ? data.customer.value : this.customer,
       isPaid: data.isPaid.present ? data.isPaid.value : this.isPaid,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1503,6 +1529,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
           ..write('amount: $amount, ')
           ..write('note: $note, ')
           ..write('customerId: $customerId, ')
+          ..write('customer: $customer, ')
           ..write('isPaid: $isPaid, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1513,8 +1540,8 @@ class Loaner extends DataClass implements Insertable<Loaner> {
   }
 
   @override
-  int get hashCode => Object.hash(id, amount, note, customerId, isPaid,
-      createdAt, updatedAt, isDeleted, syncStatus);
+  int get hashCode => Object.hash(id, amount, note, customerId, customer,
+      isPaid, createdAt, updatedAt, isDeleted, syncStatus);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1523,6 +1550,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
           other.amount == this.amount &&
           other.note == this.note &&
           other.customerId == this.customerId &&
+          other.customer == this.customer &&
           other.isPaid == this.isPaid &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1535,6 +1563,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
   final Value<int> amount;
   final Value<String?> note;
   final Value<int?> customerId;
+  final Value<String?> customer;
   final Value<bool> isPaid;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
@@ -1545,6 +1574,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
     this.amount = const Value.absent(),
     this.note = const Value.absent(),
     this.customerId = const Value.absent(),
+    this.customer = const Value.absent(),
     this.isPaid = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1556,6 +1586,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
     required int amount,
     this.note = const Value.absent(),
     this.customerId = const Value.absent(),
+    this.customer = const Value.absent(),
     this.isPaid = const Value.absent(),
     required DateTime createdAt,
     this.updatedAt = const Value.absent(),
@@ -1568,6 +1599,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
     Expression<int>? amount,
     Expression<String>? note,
     Expression<int>? customerId,
+    Expression<String>? customer,
     Expression<bool>? isPaid,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -1579,6 +1611,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
       if (amount != null) 'amount': amount,
       if (note != null) 'note': note,
       if (customerId != null) 'customer_id': customerId,
+      if (customer != null) 'customer': customer,
       if (isPaid != null) 'is_paid': isPaid,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1592,6 +1625,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
       Value<int>? amount,
       Value<String?>? note,
       Value<int?>? customerId,
+      Value<String?>? customer,
       Value<bool>? isPaid,
       Value<DateTime>? createdAt,
       Value<DateTime?>? updatedAt,
@@ -1602,6 +1636,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
       amount: amount ?? this.amount,
       note: note ?? this.note,
       customerId: customerId ?? this.customerId,
+      customer: customer ?? this.customer,
       isPaid: isPaid ?? this.isPaid,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1624,6 +1659,9 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
     }
     if (customerId.present) {
       map['customer_id'] = Variable<int>(customerId.value);
+    }
+    if (customer.present) {
+      map['customer'] = Variable<String>(customer.value);
     }
     if (isPaid.present) {
       map['is_paid'] = Variable<bool>(isPaid.value);
@@ -1650,6 +1688,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
           ..write('amount: $amount, ')
           ..write('note: $note, ')
           ..write('customerId: $customerId, ')
+          ..write('customer: $customer, ')
           ..write('isPaid: $isPaid, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2548,6 +2587,7 @@ typedef $$LoanersTableCreateCompanionBuilder = LoanersCompanion Function({
   required int amount,
   Value<String?> note,
   Value<int?> customerId,
+  Value<String?> customer,
   Value<bool> isPaid,
   required DateTime createdAt,
   Value<DateTime?> updatedAt,
@@ -2559,6 +2599,7 @@ typedef $$LoanersTableUpdateCompanionBuilder = LoanersCompanion Function({
   Value<int> amount,
   Value<String?> note,
   Value<int?> customerId,
+  Value<String?> customer,
   Value<bool> isPaid,
   Value<DateTime> createdAt,
   Value<DateTime?> updatedAt,
@@ -2603,6 +2644,9 @@ class $$LoanersTableFilterComposer
 
   ColumnFilters<String> get note => $composableBuilder(
       column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get customer => $composableBuilder(
+      column: $table.customer, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isPaid => $composableBuilder(
       column: $table.isPaid, builder: (column) => ColumnFilters(column));
@@ -2658,6 +2702,9 @@ class $$LoanersTableOrderingComposer
   ColumnOrderings<String> get note => $composableBuilder(
       column: $table.note, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get customer => $composableBuilder(
+      column: $table.customer, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get isPaid => $composableBuilder(
       column: $table.isPaid, builder: (column) => ColumnOrderings(column));
 
@@ -2711,6 +2758,9 @@ class $$LoanersTableAnnotationComposer
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get customer =>
+      $composableBuilder(column: $table.customer, builder: (column) => column);
 
   GeneratedColumn<bool> get isPaid =>
       $composableBuilder(column: $table.isPaid, builder: (column) => column);
@@ -2775,6 +2825,7 @@ class $$LoanersTableTableManager extends RootTableManager<
             Value<int> amount = const Value.absent(),
             Value<String?> note = const Value.absent(),
             Value<int?> customerId = const Value.absent(),
+            Value<String?> customer = const Value.absent(),
             Value<bool> isPaid = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime?> updatedAt = const Value.absent(),
@@ -2786,6 +2837,7 @@ class $$LoanersTableTableManager extends RootTableManager<
             amount: amount,
             note: note,
             customerId: customerId,
+            customer: customer,
             isPaid: isPaid,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -2797,6 +2849,7 @@ class $$LoanersTableTableManager extends RootTableManager<
             required int amount,
             Value<String?> note = const Value.absent(),
             Value<int?> customerId = const Value.absent(),
+            Value<String?> customer = const Value.absent(),
             Value<bool> isPaid = const Value.absent(),
             required DateTime createdAt,
             Value<DateTime?> updatedAt = const Value.absent(),
@@ -2808,6 +2861,7 @@ class $$LoanersTableTableManager extends RootTableManager<
             amount: amount,
             note: note,
             customerId: customerId,
+            customer: customer,
             isPaid: isPaid,
             createdAt: createdAt,
             updatedAt: updatedAt,

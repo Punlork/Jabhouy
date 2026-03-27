@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000417">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: Switch to android build_release lane" time="0.00077">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: cd /Users/tt/Documents/learning/jabhouy &amp;&amp; flutter build apk --flavor production -t lib/main_production.dart --release" time="106.979489">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>

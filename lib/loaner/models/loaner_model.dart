@@ -28,9 +28,15 @@ class LoanerModel extends Equatable {
       id: tryCast<int>(json['id'])!,
       amount: tryCast<int>(json['amount'])!,
       note: tryCast<String>(json['note']),
-      customer: tryCast<Map<String, dynamic>>(json['customer'])?.let(CustomerModel.fromJson),
-      createdAt: tryCast<String>(json['createdAt'])?.let((s) => DateTime.parse(s).toLocal()),
-      updatedAt: tryCast<String>(json['updatedAt'])?.let((s) => DateTime.parse(s).toLocal()),
+      customerId: tryCast<int>(json['customerId']) ??
+          tryCast<int>(json['customer_id']) ??
+          tryCast<int>(json['customer']),
+      customer: tryCast<Map<String, dynamic>>(json['customer'])
+          ?.let(CustomerModel.fromJson),
+      createdAt: tryCast<String>(json['createdAt'])
+          ?.let((s) => DateTime.parse(s).toLocal()),
+      updatedAt: tryCast<String>(json['updatedAt'])
+          ?.let((s) => DateTime.parse(s).toLocal()),
       isPaid: tryCast<bool>(json['paid'], fallback: false)!,
       syncStatus: tryCast<int>(json['syncStatus']) ?? 0,
       isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
@@ -62,7 +68,17 @@ class LoanerModel extends Equatable {
       };
 
   @override
-  List<Object?> get props => [id, amount, note, createdAt, updatedAt, customer, customerId, syncStatus, isDeleted];
+  List<Object?> get props => [
+        id,
+        amount,
+        note,
+        createdAt,
+        updatedAt,
+        customer,
+        customerId,
+        syncStatus,
+        isDeleted,
+      ];
 
   LoanerModel copyWith({
     int? id,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -49,12 +50,11 @@ class GridShopItemCard extends StatelessWidget {
                         imageCacheHeight: 250,
                         imageCacheWidth: 250,
                         placeholder: kTransparentImage,
-                        imageErrorBuilder: (context, url, error) => Center(
-                          child: Icon(
-                            Icons.inventory_2_outlined,
-                            color: colorScheme.onSurfaceVariant
-                                .withValues(alpha: 0.4),
-                            size: 32,
+                        imageErrorBuilder: (context, url, error) => const Center(
+                          child: AppLogo(
+                            shape: BoxShape.rectangle,
+                            useBg: false,
+                            size: 120,
                           ),
                         ),
                       ),
@@ -125,8 +125,7 @@ class GridShopItemShimmer extends StatelessWidget {
         ),
       ),
       child: ColoredBox(
-        color: Theme.of(context).cardTheme.color ??
-            colorScheme.surfaceContainerLow,
+        color: Theme.of(context).cardTheme.color ?? colorScheme.surfaceContainerLow,
         child: Shimmer.fromColors(
           baseColor: colorScheme.surfaceContainerHighest,
           highlightColor: colorScheme.surfaceContainerHigh,

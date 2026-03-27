@@ -15,7 +15,8 @@ class LoanerView extends StatefulWidget {
   State<LoanerView> createState() => _LoanerViewState();
 }
 
-class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMixin, InfiniteScrollMixin<LoanerView> {
+class _LoanerViewState extends State<LoanerView>
+    with AutomaticKeepAliveClientMixin, InfiniteScrollMixin<LoanerView> {
   @override
   void initState() {
     super.initState();
@@ -23,7 +24,8 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
   }
 
   @override
-  ScrollController? getScrollController(BuildContext context) => TabScrollManager.of(context)?.getController(1);
+  ScrollController? getScrollController(BuildContext context) =>
+      TabScrollManager.of(context)?.getController(1);
 
   @override
   void onScrollToBottom() {
@@ -53,7 +55,8 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
       builder: (context, state) => switch (state) {
         LoanerLoading() => ListView.builder(
             controller: controller,
-            physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+            physics: const BouncingScrollPhysics()
+                .applyTo(const AlwaysScrollableScrollPhysics()),
             padding: const EdgeInsets.all(16),
             itemCount: 5,
             itemBuilder: (context, index) => const LoanerItemShimmer(),
@@ -70,7 +73,8 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
                 ? EmptyView(msg: context.l10n.noLoanerFound)
                 : ListView.builder(
                     controller: controller,
-                    physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+                    physics: const BouncingScrollPhysics()
+                        .applyTo(const AlwaysScrollableScrollPhysics()),
                     padding: const EdgeInsets.all(16),
                     itemCount: items.length + 2,
                     itemBuilder: (context, index) {
@@ -106,7 +110,6 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
     final colorScheme = Theme.of(context).colorScheme;
     return Slidable(
       key: ValueKey(loaner.id),
-      
       endActionPane: ActionPane(
         motion: const StretchMotion(),
         children: [
@@ -141,7 +144,8 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
               UpdateLoaner(
                 loaner.copyWith(
                   isPaid: isPaid,
-                  customerId: loaner.customer?.id,
+                  customerId: loaner.customerId ?? loaner.customer?.id,
+                  customer: loaner.customer,
                 ),
               ),
             ),
