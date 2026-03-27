@@ -139,6 +139,15 @@ jobs:
           umask 077
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
 
+      - name: Restore production .env
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.PRODUCTION_DOTENV }}" ]; then
+            echo "Missing PRODUCTION_DOTENV secret."
+            exit 1
+          fi
+          printf '%s' "${{ secrets.PRODUCTION_DOTENV }}" > .env
+
       - name: Build production APK
         working-directory: android
         run: bundle exec fastlane build_release_ci
@@ -195,7 +204,7 @@ jobs:
       - name: Remove Android keystore
         if: always()
         shell: bash
-        run: rm -f "$ANDROID_KEYSTORE_PATH"
+        run: rm -f "$ANDROID_KEYSTORE_PATH" .env
 
   # fastlane-ios-build:
   #   name: Fastlane iOS (build)
