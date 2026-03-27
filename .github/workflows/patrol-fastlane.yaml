@@ -147,6 +147,7 @@ jobs:
             exit 1
           fi
           printf '%s' "${{ secrets.PRODUCTION_DOTENV }}" > .env
+          touch .env.dev
 
       - name: Build production APK
         working-directory: android
