@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/l10n/l10n.dart';
@@ -17,7 +18,11 @@ class LoanerFilterSheet extends StatefulWidget {
   final DateTime? initialFromDate;
   final DateTime? initialToDate;
   final CustomerModel? initialLoanerFilter;
-  final void Function(DateTime? fromDate, DateTime? toDate, CustomerModel? loanerFilter) onApply;
+  final void Function(
+    DateTime? fromDate,
+    DateTime? toDate,
+    CustomerModel? loanerFilter,
+  ) onApply;
 
   @override
   State<LoanerFilterSheet> createState() => _LoanerFilterSheetState();
@@ -29,7 +34,8 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   late CustomerModel? _loanerFilter;
   final TextEditingController _loanerController = TextEditingController();
 
-  bool get isDisabled => _fromDate == null && _toDate == null && _loanerFilter == null;
+  bool get isDisabled =>
+      _fromDate == null && _toDate == null && _loanerFilter == null;
 
   @override
   void initState() {
@@ -83,6 +89,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final inputTheme = Theme.of(context).inputDecorationTheme;
     final l10n = AppLocalizations.of(context);
 
     return Padding(
@@ -93,7 +100,10 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
         children: [
           Text(
             l10n.filterLoaners,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: AppTextTheme.title.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -102,11 +112,14 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             decoration: InputDecoration(
               labelText: l10n.fromDate,
               hintText: _fromDate == null ? l10n.notSet : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              filled: inputTheme.filled,
+              fillColor: inputTheme.fillColor,
+              border: inputTheme.border,
+              enabledBorder: inputTheme.enabledBorder,
+              focusedBorder: inputTheme.focusedBorder,
               suffixIcon: const Icon(Icons.calendar_today, size: 20),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
             ),
             controller: TextEditingController(
               text: _formatToRFC3339Date(_fromDate),
@@ -119,11 +132,14 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             decoration: InputDecoration(
               labelText: l10n.toDate,
               hintText: _toDate == null ? l10n.notSet : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              filled: inputTheme.filled,
+              fillColor: inputTheme.fillColor,
+              border: inputTheme.border,
+              enabledBorder: inputTheme.enabledBorder,
+              focusedBorder: inputTheme.focusedBorder,
               suffixIcon: const Icon(Icons.calendar_today, size: 20),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
             ),
             controller: TextEditingController(
               text: _formatToRFC3339Date(_toDate),
@@ -148,7 +164,9 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             children: [
               TextButton(
                 onPressed: () {
-                  context.read<LoanerBloc>().add(LoadLoaners(forceRefresh: true));
+                  context
+                      .read<LoanerBloc>()
+                      .add(LoadLoaners(forceRefresh: true));
                   Navigator.pop(context);
                 },
                 child: Text(l10n.reset),
@@ -170,8 +188,12 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                         Navigator.pop(context);
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.primary,
-                  foregroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.onPrimary,
+                  backgroundColor: isDisabled
+                      ? colorScheme.surfaceContainerHighest
+                      : colorScheme.primary,
+                  foregroundColor: isDisabled
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.onPrimary,
                 ),
                 child: Text(l10n.apply),
               ),

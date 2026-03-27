@@ -42,11 +42,15 @@ class CustomerAutocompleteField extends StatelessWidget {
             focusNode: this.focusNode ?? focusNode,
             useCustomBorder: false,
             showClearButton: true,
-            validator: validator ?? (required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null),
+            validator: validator ??
+                (required
+                    ? (value) =>
+                        value!.isEmpty ? l10n.nameRequired(label) : null
+                    : null),
             decoration: const InputDecoration(
-              contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               labelStyle: AppTextTheme.body,
-              fillColor: Colors.transparent,
             ),
             onCleared: controller.clear,
           ),
@@ -56,13 +60,17 @@ class CustomerAutocompleteField extends StatelessWidget {
             if (currentState == null) return [];
             return currentState.customers
                 .where(
-                  (customer) => customer.name.toLowerCase().contains(pattern.toLowerCase()),
+                  (customer) => customer.name
+                      .toLowerCase()
+                      .contains(pattern.toLowerCase()),
                 )
                 .toList();
           },
           constraints: const BoxConstraints(maxHeight: 200),
           itemBuilder: (context, CustomerModel suggestion) {
-            final number = state.asType<CustomerLoaded>()?.customers.indexOf(suggestion) ?? -1;
+            final number =
+                state.asType<CustomerLoaded>()?.customers.indexOf(suggestion) ??
+                    -1;
             return ListTile(
               title: Text('${number + 1}. ${suggestion.name}'),
             );

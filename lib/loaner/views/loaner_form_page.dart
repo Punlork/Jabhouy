@@ -84,8 +84,10 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       _initialTextValues['name'] = '';
       _initialTextValues['amount'] = '';
       _initialTextValues['note'] = '';
-      _initialTextValues['date'] = DateFormat('dd MMM yyyy').format(DateTime.now());
-      _controllers['date']!.text = DateFormat('dd MMM yyyy').format(DateTime.now());
+      _initialTextValues['date'] =
+          DateFormat('dd MMM yyyy').format(DateTime.now());
+      _controllers['date']!.text =
+          DateFormat('dd MMM yyyy').format(DateTime.now());
     }
 
     _controllers.forEach((key, controller) {
@@ -99,7 +101,9 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       id: widget.existingLoaner?.id ?? -1,
       customerId: customer.id,
       amount: int.tryParse(_controllers['amount']!.text) ?? 0,
-      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+      note: _controllers['note']!.text.isEmpty
+          ? null
+          : _controllers['note']!.text,
       createdAt: _selectedDate,
     );
 
@@ -209,13 +213,18 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
         hintText: '',
         textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
-        keyboardType: maxLines != null ? TextInputType.multiline : (isAmount ? TextInputType.number : keyboardType),
+        keyboardType: maxLines != null
+            ? TextInputType.multiline
+            : (isAmount ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
         onTapOutside: (_) {},
-        validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
+        validator: required
+            ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null
+            : null,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           labelStyle: AppTextTheme.body,
           suffixText: isAmount ? 'រៀល' : null,
           suffixStyle: isAmount ? AppTextTheme.caption : null,
@@ -228,6 +237,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final inputTheme = Theme.of(context).inputDecorationTheme;
     final l10n = AppLocalizations.of(context);
 
     return PopScope(
@@ -304,17 +314,26 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                           controller: _controllers['date'],
                           readOnly: true,
                           onTap: () => _selectDate(context),
-                          onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                          onTapOutside: (event) =>
+                              FocusManager.instance.primaryFocus?.unfocus(),
                           decoration: InputDecoration(
                             labelText: l10n.toDate,
                             labelStyle: AppTextTheme.body,
-                            border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8)),
+                            filled: inputTheme.filled,
+                            fillColor: inputTheme.fillColor,
+                            border: inputTheme.border,
+                            enabledBorder: inputTheme.enabledBorder,
+                            focusedBorder: inputTheme.focusedBorder,
+                            suffixIcon:
+                                const Icon(Icons.calendar_today, size: 20),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 20,
                             ),
-                            suffixIcon: const Icon(Icons.calendar_today, size: 20),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                           ),
-                          validator: (value) => value!.isEmpty ? l10n.nameRequired(l10n.toDate) : null,
+                          validator: (value) => value!.isEmpty
+                              ? l10n.nameRequired(l10n.toDate)
+                              : null,
                         ),
                       ),
                       _buildTextField(
@@ -345,7 +364,9 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                         foregroundColor: colorScheme.onPrimary,
                       ),
                       child: Text(
-                        widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
+                        widget.existingLoaner != null
+                            ? l10n.saveChanges
+                            : l10n.addLoaner,
                         style: AppTextTheme.body,
                       ),
                     ),
@@ -359,7 +380,9 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                       label: Text(
-                        widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
+                        widget.existingLoaner != null
+                            ? l10n.saveChanges
+                            : l10n.addLoaner,
                         style: AppTextTheme.body,
                       ),
                       icon: const Icon(Icons.save),

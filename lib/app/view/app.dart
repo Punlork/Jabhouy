@@ -33,19 +33,9 @@ class _MyApp extends StatelessWidget {
         return MaterialApp.router(
           locale: state.locale,
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            appBarTheme: AppBarTheme(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              titleTextStyle: const TextStyle(
-                color: Colors.white,
-              ),
-              iconTheme: const IconThemeData(
-                color: Colors.white,
-              ),
-            ),
-            useMaterial3: true,
-            fontFamily: 'NotoSansKhmer',
-          ),
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           builder: (context, child) => Overlay(
             initialEntries: [
               OverlayEntry(

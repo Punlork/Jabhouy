@@ -16,7 +16,8 @@ class ProfilePage extends StatelessWidget {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         final bloc = context.read<ProfileBloc>();
-        if (state is Authenticated && (bloc.state.asLoaded?.isSuccess ?? false)) {
+        if (state is Authenticated &&
+            (bloc.state.asLoaded?.isSuccess ?? false)) {
           showSuccessSnackBar(
             context,
             context.l10n.profileUpdated,
@@ -24,7 +25,8 @@ class ProfilePage extends StatelessWidget {
           bloc.add(ResetProfile());
         }
       },
-      builder: (context, state) => _ProfilePageContent(state.asAuthenticated?.user),
+      builder: (context, state) =>
+          _ProfilePageContent(state.asAuthenticated?.user),
     );
   }
 }
@@ -36,6 +38,7 @@ class _ProfilePageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final displayNameController = TextEditingController(text: user?.name);
     final usernameController = TextEditingController(text: user?.username);
 
@@ -94,22 +97,26 @@ class _ProfilePageContent extends StatelessWidget {
                       final bloc = context.read<ProfileBloc>().upload;
                       bloc.showImageSourceDialog(
                         context,
-                        onChoseFromGallery: () => bloc.add(SelectImageEvent(ImageSource.gallery)),
-                        onTakePhoto: () => bloc.add(SelectImageEvent(ImageSource.camera)),
+                        onChoseFromGallery: () =>
+                            bloc.add(SelectImageEvent(ImageSource.gallery)),
+                        onTakePhoto: () =>
+                            bloc.add(SelectImageEvent(ImageSource.camera)),
                       );
                     },
                     child: Stack(
                       children: [
                         BlocBuilder<UploadBloc, UploadState>(
                           bloc: context.read<ProfileBloc>().upload,
-                          builder: (context, uploadState) => switch (uploadState) {
+                          builder: (context, uploadState) =>
+                              switch (uploadState) {
                             UploadImageSelected() => ClipOval(
                                 child: Image.file(
                                   uploadState.selectedImage,
                                   width: 80,
                                   height: 80,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const SizedBox.shrink(),
                                 ),
                               ),
                             UploadImageUrlLoaded() => ClipOval(
@@ -118,7 +125,8 @@ class _ProfilePageContent extends StatelessWidget {
                                   width: 80,
                                   height: 80,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const SizedBox.shrink(),
                                 ),
                               ),
                             _ => const CircleAvatar(
@@ -132,13 +140,14 @@ class _ProfilePageContent extends StatelessWidget {
                           bottom: 0,
                           child: Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceContainerLow,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.edit,
                               size: 14,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -183,7 +192,8 @@ class _ProfilePageContent extends StatelessWidget {
                     final newUsername = usernameController.text.trim();
 
                     if (uploadBloc.selectedImage != null) {
-                      uploadBloc.add(UploadImageEvent(uploadBloc.selectedImage!));
+                      uploadBloc
+                          .add(UploadImageEvent(uploadBloc.selectedImage!));
                     } else {
                       if (newDisplayName.isEmpty || newUsername.isEmpty) return;
                       context.read<ProfileBloc>().add(
@@ -195,10 +205,6 @@ class _ProfilePageContent extends StatelessWidget {
                           );
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  ),
                   child: Text(
                     l10n.save,
                     style: AppTextTheme.body,

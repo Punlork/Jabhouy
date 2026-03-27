@@ -344,6 +344,24 @@ abstract class AppLocalizations {
   /// **'Khmer'**
   String get languageKhmer;
 
+  /// Label for toggling dark theme
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get darkMode;
+
+  /// Subtitle shown when dark theme is active
+  ///
+  /// In en, this message translates to:
+  /// **'Dark theme enabled'**
+  String get darkModeOn;
+
+  /// Subtitle shown when light theme is active
+  ///
+  /// In en, this message translates to:
+  /// **'Light theme enabled'**
+  String get darkModeOff;
+
   /// AppBar title when editing an item
   ///
   /// In en, this message translates to:

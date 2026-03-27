@@ -16,13 +16,18 @@ class LoanerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
-      elevation: 4,
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.8),
+        ),
       ),
       margin: EdgeInsets.zero,
-      color: loaner.isPaid ? Colors.green[50] : null,
+      color: loaner.isPaid ? colorScheme.secondaryContainer : Theme.of(context).cardTheme.color,
       child: Stack(
         children: [
           Container(
@@ -33,42 +38,75 @@ class LoanerItem extends StatelessWidget {
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
-                          children: [
-                            Text(
-                              loaner.customer?.name ?? 'Unknown',
-                              style: AppTextTheme.title,
-                            ),
-                            if (loaner.isPaid) ...[
-                              const SizedBox(width: 8),
-                            ],
-                          ],
-                        ),
-                        if (loaner.amount != 0) ...[
-                          const SizedBox(height: 2),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
                           Text(
-                            '${loaner.amount} រៀល',
-                            style: AppTextTheme.body,
+                            loaner.customer?.name ?? 'Unknown',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextTheme.title.copyWith(
+                              color: colorScheme.onSurface,
+                            ),
                           ),
-                        ]
-                      ],
+                          if (loaner.amount != 0) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${loaner.amount} រៀល',
+                              style: AppTextTheme.body.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 12),
                     Text(
                       loaner.displayDate,
-                      style: AppTextTheme.caption.copyWith(color: Colors.grey),
+                      textAlign: TextAlign.end,
+                      style: AppTextTheme.caption.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
-                if (loaner.note != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    '${context.l10n.note}: ${loaner.note}',
-                    style: AppTextTheme.caption,
+                if ((loaner.note ?? '').trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    margin: const EdgeInsets.only(right: 100),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.6,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.sticky_note_2_outlined,
+                          size: 16,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            loaner.note!.trim(),
+                            style: AppTextTheme.caption.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ],
@@ -87,13 +125,16 @@ class LoanerItem extends StatelessWidget {
                   vertical: 2,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: loaner.isPaid ? colorScheme.surface : colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: loaner.isPaid ? colorScheme.outline : colorScheme.primaryContainer,
+                  ),
                 ),
                 child: Text(
                   loaner.isPaid ? context.l10n.unpaid : context.l10n.paid,
                   style: AppTextTheme.caption.copyWith(
-                    color: Colors.white,
+                    color: loaner.isPaid ? colorScheme.onSurface : colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -111,17 +152,23 @@ class LoanerItemShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Card(
-        elevation: 4,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.8),
+          ),
         ),
         margin: EdgeInsets.zero,
+        color: Theme.of(context).cardTheme.color,
         child: Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
+          baseColor: colorScheme.surfaceContainerHighest,
+          highlightColor: colorScheme.surfaceContainerHigh,
           child: Container(
             padding: const EdgeInsets.all(16),
             width: double.infinity,
@@ -135,19 +182,19 @@ class LoanerItemShimmer extends StatelessWidget {
                       Container(
                         width: 150,
                         height: 20,
-                        color: Colors.white,
+                        color: colorScheme.surfaceContainerHighest,
                       ),
                       const SizedBox(height: 12),
                       Container(
                         width: 100,
                         height: 16,
-                        color: Colors.white,
+                        color: colorScheme.surfaceContainerHighest,
                       ),
                       const SizedBox(height: 12),
                       Container(
                         width: 200,
                         height: 16,
-                        color: Colors.white,
+                        color: colorScheme.surfaceContainerHighest,
                       ),
                     ],
                   ),
@@ -155,7 +202,7 @@ class LoanerItemShimmer extends StatelessWidget {
                 Container(
                   width: 100,
                   height: 16,
-                  color: Colors.white, // Created date placeholder
+                  color: colorScheme.surfaceContainerHighest,
                 ),
               ],
             ),

@@ -18,6 +18,35 @@ extension ShopStateExtension on ShopState {
 
 class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ShopBloc(this._service, this.upload) : super(const ShopInitial()) {
+    _filtersController = StreamController<_ShopFilters>.broadcast(sync: true)..add(const _ShopFilters());
+
+    _itemsSubscription = _filtersController.stream
+        .switchMap(
+      (filters) => _service.watchShopItems(
+        searchQuery: filters.searchQuery,
+        categoryFilter: filters.categoryFilter,
+      ),
+    )
+        .listen((items) {
+      add(
+        _ShopInternalItemsUpdated(items),
+      );
+    });
+
+    on<_ShopInternalItemsUpdated>((event, emit) {
+      final currentState = state.asLoaded;
+      emit(
+        ShopLoaded(
+          paginatedItems: PaginatedResponse<ShopItemModel>(
+            items: event.items,
+            pagination: currentState?.pagination ?? Pagination(total: event.items.length, totalPage: 1),
+          ),
+          searchQuery: currentState?.searchQuery ?? '',
+          categoryFilter: currentState?.categoryFilter,
+        ),
+      );
+    });
+
     on<ShopGetItemsEvent>(
       _onGetItems,
       transformer: (events, mapper) {
@@ -33,31 +62,27 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     on<ShopDeleteItemEvent>(_onDeleteItem);
     on<ShopEditItemEvent>(_onEditItem);
   }
+
   static const throttleDuration = Duration(milliseconds: 300);
 
   final ShopService _service;
   final UploadBloc upload;
+  late StreamSubscription<List<ShopItemModel>> _itemsSubscription;
+  late StreamController<_ShopFilters> _filtersController;
+
+  @override
+  Future<void> close() {
+    _itemsSubscription.cancel();
+    _filtersController.close();
+    return super.close();
+  }
 
   Future<void> _onCreateItem(ShopCreateItemEvent event, Emitter<ShopState> emit) async {
     LoadingOverlay.show();
     try {
       final response = await _service.createShopItem(event.body);
       if (!response.success) return;
-
       showSuccessSnackBar(null, 'Created ${response.data?.name}');
-
-      final updatedItems = [response.data!, ...?state.asLoaded?.items];
-
-      emit(
-        ShopLoaded(
-          paginatedItems: PaginatedResponse<ShopItemModel>(
-            items: updatedItems,
-            pagination: state.asLoaded!.pagination,
-          ),
-          searchQuery: state.asLoaded?.searchQuery ?? '',
-          categoryFilter: state.asLoaded?.categoryFilter,
-        ),
-      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
@@ -70,24 +95,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     try {
       final response = await _service.updateShopItem(event.body);
       if (!response.success) return;
-
       showSuccessSnackBar(null, 'Updated: ${response.data?.name}');
-
-      final currentItems = state.asLoaded?.items ?? <ShopItemModel>[];
-      final updatedItems = currentItems.map((item) {
-        return item.id == event.body.id ? response.data! : item;
-      }).toList();
-
-      emit(
-        ShopLoaded(
-          paginatedItems: PaginatedResponse<ShopItemModel>(
-            items: updatedItems,
-            pagination: state.asLoaded!.pagination,
-          ),
-          searchQuery: state.asLoaded?.searchQuery ?? '',
-          categoryFilter: state.asLoaded?.categoryFilter,
-        ),
-      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
     } finally {
@@ -100,32 +108,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     try {
       final response = await _service.deleteShopItem(event.body);
       if (!response.success) return;
-
       showSuccessSnackBar(null, 'Deleted ${event.body.name}');
-
-      final updatedItems = List<ShopItemModel>.from(state.asLoaded?.items ?? [])
-        ..removeWhere((item) => item.id == event.body.id);
-
-      emit(
-        ShopLoaded(
-          paginatedItems: PaginatedResponse<ShopItemModel>(
-            items: updatedItems,
-            pagination: state.asLoaded?.pagination != null
-                ? Pagination(
-                    total: updatedItems.length,
-                    page: state.asLoaded!.pagination.page,
-                    limit: state.asLoaded!.pagination.limit,
-                    totalPage: (updatedItems.length / state.asLoaded!.pagination.limit).ceil(),
-                  )
-                : Pagination(
-                    total: updatedItems.length,
-                    totalPage: 1,
-                  ),
-          ),
-          searchQuery: state.asLoaded?.searchQuery ?? '',
-          categoryFilter: state.asLoaded?.categoryFilter,
-        ),
-      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete item: $e');
     } finally {
@@ -144,8 +127,17 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     final isFilterChange = newSearchQuery != currentState?.searchQuery;
     final isCategoryChange = newCategoryFilter != currentState?.categoryFilter;
 
+    if (isFilterChange || isCategoryChange) {
+      _filtersController.add(
+        _ShopFilters(
+          searchQuery: newSearchQuery,
+          categoryFilter: newCategoryFilter,
+        ),
+      );
+    }
+
     final effectivePage = isFilterChange || isCategoryChange ? 1 : newPage;
-    final showFilterLoading = effectivePage == 1 && isFilterChange || isCategoryChange;
+    final showFilterLoading = effectivePage == 1 && (isFilterChange || isCategoryChange);
 
     if (isCategoryChange || event.forceRefresh || isFilterChange) {
       if (currentState != null) {
@@ -162,38 +154,28 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     }
 
     try {
-      final response = await _service.getShopItems(
+      // Still fetch from API to update local DB
+      await _service.getShopItems(
         page: effectivePage,
         limit: newPageSize,
         searchQuery: newSearchQuery,
         categoryFilter: newCategoryFilter?.id.toString() ?? '',
       );
-
-      if (response.success && response.data != null) {
-        final paginatedItems = response.data!.items;
-        final pagination = response.data!.pagination;
-
-        var allItems = <ShopItemModel>[];
-
-        if (event.forceRefresh || isFilterChange || effectivePage == 1) {
-          allItems = paginatedItems;
-        } else {
-          allItems = [...currentState!.items, ...paginatedItems];
-        }
-
-        emit(
-          ShopLoaded(
-            paginatedItems: PaginatedResponse(
-              items: allItems,
-              pagination: pagination,
-            ),
-            searchQuery: newSearchQuery,
-            categoryFilter: newCategoryFilter,
-          ),
-        );
-      }
+      // We don't need to emit ShopLoaded here because the stream subscription will do it
     } catch (e) {
-      emit(ShopError('Failed to load items: $e'));
+      if (state is! ShopLoaded) {
+        emit(ShopError('Failed to load items: $e'));
+      }
     }
   }
+}
+
+class _ShopFilters {
+  const _ShopFilters({
+    this.searchQuery = '',
+    this.categoryFilter,
+  });
+
+  final String searchQuery;
+  final CategoryItemModel? categoryFilter;
 }

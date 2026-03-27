@@ -138,6 +138,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageKhmer => 'Khmer';
 
   @override
+  String get darkMode => 'Dark Mode';
+
+  @override
+  String get darkModeOn => 'Dark theme enabled';
+
+  @override
+  String get darkModeOff => 'Light theme enabled';
+
+  @override
   String get editItem => 'Edit Item';
 
   @override

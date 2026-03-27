@@ -14,6 +14,8 @@ class ShopItemModel extends Equatable {
     this.category,
     this.createdAt,
     this.updatedAt,
+    this.syncStatus = 0,
+    this.isDeleted = false,
   });
 
   factory ShopItemModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,8 @@ class ShopItemModel extends Equatable {
       ),
       createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
       updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
+      syncStatus: tryCast<int>(json['syncStatus']) ?? 0,
+      isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }
 
@@ -43,6 +47,8 @@ class ShopItemModel extends Equatable {
   final CategoryItemModel? category;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final int syncStatus;
+  final bool isDeleted;
 
   Map<String, dynamic> toJson() {
     return {
@@ -68,11 +74,12 @@ class ShopItemModel extends Equatable {
         category,
         createdAt,
         updatedAt,
+        syncStatus,
+        isDeleted,
       ];
 
   ShopItemModel copyWith({
     int? id,
-    String? userId,
     String? name,
     int? defaultPrice,
     int? customerPrice,
@@ -82,6 +89,8 @@ class ShopItemModel extends Equatable {
     CategoryItemModel? category,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? syncStatus,
+    bool? isDeleted,
   }) {
     return ShopItemModel(
       id: id ?? this.id,
@@ -94,6 +103,8 @@ class ShopItemModel extends Equatable {
       category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 }

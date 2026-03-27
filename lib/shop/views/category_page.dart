@@ -26,6 +26,8 @@ class _CategoryPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -39,9 +41,12 @@ class _CategoryPageContent extends StatelessWidget {
             case CategoryError():
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
+                  backgroundColor: colorScheme.inverseSurface,
                   content: Text(
                     state.message,
-                    style: AppTextTheme.body,
+                    style: AppTextTheme.body.copyWith(
+                      color: colorScheme.onInverseSurface,
+                    ),
                   ),
                 ),
               );
@@ -77,10 +82,7 @@ class _CategoryPageContent extends StatelessWidget {
           minimumSize: const Size(double.infinity, 50),
         ),
         onPressed: () => _showCategoryDialog(context),
-        icon: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        icon: const Icon(Icons.add),
         label: Text(
           AppLocalizations.of(context).add,
           style: AppTextTheme.body,
@@ -90,28 +92,39 @@ class _CategoryPageContent extends StatelessWidget {
   }
 
   Widget _buildCategoryTile(BuildContext context, CategoryItemModel item) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: Colors.white,
-      elevation: 2,
+      color: Theme.of(context).cardTheme.color,
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 12),
         title: Text(
           item.name,
-          style: AppTextTheme.body,
+          style: AppTextTheme.body.copyWith(
+            color: colorScheme.onSurface,
+          ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: Icon(
+                Icons.edit,
+                color: colorScheme.onSurfaceVariant,
+              ),
               onPressed: () => _showCategoryDialog(context, item: item),
             ),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: Icon(
+                Icons.delete,
+                color: colorScheme.error,
+              ),
               onPressed: () => _showDeleteConfirmation(context, item),
             ),
           ],
@@ -123,6 +136,7 @@ class _CategoryPageContent extends StatelessWidget {
   void _showCategoryDialog(BuildContext context, {CategoryItemModel? item}) {
     final isEdit = item != null;
     final controller = TextEditingController(text: item?.name ?? '');
+    final colorScheme = Theme.of(context).colorScheme;
 
     showDialog<void>(
       context: context,
@@ -130,7 +144,9 @@ class _CategoryPageContent extends StatelessWidget {
         value: context.read<CategoryBloc>(),
         child: AlertDialog(
           title: Text(
-            isEdit ? AppLocalizations.of(context).editCategory : AppLocalizations.of(context).addCategory,
+            isEdit
+                ? AppLocalizations.of(context).editCategory
+                : AppLocalizations.of(context).addCategory,
             style: AppTextTheme.title,
           ),
           content: TextField(
@@ -138,6 +154,9 @@ class _CategoryPageContent extends StatelessWidget {
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).category,
               labelStyle: AppTextTheme.body,
+            ),
+            style: AppTextTheme.body.copyWith(
+              color: colorScheme.onSurface,
             ),
           ),
           actions: [
@@ -157,7 +176,9 @@ class _CategoryPageContent extends StatelessWidget {
                     final body = item.copyWith(name: controller.text);
                     bloc.add(CategoryEditEvent(body: body));
                     if (shopBloc.state.asLoaded?.categoryFilter == item) {
-                      context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: body));
+                      context
+                          .read<ShopBloc>()
+                          .add(ShopGetItemsEvent(categoryFilter: body));
                     }
                   } else {
                     bloc.add(
@@ -172,8 +193,13 @@ class _CategoryPageContent extends StatelessWidget {
                   Navigator.pop(context);
                 }
               },
+              style: TextButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+              ),
               child: Text(
-                isEdit ? AppLocalizations.of(context).saveChanges : AppLocalizations.of(context).addItem,
+                isEdit
+                    ? AppLocalizations.of(context).saveChanges
+                    : AppLocalizations.of(context).addItem,
                 style: AppTextTheme.caption,
               ),
             ),
@@ -184,6 +210,8 @@ class _CategoryPageContent extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context, CategoryItemModel item) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog<void>(
       context: context,
       builder: (_) => BlocProvider.value(
@@ -207,9 +235,14 @@ class _CategoryPageContent extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                context.read<CategoryBloc>().add(CategoryDeleteEvent(body: item));
+                context
+                    .read<CategoryBloc>()
+                    .add(CategoryDeleteEvent(body: item));
                 Navigator.pop(context);
               },
+              style: TextButton.styleFrom(
+                foregroundColor: colorScheme.error,
+              ),
               child: Text(
                 AppLocalizations.of(context).delete,
                 style: AppTextTheme.caption,

@@ -14,6 +14,14 @@ extension CategoryStateExtension on CategoryState {
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   CategoryBloc(this._service) : super(const CategoryInitial()) {
+    _categorySubscription = _service.watchCategories().listen((items) {
+      add(_CategoryUpdatedFromLocal(items));
+    });
+
+    on<_CategoryUpdatedFromLocal>((event, emit) {
+      emit(CategoryLoaded(items: event.items));
+    });
+
     on<CategoryGetEvent>(_onGetItems);
     on<CategoryCreateEvent>(_onCreateItem);
     on<CategoryEditEvent>(_onEditItem);
@@ -21,18 +29,20 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   final CategoryService _service;
+  late StreamSubscription<List<CategoryItemModel>> _categorySubscription;
+
+  @override
+  Future<void> close() {
+    _categorySubscription.cancel();
+    return super.close();
+  }
 
   Future<void> _onCreateItem(CategoryCreateEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
       final response = await _service.createCategory(event.body);
       if (!response.success) return;
-
       showSuccessSnackBar(null, 'Created: ${response.data?.name}');
-
-      final updatedItems = [response.data!, ...?state.asLoaded?.items];
-
-      emit(CategoryLoaded(items: updatedItems));
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
@@ -45,17 +55,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       final response = await _service.updateCategory(event.body);
       if (!response.success) return;
-
       showSuccessSnackBar(null, 'Updated: ${response.data?.name}');
-
-      final currentItems = state.asLoaded?.items ?? <CategoryItemModel>[];
-      final updatedItems = currentItems
-          .map(
-            (item) => item.id == event.body.id ? response.data! : item,
-          )
-          .toList();
-
-      emit(CategoryLoaded(items: updatedItems));
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
     } finally {
@@ -68,15 +68,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       final response = await _service.deleteCategory(event.body);
       if (!response.success) return;
-
       showSuccessSnackBar(null, 'Deleted ${event.body.name}');
-
-      final updatedItems = List<CategoryItemModel>.from(state.asLoaded?.items ?? [])
-        ..removeWhere(
-          (item) => item.id == event.body.id,
-        );
-
-      emit(CategoryLoaded(items: updatedItems));
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete item: $e');
     } finally {
@@ -85,15 +77,23 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onGetItems(CategoryGetEvent event, Emitter<CategoryState> emit) async {
-    emit(const CategoryLoading());
+    if (state is! CategoryLoaded) {
+      emit(const CategoryLoading());
+    }
     try {
-      final response = await _service.getCategory();
-
-      if (response.success && response.data != null) {
-        emit(CategoryLoaded(items: response.data!));
-      }
+      await _service.getCategory();
     } catch (e) {
-      emit(CategoryError('Failed to load items: $e'));
+      if (state is! CategoryLoaded) {
+        // emit(CategoryError('Failed to load items: $e'));
+      }
     }
   }
+}
+
+class _CategoryUpdatedFromLocal extends CategoryEvent {
+  _CategoryUpdatedFromLocal(this.items);
+  final List<CategoryItemModel> items;
+
+  @override
+  List<Object?> get props => [items];
 }

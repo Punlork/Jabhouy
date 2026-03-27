@@ -32,6 +32,7 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final inputTheme = Theme.of(context).inputDecorationTheme;
     final l10n = AppLocalizations.of(context); // Ensure non-null access
 
     return BlocBuilder<CategoryBloc, CategoryState>(
@@ -53,7 +54,8 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
                       ),
                       onPressed: () {
                         context
@@ -102,11 +104,17 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                   ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                border: const OutlineInputBorder(),
+                border: inputTheme.border,
+                enabledBorder: inputTheme.enabledBorder,
+                focusedBorder: inputTheme.focusedBorder,
+                filled: inputTheme.filled,
+                fillColor: inputTheme.fillColor,
               ).copyWith(
                 label: widget.decoration?.label,
                 contentPadding: widget.decoration?.contentPadding,
                 border: widget.decoration?.border,
+                enabledBorder: widget.decoration?.enabledBorder,
+                focusedBorder: widget.decoration?.focusedBorder,
                 filled: widget.decoration?.filled,
                 fillColor: widget.decoration?.fillColor,
               ),
@@ -120,6 +128,7 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                 maxHeight: 200,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
+                  color: Theme.of(context).colorScheme.surface,
                 ),
               ),
             ),

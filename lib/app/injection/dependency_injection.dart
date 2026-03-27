@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:get_it/get_it.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/app/service/database/app_database.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/loaner/loaner.dart';
@@ -15,13 +16,14 @@ Future<void> setupDependencies() async {
   await apiService.cookies.initCookies();
   getIt
     ..registerSingleton<ApiService>(apiService)
+    ..registerSingleton<AppDatabase>(AppDatabase())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
-    ..registerLazySingleton(() => ShopService(getIt<ApiService>()))
-    ..registerLazySingleton(() => LoanerService(getIt<ApiService>()))
-    ..registerLazySingleton(() => CustomerService(getIt<ApiService>()))
+    ..registerLazySingleton(() => ShopService(getIt<ApiService>(), getIt<AppDatabase>()))
+    ..registerLazySingleton(() => LoanerService(getIt<ApiService>(), getIt<AppDatabase>()))
+    ..registerLazySingleton(() => CustomerService(getIt<ApiService>(), getIt<AppDatabase>()))
     ..registerLazySingleton(() => AuthService(getIt<ApiService>()))
-    ..registerLazySingleton(() => CategoryService(getIt<ApiService>()))
+    ..registerLazySingleton(() => CategoryService(getIt<ApiService>(), getIt<AppDatabase>()))
     ..registerFactory(AppBloc.new)
     ..registerFactory(() => UploadBloc(getIt<UploadService>()))
     ..registerFactory(() => AuthBloc(getIt<AuthService>())..add(AuthCheckRequested()))
