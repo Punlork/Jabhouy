@@ -23,6 +23,8 @@ class _CustomerPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -36,9 +38,12 @@ class _CustomerPageContent extends StatelessWidget {
             case CustomerError():
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
+                  backgroundColor: colorScheme.inverseSurface,
                   content: Text(
                     state.message,
-                    style: AppTextTheme.body,
+                    style: AppTextTheme.body.copyWith(
+                      color: colorScheme.onInverseSurface,
+                    ),
                   ),
                 ),
               );
@@ -46,7 +51,8 @@ class _CustomerPageContent extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          final items = state is CustomerLoaded ? state.customers : <CustomerModel>[];
+          final items =
+              state is CustomerLoaded ? state.customers : <CustomerModel>[];
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -74,10 +80,7 @@ class _CustomerPageContent extends StatelessWidget {
           minimumSize: const Size(double.infinity, 50),
         ),
         onPressed: () => _showCustomerDialog(context),
-        icon: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        icon: const Icon(Icons.add),
         label: Text(
           context.l10n.add,
           style: AppTextTheme.body,
@@ -87,28 +90,39 @@ class _CustomerPageContent extends StatelessWidget {
   }
 
   Widget _buildCustomerTile(BuildContext context, CustomerModel item) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: Colors.white,
-      elevation: 2,
+      color: Theme.of(context).cardTheme.color,
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 12),
         title: Text(
           item.name,
-          style: AppTextTheme.body,
+          style: AppTextTheme.body.copyWith(
+            color: colorScheme.onSurface,
+          ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: Icon(
+                Icons.edit,
+                color: colorScheme.onSurfaceVariant,
+              ),
               onPressed: () => _showCustomerDialog(context, item: item),
             ),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: Icon(
+                Icons.delete,
+                color: colorScheme.error,
+              ),
               onPressed: () => _showDeleteConfirmation(context, item),
             ),
           ],
@@ -120,6 +134,7 @@ class _CustomerPageContent extends StatelessWidget {
   void _showCustomerDialog(BuildContext context, {CustomerModel? item}) {
     final isEdit = item != null;
     final controller = TextEditingController(text: item?.name ?? '');
+    final colorScheme = Theme.of(context).colorScheme;
 
     showDialog<void>(
       context: context,
@@ -136,6 +151,9 @@ class _CustomerPageContent extends StatelessWidget {
               labelText: context.l10n.customerName,
               labelStyle: AppTextTheme.body,
             ),
+            style: AppTextTheme.body.copyWith(
+              color: colorScheme.onSurface,
+            ),
           ),
           actions: [
             TextButton(
@@ -150,7 +168,8 @@ class _CustomerPageContent extends StatelessWidget {
                 if (controller.text.isNotEmpty) {
                   final bloc = context.read<CustomerBloc>();
                   if (isEdit) {
-                    final updatedCustomer = item.copyWith(name: controller.text);
+                    final updatedCustomer =
+                        item.copyWith(name: controller.text);
                     bloc.add(UpdateCustomerEvent(updatedCustomer));
                   } else {
                     bloc.add(
@@ -165,6 +184,9 @@ class _CustomerPageContent extends StatelessWidget {
                   Navigator.pop(context);
                 }
               },
+              style: TextButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+              ),
               child: Text(
                 isEdit ? context.l10n.saveChanges : context.l10n.addItem,
                 style: AppTextTheme.caption,
@@ -177,6 +199,8 @@ class _CustomerPageContent extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context, CustomerModel item) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog<void>(
       context: context,
       builder: (_) => BlocProvider.value(
@@ -203,6 +227,9 @@ class _CustomerPageContent extends StatelessWidget {
                 context.read<CustomerBloc>().add(DeleteCustomerEvent(item));
                 Navigator.pop(context);
               },
+              style: TextButton.styleFrom(
+                foregroundColor: colorScheme.error,
+              ),
               child: Text(
                 context.l10n.delete,
                 style: AppTextTheme.caption,

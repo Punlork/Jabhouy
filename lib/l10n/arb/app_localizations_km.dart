@@ -138,6 +138,15 @@ class AppLocalizationsKm extends AppLocalizations {
   String get languageKhmer => 'ខ្មែរ';
 
   @override
+  String get darkMode => 'របៀបងងឹត';
+
+  @override
+  String get darkModeOn => 'បានបើកផ្ទាំងពណ៌ងងឹត';
+
+  @override
+  String get darkModeOff => 'បានបើកផ្ទាំងពណ៌ភ្លឺ';
+
+  @override
   String get editItem => 'កែសម្រួលធាតុ';
 
   @override

@@ -38,3 +38,8 @@ class ShopDeleteItemEvent extends ShopEvent {
 
   final ShopItemModel body;
 }
+
+class _ShopInternalItemsUpdated extends ShopEvent {
+  _ShopInternalItemsUpdated(this.items);
+  final List<ShopItemModel> items;
+}

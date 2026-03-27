@@ -85,14 +85,16 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
       final item = widget.existingItem!;
       _controllers['name']!.text = item.name;
       _controllers['defaultPrice']!.text = item.defaultPrice?.toString() ?? '';
-      _controllers['customerPrice']!.text = item.customerPrice?.toString() ?? '';
+      _controllers['customerPrice']!.text =
+          item.customerPrice?.toString() ?? '';
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
       _categoryFilter = item.category;
 
       _initialTextValues['name'] = item.name;
       _initialTextValues['defaultPrice'] = item.defaultPrice?.toString() ?? '';
-      _initialTextValues['customerPrice'] = item.customerPrice?.toString() ?? '';
+      _initialTextValues['customerPrice'] =
+          item.customerPrice?.toString() ?? '';
       _initialTextValues['sellerPrice'] = item.sellerPrice?.toString() ?? '';
       _initialTextValues['note'] = item.note ?? '';
       _initialCategory = item.category;
@@ -166,7 +168,9 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: Text(l10n.discard, style: AppTextTheme.caption),
           ),
         ],
@@ -184,13 +188,18 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
     final item = ShopItemModel(
       id: widget.existingItem?.id ?? 0,
       name: _controllers['name']!.text,
-      defaultPrice:
-          _controllers['defaultPrice']!.text.isNotEmpty ? int.tryParse(_controllers['defaultPrice']!.text) : null,
-      customerPrice:
-          _controllers['customerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['customerPrice']!.text) : null,
-      sellerPrice:
-          _controllers['sellerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['sellerPrice']!.text) : null,
-      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+      defaultPrice: _controllers['defaultPrice']!.text.isNotEmpty
+          ? int.tryParse(_controllers['defaultPrice']!.text)
+          : null,
+      customerPrice: _controllers['customerPrice']!.text.isNotEmpty
+          ? int.tryParse(_controllers['customerPrice']!.text)
+          : null,
+      sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
+          ? int.tryParse(_controllers['sellerPrice']!.text)
+          : null,
+      note: _controllers['note']!.text.isEmpty
+          ? null
+          : _controllers['note']!.text,
       imageUrl: uploadBloc.selectedImage?.path,
       category: _categoryFilter,
     );
@@ -225,13 +234,18 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
         hintText: '',
         textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
-        keyboardType: maxLines != null ? TextInputType.multiline : (isPrice ? TextInputType.number : keyboardType),
+        keyboardType: maxLines != null
+            ? TextInputType.multiline
+            : (isPrice ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
-        validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
+        validator: required
+            ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null
+            : null,
         maxLines: maxLines ?? 1,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           labelStyle: AppTextTheme.body,
           suffixText: isPrice ? 'រៀល' : null,
           suffixStyle: isPrice ? AppTextTheme.caption : null,
@@ -243,6 +257,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final inputTheme = Theme.of(context).inputDecorationTheme;
     final l10n = AppLocalizations.of(context);
 
     return PopScope(
@@ -283,14 +298,22 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                       final item = ShopItemModel(
                         id: widget.existingItem?.id ?? 0,
                         name: _controllers['name']!.text,
-                        defaultPrice: int.tryParse(_controllers['defaultPrice']!.text) ?? 0,
-                        customerPrice: _controllers['customerPrice']!.text.isNotEmpty
+                        defaultPrice:
+                            int.tryParse(_controllers['defaultPrice']!.text) ??
+                                0,
+                        customerPrice: _controllers['customerPrice']!
+                                .text
+                                .isNotEmpty
                             ? int.tryParse(_controllers['customerPrice']!.text)
                             : null,
-                        sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
+                        sellerPrice: _controllers['sellerPrice']!
+                                .text
+                                .isNotEmpty
                             ? int.tryParse(_controllers['sellerPrice']!.text)
                             : null,
-                        note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
+                        note: _controllers['note']!.text.isEmpty
+                            ? null
+                            : _controllers['note']!.text,
                         imageUrl: state.imageUrl, // Use uploaded URL
                         category: _categoryFilter,
                       );
@@ -300,7 +323,10 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                         shopBloc.add(ShopCreateItemEvent(body: item));
                       }
                     } else if (state is UploadFailure) {
-                      showErrorSnackBar(context, 'Upload failed: ${state.error}');
+                      showErrorSnackBar(
+                        context,
+                        'Upload failed: ${state.error}',
+                      );
                     }
                   },
                 ),
@@ -351,14 +377,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                             _detectChanges();
                           },
                           decoration: InputDecoration(
-                            border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                            ),
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 20,
                             ),
-                            filled: true,
-                            fillColor: colorScheme.surface,
+                            filled: inputTheme.filled,
+                            fillColor: inputTheme.fillColor,
+                            border: inputTheme.border,
+                            enabledBorder: inputTheme.enabledBorder,
+                            focusedBorder: inputTheme.focusedBorder,
                           ),
                         ),
                       ),
@@ -381,7 +407,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                             BlocBuilder<UploadBloc, UploadState>(
                               bloc: context.read<ShopBloc>().upload,
                               builder: (context, state) {
-                                final uploadBloc = context.read<ShopBloc>().upload;
+                                final uploadBloc =
+                                    context.read<ShopBloc>().upload;
                                 return Row(
                                   children: [
                                     ElevatedButton.icon(
@@ -390,10 +417,15 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                         uploadBloc.showImageSourceDialog(
                                           context,
                                           onTakePhoto: () => uploadBloc.add(
-                                            SelectImageEvent(ImageSource.camera),
+                                            SelectImageEvent(
+                                              ImageSource.camera,
+                                            ),
                                           ),
-                                          onChoseFromGallery: () => uploadBloc.add(
-                                            SelectImageEvent(ImageSource.gallery),
+                                          onChoseFromGallery: () =>
+                                              uploadBloc.add(
+                                            SelectImageEvent(
+                                              ImageSource.gallery,
+                                            ),
                                           ),
                                         );
                                       },
@@ -404,7 +436,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                       ),
                                       style: ElevatedButton.styleFrom(
                                         foregroundColor: colorScheme.onSurface,
-                                        backgroundColor: colorScheme.surface,
+                                        backgroundColor:
+                                            colorScheme.surfaceContainerHighest,
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -412,13 +445,19 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                       UploadImageSelected() => Stack(
                                           children: [
                                             ClipRRect(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               child: Image.file(
                                                 state.selectedImage,
                                                 width: 80,
                                                 height: 80,
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                                errorBuilder: (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) =>
+                                                    const SizedBox.shrink(),
                                               ),
                                             ),
                                             Positioned(
@@ -428,12 +467,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                 width: 24,
                                                 height: 24,
                                                 decoration: BoxDecoration(
-                                                  color: Colors.black.withOpacity(.5),
+                                                  color: colorScheme.scrim
+                                                      .withValues(alpha: 0.55),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    uploadBloc.add(ClearImageEvent());
+                                                    uploadBloc
+                                                        .add(ClearImageEvent());
                                                     _detectChanges();
                                                   },
                                                   child: const Icon(
@@ -449,13 +490,19 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                       UploadImageUrlLoaded() => Stack(
                                           children: [
                                             ClipRRect(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               child: Image.network(
                                                 state.imageUrl,
                                                 width: 80,
                                                 height: 80,
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                                errorBuilder: (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) =>
+                                                    const SizedBox.shrink(),
                                               ),
                                             ),
                                             Positioned(
@@ -465,12 +512,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                 width: 24,
                                                 height: 24,
                                                 decoration: BoxDecoration(
-                                                  color: Colors.black.withOpacity(.5),
+                                                  color: colorScheme.scrim
+                                                      .withValues(alpha: 0.55),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    uploadBloc.add(ClearImageEvent());
+                                                    uploadBloc
+                                                        .add(ClearImageEvent());
                                                     _detectChanges();
                                                   },
                                                   child: const Icon(
@@ -514,7 +563,9 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                         foregroundColor: colorScheme.onPrimary,
                       ),
                       child: Text(
-                        widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
+                        widget.existingItem != null
+                            ? l10n.saveChanges
+                            : l10n.addItem,
                         style: AppTextTheme.body,
                       ),
                     ),
@@ -528,7 +579,9 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                       label: Text(
-                        widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
+                        widget.existingItem != null
+                            ? l10n.saveChanges
+                            : l10n.addItem,
                         style: AppTextTheme.body,
                       ),
                       icon: const Icon(Icons.save),

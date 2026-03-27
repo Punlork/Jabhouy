@@ -90,6 +90,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final inputTheme = Theme.of(context).inputDecorationTheme;
 
     final customBorder = widget.useCustomBorder
         ? CustomOutlineInputBorder(
@@ -103,8 +104,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     final baseDecoration = InputDecoration(
       hintText: widget.hintText,
       labelText: widget.labelText,
-      filled: true,
-      fillColor: colorScheme.surface,
+      filled: inputTheme.filled,
+      fillColor: inputTheme.fillColor,
       prefixIcon: widget.prefixIcon != null
           ? Icon(
               widget.prefixIcon,
@@ -118,7 +119,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             IconButton(
               icon: Icon(
                 Icons.clear,
-                color: colorScheme.onSurface.withOpacity(.6),
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               onPressed: _clearText,
             ),
@@ -137,7 +138,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       focusedBorder: customBorder,
       disabledBorder: customBorder,
       labelStyle: TextStyle(
-        color: colorScheme.onSurface.withOpacity(.6),
+        color: colorScheme.onSurface.withValues(alpha: 0.6),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       floatingLabelBehavior: widget.floatingLabelBehavior,
@@ -160,7 +161,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             hintStyle: widget.decoration!.hintStyle,
             suffixText: widget.decoration!.suffixText,
             suffixStyle: widget.decoration!.suffixStyle,
-
             enabled: widget.decoration!.enabled,
             //! Add other properties as needed
           )

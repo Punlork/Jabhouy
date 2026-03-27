@@ -133,7 +133,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void _showSettingsSheet(VoidCallback onSignout) {
     showModalBottomSheet<void>(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
       builder: (_) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: context.read<CategoryBloc>()),
@@ -172,6 +175,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerBackground = colorScheme.surface;
+    final bottomBarBackground = isDark ? colorScheme.surfaceContainerLow : Colors.white;
+    final bottomBarIndicator = isDark ? colorScheme.primary : colorScheme.primaryContainer;
+    final bottomBarSelectedForeground = isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
+    final bottomBarUnselectedForeground = colorScheme.onSurfaceVariant;
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
 
     final bottomBars = [
@@ -189,52 +198,45 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       length: 2,
       child: Scaffold(
         extendBody: true,
-        backgroundColor: Colors.white,
         body: BottomBar(
           body: (context, controller) => SafeArea(
-            top: false,
+            // top: false,
             maintainBottomViewPadding: true,
             child: Column(
               children: [
-                Column(
-                  children: <Widget>[
-                    Container(
-                      height: statusBarHeight,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                    Builder(
-                      builder: (context) {
-                        Widget buildShopHeader({bool hasFilter = false}) {
-                          return ShopHeader(
-                            hasFilter: hasFilter,
-                            onSettingsPressed: () => _showSettingsSheet(
-                              () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
-                            ),
-                            onSearchChanged: _onSearchChanged,
-                            onFilterPressed: _showFilterSheet,
-                            searchController: _searchController,
+                Builder(
+                  builder: (context) {
+                    Widget buildShopHeader({bool hasFilter = false}) {
+                      return ShopHeader(
+                        hasFilter: hasFilter,
+                        onSettingsPressed: () => _showSettingsSheet(
+                          () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
+                        ),
+                        onSearchChanged: _onSearchChanged,
+                        onFilterPressed: _showFilterSheet,
+                        searchController: _searchController,
+                      );
+                    }
+
+                    final blocBuilders = {
+                      0: BlocBuilder<ShopBloc, ShopState>(
+                        builder: (context, state) {
+                          return buildShopHeader(
+                            hasFilter: state.asLoaded?.categoryFilter != null,
                           );
-                        }
+                        },
+                      ),
+                      1: BlocBuilder<LoanerBloc, LoanerState>(
+                        builder: (context, state) {
+                          return buildShopHeader(
+                            hasFilter: state.asLoaded?.hasFilter ?? false,
+                          );
+                        },
+                      ),
+                    };
 
-                        final blocBuilders = {
-                          0: BlocBuilder<ShopBloc, ShopState>(
-                            builder: (context, state) {
-                              return buildShopHeader(hasFilter: state.asLoaded?.categoryFilter != null);
-                            },
-                          ),
-                          1: BlocBuilder<LoanerBloc, LoanerState>(
-                            builder: (context, state) {
-                              return buildShopHeader(hasFilter: state.asLoaded?.hasFilter ?? false);
-                            },
-                          ),
-                        };
-
-                        return blocBuilders[_selectedIndex] ?? buildShopHeader();
-                      },
-                    ),
-                  ],
+                    return blocBuilders[_selectedIndex] ?? buildShopHeader();
+                  },
                 ),
                 Expanded(
                   child: MultiBlocProvider(
@@ -251,21 +253,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ],
             ),
           ),
-          barColor: colorScheme.primary.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(16),
-          offset: 4,
+          barColor: bottomBarBackground,
+          borderRadius: BorderRadius.circular(20),
           child: TabBar(
             dividerColor: Colors.transparent,
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              color: colorScheme.onPrimaryContainer,
+              color: bottomBarIndicator,
             ),
             onTap: (index) {
               _pageController.jumpToPage(index);
               _onItemTapped(index);
               setState(() => _selectedIndex = index);
             },
+            splashBorderRadius: BorderRadius.circular(16),
             tabs: List.generate(
               bottomBars.length,
               (index) => Tab(
@@ -275,7 +277,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     Icon(
                       bottomBars[index]['icon']! as IconData,
                       size: 26,
-                      color: _selectedIndex == index ? Colors.white : Colors.grey,
+                      color: _selectedIndex == index ? bottomBarSelectedForeground : bottomBarUnselectedForeground,
                     ),
 
                     Opacity(
@@ -283,7 +285,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       child: Text(
                         bottomBars[index]['name']! as String,
                         style: TextStyle(
-                          color: _selectedIndex == index ? Colors.white : Colors.grey,
+                          color: _selectedIndex == index ? bottomBarSelectedForeground : bottomBarUnselectedForeground,
                           fontSize: 16,
                           fontWeight: _selectedIndex == index ? FontWeight.w600 : FontWeight.normal,
                         ),
@@ -325,9 +327,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     );
                 }
               },
-              backgroundColor: colorScheme.primary.withValues(alpha: 0.8),
-              foregroundColor: colorScheme.onPrimaryContainer,
-              elevation: 6,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              elevation: isDark ? 0 : 4,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
@@ -341,20 +343,36 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 children: [
                   Transform(
                     alignment: Alignment.center,
-                    transform: Matrix4.identity()..scale(-1.0, 1),
+                    transform: Matrix4(
+                      -1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                    ),
                     child: const Icon(
                       Icons.add_comment_rounded,
                       size: 24,
-                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     _selectedIndex == 0 ? context.l10n.addItem : context.l10n.addLoaner,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ],

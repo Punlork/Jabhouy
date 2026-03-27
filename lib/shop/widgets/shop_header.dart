@@ -28,7 +28,10 @@ class ShopHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: colorScheme.primary,
+        color: colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(color: colorScheme.outlineVariant),
+        ),
       ),
       child: Column(
         children: [
@@ -110,8 +113,6 @@ class _SettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return MultiBlocListener(
       listeners: [
         BlocListener<SignoutBloc, SignoutState>(
@@ -133,9 +134,9 @@ class _SettingsButton extends StatelessWidget {
       ],
       child: IconButtonWidget(
         icon: Icons.settings,
-        color: Colors.white.withValues(alpha: .8),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         onPressed: onPressed,
-        colorScheme: colorScheme,
+        colorScheme: Theme.of(context).colorScheme,
       ),
     );
   }
@@ -161,7 +162,7 @@ class _SearchBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return SizedBox(
-      height: 34,
+      height: 40,
       child: Row(
         children: [
           Expanded(
@@ -171,8 +172,8 @@ class _SearchBar extends StatelessWidget {
               labelText: '',
               prefixIcon: Icons.search,
               onChanged: onChanged,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: colorScheme.onSurface,
                 fontSize: 16,
               ),
               action: TextInputAction.search,
@@ -180,10 +181,10 @@ class _SearchBar extends StatelessWidget {
               floatingLabelBehavior: FloatingLabelBehavior.always,
               useCustomBorder: false,
               decoration: InputDecoration(
-                prefixIconColor: Colors.white.withValues(alpha: .8),
+                prefixIconColor: colorScheme.onSurfaceVariant,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withValues(alpha: .8),
+                      color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w300,
                     ),
                 border: OutlineInputBorder(
@@ -203,7 +204,7 @@ class _SearchBar extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: .1),
+                fillColor: colorScheme.surfaceContainerHigh,
               ),
             ),
           ),

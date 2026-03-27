@@ -26,3 +26,11 @@ class SwitchViewMode extends AppEvent {
   @override
   List<Object?> get props => [isGridView];
 }
+
+class SwitchThemeMode extends AppEvent {
+  const SwitchThemeMode({required this.isDarkMode});
+  final bool isDarkMode;
+
+  @override
+  List<Object?> get props => [isDarkMode];
+}

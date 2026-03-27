@@ -20,7 +20,8 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
 
   Future<void> _checkClipboardForImage() async {
     final now = DateTime.now();
-    if (_lastClipboardCheck != null && now.difference(_lastClipboardCheck!).inSeconds < _coolDownSeconds) {
+    if (_lastClipboardCheck != null &&
+        now.difference(_lastClipboardCheck!).inSeconds < _coolDownSeconds) {
       return;
     }
     _lastClipboardCheck = now;
@@ -100,13 +101,14 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
   }
 
   void showImagePreviewSnackBar(File file) {
+    final colorScheme = Theme.of(context).colorScheme;
     final snackBar = SnackBar(
       duration: const Duration(seconds: 5),
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surfaceContainerLow,
       margin: const EdgeInsets.all(16),
       content: GestureDetector(
         onTap: () => onImageSelected(file),
@@ -120,14 +122,19 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
                   width: 50,
                   height: 50,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.error,
+                    color: colorScheme.error,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   context.l10n.imgFound,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
                 ),
               ),
             ],
@@ -139,6 +146,7 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
         onPressed: () {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         },
+        textColor: colorScheme.primary,
       ),
     );
 
@@ -175,7 +183,10 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          style: TextStyle(color: Theme.of(context).colorScheme.onError),
+        ),
         backgroundColor: Theme.of(context).colorScheme.error,
       ),
     );

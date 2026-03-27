@@ -179,6 +179,18 @@
   "@languageKhmer": {
     "description": "Label for Khmer language option"
   },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Label for toggling dark theme"
+  },
+  "darkModeOn": "Dark theme enabled",
+  "@darkModeOn": {
+    "description": "Subtitle shown when dark theme is active"
+  },
+  "darkModeOff": "Light theme enabled",
+  "@darkModeOff": {
+    "description": "Subtitle shown when light theme is active"
+  },
   "editItem": "Edit Item",
   "@editItem": {
     "description": "AppBar title when editing an item"

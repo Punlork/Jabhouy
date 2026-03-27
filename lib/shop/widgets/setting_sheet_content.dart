@@ -16,7 +16,7 @@ class SettingsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -31,7 +31,7 @@ class SettingsSheet extends StatelessWidget {
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.person, color: Colors.green),
+            leading: Icon(Icons.person, color: colorScheme.onSurfaceVariant),
             title: Text(
               l10n.profile,
               style: AppTextTheme.body,
@@ -46,7 +46,7 @@ class SettingsSheet extends StatelessWidget {
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.category, color: Colors.blue),
+            leading: Icon(Icons.category, color: colorScheme.onSurfaceVariant),
             title: Text(
               l10n.category,
               style: AppTextTheme.body,
@@ -65,7 +65,7 @@ class SettingsSheet extends StatelessWidget {
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.people, color: Colors.orange),
+            leading: Icon(Icons.people, color: colorScheme.onSurfaceVariant),
             title: Text(
               l10n.customers,
               style: AppTextTheme.body,
@@ -83,7 +83,7 @@ class SettingsSheet extends StatelessWidget {
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.logout, color: Colors.red),
+            leading: Icon(Icons.logout, color: colorScheme.onSurfaceVariant),
             title: Text(
               l10n.signOut,
               style: AppTextTheme.body,
@@ -125,6 +125,32 @@ class SettingsSheet extends StatelessWidget {
               }
             },
           ),
+          Divider(color: colorScheme.outlineVariant),
+          BlocBuilder<AppBloc, AppState>(
+            builder: (context, state) {
+              return SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                secondary: Icon(
+                  state.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                ),
+                title: Text(
+                  l10n.darkMode,
+                  style: AppTextTheme.body,
+                ),
+                subtitle: Text(
+                  state.isDarkMode ? l10n.darkModeOn : l10n.darkModeOff,
+                  style: AppTextTheme.caption,
+                ),
+                value: state.isDarkMode,
+                onChanged: (value) {
+                  context
+                      .read<AppBloc>()
+                      .add(SwitchThemeMode(isDarkMode: value));
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 8),
           BlocBuilder<AppBloc, AppState>(
             builder: (context, state) {
               final currentLocale = state.locale.languageCode;
@@ -136,7 +162,9 @@ class SettingsSheet extends StatelessWidget {
                   style: AppTextTheme.body,
                 ),
                 subtitle: Text(
-                  currentLocale == 'en' ? l10n.languageEnglish : l10n.languageKhmer,
+                  currentLocale == 'en'
+                      ? l10n.languageEnglish
+                      : l10n.languageKhmer,
                   style: AppTextTheme.caption,
                 ),
                 onTap: () {

@@ -104,83 +104,48 @@ class _LoanerViewState extends State<LoanerView> with AutomaticKeepAliveClientMi
     LoanerModel loaner,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Builder(
-            builder: (context) => Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [colorScheme.primary, colorScheme.primaryContainer],
+    return Slidable(
+      key: ValueKey(loaner.id),
+      
+      endActionPane: ActionPane(
+        motion: const StretchMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (context) {
+              context.pushNamed(
+                AppRoutes.formLoaner,
+                extra: {
+                  'existingLoaner': loaner,
+                  'loanerBloc': context.read<LoanerBloc>(),
+                  'customerBloc': context.read<CustomerBloc>(),
+                },
+              );
+            },
+            backgroundColor: colorScheme.surfaceContainerHighest,
+            foregroundColor: colorScheme.onSurface,
+            icon: Icons.edit,
+          ),
+          SlidableAction(
+            onPressed: (context) {
+              context.read<LoanerBloc>().add(DeleteLoaner(loaner));
+            },
+            backgroundColor: colorScheme.inverseSurface,
+            foregroundColor: colorScheme.onInverseSurface,
+            icon: Icons.delete,
+          ),
+        ],
+      ),
+      child: LoanerItem(
+        loaner: loaner,
+        onMarkAsPaid: ({bool isPaid = false}) => context.read<LoanerBloc>().add(
+              UpdateLoaner(
+                loaner.copyWith(
+                  isPaid: isPaid,
+                  customerId: loaner.customer?.id,
                 ),
-                borderRadius: BorderRadius.circular(12),
               ),
             ),
-          ),
-        ),
-        Slidable(
-          key: ValueKey(loaner.id),
-          endActionPane: ActionPane(
-            motion: const StretchMotion(),
-            children: [
-              Theme(
-                data: Theme.of(context).copyWith(
-                  outlinedButtonTheme: const OutlinedButtonThemeData(
-                    style: ButtonStyle(
-                      iconColor: WidgetStatePropertyAll(Colors.white),
-                    ),
-                  ),
-                ),
-                child: SlidableAction(
-                  onPressed: (context) {
-                    context.pushNamed(
-                      AppRoutes.formLoaner,
-                      extra: {
-                        'existingLoaner': loaner,
-                        'loanerBloc': context.read<LoanerBloc>(),
-                        'customerBloc': context.read<CustomerBloc>(),
-                      },
-                    );
-                  },
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  icon: Icons.edit,
-                ),
-              ),
-              Theme(
-                data: Theme.of(context).copyWith(
-                  outlinedButtonTheme: const OutlinedButtonThemeData(
-                    style: ButtonStyle(
-                      iconColor: WidgetStatePropertyAll(Colors.red),
-                    ),
-                  ),
-                ),
-                child: SlidableAction(
-                  onPressed: (context) {
-                    context.read<LoanerBloc>().add(DeleteLoaner(loaner));
-                  },
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.red,
-                  icon: Icons.delete,
-                ),
-              ),
-            ],
-          ),
-          child: LoanerItem(
-            loaner: loaner,
-            onMarkAsPaid: ({bool isPaid = false}) => context.read<LoanerBloc>().add(
-                  UpdateLoaner(
-                    loaner.copyWith(
-                      isPaid: isPaid,
-                      customerId: loaner.customer?.id,
-                    ),
-                  ),
-                ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

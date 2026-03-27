@@ -19,6 +19,8 @@ class LoanerModel extends Equatable {
     this.updatedAt,
     this.isPaid = false,
     DateTime? createdAt,
+    this.syncStatus = 0,
+    this.isDeleted = false,
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory LoanerModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,8 @@ class LoanerModel extends Equatable {
       createdAt: tryCast<String>(json['createdAt'])?.let((s) => DateTime.parse(s).toLocal()),
       updatedAt: tryCast<String>(json['updatedAt'])?.let((s) => DateTime.parse(s).toLocal()),
       isPaid: tryCast<bool>(json['paid'], fallback: false)!,
+      syncStatus: tryCast<int>(json['syncStatus']) ?? 0,
+      isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }
 
@@ -46,6 +50,8 @@ class LoanerModel extends Equatable {
   final DateTime? updatedAt;
   final CustomerModel? customer;
   final bool isPaid;
+  final int syncStatus;
+  final bool isDeleted;
 
   Map<String, dynamic> toJson() => {
         'customerId': customerId,
@@ -56,7 +62,7 @@ class LoanerModel extends Equatable {
       };
 
   @override
-  List<Object?> get props => [id, amount, note, createdAt, updatedAt, customer, customerId];
+  List<Object?> get props => [id, amount, note, createdAt, updatedAt, customer, customerId, syncStatus, isDeleted];
 
   LoanerModel copyWith({
     int? id,
@@ -67,6 +73,8 @@ class LoanerModel extends Equatable {
     DateTime? updatedAt,
     CustomerModel? customer,
     bool? isPaid,
+    int? syncStatus,
+    bool? isDeleted,
   }) {
     return LoanerModel(
       id: id ?? this.id,
@@ -77,6 +85,8 @@ class LoanerModel extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       customer: customer ?? this.customer,
       isPaid: isPaid ?? this.isPaid,
+      syncStatus: syncStatus ?? this.syncStatus,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 }

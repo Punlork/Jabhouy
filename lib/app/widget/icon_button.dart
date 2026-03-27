@@ -17,6 +17,8 @@ class IconButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       height: 48,
       width: 48,
@@ -24,10 +26,13 @@ class IconButtonWidget extends StatelessWidget {
         message: tooltip ?? '',
         child: IconButton(
           onPressed: onPressed,
-          icon: Icon(icon, color: color ?? Colors.black),
+          icon: Icon(icon, color: color ?? colorScheme.onSurfaceVariant),
           style: IconButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            backgroundColor: theme.cardTheme.color,
+            side: BorderSide(color: colorScheme.outlineVariant),
+            elevation: 0,
           ),
         ),
       ),

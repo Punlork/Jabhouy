@@ -9,23 +9,27 @@ class CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return BlocBuilder<ShopBloc, ShopState>(
       builder: (context, shopState) {
         final currentShopState = shopState.asLoaded;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+              color: colorScheme.surfaceContainerLow,
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Row(
               children: [
                 InkWell(
-                  onTap: () => context.read<ShopBloc>().add(ShopGetItemsEvent()),
+                  onTap: () =>
+                      context.read<ShopBloc>().add(ShopGetItemsEvent()),
                   child: _buildChip(
                     context,
                     label: context.l10n.all,
@@ -37,7 +41,7 @@ class CategoryChips extends StatelessWidget {
                   height: 30,
                   width: 8,
                   child: VerticalDivider(
-                    color: Colors.grey[200],
+                    color: colorScheme.outlineVariant,
                   ),
                 ),
                 const SizedBox(width: 2),
@@ -52,14 +56,19 @@ class CategoryChips extends StatelessWidget {
                               state.items.length,
                               (index) {
                                 final category = state.items[index];
-                                final isSelected = currentShopState?.categoryFilter?.name == category.name;
+                                final isSelected =
+                                    currentShopState?.categoryFilter?.name ==
+                                        category.name;
                                 return Padding(
                                   padding: EdgeInsets.only(
-                                    right: index == state.items.length - 1 ? 0 : 4,
+                                    right:
+                                        index == state.items.length - 1 ? 0 : 4,
                                   ),
                                   child: InkWell(
                                     onTap: () => context.read<ShopBloc>().add(
-                                          ShopGetItemsEvent(categoryFilter: category),
+                                          ShopGetItemsEvent(
+                                            categoryFilter: category,
+                                          ),
                                         ),
                                     child: _buildChip(
                                       context,
@@ -87,18 +96,24 @@ class CategoryChips extends StatelessWidget {
                                   right: index == 4 ? 0 : 4,
                                 ),
                                 child: Shimmer.fromColors(
-                                  baseColor: Colors.grey[300]!,
-                                  highlightColor: Colors.grey[100]!,
+                                  baseColor:
+                                      colorScheme.surfaceContainerHighest,
+                                  highlightColor:
+                                      colorScheme.surfaceContainerHigh,
                                   child: Chip(
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                     visualDensity: VisualDensity.compact,
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
                                     label: Container(
                                       width: 30,
                                       height: 20,
-                                      color: Colors.white,
+                                      color:
+                                          colorScheme.surfaceContainerHighest,
                                     ),
-                                    backgroundColor: Theme.of(context).colorScheme.surface,
+                                    backgroundColor: colorScheme.surface,
                                   ),
                                 ),
                               ),
@@ -123,26 +138,32 @@ class CategoryChips extends StatelessWidget {
     BuildContext context, {
     required String label,
     required bool isSelected,
-  }) =>
-      Theme(
-        data: ThemeData(canvasColor: Colors.transparent),
-        child: Chip(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(19),
-          ),
-          side: const BorderSide(
-            width: 0,
-            color: Colors.transparent,
-          ),
-          labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
-          label: Text(label),
-          backgroundColor: isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Colors.transparent,
-          labelStyle: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimary,
-          ),
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Theme(
+      data: ThemeData(canvasColor: Colors.transparent),
+      child: Chip(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(19),
         ),
-      );
+        side: const BorderSide(
+          width: 0,
+          color: Colors.transparent,
+        ),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        label: Text(label),
+        backgroundColor:
+            isSelected ? colorScheme.primaryContainer : Colors.transparent,
+        labelStyle: TextStyle(
+          color: isSelected
+              ? colorScheme.onPrimaryContainer
+              : colorScheme.onSurface,
+        ),
+      ),
+    );
+  }
 }

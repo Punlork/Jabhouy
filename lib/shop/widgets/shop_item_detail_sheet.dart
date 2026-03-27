@@ -39,16 +39,16 @@ class ShopItemDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context); // Access translations
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.1),
+            color: colorScheme.shadow.withValues(alpha: 0.12),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -83,14 +83,15 @@ class ShopItemDetailSheet extends StatelessWidget {
                     Text(
                       item.name,
                       style: AppTextTheme.headline.copyWith(
-                        fontWeight: FontWeight.bold, // Already w700, but explicit for clarity
+                        fontWeight: FontWeight
+                            .bold, // Already w700, but explicit for clarity
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.category?.name ?? l10n.na,
                       style: AppTextTheme.body.copyWith(
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -142,19 +143,10 @@ class ShopItemDetailSheet extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: onEdit,
-                  icon: const Icon(
-                    Icons.edit,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.edit),
                   label: Text(
                     l10n.edit,
-                    style: AppTextTheme.body.copyWith(
-                      color: Colors.white, // Match foregroundColor
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
+                    style: AppTextTheme.body,
                   ),
                 ),
               ),
@@ -168,8 +160,8 @@ class ShopItemDetailSheet extends StatelessWidget {
                     style: AppTextTheme.body,
                   ),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.error,
-                    side: BorderSide(color: Theme.of(context).colorScheme.error),
+                    foregroundColor: colorScheme.error,
+                    side: BorderSide(color: colorScheme.error),
                   ),
                 ),
               ),
@@ -194,7 +186,7 @@ class ShopItemDetailSheet extends StatelessWidget {
             Text(
               label,
               style: AppTextTheme.body.copyWith(
-                color: Colors.grey.shade700,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             Text(

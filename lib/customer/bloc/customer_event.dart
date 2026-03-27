@@ -9,6 +9,14 @@ abstract class CustomerEvent extends Equatable {
 
 class LoadCustomers extends CustomerEvent {}
 
+class CustomerUpdatedFromLocal extends CustomerEvent {
+  const CustomerUpdatedFromLocal(this.customers);
+  final List<CustomerModel> customers;
+
+  @override
+  List<Object> get props => [customers];
+}
+
 class CreateCustomerEvent extends CustomerEvent {
   const CreateCustomerEvent(this.customer);
 

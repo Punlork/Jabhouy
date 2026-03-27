@@ -1,6 +1,7 @@
 // New FilterSheet widget
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -40,8 +41,8 @@ class _FilterSheetState extends State<FilterSheet> {
         children: [
           Text(
             context.l10n.filterItems,
-            style: const TextStyle(
-              fontSize: 20,
+            style: AppTextTheme.title.copyWith(
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -73,8 +74,12 @@ class _FilterSheetState extends State<FilterSheet> {
                         context.pop();
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.primary,
-                  foregroundColor: isDisabled ? colorScheme.onSurface.withOpacity(.38) : colorScheme.onPrimary,
+                  backgroundColor: isDisabled
+                      ? colorScheme.surfaceContainerHighest
+                      : colorScheme.primary,
+                  foregroundColor: isDisabled
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.onPrimary,
                 ),
                 child: Text(context.l10n.apply),
               ),

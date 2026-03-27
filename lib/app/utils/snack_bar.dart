@@ -2,19 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
 
 void showErrorSnackBar(BuildContext? context, String message) {
+  final colorScheme =
+      Theme.of(context ?? GlobalContext.currentContext).colorScheme;
   _showSnackBar(
     context: context,
     message: message,
-    backgroundColor: Colors.red,
+    backgroundColor: colorScheme.error,
+    foregroundColor: colorScheme.onError,
     icon: Icons.error_outline,
   );
 }
 
 void showSuccessSnackBar(BuildContext? context, String message) {
+  final colorScheme =
+      Theme.of(context ?? GlobalContext.currentContext).colorScheme;
   _showSnackBar(
     context: context,
     message: message,
-    backgroundColor: Colors.green,
+    backgroundColor: colorScheme.primary,
+    foregroundColor: colorScheme.onPrimary,
     icon: Icons.check_circle_outline,
   );
 }
@@ -23,6 +29,7 @@ void _showSnackBar({
   required BuildContext? context,
   required String message,
   required Color backgroundColor,
+  required Color foregroundColor,
   required IconData icon,
 }) {
   final tempContext = context ?? GlobalContext.currentContext;
@@ -33,14 +40,14 @@ void _showSnackBar({
           children: [
             Icon(
               icon,
-              color: Colors.white,
+              color: foregroundColor,
               size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: foregroundColor),
               ),
             ),
           ],
