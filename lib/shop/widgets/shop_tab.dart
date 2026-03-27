@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
@@ -20,7 +21,8 @@ class _ShopTabView extends StatefulWidget {
   State<_ShopTabView> createState() => _ShopTabState();
 }
 
-class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMixin {
+class _ShopTabState extends State<_ShopTabView>
+    with AutomaticKeepAliveClientMixin {
   bool _shouldRebuild(ShopState previous, ShopState current) {
     if (previous.runtimeType != current.runtimeType) return true;
     if (previous is ShopLoaded && current is ShopLoaded) {
@@ -53,7 +55,8 @@ class _ShopTabState extends State<_ShopTabView> with AutomaticKeepAliveClientMix
           buildWhen: _shouldRebuild,
           builder: (context, state) => switch (state) {
             ShopInitial() || ShopLoading() => const ShopGridLoading(),
-            ShopLoaded(:final items, :final pagination, :final isFiltering) => RefreshIndicator(
+            ShopLoaded(:final items, :final pagination, :final isFiltering) =>
+              RefreshIndicator(
                 onRefresh: _refreshItems,
                 child: Builder(
                   builder: (context) {
@@ -90,20 +93,25 @@ class ShopGridLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
-      physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+      physics: const BouncingScrollPhysics()
+          .applyTo(const AlwaysScrollableScrollPhysics()),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
             bottom: 52,
           ),
-          sliver: SliverGrid.builder(
-            itemCount: 6,
-            itemBuilder: (context, index) => const GridShopItemShimmer(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.95,
+          sliver: SliverToBoxAdapter(
+            child: MasonryGridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 6,
+              itemBuilder: (context, index) => const GridShopItemShimmer(),
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              padding: EdgeInsets.zero,
+              gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+              ),
             ),
           ),
         ),
@@ -124,7 +132,10 @@ class ErrorView extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
-          Text(message, style: const TextStyle(fontSize: 18, color: Colors.red)),
+          Text(
+            message,
+            style: const TextStyle(fontSize: 18, color: Colors.red),
+          ),
         ],
       ),
     );
@@ -144,7 +155,11 @@ class ItemCount extends StatelessWidget {
       right: 40,
       child: Text(
         l10n.itemCount(counts.toString()),
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.black),
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: Colors.black,
+        ),
       ),
     );
   }

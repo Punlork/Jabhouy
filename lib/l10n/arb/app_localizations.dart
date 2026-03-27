@@ -584,6 +584,30 @@ abstract class AppLocalizations {
   /// **'v{version}'**
   String appVersion(String version);
 
+  /// Dialog title shown when a newer app release exists
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get updateAvailableTitle;
+
+  /// Dialog body shown when an update is available
+  ///
+  /// In en, this message translates to:
+  /// **'A newer version is available.\nCurrent: v{currentVersion}\nLatest: v{latestVersion}'**
+  String updateAvailableMessage(String currentVersion, String latestVersion);
+
+  /// Button label to dismiss the update prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
+  /// Button label to open the latest release for updating
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get updateNow;
+
   /// Label for the customers section or page
   ///
   /// In en, this message translates to:

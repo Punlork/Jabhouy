@@ -333,6 +333,30 @@
       }
     }
   },
+  "updateAvailableTitle": "មានកំណែថ្មី",
+  "@updateAvailableTitle": {
+    "description": "Dialog title shown when a newer app release exists"
+  },
+  "updateAvailableMessage": "មានកំណែថ្មីសម្រាប់អាប់ដេត។\nកំណែបច្ចុប្បន្ន៖ v{currentVersion}\nកំណែចុងក្រោយ៖ v{latestVersion}",
+  "@updateAvailableMessage": {
+    "description": "Dialog body shown when an update is available",
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "ពេលក្រោយ",
+  "@updateLater": {
+    "description": "Button label to dismiss the update prompt"
+  },
+  "updateNow": "អាប់ដេតឥឡូវនេះ",
+  "@updateNow": {
+    "description": "Button label to open the latest release for updating"
+  },
   "profile": "គណនី",
   "@profile": {
     "description": "Label for the profile"

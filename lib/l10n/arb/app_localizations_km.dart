@@ -263,6 +263,20 @@ class AppLocalizationsKm extends AppLocalizations {
   }
 
   @override
+  String get updateAvailableTitle => 'មានកំណែថ្មី';
+
+  @override
+  String updateAvailableMessage(String currentVersion, String latestVersion) {
+    return 'មានកំណែថ្មីសម្រាប់អាប់ដេត។\nកំណែបច្ចុប្បន្ន៖ v$currentVersion\nកំណែចុងក្រោយ៖ v$latestVersion';
+  }
+
+  @override
+  String get updateLater => 'ពេលក្រោយ';
+
+  @override
+  String get updateNow => 'អាប់ដេតឥឡូវនេះ';
+
+  @override
   String get customers => 'អតិថិជន';
 
   @override

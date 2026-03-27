@@ -263,6 +263,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get updateAvailableTitle => 'Update available';
+
+  @override
+  String updateAvailableMessage(String currentVersion, String latestVersion) {
+    return 'A newer version is available.\nCurrent: v$currentVersion\nLatest: v$latestVersion';
+  }
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
   String get customers => 'Customers';
 
   @override

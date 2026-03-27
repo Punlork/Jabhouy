@@ -349,6 +349,30 @@
       }
     }
   },
+  "updateAvailableTitle": "Update available",
+  "@updateAvailableTitle": {
+    "description": "Dialog title shown when a newer app release exists"
+  },
+  "updateAvailableMessage": "A newer version is available.\nCurrent: v{currentVersion}\nLatest: v{latestVersion}",
+  "@updateAvailableMessage": {
+    "description": "Dialog body shown when an update is available",
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "Later",
+  "@updateLater": {
+    "description": "Button label to dismiss the update prompt"
+  },
+  "updateNow": "Update now",
+  "@updateNow": {
+    "description": "Button label to open the latest release for updating"
+  },
   "customers": "Customers",
   "editCustomer": "Edit Customer",
   "addCustomer": "Add Customer",
