@@ -72,6 +72,11 @@ jobs:
     name: Fastlane Android (release)
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    env:
+      ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/release-keystore.jks
+      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -127,6 +132,12 @@ jobs:
         working-directory: android
         run: bundle install
 
+      - name: Restore Android keystore
+        shell: bash
+        run: |
+          umask 077
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+
       - name: Build production APK
         working-directory: android
         run: bundle exec fastlane build_release_ci
@@ -179,6 +190,11 @@ jobs:
           files: ${{ steps.apk.outputs.apk_path }}
           fail_on_unmatched_files: true
           target_commitish: ${{ github.sha }}
+
+      - name: Remove Android keystore
+        if: always()
+        shell: bash
+        run: rm -f "$ANDROID_KEYSTORE_PATH"
 
   # fastlane-ios-build:
   #   name: Fastlane iOS (build)
