@@ -4,7 +4,7 @@ abstract class LoanerEvent extends Equatable {
   const LoanerEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class LoadLoaners extends LoanerEvent {
@@ -35,7 +35,7 @@ class AddLoaner extends LoanerEvent {
   final LoanerModel loaner;
 
   @override
-  List<Object> get props => [loaner];
+  List<Object?> get props => [loaner];
 }
 
 class UpdateLoaner extends LoanerEvent {
@@ -43,7 +43,7 @@ class UpdateLoaner extends LoanerEvent {
   final LoanerModel loaner;
 
   @override
-  List<Object> get props => [loaner];
+  List<Object?> get props => [loaner];
 }
 
 class DeleteLoaner extends LoanerEvent {
@@ -51,5 +51,14 @@ class DeleteLoaner extends LoanerEvent {
   final LoanerModel body;
 
   @override
-  List<Object> get props => [body];
+  List<Object?> get props => [body];
+}
+
+class _LoanerConnectivityChanged extends LoanerEvent {
+  const _LoanerConnectivityChanged({required this.isOnline});
+
+  final bool isOnline;
+
+  @override
+  List<Object?> get props => [isOnline];
 }

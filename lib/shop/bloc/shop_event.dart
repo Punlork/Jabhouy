@@ -43,3 +43,9 @@ class _ShopInternalItemsUpdated extends ShopEvent {
   _ShopInternalItemsUpdated(this.items);
   final List<ShopItemModel> items;
 }
+
+class _ShopConnectivityChanged extends ShopEvent {
+  _ShopConnectivityChanged({required this.isOnline});
+
+  final bool isOnline;
+}

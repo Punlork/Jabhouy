@@ -17,24 +17,80 @@ Future<void> setupDependencies() async {
   getIt
     ..registerSingleton<ApiService>(apiService)
     ..registerSingleton<AppDatabase>(AppDatabase())
+    ..registerSingleton(ConnectivityService())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
-    ..registerLazySingleton(() => ShopService(getIt<ApiService>(), getIt<AppDatabase>()))
-    ..registerLazySingleton(() => LoanerService(getIt<ApiService>(), getIt<AppDatabase>()))
-    ..registerLazySingleton(() => CustomerService(getIt<ApiService>(), getIt<AppDatabase>()))
-    ..registerLazySingleton(() => AuthService(getIt<ApiService>()))
-    ..registerLazySingleton(() => CategoryService(getIt<ApiService>(), getIt<AppDatabase>()))
+    ..registerLazySingleton(
+      () => ShopService(
+        getIt<ApiService>(),
+        getIt<AppDatabase>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => LoanerService(
+        getIt<ApiService>(),
+        getIt<AppDatabase>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => CustomerService(
+        getIt<ApiService>(),
+        getIt<AppDatabase>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => AuthService(
+        getIt<ApiService>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => CategoryService(
+        getIt<ApiService>(),
+        getIt<AppDatabase>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
     ..registerFactory(AppBloc.new)
     ..registerFactory(() => UploadBloc(getIt<UploadService>()))
-    ..registerFactory(() => AuthBloc(getIt<AuthService>())..add(AuthCheckRequested()))
-    ..registerFactory(() => ProfileBloc(getIt<UploadBloc>(), getIt<ProfileService>()))
-    ..registerFactory(() => ShopBloc(getIt<ShopService>(), getIt<UploadBloc>()))
+    ..registerFactory(
+      () => AuthBloc(
+        getIt<AuthService>(),
+        getIt<ConnectivityService>(),
+      )..add(AuthCheckRequested()),
+    )
+    ..registerFactory(
+      () => ProfileBloc(
+        getIt<UploadBloc>(),
+        getIt<ProfileService>(),
+      ),
+    )
+    ..registerFactory(
+      () => ShopBloc(
+        getIt<ShopService>(),
+        getIt<UploadBloc>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
     ..registerFactory(() => CategoryBloc(getIt<CategoryService>()))
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
     ..registerFactory(() => SignupBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
-    ..registerFactory(() => LoanerBloc(getIt<LoanerService>()))
-    ..registerFactory(() => CustomerBloc(getIt<CustomerService>()));
+    ..registerFactory(
+      () => LoanerBloc(
+        getIt<LoanerService>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerFactory(
+      () => CustomerBloc(
+        getIt<CustomerService>(),
+        getIt<ConnectivityService>(),
+      ),
+    );
 
   log('Dependencies setup successfully');
 }

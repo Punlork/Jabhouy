@@ -19,3 +19,12 @@ class AuthSignedIn extends AuthEvent {
 }
 
 class AuthSignedOut extends AuthEvent {}
+
+class _AuthConnectivityChanged extends AuthEvent {
+  const _AuthConnectivityChanged({required this.isOnline});
+
+  final bool isOnline;
+
+  @override
+  List<Object?> get props => [isOnline];
+}

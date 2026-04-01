@@ -24,7 +24,8 @@ class _SignupPageContent extends StatefulWidget {
   State<_SignupPageContent> createState() => _SignupPageContentState();
 }
 
-class _SignupPageContentState extends State<_SignupPageContent> with SingleTickerProviderStateMixin {
+class _SignupPageContentState extends State<_SignupPageContent>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   final _nameController = TextEditingController();
@@ -110,14 +111,19 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                     BlocListener<SignupBloc, SignupState>(
                       listener: (context, state) {
                         if (state is SignupSuccess) {
-                          context.read<AuthBloc>().add(AuthSignedIn(state.user));
+                          context
+                              .read<AuthBloc>()
+                              .add(AuthSignedIn(state.user));
                         }
                       },
                     ),
                     BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
-                        if (state is Authenticated) {
-                          showSuccessSnackBar(context, l10n.welcomeUser(state.user.name ?? 'No name'));
+                        if (state is Authenticated && state.isSessionTrusted) {
+                          showSuccessSnackBar(
+                            context,
+                            l10n.welcomeUser(state.user.name ?? 'No name'),
+                          );
                           context.goNamed(AppRoutes.home);
                         }
                       },
@@ -173,7 +179,8 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                             if (value == null || value.isEmpty) {
                               return l10n.pleaseEnterYourEmail;
                             }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                .hasMatch(value)) {
                               return l10n.pleaseEnterAValidEmail;
                             }
                             return null;
@@ -208,11 +215,16 @@ class _SignupPageContentState extends State<_SignupPageContent> with SingleTicke
                         BlocBuilder<SignupBloc, SignupState>(
                           builder: (context, state) {
                             return ElevatedButton(
-                              onPressed: state is SignupLoading ? null : () => _handleSignup(context),
+                              onPressed: state is SignupLoading
+                                  ? null
+                                  : () => _handleSignup(context),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: colorScheme.primary,
                                 foregroundColor: colorScheme.onPrimary,
-                                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 50,
+                                  vertical: 18,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),

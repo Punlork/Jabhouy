@@ -32,6 +32,8 @@ class ApiService {
   static const _timeout = Duration(seconds: 30);
   final http.Client _client;
 
+  String get baseUrl => _baseUrl;
+
   Future<ApiResponse<T>> get<T>(
     String endpoint, {
     Map<String, String>? headers,

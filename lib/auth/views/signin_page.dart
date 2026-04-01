@@ -24,7 +24,8 @@ class _SigninPageContent extends StatefulWidget {
   State<_SigninPageContent> createState() => _SigninPageContentState();
 }
 
-class _SigninPageContentState extends State<_SigninPageContent> with SingleTickerProviderStateMixin {
+class _SigninPageContentState extends State<_SigninPageContent>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   final _username = TextEditingController();
@@ -99,13 +100,15 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                     BlocListener<SigninBloc, SigninState>(
                       listener: (context, state) {
                         if (state is SigninSuccess) {
-                          context.read<AuthBloc>().add(AuthSignedIn(state.user));
+                          context
+                              .read<AuthBloc>()
+                              .add(AuthSignedIn(state.user));
                         }
                       },
                     ),
                     BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
-                        if (state is Authenticated) {
+                        if (state is Authenticated && state.isSessionTrusted) {
                           showSuccessSnackBar(context, l10n.signinSuccessful);
                           context.goNamed(AppRoutes.home);
                         }
@@ -123,7 +126,8 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                           l10n.welcomeBack,
                           style: AppTextTheme.headline.copyWith(
                             color: colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold, // Already w700, explicit for clarity
+                            fontWeight: FontWeight
+                                .bold, // Already w700, explicit for clarity
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -177,11 +181,16 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                         BlocBuilder<SigninBloc, SigninState>(
                           builder: (context, state) {
                             return ElevatedButton(
-                              onPressed: state is SigninLoading ? null : () => _handleLogin(context),
+                              onPressed: state is SigninLoading
+                                  ? null
+                                  : () => _handleLogin(context),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: colorScheme.primary,
                                 foregroundColor: colorScheme.onPrimary,
-                                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 50,
+                                  vertical: 18,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -211,7 +220,8 @@ class _SigninPageContentState extends State<_SigninPageContent> with SingleTicke
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                              onPressed: () => context.pushNamed(AppRoutes.signup),
+                              onPressed: () =>
+                                  context.pushNamed(AppRoutes.signup),
                               style: TextButton.styleFrom(
                                 foregroundColor: colorScheme.onPrimary,
                               ),

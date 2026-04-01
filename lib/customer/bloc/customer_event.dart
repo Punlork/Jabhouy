@@ -4,7 +4,7 @@ abstract class CustomerEvent extends Equatable {
   const CustomerEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class LoadCustomers extends CustomerEvent {}
@@ -14,7 +14,7 @@ class CustomerUpdatedFromLocal extends CustomerEvent {
   final List<CustomerModel> customers;
 
   @override
-  List<Object> get props => [customers];
+  List<Object?> get props => [customers];
 }
 
 class CreateCustomerEvent extends CustomerEvent {
@@ -29,7 +29,7 @@ class UpdateCustomerEvent extends CustomerEvent {
   final CustomerModel customer;
 
   @override
-  List<Object> get props => [customer];
+  List<Object?> get props => [customer];
 }
 
 class DeleteCustomerEvent extends CustomerEvent {
@@ -38,5 +38,14 @@ class DeleteCustomerEvent extends CustomerEvent {
   final CustomerModel customer;
 
   @override
-  List<Object> get props => [customer];
+  List<Object?> get props => [customer];
+}
+
+class _CustomerConnectivityChanged extends CustomerEvent {
+  const _CustomerConnectivityChanged({required this.isOnline});
+
+  final bool isOnline;
+
+  @override
+  List<Object?> get props => [isOnline];
 }

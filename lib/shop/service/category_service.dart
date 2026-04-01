@@ -4,14 +4,18 @@ import 'package:my_app/app/service/database/app_database.dart';
 import 'package:my_app/shop/shop.dart';
 
 class CategoryService extends BaseService {
-  CategoryService(super.apiService, this._db);
+  CategoryService(super.apiService, this._db, this._connectivityService);
+
   final AppDatabase _db;
+  final ConnectivityService _connectivityService;
 
   @override
   String get basePath => '/categories';
 
   Stream<List<CategoryItemModel>> watchCategories() {
-    return (_db.select(_db.categories)..where((t) => t.isDeleted.equals(false))).watch().map((rows) {
+    return (_db.select(_db.categories)..where((t) => t.isDeleted.equals(false)))
+        .watch()
+        .map((rows) {
       return rows
           .map(
             (row) => CategoryItemModel(
@@ -26,7 +30,13 @@ class CategoryService extends BaseService {
   }
 
   Future<void> syncPendingChanges() async {
-    final pendingItems = await (_db.select(_db.categories)..where((t) => t.syncStatus.equals(1))).get();
+    if (!await _connectivityService.isOnline) {
+      return;
+    }
+
+    final pendingItems = await (_db.select(_db.categories)
+          ..where((t) => t.syncStatus.equals(1)))
+        .get();
 
     for (final item in pendingItems) {
       try {
@@ -47,9 +57,15 @@ class CategoryService extends BaseService {
           response = await updateCategory(model, localOnly: false);
         }
 
-        if (response.success) {}
-      } catch (e) {
-        await (_db.update(_db.categories)..where((t) => t.id.equals(item.id))).write(
+        if (!response.success) {
+          await (_db.update(_db.categories)..where((t) => t.id.equals(item.id)))
+              .write(
+            const CategoriesCompanion(syncStatus: Value(2)),
+          );
+        }
+      } catch (_) {
+        await (_db.update(_db.categories)..where((t) => t.id.equals(item.id)))
+            .write(
           const CategoriesCompanion(syncStatus: Value(2)),
         );
       }
@@ -57,6 +73,13 @@ class CategoryService extends BaseService {
   }
 
   Future<ApiResponse<List<CategoryItemModel>>> getCategory() async {
+    if (!await _connectivityService.isOnline) {
+      return ApiResponse(
+        success: false,
+        message: 'Offline - showing cached data.',
+      );
+    }
+
     final response = await get<List<CategoryItemModel>>(
       '',
       parser: (value) {
@@ -98,7 +121,9 @@ class CategoryService extends BaseService {
     CategoryItemModel body, {
     bool localOnly = true,
   }) async {
-    final id = body.id == 0 ? -(DateTime.now().millisecondsSinceEpoch % 1000000) : body.id;
+    final id = body.id == 0
+        ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
+        : body.id;
     final localItem = body.copyWith(id: id, syncStatus: 1);
 
     await _db.into(_db.categories).insert(
@@ -111,8 +136,16 @@ class CategoryService extends BaseService {
         );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true, data: localItem);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true, data: localItem);
+      }
+
+      return ApiResponse(
+        success: true,
+        data: localItem,
+        message: 'Saved offline. It will sync when you are back online.',
+      );
     }
 
     final response = await post(
@@ -127,7 +160,9 @@ class CategoryService extends BaseService {
 
     if (response.success && response.data != null) {
       final c = response.data!;
-      await (_db.delete(_db.categories)..where((t) => t.id.equals(localItem.id))).go();
+      await (_db.delete(_db.categories)
+            ..where((t) => t.id.equals(localItem.id)))
+          .go();
       await _db.into(_db.categories).insert(
             CategoriesCompanion.insert(
               id: Value(c.id),
@@ -155,8 +190,16 @@ class CategoryService extends BaseService {
         );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true, data: body);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true, data: body);
+      }
+
+      return ApiResponse(
+        success: true,
+        data: body.copyWith(syncStatus: 1),
+        message: 'Saved offline. It will sync when you are back online.',
+      );
     }
 
     final response = await put(
@@ -188,7 +231,8 @@ class CategoryService extends BaseService {
     CategoryItemModel body, {
     bool localOnly = true,
   }) async {
-    await (_db.update(_db.categories)..where((t) => t.id.equals(body.id))).write(
+    await (_db.update(_db.categories)..where((t) => t.id.equals(body.id)))
+        .write(
       const CategoriesCompanion(
         isDeleted: Value(true),
         syncStatus: Value(1),
@@ -196,8 +240,15 @@ class CategoryService extends BaseService {
     );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true);
+      }
+
+      return ApiResponse(
+        success: true,
+        message: 'Deleted offline. It will sync when you are back online.',
+      );
     }
 
     final response = await delete<dynamic>(
@@ -205,7 +256,8 @@ class CategoryService extends BaseService {
     );
 
     if (response.success) {
-      await (_db.delete(_db.categories)..where((t) => t.id.equals(body.id))).go();
+      await (_db.delete(_db.categories)..where((t) => t.id.equals(body.id)))
+          .go();
     }
 
     return response;

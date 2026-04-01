@@ -10,6 +10,7 @@ export 'models/user_model.dart';
 export 'routes/app_routes.dart';
 export 'service/api_service.dart';
 export 'service/base_service.dart';
+export 'service/connectivity_service.dart';
 export 'service/upload_service.dart';
 export 'theme/app_theme.dart';
 export 'theme/color_theme.dart';

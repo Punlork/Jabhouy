@@ -28,7 +28,10 @@ class _ShopTabState extends State<_ShopTabView>
     if (previous is ShopLoaded && current is ShopLoaded) {
       return previous.items.length != current.items.length ||
           previous.searchQuery != current.searchQuery ||
-          previous.itemCategories != current.itemCategories;
+          previous.itemCategories != current.itemCategories ||
+          previous.isOffline != current.isOffline ||
+          previous.syncMessage != current.syncMessage ||
+          previous.isFiltering != current.isFiltering;
     }
     return true;
   }
@@ -55,22 +58,39 @@ class _ShopTabState extends State<_ShopTabView>
           buildWhen: _shouldRebuild,
           builder: (context, state) => switch (state) {
             ShopInitial() || ShopLoading() => const ShopGridLoading(),
-            ShopLoaded(:final items, :final pagination, :final isFiltering) =>
+            ShopLoaded(
+              :final items,
+              :final pagination,
+              :final isFiltering,
+              :final isOffline,
+              :final syncMessage,
+            ) =>
               RefreshIndicator(
                 onRefresh: _refreshItems,
-                child: Builder(
-                  builder: (context) {
-                    if (isFiltering != null && isFiltering) {
-                      return const ShopGridLoading();
-                    }
-                    if (items.isEmpty) {
-                      return const EmptyView();
-                    }
-                    return ShopGridBuilder(
-                      items: items,
-                      pagination: pagination,
-                    );
-                  },
+                child: Column(
+                  children: [
+                    if (syncMessage != null)
+                      _SyncStatusBanner(
+                        message: syncMessage,
+                        isOffline: isOffline,
+                      ),
+                    Expanded(
+                      child: Builder(
+                        builder: (context) {
+                          if (isFiltering != null && isFiltering) {
+                            return const ShopGridLoading();
+                          }
+                          if (items.isEmpty) {
+                            return const EmptyView();
+                          }
+                          return ShopGridBuilder(
+                            items: items,
+                            pagination: pagination,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ShopError(:final message) => ErrorView(message: message),
@@ -83,6 +103,47 @@ class _ShopTabState extends State<_ShopTabView>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class _SyncStatusBanner extends StatelessWidget {
+  const _SyncStatusBanner({
+    required this.message,
+    required this.isOffline,
+  });
+
+  final String message;
+  final bool isOffline;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 52, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isOffline ? Icons.cloud_off_rounded : Icons.sync_rounded,
+            size: 18,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class ShopGridLoading extends StatelessWidget {

@@ -61,7 +61,13 @@ class _LoanerViewState extends State<LoanerView>
             itemCount: 5,
             itemBuilder: (context, index) => const LoanerItemShimmer(),
           ),
-        LoanerLoaded(:final items, :final pagination) => RefreshIndicator(
+        LoanerLoaded(
+          :final items,
+          :final pagination,
+          :final isOffline,
+          :final syncMessage,
+        ) =>
+          RefreshIndicator(
             onRefresh: () async => context.read<LoanerBloc>().add(
                   LoadLoaners(
                     forceRefresh: true,
@@ -69,33 +75,44 @@ class _LoanerViewState extends State<LoanerView>
                     limit: 10,
                   ),
                 ),
-            child: items.isEmpty
-                ? EmptyView(msg: context.l10n.noLoanerFound)
-                : ListView.builder(
-                    controller: controller,
-                    physics: const BouncingScrollPhysics()
-                        .applyTo(const AlwaysScrollableScrollPhysics()),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: items.length + 2,
-                    itemBuilder: (context, index) {
-                      if (index == items.length) {
-                        if (pagination.hasNext) {
-                          return const CustomLoading();
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }
-                      if (index == items.length + 1) {
-                        return const SizedBox(height: 70);
-                      }
-
-                      final loaner = items[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildLoanerItem(context, loaner),
-                      );
-                    },
+            child: Column(
+              children: [
+                if (syncMessage != null)
+                  _SyncStatusBanner(
+                    message: syncMessage,
+                    isOffline: isOffline,
                   ),
+                Expanded(
+                  child: items.isEmpty
+                      ? EmptyView(msg: context.l10n.noLoanerFound)
+                      : ListView.builder(
+                          controller: controller,
+                          physics: const BouncingScrollPhysics()
+                              .applyTo(const AlwaysScrollableScrollPhysics()),
+                          padding: const EdgeInsets.all(16),
+                          itemCount: items.length + 2,
+                          itemBuilder: (context, index) {
+                            if (index == items.length) {
+                              if (pagination.hasNext) {
+                                return const CustomLoading();
+                              } else {
+                                return const SizedBox.shrink();
+                              }
+                            }
+                            if (index == items.length + 1) {
+                              return const SizedBox(height: 70);
+                            }
+
+                            final loaner = items[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildLoanerItem(context, loaner),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           ),
         LoanerError() => Center(child: Text(state.message)),
         _ => const SizedBox.shrink(),
@@ -155,4 +172,45 @@ class _LoanerViewState extends State<LoanerView>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class _SyncStatusBanner extends StatelessWidget {
+  const _SyncStatusBanner({
+    required this.message,
+    required this.isOffline,
+  });
+
+  final String message;
+  final bool isOffline;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isOffline ? Icons.cloud_off_rounded : Icons.sync_rounded,
+            size: 18,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -13,6 +13,6 @@ await dotenv.load(fileName: '.env.dev');
         location: BannerLocation.topEnd,
         child: App(),
       ),
-    ),
+    ), 
   );
 }

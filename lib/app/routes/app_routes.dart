@@ -55,7 +55,7 @@ class AppRoutes {
   };
 
   static final GoRouter router = GoRouter(
-    initialLocation: signin.toPath,
+    initialLocation: home.toPath,
     redirect: (context, state) {
       final authState = BlocProvider.of<AuthBloc>(context).state;
       final currentPath = state.matchedLocation;
@@ -82,11 +82,31 @@ class AppRoutes {
             key: state.pageKey,
             child: MultiBlocProvider(
               providers: [
-                BlocProvider(create: (context) => ShopBloc(getIt<ShopService>(), getIt<UploadBloc>())),
-                BlocProvider(create: (context) => SignoutBloc(getIt<AuthService>())),
-                BlocProvider(create: (context) => CategoryBloc(getIt<CategoryService>())),
-                BlocProvider(create: (context) => LoanerBloc(getIt<LoanerService>())),
-                BlocProvider(create: (context) => CustomerBloc(getIt<CustomerService>())),
+                BlocProvider(
+                  create: (context) => ShopBloc(
+                    getIt<ShopService>(),
+                    getIt<UploadBloc>(),
+                    getIt<ConnectivityService>(),
+                  ),
+                ),
+                BlocProvider(
+                  create: (context) => SignoutBloc(getIt<AuthService>()),
+                ),
+                BlocProvider(
+                  create: (context) => CategoryBloc(getIt<CategoryService>()),
+                ),
+                BlocProvider(
+                  create: (context) => LoanerBloc(
+                    getIt<LoanerService>(),
+                    getIt<ConnectivityService>(),
+                  ),
+                ),
+                BlocProvider(
+                  create: (context) => CustomerBloc(
+                    getIt<CustomerService>(),
+                    getIt<ConnectivityService>(),
+                  ),
+                ),
               ],
               child: const HomePage(),
             ),

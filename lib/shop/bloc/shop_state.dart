@@ -1,5 +1,8 @@
 part of 'shop_bloc.dart';
 
+const _shopCategoryFilterUnset = Object();
+const _shopSyncMessageUnset = Object();
+
 sealed class ShopState extends Equatable {
   const ShopState();
 
@@ -21,12 +24,16 @@ class ShopLoaded extends ShopState {
     this.searchQuery = '',
     this.categoryFilter,
     this.isFiltering,
+    this.isOffline = false,
+    this.syncMessage,
   });
 
   final PaginatedResponse<ShopItemModel> paginatedItems;
   final String searchQuery;
   final CategoryItemModel? categoryFilter;
   final bool? isFiltering;
+  final bool isOffline;
+  final String? syncMessage;
 
   List<ShopItemModel> get items => paginatedItems.items;
 
@@ -42,15 +49,22 @@ class ShopLoaded extends ShopState {
   ShopLoaded copyWith({
     PaginatedResponse<ShopItemModel>? paginatedItems,
     String? searchQuery,
-    CategoryItemModel? categoryFilter,
-    String? buyerFilter,
+    Object? categoryFilter = _shopCategoryFilterUnset,
     bool? isFiltering,
+    bool? isOffline,
+    Object? syncMessage = _shopSyncMessageUnset,
   }) {
     return ShopLoaded(
       paginatedItems: paginatedItems ?? this.paginatedItems,
       searchQuery: searchQuery ?? this.searchQuery,
-      categoryFilter: categoryFilter,
+      categoryFilter: identical(categoryFilter, _shopCategoryFilterUnset)
+          ? this.categoryFilter
+          : categoryFilter as CategoryItemModel?,
       isFiltering: isFiltering ?? this.isFiltering,
+      isOffline: isOffline ?? this.isOffline,
+      syncMessage: identical(syncMessage, _shopSyncMessageUnset)
+          ? this.syncMessage
+          : syncMessage as String?,
     );
   }
 
@@ -61,6 +75,8 @@ class ShopLoaded extends ShopState {
         paginatedItems,
         items.length,
         isFiltering,
+        isOffline,
+        syncMessage,
         ...items,
       ];
 }

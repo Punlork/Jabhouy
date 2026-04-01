@@ -53,19 +53,65 @@ class _CustomerPageContent extends StatelessWidget {
         builder: (context, state) {
           final items =
               state is CustomerLoaded ? state.customers : <CustomerModel>[];
+          final syncMessage =
+              state is CustomerLoaded ? state.syncMessage : null;
+          final bannerCount = syncMessage == null ? 0 : 1;
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: items.length + 1,
+            itemCount: items.length + 1 + bannerCount,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return _buildAddCustomerButton(context);
               }
-              final item = items[index - 1];
+              if (syncMessage != null && index == 1) {
+                return _buildSyncBanner(
+                  context,
+                  syncMessage,
+                  state is CustomerLoaded && state.isOffline,
+                );
+              }
+              final item = items[index - 1 - bannerCount];
               return _buildCustomerTile(context, item);
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildSyncBanner(
+    BuildContext context,
+    String message,
+    bool isOffline,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isOffline ? Icons.cloud_off_rounded : Icons.sync_rounded,
+            size: 18,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextTheme.caption.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

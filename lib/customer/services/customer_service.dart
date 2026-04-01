@@ -4,14 +4,18 @@ import 'package:my_app/app/service/database/app_database.dart';
 import 'package:my_app/customer/customer.dart';
 
 class CustomerService extends BaseService {
-  CustomerService(super.apiService, this._db);
+  CustomerService(super.apiService, this._db, this._connectivityService);
+
   final AppDatabase _db;
+  final ConnectivityService _connectivityService;
 
   @override
   String get basePath => '/customers';
 
   Stream<List<CustomerModel>> watchCustomers() {
-    return (_db.select(_db.customers)..where((t) => t.isDeleted.equals(false))).watch().map((rows) {
+    return (_db.select(_db.customers)..where((t) => t.isDeleted.equals(false)))
+        .watch()
+        .map((rows) {
       return rows
           .map(
             (row) => CustomerModel(
@@ -28,7 +32,13 @@ class CustomerService extends BaseService {
   }
 
   Future<void> syncPendingChanges() async {
-    final pendingItems = await (_db.select(_db.customers)..where((t) => t.syncStatus.equals(1))).get();
+    if (!await _connectivityService.isOnline) {
+      return;
+    }
+
+    final pendingItems = await (_db.select(_db.customers)
+          ..where((t) => t.syncStatus.equals(1)))
+        .get();
 
     for (final item in pendingItems) {
       try {
@@ -51,13 +61,26 @@ class CustomerService extends BaseService {
           response = await updateCustomer(model, localOnly: false);
         }
 
-        if (response.success) {}
-      } catch (e) {
-        await (_db.update(_db.customers)..where((t) => t.id.equals(item.id))).write(
+        if (!response.success) {
+          await (_db.update(_db.customers)..where((t) => t.id.equals(item.id)))
+              .write(
+            const CustomersCompanion(syncStatus: Value(2)),
+          );
+        }
+      } catch (_) {
+        await (_db.update(_db.customers)..where((t) => t.id.equals(item.id)))
+            .write(
           const CustomersCompanion(syncStatus: Value(2)),
         );
       }
     }
+  }
+
+  Future<bool> hasCachedCustomers() async {
+    final query = _db.select(_db.customers)
+      ..where((t) => t.isDeleted.equals(false))
+      ..limit(1);
+    return (await query.get()).isNotEmpty;
   }
 
   Future<ApiResponse<PaginatedResponse<CustomerModel>>> getCustomers({
@@ -66,6 +89,13 @@ class CustomerService extends BaseService {
     String searchQuery = '',
     String categoryFilter = '',
   }) async {
+    if (!await _connectivityService.isOnline) {
+      return ApiResponse(
+        success: false,
+        message: 'Offline - showing cached customers.',
+      );
+    }
+
     final response = await get<PaginatedResponse<CustomerModel>>(
       '',
       queryParameters: {
@@ -114,7 +144,9 @@ class CustomerService extends BaseService {
     CustomerModel body, {
     bool localOnly = true,
   }) async {
-    final id = body.id == 0 ? -(DateTime.now().millisecondsSinceEpoch % 1000000) : body.id;
+    final id = body.id == 0
+        ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
+        : body.id;
     final localItem = body.copyWith(id: id, syncStatus: 1);
 
     await _db.into(_db.customers).insert(
@@ -129,8 +161,16 @@ class CustomerService extends BaseService {
         );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true, data: localItem);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true, data: localItem);
+      }
+
+      return ApiResponse(
+        success: true,
+        data: localItem,
+        message: 'Saved offline. It will sync when you are back online.',
+      );
     }
 
     final response = await post(
@@ -145,7 +185,8 @@ class CustomerService extends BaseService {
 
     if (response.success && response.data != null) {
       final c = response.data!;
-      await (_db.delete(_db.customers)..where((t) => t.id.equals(localItem.id))).go();
+      await (_db.delete(_db.customers)..where((t) => t.id.equals(localItem.id)))
+          .go();
       await _db.into(_db.customers).insert(
             CustomersCompanion.insert(
               id: Value(c.id),
@@ -165,20 +206,30 @@ class CustomerService extends BaseService {
     CustomerModel body, {
     bool localOnly = true,
   }) async {
+    final updatedAt = DateTime.now();
+
     await _db.update(_db.customers).replace(
           Customer(
             id: body.id,
             name: body.name,
             createdAt: body.createdAt,
-            updatedAt: DateTime.now(),
+            updatedAt: updatedAt,
             syncStatus: 1,
             isDeleted: false,
           ),
         );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true, data: body);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true, data: body);
+      }
+
+      return ApiResponse(
+        success: true,
+        data: body.copyWith(syncStatus: 1, updatedAt: updatedAt),
+        message: 'Saved offline. It will sync when you are back online.',
+      );
     }
 
     final response = await put(
@@ -220,14 +271,22 @@ class CustomerService extends BaseService {
     );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true);
+      }
+
+      return ApiResponse(
+        success: true,
+        message: 'Deleted offline. It will sync when you are back online.',
+      );
     }
 
     final response = await delete<dynamic>('/${body.id}');
 
     if (response.success) {
-      await (_db.delete(_db.customers)..where((t) => t.id.equals(body.id))).go();
+      await (_db.delete(_db.customers)..where((t) => t.id.equals(body.id)))
+          .go();
     }
 
     return response;

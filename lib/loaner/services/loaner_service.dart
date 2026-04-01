@@ -7,8 +7,10 @@ import 'package:my_app/customer/customer.dart';
 import 'package:my_app/loaner/loaner.dart';
 
 class LoanerService extends BaseService {
-  LoanerService(super.apiService, this._db);
+  LoanerService(super.apiService, this._db, this._connectivityService);
+
   final AppDatabase _db;
+  final ConnectivityService _connectivityService;
 
   @override
   String get basePath => '/loans';
@@ -55,8 +57,7 @@ class LoanerService extends BaseService {
     final uniqueCustomers = <int, CustomerModel>{};
     for (final customer in customers) {
       if (customer == null) continue;
-      final value = customer;
-      uniqueCustomers[value.id] = value;
+      uniqueCustomers[customer.id] = customer;
     }
 
     if (uniqueCustomers.isEmpty) return;
@@ -81,21 +82,52 @@ class LoanerService extends BaseService {
     });
   }
 
-  Stream<List<LoanerModel>> watchLoaners() {
-    final query = _db.select(_db.loaners).join(
-      [
-        leftOuterJoin(
-          _db.customers,
-          _db.customers.id.equalsExp(_db.loaners.customerId) &
-              _db.customers.isDeleted.equals(false),
-        ),
-      ],
-    )
-      ..where(_db.loaners.isDeleted.equals(false))
-      ..orderBy([
-        OrderingTerm.desc(_db.loaners.createdAt),
-        OrderingTerm.desc(_db.loaners.id),
-      ]);
+  Stream<List<LoanerModel>> watchLoaners({
+    String searchQuery = '',
+    CustomerModel? customerFilter,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) {
+    final query = _db.select(_db.loaners).join([
+      leftOuterJoin(
+        _db.customers,
+        _db.customers.id.equalsExp(_db.loaners.customerId) &
+            _db.customers.isDeleted.equals(false),
+      ),
+    ])
+      ..where(_db.loaners.isDeleted.equals(false));
+
+    if (searchQuery.isNotEmpty) {
+      query.where(
+        _db.customers.name.contains(searchQuery) |
+            _db.loaners.note.contains(searchQuery),
+      );
+    }
+
+    if (customerFilter != null) {
+      query.where(_db.loaners.customerId.equals(customerFilter.id));
+    }
+
+    if (fromDate != null) {
+      query.where(_db.loaners.createdAt.isBiggerOrEqualValue(fromDate));
+    }
+
+    if (toDate != null) {
+      final endOfDay =
+          DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 999);
+      query.where(_db.loaners.createdAt.isSmallerOrEqualValue(endOfDay));
+    }
+
+    query.orderBy([
+      OrderingTerm(
+        expression: _db.loaners.createdAt,
+        mode: OrderingMode.desc,
+      ),
+      OrderingTerm(
+        expression: _db.loaners.id,
+        mode: OrderingMode.desc,
+      ),
+    ]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -119,6 +151,10 @@ class LoanerService extends BaseService {
   }
 
   Future<void> syncPendingChanges() async {
+    if (!await _connectivityService.isOnline) {
+      return;
+    }
+
     final pendingItems = await (_db.select(_db.loaners)
           ..where((t) => t.syncStatus.equals(1)))
         .get();
@@ -148,14 +184,59 @@ class LoanerService extends BaseService {
           response = await updateLoaner(model, localOnly: false);
         }
 
-        if (response.success) {}
-      } catch (e) {
+        if (!response.success) {
+          await (_db.update(_db.loaners)..where((t) => t.id.equals(item.id)))
+              .write(
+            const LoanersCompanion(syncStatus: Value(2)),
+          );
+        }
+      } catch (_) {
         await (_db.update(_db.loaners)..where((t) => t.id.equals(item.id)))
             .write(
           const LoanersCompanion(syncStatus: Value(2)),
         );
       }
     }
+  }
+
+  Future<bool> hasCachedLoaners({
+    String searchQuery = '',
+    CustomerModel? customerFilter,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
+    final query = _db.select(_db.loaners).join([
+      leftOuterJoin(
+        _db.customers,
+        _db.customers.id.equalsExp(_db.loaners.customerId) &
+            _db.customers.isDeleted.equals(false),
+      ),
+    ])
+      ..where(_db.loaners.isDeleted.equals(false));
+
+    if (searchQuery.isNotEmpty) {
+      query.where(
+        _db.customers.name.contains(searchQuery) |
+            _db.loaners.note.contains(searchQuery),
+      );
+    }
+
+    if (customerFilter != null) {
+      query.where(_db.loaners.customerId.equals(customerFilter.id));
+    }
+
+    if (fromDate != null) {
+      query.where(_db.loaners.createdAt.isBiggerOrEqualValue(fromDate));
+    }
+
+    if (toDate != null) {
+      final endOfDay =
+          DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 999);
+      query.where(_db.loaners.createdAt.isSmallerOrEqualValue(endOfDay));
+    }
+
+    query.limit(1);
+    return (await query.get()).isNotEmpty;
   }
 
   Future<ApiResponse<PaginatedResponse<LoanerModel>>> getLoaners({
@@ -166,6 +247,13 @@ class LoanerService extends BaseService {
     DateTime? toDate,
     DateTime? fromDate,
   }) async {
+    if (!await _connectivityService.isOnline) {
+      return ApiResponse(
+        success: false,
+        message: 'Offline - showing cached loaners.',
+      );
+    }
+
     final response = await get<PaginatedResponse<LoanerModel>>(
       '',
       queryParameters: {
@@ -197,8 +285,7 @@ class LoanerService extends BaseService {
         final uniqueCustomers = <int, CustomerModel>{};
         for (final customer in customers) {
           if (customer == null) continue;
-          final value = customer;
-          uniqueCustomers[value.id] = value;
+          uniqueCustomers[customer.id] = customer;
         }
 
         if (uniqueCustomers.isNotEmpty) {
@@ -269,8 +356,16 @@ class LoanerService extends BaseService {
         );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true, data: localItem);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true, data: localItem);
+      }
+
+      return ApiResponse(
+        success: true,
+        data: localItem,
+        message: 'Saved offline. It will sync when you are back online.',
+      );
     }
 
     final response = await post(
@@ -311,6 +406,8 @@ class LoanerService extends BaseService {
     LoanerModel body, {
     bool localOnly = true,
   }) async {
+    final updatedAt = DateTime.now();
+
     await _db.update(_db.loaners).replace(
           Loaner(
             id: body.id,
@@ -320,15 +417,23 @@ class LoanerService extends BaseService {
             customer: _encodeCustomer(body.customer),
             isPaid: body.isPaid,
             createdAt: body.createdAt,
-            updatedAt: DateTime.now(),
+            updatedAt: updatedAt,
             syncStatus: 1,
             isDeleted: false,
           ),
         );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true, data: body);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true, data: body);
+      }
+
+      return ApiResponse(
+        success: true,
+        data: body.copyWith(syncStatus: 1, updatedAt: updatedAt),
+        message: 'Saved offline. It will sync when you are back online.',
+      );
     }
 
     final response = await put(
@@ -375,8 +480,15 @@ class LoanerService extends BaseService {
     );
 
     if (localOnly) {
-      await syncPendingChanges();
-      return ApiResponse(success: true);
+      if (await _connectivityService.isOnline) {
+        await syncPendingChanges();
+        return ApiResponse(success: true);
+      }
+
+      return ApiResponse(
+        success: true,
+        message: 'Deleted offline. It will sync when you are back online.',
+      );
     }
 
     final response = await delete<dynamic>('/${body.id}');
