@@ -5,6 +5,7 @@ import 'package:my_app/app/app.dart';
 import 'package:my_app/app/service/database/app_database.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/customer/customer.dart';
+import 'package:my_app/income/income.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/profile/profile.dart';
 import 'package:my_app/shop/shop.dart';
@@ -20,6 +21,19 @@ Future<void> setupDependencies() async {
     ..registerSingleton(ConnectivityService())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
+    ..registerLazySingleton(
+      () => AuthService(
+        getIt<ApiService>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerLazySingleton(NotificationTrackingBridge.new)
+    ..registerLazySingleton(
+      () => FirebaseIncomeSyncService(
+        getIt<ConnectivityService>(),
+        getIt<AuthService>(),
+      ),
+    )
     ..registerLazySingleton(
       () => ShopService(
         getIt<ApiService>(),
@@ -42,9 +56,10 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerLazySingleton(
-      () => AuthService(
-        getIt<ApiService>(),
-        getIt<ConnectivityService>(),
+      () => IncomeService(
+        getIt<AppDatabase>(),
+        getIt<NotificationTrackingBridge>(),
+        getIt<FirebaseIncomeSyncService>(),
       ),
     )
     ..registerLazySingleton(
@@ -90,7 +105,8 @@ Future<void> setupDependencies() async {
         getIt<CustomerService>(),
         getIt<ConnectivityService>(),
       ),
-    );
+    )
+    ..registerFactory(() => IncomeBloc(getIt<IncomeService>()));
 
   log('Dependencies setup successfully');
 }

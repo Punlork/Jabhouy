@@ -362,4 +362,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get all => 'All';
+
+  @override
+  String get income => 'Income';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get searchIncome => 'Search income notifications...';
+
+  @override
+  String get filterIncome => 'Filter Income';
+
+  @override
+  String get notificationTracking => 'Notification tracking';
+
+  @override
+  String get notificationTrackingEnabled =>
+      'Bank notification tracking is active on this device.';
+
+  @override
+  String get notificationTrackingDisabled =>
+      'Enable notification access so this main device can capture ABA, Chip Mong, and ACLEDA notifications.';
+
+  @override
+  String get enableNotificationAccess => 'Enable access';
+
+  @override
+  String get refreshStatus => 'Refresh status';
+
+  @override
+  String get mainDeviceTrackingHint =>
+      'Use this on the main Android phone. Sub-device sync can be added later on top of the same data model.';
+
+  @override
+  String get bankNotificationUnsupported =>
+      'This device cannot capture bank notifications. Use Android for the main tracking phone.';
+
+  @override
+  String get incomeByBank => 'Income by bank';
+
+  @override
+  String get noIncomeChartData =>
+      'No income data yet. Add demo data or enable tracking to see the chart.';
+
+  @override
+  String get totalIncome => 'Total income';
+
+  @override
+  String get totalExpense => 'Total expense';
+
+  @override
+  String get trackedCount => 'Tracked count';
+
+  @override
+  String get trackedNotifications => 'Tracked notifications';
+
+  @override
+  String get allRecords => 'All records';
+
+  @override
+  String get incomeOnly => 'Income only';
+
+  @override
+  String get expenseOnly => 'Expense only';
+
+  @override
+  String get noTrackedNotifications => 'No tracked bank notifications found';
+
+  @override
+  String get addDemoData => 'Demo data';
+
+  @override
+  String get demoDataAdded => 'Demo bank notifications added';
+
+  @override
+  String get bankLabel => 'Bank';
+
+  @override
+  String get deviceRole => 'Device role';
+
+  @override
+  String get mainDeviceRole => 'Main device';
+
+  @override
+  String get subDeviceRole => 'Sub device';
+
+  @override
+  String get deviceRoleMainDescription =>
+      'This device captures bank notifications.';
+
+  @override
+  String get deviceRoleSubDescription =>
+      'This device is a sub device for viewing synced data later.';
+
+  @override
+  String get subDeviceTrackingDisabled =>
+      'Sub devices do not capture bank notifications in the current local-only setup.';
+
+  @override
+  String get subDeviceTrackingHint =>
+      'Switch this device to main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.';
+
+  @override
+  String get mainDeviceRoleRequired =>
+      'Switch this device to Main device before adding demo or tracked notifications.';
+
+  @override
+  String get mainDeviceOnly => 'Main only';
+
+  @override
+  String get singleMainDeviceHint =>
+      'Only one main device can be active for the same synced income scope at a time.';
+
+  @override
+  String get anotherMainDeviceActive =>
+      'Another main device is already active for this income sync.';
 }

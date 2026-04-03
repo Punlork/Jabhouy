@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/customer/customer.dart';
+import 'package:my_app/income/income.dart';
 import 'package:my_app/l10n/l10n.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/shop/shop.dart';
@@ -37,15 +38,18 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
   late final PageController _pageController;
+  bool _hasLoadedProtectedData = false;
 
   static const _pages = [
     ShopTab(),
     LoanerView(),
+    IncomeView(),
   ];
 
   void _onItemTapped(int index) {
@@ -69,11 +73,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         context.read<ShopBloc>().add(
               ShopGetItemsEvent(
                 searchQuery: value,
-                categoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+                categoryFilter:
+                    context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               ),
             );
       case 1:
         context.read<LoanerBloc>().add(LoadLoaners(searchQuery: value));
+      case 2:
+        context.read<IncomeBloc>().add(LoadIncomeDashboard(searchQuery: value));
     }
   }
 
@@ -91,8 +98,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               BlocProvider.value(value: context.read<ShopBloc>()),
             ],
             child: FilterSheet(
-              initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
-              onApply: (category) => context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: category)),
+              initialCategoryFilter:
+                  context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+              onApply: (category) => context.read<ShopBloc>().add(
+                    ShopGetItemsEvent(categoryFilter: category),
+                  ),
             ),
           ),
         );
@@ -113,16 +123,56 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: LoanerFilterSheet(
-                initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
-                initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
-                initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
-                onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
-                      LoadLoaners(
-                        fromDate: fromDate,
-                        toDate: toDate,
-                        loanerFilter: loanerFilter,
-                      ),
-                    ),
+                initialFromDate:
+                    context.read<LoanerBloc>().state.asLoaded?.fromDate,
+                initialToDate:
+                    context.read<LoanerBloc>().state.asLoaded?.toDate,
+                initialLoanerFilter:
+                    context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
+                onApply: (fromDate, toDate, loanerFilter) =>
+                    context.read<LoanerBloc>().add(
+                          LoadLoaners(
+                            fromDate: fromDate,
+                            toDate: toDate,
+                            loanerFilter: loanerFilter,
+                          ),
+                        ),
+              ),
+            ),
+          ),
+        );
+      case 2:
+        showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (_) => BlocProvider.value(
+            value: context.read<IncomeBloc>(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: IncomeFilterSheet(
+                initialFromDate:
+                    context.read<IncomeBloc>().state.asLoaded?.fromDate,
+                initialToDate:
+                    context.read<IncomeBloc>().state.asLoaded?.toDate,
+                initialBankFilter:
+                    context.read<IncomeBloc>().state.asLoaded?.bankFilter,
+                initialRecordFilter:
+                    context.read<IncomeBloc>().state.asLoaded?.recordFilter ??
+                        NotificationRecordFilter.all,
+                onApply: (fromDate, toDate, bankFilter, recordFilter) =>
+                    context.read<IncomeBloc>().add(
+                          LoadIncomeDashboard(
+                            fromDate: fromDate,
+                            toDate: toDate,
+                            bankFilter: bankFilter,
+                            recordFilter: recordFilter,
+                          ),
+                        ),
               ),
             ),
           ),
@@ -155,11 +205,26 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _scrollControllers = [
       ScrollController(),
       ScrollController(),
+      ScrollController(),
     ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final authState = context.read<AuthBloc>().state;
+      if (authState is Authenticated) {
+        _loadProtectedData();
+      }
+    });
+  }
+
+  void _loadProtectedData() {
+    if (_hasLoadedProtectedData) return;
+
+    _hasLoadedProtectedData = true;
     context.read<LoanerBloc>().add(LoadLoaners());
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<CategoryBloc>().add(CategoryGetEvent());
     context.read<CustomerBloc>().add(LoadCustomers());
+    context.read<IncomeBloc>().add(const RefreshIncomeTrackingStatus());
   }
 
   @override
@@ -168,20 +233,49 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       controller.dispose();
     }
     _pageController.dispose();
-    _searchController.dispose();
-    super.dispose();
+    _searchController.dispose();    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          previous.runtimeType != current.runtimeType,
+      listener: (context, authState) {
+        if (authState is Authenticated) {
+          _loadProtectedData();
+          return;
+        }
+
+        // redirect to splash screen to trigger auth check and data reload
+        context.go(AppRoutes.signin.toPath);
+        _hasLoadedProtectedData = false;
+      },
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) {
+          if (authState is! Authenticated) {
+            return const Scaffold(
+              body: SizedBox.expand(),
+            );
+          }
+
+          return _buildAuthenticatedScaffold(context);
+        },
+      ),
+    );
+  }
+
+  Widget _buildAuthenticatedScaffold(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final headerBackground = colorScheme.surface;
-    final bottomBarBackground = isDark ? colorScheme.surfaceContainerLow : Colors.white;
-    final bottomBarIndicator = isDark ? colorScheme.primary : colorScheme.primaryContainer;
-    final bottomBarSelectedForeground = isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
+    final appState = context.watch<AppBloc>().state;
+    final bottomBarBackground =
+        isDark ? colorScheme.surfaceContainerLow : Colors.white;
+    final bottomBarIndicator =
+        isDark ? colorScheme.primary : colorScheme.primaryContainer;
+    final bottomBarSelectedForeground =
+        isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
     final bottomBarUnselectedForeground = colorScheme.onSurfaceVariant;
-    final statusBarHeight = MediaQuery.of(context).viewPadding.top;
 
     final bottomBars = [
       {
@@ -192,25 +286,34 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         'icon': Icons.handshake_rounded,
         'name': context.l10n.loaner,
       },
+      {
+        'icon': Icons.pie_chart_rounded,
+        'name': context.l10n.income,
+      },
     ];
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         extendBody: true,
         body: BottomBar(
           body: (context, controller) => SafeArea(
-            // top: false,
             maintainBottomViewPadding: true,
             child: Column(
               children: [
                 Builder(
                   builder: (context) {
-                    Widget buildShopHeader({bool hasFilter = false}) {
+                    Widget buildShopHeader({
+                      bool hasFilter = false,
+                      String? searchHintText,
+                    }) {
                       return ShopHeader(
                         hasFilter: hasFilter,
+                        searchHintText: searchHintText,
                         onSettingsPressed: () => _showSettingsSheet(
-                          () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
+                          () => context
+                              .read<SignoutBloc>()
+                              .add(const SignoutSubmitted()),
                         ),
                         onSearchChanged: _onSearchChanged,
                         onFilterPressed: _showFilterSheet,
@@ -233,6 +336,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           );
                         },
                       ),
+                      2: BlocBuilder<IncomeBloc, IncomeState>(
+                        builder: (context, state) {
+                          final loaded = state.asLoaded;
+                          return buildShopHeader(
+                            hasFilter: loaded?.hasFilter ?? false,
+                            searchHintText: context.l10n.searchIncome,
+                          );
+                        },
+                      ),
                     };
 
                     return blocBuilders[_selectedIndex] ?? buildShopHeader();
@@ -242,11 +354,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   child: MultiBlocProvider(
                     providers: [
                       BlocProvider.value(value: context.read<LoanerBloc>()),
+                      BlocProvider.value(value: context.read<IncomeBloc>()),
                     ],
-                    child: PageView(
-                      controller: _pageController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: _pages,
+                    child: TabScrollManager(
+                      controllers: _scrollControllers,
+                      child: PageView(
+                        controller: _pageController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: _pages,
+                      ),
                     ),
                   ),
                 ),
@@ -277,22 +393,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     Icon(
                       bottomBars[index]['icon']! as IconData,
                       size: 26,
-                      color: _selectedIndex == index ? bottomBarSelectedForeground : bottomBarUnselectedForeground,
+                      color: _selectedIndex == index
+                          ? bottomBarSelectedForeground
+                          : bottomBarUnselectedForeground,
                     ),
-
-                    Opacity(
-                      opacity: _selectedIndex == index ? 1.0 : 0.0,
-                      child: Text(
-                        bottomBars[index]['name']! as String,
-                        style: TextStyle(
-                          color: _selectedIndex == index ? bottomBarSelectedForeground : bottomBarUnselectedForeground,
-                          fontSize: 16,
-                          fontWeight: _selectedIndex == index ? FontWeight.w600 : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    // if (_selectedIndex == index) ...[
-                    // ],
+                    // Opacity(
+                    //   opacity: _selectedIndex == index ? 1.0 : 0.0,
+                    //   child: Text(
+                    //     bottomBars[index]['name']! as String,
+                    //     style: TextStyle(
+                    //       color: _selectedIndex == index ? bottomBarSelectedForeground : bottomBarUnselectedForeground,
+                    //       fontSize: 16,
+                    //       fontWeight: _selectedIndex == index ? FontWeight.w600 : FontWeight.normal,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -304,7 +419,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           padding: const EdgeInsets.only(bottom: 60),
           child: SizedBox(
             height: 42,
-            width: 120,
+            width: 140,
             child: FloatingActionButton(
               onPressed: () {
                 switch (_selectedIndex) {
@@ -325,6 +440,32 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         'customerBloc': context.read<CustomerBloc>(),
                       },
                     );
+                  case 2:
+                    if (appState.deviceRole.isSub) {
+                      showErrorSnackBar(
+                        null,
+                        context.l10n.mainDeviceRoleRequired,
+                      );
+                      return;
+                    }
+                    final trackingStatus = context
+                        .read<IncomeBloc>()
+                        .state
+                        .asLoaded
+                        ?.trackingStatus;
+                    if (trackingStatus?.isBlockedByAnotherMainDevice ?? false) {
+                      showErrorSnackBar(
+                        null,
+                        context.l10n.anotherMainDeviceActive,
+                      );
+                      return;
+                    }
+                    context.read<IncomeBloc>().add(
+                          SeedIncomeDemoData(
+                            context.l10n.demoDataAdded,
+                            context.l10n.anotherMainDeviceActive,
+                          ),
+                        );
                 }
               },
               backgroundColor: colorScheme.primary,
@@ -368,7 +509,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    _selectedIndex == 0 ? context.l10n.addItem : context.l10n.addLoaner,
+                    _selectedIndex == 0
+                        ? context.l10n.addItem
+                        : _selectedIndex == 1
+                            ? context.l10n.addLoaner
+                            : appState.deviceRole.isMain
+                                ? context.l10n.addDemoData
+                                : context.l10n.mainDeviceOnly,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

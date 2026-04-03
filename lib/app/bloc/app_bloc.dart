@@ -14,12 +14,14 @@ class AppBloc extends Bloc<AppEvent, AppState> {
             locale: Locale('en'),
             isGridView: true,
             isDarkMode: false,
+            deviceRole: DeviceRole.main,
           ),
         ) {
     on<InitializeApp>(_onInitializeApp);
     on<SwitchLanguage>(_onSwitchLanguage);
     on<SwitchViewMode>(_onSwitchViewMode);
     on<SwitchThemeMode>(_onSwitchThemeMode);
+    on<SwitchDeviceRole>(_onSwitchDeviceRole);
     add(const InitializeApp());
   }
 
@@ -31,12 +33,16 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     final savedLocale = sharedPref.getString('locale') ?? 'km';
     final savedIsGridView = sharedPref.getBool('isGridView') ?? true;
     final savedIsDarkMode = sharedPref.getBool('isDarkMode') ?? false;
+    final savedDeviceRole = DeviceRole.fromStorage(
+      sharedPref.getString('deviceRole'),
+    );
 
     emit(
       AppState(
         locale: Locale(savedLocale),
         isGridView: savedIsGridView,
         isDarkMode: savedIsDarkMode,
+        deviceRole: savedDeviceRole,
       ),
     );
   }
@@ -68,5 +74,14 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     final sharedPref = await SharedPreferences.getInstance();
     await sharedPref.setBool('isDarkMode', event.isDarkMode);
     emit(state.copyWith(isDarkMode: event.isDarkMode));
+  }
+
+  Future<void> _onSwitchDeviceRole(
+    SwitchDeviceRole event,
+    Emitter<AppState> emit,
+  ) async {
+    final sharedPref = await SharedPreferences.getInstance();
+    await sharedPref.setString('deviceRole', event.deviceRole.storageValue);
+    emit(state.copyWith(deviceRole: event.deviceRole));
   }
 }

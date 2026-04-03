@@ -488,5 +488,145 @@
   "all": "All",
   "@all": {
     "description": "Label for the all filter"
+  }  ,
+  "income": "Income",
+  "@income": {
+    "description": "Label for the income section"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Label for the notifications view inside income"
+  },
+  "searchIncome": "Search income notifications...",
+  "@searchIncome": {
+    "description": "Hint text for searching tracked bank notifications"
+  },
+  "filterIncome": "Filter Income",
+  "@filterIncome": {
+    "description": "Title for the income filter sheet"
+  },
+  "notificationTracking": "Notification tracking",
+  "@notificationTracking": {
+    "description": "Title for the bank notification tracking status card"
+  },
+  "notificationTrackingEnabled": "Bank notification tracking is active on this device.",
+  "@notificationTrackingEnabled": {
+    "description": "Message shown when notification tracking access is enabled"
+  },
+  "notificationTrackingDisabled": "Enable notification access so this main device can capture ABA, Chip Mong, and ACLEDA notifications.",
+  "@notificationTrackingDisabled": {
+    "description": "Message shown when notification tracking access is disabled"
+  },
+  "enableNotificationAccess": "Enable access",
+  "@enableNotificationAccess": {
+    "description": "Button label to open Android notification listener settings"
+  },
+  "refreshStatus": "Refresh status",
+  "@refreshStatus": {
+    "description": "Button label to refresh notification tracking status"
+  },
+  "mainDeviceTrackingHint": "Use this on the main Android phone. Sub-device sync can be added later on top of the same data model.",
+  "@mainDeviceTrackingHint": {
+    "description": "Helper text describing the current tracking scope"
+  },
+  "bankNotificationUnsupported": "This device cannot capture bank notifications. Use Android for the main tracking phone.",
+  "@bankNotificationUnsupported": {
+    "description": "Message shown on unsupported platforms for notification capture"
+  },
+  "incomeByBank": "Income by bank",
+  "@incomeByBank": {
+    "description": "Title above the pie chart showing income grouped by bank"
+  },
+  "noIncomeChartData": "No income data yet. Add demo data or enable tracking to see the chart.",
+  "@noIncomeChartData": {
+    "description": "Empty state text for the income chart"
+  },
+  "totalIncome": "Total income",
+  "@totalIncome": {
+    "description": "Label for the total income summary card"
+  },
+  "totalExpense": "Total expense",
+  "@totalExpense": {
+    "description": "Label for the total expense summary card"
+  },
+  "trackedCount": "Tracked count",
+  "@trackedCount": {
+    "description": "Label for the total tracked notifications summary card"
+  },
+  "trackedNotifications": "Tracked notifications",
+  "@trackedNotifications": {
+    "description": "Label for the notification filters"
+  },
+  "allRecords": "All records",
+  "@allRecords": {
+    "description": "Label for showing all tracked notification records"
+  },
+  "incomeOnly": "Income only",
+  "@incomeOnly": {
+    "description": "Label for showing income notifications only"
+  },
+  "expenseOnly": "Expense only",
+  "@expenseOnly": {
+    "description": "Label for showing expense notifications only"
+  },
+  "noTrackedNotifications": "No tracked bank notifications found",
+  "@noTrackedNotifications": {
+    "description": "Empty state message for the tracked notification list"
+  },
+  "addDemoData": "Demo data",
+  "@addDemoData": {
+    "description": "Button label to inject demo bank notifications"
+  },
+  "demoDataAdded": "Demo bank notifications added",
+  "@demoDataAdded": {
+    "description": "Success message after adding demo tracked notifications"
+  },
+  "bankLabel": "Bank",
+  "@bankLabel": {
+    "description": "Label for the bank filter section"
+  },
+  "deviceRole": "Device role",
+  "@deviceRole": {
+    "description": "Label for selecting the current device role"
+  },
+  "mainDeviceRole": "Main device",
+  "@mainDeviceRole": {
+    "description": "Label for the main device role"
+  },
+  "subDeviceRole": "Sub device",
+  "@subDeviceRole": {
+    "description": "Label for the sub device role"
+  },
+  "deviceRoleMainDescription": "This device captures bank notifications.",
+  "@deviceRoleMainDescription": {
+    "description": "Subtitle for the main device role in settings"
+  },
+  "deviceRoleSubDescription": "This device is a sub device for viewing synced data later.",
+  "@deviceRoleSubDescription": {
+    "description": "Subtitle for the sub device role in settings"
+  },
+  "subDeviceTrackingDisabled": "Sub devices do not capture bank notifications in the current local-only setup.",
+  "@subDeviceTrackingDisabled": {
+    "description": "Message shown on the income page when the device role is sub"
+  },
+  "subDeviceTrackingHint": "Switch this device to main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.",
+  "@subDeviceTrackingHint": {
+    "description": "Helper text shown for sub devices on the income page"
+  },
+  "mainDeviceRoleRequired": "Switch this device to Main device before adding demo or tracked notifications.",
+  "@mainDeviceRoleRequired": {
+    "description": "Error message shown when a sub device tries to use main-device-only actions"
+  },
+  "mainDeviceOnly": "Main only",
+  "@mainDeviceOnly": {
+    "description": "Short label shown for actions available only on the main device"
+  },
+  "singleMainDeviceHint": "Only one main device can be active for the same synced income scope at a time.",
+  "@singleMainDeviceHint": {
+    "description": "Hint explaining the single active main-device rule"
+  },
+  "anotherMainDeviceActive": "Another main device is already active for this income sync.",
+  "@anotherMainDeviceActive": {
+    "description": "Shown when another device already owns the main-device claim"
   }
 }

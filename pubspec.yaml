@@ -10,11 +10,13 @@ dependencies:
   animated_text_kit: ^4.2.3
   bloc: ^8.1.4
   bloc_concurrency: ^0.2.5
+  cloud_firestore: ^6.2.0
   connectivity_plus: ^7.1.0
   dio: ^5.8.0+1
   drift: ^2.16.0
   dropdown_button2: ^2.3.9
   equatable: ^2.0.7
+  firebase_core: ^4.6.0
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.6

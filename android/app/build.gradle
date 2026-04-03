@@ -4,6 +4,13 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def firebaseConfigFiles = [
+    file('src/development/google-services.json'),
+    file('src/staging/google-services.json'),
+    file('src/main/google-services.json'),
+]
+def hasGoogleServicesConfig = firebaseConfigFiles.any { it.exists() }
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -116,4 +123,10 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.20"
+}
+
+if (hasGoogleServicesConfig) {
+    apply plugin: 'com.google.gms.google-services'
+} else {
+    println('Firebase: no google-services.json found, skipping Google services Gradle plugin.')
 }

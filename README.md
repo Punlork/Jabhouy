@@ -35,6 +35,7 @@ First-time sign-in still requires internet access.
 - **Drift + SQLite** for local persistence
 - **SharedPreferences** for lightweight local state such as cookies, cached session data, and app preferences
 - **connectivity_plus** for connectivity awareness
+- **Firebase Core + Cloud Firestore** for optional cross-device income notification sync
 
 ## Project structure
 
@@ -106,6 +107,7 @@ flutter build apk --flavor production --target lib/main_production.dart
 - Preferences such as theme, locale, and view mode are stored locally.
 - The local database is used as the source for offline UI rendering.
 - Sync state is tracked per record so failed background syncs can be retried later.
+- Income notification sync can mirror locally captured bank notifications through Firestore when Firebase runtime config is provided.
 - The app currently includes Patrol-based native UI testing setup, while CI/CD automation is documented separately.
 
 ## CI/CD
@@ -126,6 +128,22 @@ To add or update translations:
 ```sh
 flutter gen-l10n --arb-dir="lib/l10n/arb"
 ```
+
+## Firebase income sync
+
+The income feature now supports optional Firebase-backed sync on top of the local Drift database.
+
+- Main devices still capture ABA / Chip Mong / ACLEDA notifications locally.
+- Firestore mirrors those records to other devices.
+- If Firebase config is missing, the app stays local-only and continues to work.
+
+Setup and Firestore rule notes live in [`docs/FIREBASE_INCOME_SYNC.md`](docs/FIREBASE_INCOME_SYNC.md).
+
+For multiple Firebase projects by flavor, place `google-services.json` in:
+
+- `android/app/src/development/`
+- `android/app/src/staging/`
+- `android/app/src/production/`
 
 [coverage_badge]: coverage_badge.svg
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg

@@ -128,6 +128,69 @@ class SettingsSheet extends StatelessWidget {
           Divider(color: colorScheme.outlineVariant),
           BlocBuilder<AppBloc, AppState>(
             builder: (context, state) {
+              final isMainDevice = state.deviceRole.isMain;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      isMainDevice
+                          ? Icons.phone_android_rounded
+                          : Icons.devices_rounded,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(
+                      l10n.deviceRole,
+                      style: AppTextTheme.body,
+                    ),
+                    subtitle: Text(
+                      isMainDevice
+                          ? l10n.deviceRoleMainDescription
+                          : l10n.deviceRoleSubDescription,
+                      style: AppTextTheme.caption,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      l10n.singleMainDeviceHint,
+                      style: AppTextTheme.caption.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SegmentedButton<DeviceRole>(
+                      segments: [
+                        ButtonSegment<DeviceRole>(
+                          value: DeviceRole.main,
+                          icon: const Icon(Icons.security_update_good_rounded),
+                          label: Text(l10n.mainDeviceRole),
+                        ),
+                        ButtonSegment<DeviceRole>(
+                          value: DeviceRole.sub,
+                          icon: const Icon(Icons.sync_alt_rounded),
+                          label: Text(l10n.subDeviceRole),
+                        ),
+                      ],
+                      selected: {state.deviceRole},
+                      onSelectionChanged: (selection) {
+                        final role = selection.first;
+                        context.read<AppBloc>().add(
+                              SwitchDeviceRole(deviceRole: role),
+                            );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            },
+          ),
+          BlocBuilder<AppBloc, AppState>(
+            builder: (context, state) {
               return SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
                 secondary: Icon(

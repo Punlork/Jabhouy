@@ -1,3 +1,5 @@
+// ignore_for_file: inference_failure_on_instance_creation
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:my_app/auth/auth.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/home/views/home_page.dart';
+import 'package:my_app/income/income.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/profile/profile.dart';
 import 'package:my_app/shop/shop.dart';
@@ -106,6 +109,9 @@ class AppRoutes {
                     getIt<CustomerService>(),
                     getIt<ConnectivityService>(),
                   ),
+                ),
+                BlocProvider(
+                  create: (context) => IncomeBloc(getIt<IncomeService>()),
                 ),
               ],
               child: const HomePage(),
@@ -239,15 +245,6 @@ class AppRoutes {
       ),
     ],
   );
-
-  static Widget _fadeTransition(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return FadeTransition(opacity: animation, child: child);
-  }
 
   static Widget _rightToLeftTransition(
     BuildContext context,

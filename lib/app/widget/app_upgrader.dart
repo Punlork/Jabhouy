@@ -89,7 +89,8 @@ class _AppUpgraderState extends State<AppUpgrader> {
     required String latestVersion,
     required Uri releaseUrl,
   }) async {
-    final overlayContext = AppRoutes.router.routerDelegate.navigatorKey.currentState?.overlay?.context;
+    final overlayContext = AppRoutes
+        .router.routerDelegate.navigatorKey.currentState?.overlay?.context;
     if (overlayContext == null) return;
 
     final l10n = AppLocalizations.of(overlayContext);
@@ -178,7 +179,9 @@ class _AppUpgraderState extends State<AppUpgrader> {
   }) {
     final currentParts = _parseVersion(currentVersion);
     final latestParts = _parseVersion(latestVersion);
-    final maxLength = currentParts.length > latestParts.length ? currentParts.length : latestParts.length;
+    final maxLength = currentParts.length > latestParts.length
+        ? currentParts.length
+        : latestParts.length;
 
     for (var index = 0; index < maxLength; index++) {
       final currentPart = index < currentParts.length ? currentParts[index] : 0;
@@ -191,7 +194,12 @@ class _AppUpgraderState extends State<AppUpgrader> {
   }
 
   List<int> _parseVersion(String version) {
-    return version.split('+').first.split('.').map((part) => int.tryParse(part) ?? 0).toList();
+    return version
+        .split('+')
+        .first
+        .split('.')
+        .map((part) => int.tryParse(part) ?? 0)
+        .toList();
   }
 
   @override

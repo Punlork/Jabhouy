@@ -362,4 +362,120 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get all => 'ទាំងអស់';
+
+  @override
+  String get income => 'ចំណូល';
+
+  @override
+  String get notifications => 'ការជូនដំណឹង';
+
+  @override
+  String get searchIncome => 'ស្វែងរកការជូនដំណឹងចំណូល...';
+
+  @override
+  String get filterIncome => 'តម្រងចំណូល';
+
+  @override
+  String get notificationTracking => 'ការតាមដានការជូនដំណឹង';
+
+  @override
+  String get notificationTrackingEnabled =>
+      'ការតាមដានការជូនដំណឹងធនាគារកំពុងដំណើរការនៅលើឧបករណ៍នេះ។';
+
+  @override
+  String get notificationTrackingDisabled =>
+      'សូមបើកសិទ្ធិការជូនដំណឹង ដើម្បីឱ្យឧបករណ៍មេនេះអាចចាប់ ABA, Chip Mong និង ACLEDA បាន។';
+
+  @override
+  String get enableNotificationAccess => 'បើកសិទ្ធិ';
+
+  @override
+  String get refreshStatus => 'ផ្ទុកស្ថានភាពឡើងវិញ';
+
+  @override
+  String get mainDeviceTrackingHint =>
+      'សូមប្រើវានៅលើទូរស័ព្ទ Android មេ។ ការធ្វើសមកាលកម្មទៅឧបករណ៍រងអាចបន្ថែមនៅពេលក្រោយលើទិន្នន័យដូចគ្នា។';
+
+  @override
+  String get bankNotificationUnsupported =>
+      'ឧបករណ៍នេះមិនអាចចាប់ការជូនដំណឹងធនាគារបានទេ។ សូមប្រើ Android សម្រាប់ទូរស័ព្ទមេ។';
+
+  @override
+  String get incomeByBank => 'ចំណូលតាមធនាគារ';
+
+  @override
+  String get noIncomeChartData =>
+      'មិនទាន់មានទិន្នន័យចំណូលទេ។ បន្ថែមទិន្នន័យសាកល្បង ឬបើកការតាមដានដើម្បីមើលគំនូសតាង។';
+
+  @override
+  String get totalIncome => 'ចំណូលសរុប';
+
+  @override
+  String get totalExpense => 'ចំណាយសរុប';
+
+  @override
+  String get trackedCount => 'ចំនួនតាមដាន';
+
+  @override
+  String get trackedNotifications => 'ការជូនដំណឹងដែលបានតាមដាន';
+
+  @override
+  String get allRecords => 'កំណត់ត្រាទាំងអស់';
+
+  @override
+  String get incomeOnly => 'តែចំណូល';
+
+  @override
+  String get expenseOnly => 'តែចំណាយ';
+
+  @override
+  String get noTrackedNotifications => 'រកមិនឃើញការជូនដំណឹងធនាគារដែលបានតាមដាន';
+
+  @override
+  String get addDemoData => 'ទិន្នន័យសាកល្បង';
+
+  @override
+  String get demoDataAdded => 'បានបន្ថែមការជូនដំណឹងធនាគារសាកល្បង';
+
+  @override
+  String get bankLabel => 'ធនាគារ';
+
+  @override
+  String get deviceRole => 'តួនាទីឧបករណ៍';
+
+  @override
+  String get mainDeviceRole => 'ឧបករណ៍មេ';
+
+  @override
+  String get subDeviceRole => 'ឧបករណ៍រង';
+
+  @override
+  String get deviceRoleMainDescription => 'ឧបករណ៍នេះចាប់ការជូនដំណឹងធនាគារ។';
+
+  @override
+  String get deviceRoleSubDescription =>
+      'ឧបករណ៍នេះជាឧបករណ៍រងសម្រាប់មើលទិន្នន័យសមកាលកម្មនៅពេលក្រោយ។';
+
+  @override
+  String get subDeviceTrackingDisabled =>
+      'ឧបករណ៍រងមិនចាប់ការជូនដំណឹងធនាគារនៅក្នុងការរៀបចំ local-only បច្ចុប្បន្នទេ។';
+
+  @override
+  String get subDeviceTrackingHint =>
+      'ប្តូរឧបករណ៍នេះទៅជាឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។';
+
+  @override
+  String get mainDeviceRoleRequired =>
+      'សូមប្តូរឧបករណ៍នេះទៅជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។';
+
+  @override
+  String get mainDeviceOnly => 'សម្រាប់មេប៉ុណ្ណោះ';
+
+  @override
+  String get singleMainDeviceHint =>
+      'អាចមានឧបករណ៍មេបានតែមួយប៉ុណ្ណោះ សម្រាប់ income sync ដូចគ្នា នៅពេលតែមួយ។';
+
+  @override
+  String get anotherMainDeviceActive =>
+      'មានឧបករណ៍មេមួយផ្សេងទៀតកំពុងសកម្មសម្រាប់ income sync នេះ។';
 }

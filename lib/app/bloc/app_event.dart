@@ -34,3 +34,11 @@ class SwitchThemeMode extends AppEvent {
   @override
   List<Object?> get props => [isDarkMode];
 }
+
+class SwitchDeviceRole extends AppEvent {
+  const SwitchDeviceRole({required this.deviceRole});
+  final DeviceRole deviceRole;
+
+  @override
+  List<Object?> get props => [deviceRole];
+}

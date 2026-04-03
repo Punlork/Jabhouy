@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/app/service/firebase_runtime_options.dart';
 
 class AppBlocObserver extends BlocObserver {
   const AppBlocObserver();
@@ -60,6 +61,7 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  await FirebaseRuntimeOptions.initialize();
   await setupDependencies();
   runApp(await builder());
 }
