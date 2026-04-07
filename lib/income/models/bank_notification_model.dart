@@ -64,19 +64,14 @@ class BankNotificationModel extends Equatable {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory BankNotificationModel.fromNativeMap(Map<String, dynamic> json) {
-    final receivedAtRaw = tryCast<int>(json['receivedAt']) ??
-        tryCast<int>(json['received_at']) ??
-        DateTime.now().millisecondsSinceEpoch;
-    final packageName = tryCast<String>(json['packageName']) ??
-        tryCast<String>(json['package_name']) ??
-        '';
+    final receivedAtRaw =
+        tryCast<int>(json['receivedAt']) ?? tryCast<int>(json['received_at']) ?? DateTime.now().millisecondsSinceEpoch;
+    final packageName = tryCast<String>(json['packageName']) ?? tryCast<String>(json['package_name']) ?? '';
     final title = tryCast<String>(json['title']);
-    final message =
-        tryCast<String>(json['message']) ?? tryCast<String>(json['text']) ?? '';
-    final bankApp =
-        BankApp.fromKey(tryCast<String>(json['bankKey'])) == BankApp.unknown
-            ? BankApp.fromPackageName(packageName)
-            : BankApp.fromKey(tryCast<String>(json['bankKey']));
+    final message = tryCast<String>(json['message']) ?? tryCast<String>(json['text']) ?? '';
+    final bankApp = BankApp.fromKey(tryCast<String>(json['bankKey'])) == BankApp.unknown
+        ? BankApp.fromPackageName(packageName)
+        : BankApp.fromKey(tryCast<String>(json['bankKey']));
 
     return BankNotificationModel(
       fingerprint: tryCast<String>(json['fingerprint']) ??
@@ -90,13 +85,10 @@ class BankNotificationModel extends Equatable {
       bankApp: bankApp,
       title: title,
       message: message,
-      rawPayload: tryCast<String>(json['rawPayload']) ??
-          tryCast<String>(json['raw_payload']),
+      rawPayload: tryCast<String>(json['rawPayload']) ?? tryCast<String>(json['raw_payload']),
       amount: _parseDouble(json['amount']),
       currency: tryCast<String>(json['currency'], fallback: 'USD')!,
-      isIncome: tryCast<bool>(json['isIncome']) ??
-          tryCast<bool>(json['is_income']) ??
-          true,
+      isIncome: tryCast<bool>(json['isIncome']) ?? tryCast<bool>(json['is_income']) ?? true,
       receivedAt: DateTime.fromMillisecondsSinceEpoch(receivedAtRaw).toLocal(),
       source: tryCast<String>(json['source'], fallback: 'native')!,
       createdAt: tryCast<int>(json['createdAt'])?.let(
@@ -217,8 +209,6 @@ class IncomeSummary extends Equatable {
         totalIncome,
         totalExpense,
         totalCount,
-        incomeByBank.entries
-            .map((entry) => '${entry.key.key}:${entry.value}')
-            .toList(growable: false),
+        incomeByBank.entries.map((entry) => '${entry.key.key}:${entry.value}').toList(growable: false),
       ];
 }

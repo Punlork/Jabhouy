@@ -16,8 +16,9 @@ enum DeviceRole {
       case 'sub':
         return DeviceRole.sub;
       case 'main':
-      default:
         return DeviceRole.main;
+      default:
+        return DeviceRole.sub;
     }
   }
 }

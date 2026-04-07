@@ -926,7 +926,7 @@ abstract class AppLocalizations {
   /// **'Bank'**
   String get bankLabel;
 
-  /// Label for selecting the current device role
+  /// Label for showing the current device role
   ///
   /// In en, this message translates to:
   /// **'Device role'**
@@ -965,14 +965,26 @@ abstract class AppLocalizations {
   /// Helper text shown for sub devices on the income page
   ///
   /// In en, this message translates to:
-  /// **'Switch this device to main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.'**
+  /// **'Set this device as main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.'**
   String get subDeviceTrackingHint;
 
   /// Error message shown when a sub device tries to use main-device-only actions
   ///
   /// In en, this message translates to:
-  /// **'Switch this device to Main device before adding demo or tracked notifications.'**
+  /// **'Set this device as Main device before adding demo or tracked notifications.'**
   String get mainDeviceRoleRequired;
+
+  /// Action label for claiming this device as the active main device
+  ///
+  /// In en, this message translates to:
+  /// **'Set as main device'**
+  String get setAsMainDevice;
+
+  /// Action label for releasing the current main-device claim
+  ///
+  /// In en, this message translates to:
+  /// **'Release main device'**
+  String get releaseMainDevice;
 
   /// Short label shown for actions available only on the main device
   ///

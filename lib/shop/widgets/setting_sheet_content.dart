@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
+import 'package:my_app/income/income.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -162,26 +163,39 @@ class SettingsSheet extends StatelessWidget {
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: SegmentedButton<DeviceRole>(
-                      segments: [
-                        ButtonSegment<DeviceRole>(
-                          value: DeviceRole.main,
-                          icon: const Icon(Icons.security_update_good_rounded),
-                          label: Text(l10n.mainDeviceRole),
-                        ),
-                        ButtonSegment<DeviceRole>(
-                          value: DeviceRole.sub,
-                          icon: const Icon(Icons.sync_alt_rounded),
-                          label: Text(l10n.subDeviceRole),
-                        ),
-                      ],
-                      selected: {state.deviceRole},
-                      onSelectionChanged: (selection) {
-                        final role = selection.first;
-                        context.read<AppBloc>().add(
-                              SwitchDeviceRole(deviceRole: role),
+                    child: FilledButton.icon(
+                      onPressed: () async {
+                        final syncService = getIt<FirebaseIncomeSyncService>();
+                        if (isMainDevice) {
+                          await syncService.releaseMainDeviceRole();
+                          showSuccessSnackBar(null, l10n.subDeviceRole);
+                        } else {
+                          final claimed =
+                              await syncService.requestMainDeviceRole();
+                          if (!claimed) {
+                            showErrorSnackBar(
+                              null,
+                              l10n.anotherMainDeviceActive,
                             );
+                          }
+                        }
+
+                        if (context.mounted) {
+                          context
+                              .read<AppBloc>()
+                              .add(const RefreshDeviceRole());
+                        }
                       },
+                      icon: Icon(
+                        isMainDevice
+                            ? Icons.sync_alt_rounded
+                            : Icons.security_update_good_rounded,
+                      ),
+                      label: Text(
+                        isMainDevice
+                            ? l10n.releaseMainDevice
+                            : l10n.setAsMainDevice,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),

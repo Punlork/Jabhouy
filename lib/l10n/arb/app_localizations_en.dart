@@ -463,11 +463,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subDeviceTrackingHint =>
-      'Switch this device to main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.';
+      'Set this device as main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.';
 
   @override
   String get mainDeviceRoleRequired =>
-      'Switch this device to Main device before adding demo or tracked notifications.';
+      'Set this device as Main device before adding demo or tracked notifications.';
+
+  @override
+  String get setAsMainDevice => 'Set as main device';
+
+  @override
+  String get releaseMainDevice => 'Release main device';
 
   @override
   String get mainDeviceOnly => 'Main only';

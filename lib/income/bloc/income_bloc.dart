@@ -21,8 +21,7 @@ extension IncomeStateExtension on IncomeState {
 
 class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
   IncomeBloc(this._service) : super(const IncomeLoading()) {
-    _filtersController = StreamController<_IncomeFilters>.broadcast(sync: true)
-      ..add(const _IncomeFilters());
+    _filtersController = StreamController<_IncomeFilters>.broadcast(sync: true);
 
     _incomeSubscription = _filtersController.stream
         .debounce(const Duration(milliseconds: 150))
@@ -36,6 +35,7 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
           ),
         )
         .listen((items) => add(_IncomeUpdated(items)));
+    _filtersController.add(const _IncomeFilters());
 
     on<LoadIncomeDashboard>(_onLoadIncomeDashboard);
     on<_IncomeUpdated>(_onIncomeUpdated);

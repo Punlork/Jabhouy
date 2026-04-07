@@ -462,11 +462,17 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get subDeviceTrackingHint =>
-      'ប្តូរឧបករណ៍នេះទៅជាឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។';
+      'កំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។';
 
   @override
   String get mainDeviceRoleRequired =>
-      'សូមប្តូរឧបករណ៍នេះទៅជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។';
+      'សូមកំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។';
+
+  @override
+  String get setAsMainDevice => 'កំណត់ជា ឧបករណ៍មេ';
+
+  @override
+  String get releaseMainDevice => 'បោះបង់ឧបករណ៍មេ';
 
   @override
   String get mainDeviceOnly => 'សម្រាប់មេប៉ុណ្ណោះ';

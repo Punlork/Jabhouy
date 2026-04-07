@@ -587,7 +587,7 @@
   },
   "deviceRole": "តួនាទីឧបករណ៍",
   "@deviceRole": {
-    "description": "ស្លាកសម្រាប់ជ្រើសតួនាទីឧបករណ៍បច្ចុប្បន្ន"
+    "description": "ស្លាកសម្រាប់បង្ហាញតួនាទីឧបករណ៍បច្ចុប្បន្ន"
   },
   "mainDeviceRole": "ឧបករណ៍មេ",
   "@mainDeviceRole": {
@@ -609,13 +609,21 @@
   "@subDeviceTrackingDisabled": {
     "description": "សារបង្ហាញនៅលើទំព័រចំណូលនៅពេលតួនាទីឧបករណ៍ជាឧបករណ៍រង"
   },
-  "subDeviceTrackingHint": "ប្តូរឧបករណ៍នេះទៅជាឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។",
+  "subDeviceTrackingHint": "កំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។",
   "@subDeviceTrackingHint": {
     "description": "អត្ថបទជំនួយសម្រាប់ឧបករណ៍រងនៅលើទំព័រចំណូល"
   },
-  "mainDeviceRoleRequired": "សូមប្តូរឧបករណ៍នេះទៅជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។",
+  "mainDeviceRoleRequired": "សូមកំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។",
   "@mainDeviceRoleRequired": {
     "description": "សារកំហុសបង្ហាញនៅពេលឧបករណ៍រងព្យាយាមប្រើសកម្មភាពសម្រាប់ឧបករណ៍មេ"
+  },
+  "setAsMainDevice": "កំណត់ជា ឧបករណ៍មេ",
+  "@setAsMainDevice": {
+    "description": "ស្លាកសកម្មភាពសម្រាប់ទាមទារឧបករណ៍នេះជាឧបករណ៍មេសកម្ម"
+  },
+  "releaseMainDevice": "បោះបង់ឧបករណ៍មេ",
+  "@releaseMainDevice": {
+    "description": "ស្លាកសកម្មភាពសម្រាប់បោះបង់ main-device claim បច្ចុប្បន្ន"
   },
   "mainDeviceOnly": "សម្រាប់មេប៉ុណ្ណោះ",
   "@mainDeviceOnly": {

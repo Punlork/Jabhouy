@@ -587,7 +587,7 @@
   },
   "deviceRole": "Device role",
   "@deviceRole": {
-    "description": "Label for selecting the current device role"
+    "description": "Label for showing the current device role"
   },
   "mainDeviceRole": "Main device",
   "@mainDeviceRole": {
@@ -609,13 +609,21 @@
   "@subDeviceTrackingDisabled": {
     "description": "Message shown on the income page when the device role is sub"
   },
-  "subDeviceTrackingHint": "Switch this device to main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.",
+  "subDeviceTrackingHint": "Set this device as main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.",
   "@subDeviceTrackingHint": {
     "description": "Helper text shown for sub devices on the income page"
   },
-  "mainDeviceRoleRequired": "Switch this device to Main device before adding demo or tracked notifications.",
+  "mainDeviceRoleRequired": "Set this device as Main device before adding demo or tracked notifications.",
   "@mainDeviceRoleRequired": {
     "description": "Error message shown when a sub device tries to use main-device-only actions"
+  },
+  "setAsMainDevice": "Set as main device",
+  "@setAsMainDevice": {
+    "description": "Action label for claiming this device as the active main device"
+  },
+  "releaseMainDevice": "Release main device",
+  "@releaseMainDevice": {
+    "description": "Action label for releasing the current main-device claim"
   },
   "mainDeviceOnly": "Main only",
   "@mainDeviceOnly": {

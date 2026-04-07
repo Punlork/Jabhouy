@@ -89,6 +89,7 @@ flutter:
     - .env
     - .env.dev
     - assets/
+    - assets/banks/
 
 # Patrol UI testing (patrol test, patrol build)
 # See: https://patrol.leancode.pl/getting-started

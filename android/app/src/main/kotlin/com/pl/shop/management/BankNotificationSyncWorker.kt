@@ -23,6 +23,7 @@ import java.io.BufferedReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class BankNotificationSyncWorker(
@@ -41,6 +42,9 @@ class BankNotificationSyncWorker(
 
         val firebaseApp = ensureFirebaseApp() ?: return Result.failure()
         val firestore = FirebaseFirestore.getInstance(firebaseApp)
+        if (!ensureActiveMainDevice(firestore, scopeId)) {
+            return Result.success()
+        }
         val pending = NotificationTrackingBridge.pendingUploads(applicationContext)
         if (pending.isEmpty()) {
             return Result.success()
@@ -183,6 +187,54 @@ class BankNotificationSyncWorker(
         }
     }
 
+    private fun ensureActiveMainDevice(
+        firestore: FirebaseFirestore,
+        scopeId: String
+    ): Boolean {
+        val prefs = applicationContext.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+        val deviceId = prefs.getString(deviceIdKey, null)
+        if (deviceId.isNullOrBlank()) {
+            Log.w(logTag, "Missing device id for main-device claim check.")
+            return false
+        }
+
+        val claimRef = firestore.collection(scopeCollection)
+            .document(scopeId)
+            .collection(systemCollection)
+            .document(mainDeviceClaimDocumentId)
+        val nowMs = Date().time
+
+        return Tasks.await(
+            firestore.runTransaction<Boolean> { transaction ->
+                val snapshot = transaction.get(claimRef)
+                val data = snapshot.data
+                val claimedDeviceId = data?.get("deviceId") as String?
+                val updatedAtMs = (data?.get("updatedAtMs") as? Number)?.toLong() ?: 0L
+                val isStale = nowMs - updatedAtMs > mainClaimStaleDurationMs
+
+                if (claimedDeviceId == null || claimedDeviceId == deviceId || isStale) {
+                    transaction.set(
+                        claimRef,
+                        mapOf(
+                            "deviceId" to deviceId,
+                            "claimedAtMs" to if (claimedDeviceId == deviceId) {
+                                (data?.get("claimedAtMs") as? Number)?.toLong() ?: nowMs
+                            } else {
+                                nowMs
+                            },
+                            "updatedAtMs" to nowMs,
+                            "updatedAt" to FieldValue.serverTimestamp(),
+                        ),
+                        SetOptions.merge()
+                    )
+                    true
+                } else {
+                    false
+                }
+            }
+        )
+    }
+
     private fun resolveCookieHeader(
         prefs: android.content.SharedPreferences,
         endpoint: String
@@ -205,7 +257,12 @@ class BankNotificationSyncWorker(
 
     companion object {
         private const val cookiePrefsKey = "flutter.cookies"
+        private const val deviceIdKey = "flutter.income_sync_device_id"
         private const val nativeBaseUrlKey = "flutter.income_sync_api_base_url"
+        private const val scopeCollection = "income_sync_scopes"
+        private const val systemCollection = "_system"
+        private const val mainDeviceClaimDocumentId = "main_device"
+        private const val mainClaimStaleDurationMs = 120_000L
         private const val uniqueWorkName = "bank-notification-sync"
         private const val nativeAppName = "income-native-sync"
         private const val sharedPrefsName = "FlutterSharedPreferences"

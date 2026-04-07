@@ -153,8 +153,8 @@ object NotificationTrackingBridge {
 
     fun isMainDevice(context: Context): Boolean {
         val role = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
-            .getString(deviceRoleKey, "main")
-        return role == null || role == "main"
+            .getString(deviceRoleKey, "sub")
+        return role == "main"
     }
 
     private fun detectBank(packageName: String, normalizedText: String): String {

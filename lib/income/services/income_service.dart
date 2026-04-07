@@ -69,6 +69,11 @@ class IncomeService {
   }
 
   Future<void> importPendingTrackedNotifications() async {
+    if (!await _syncService.canAcceptLocalCapture()) {
+      await _bridge.drainPendingTrackedNotifications();
+      return;
+    }
+
     final pending = await _bridge.drainPendingTrackedNotifications();
     for (final item in pending) {
       await saveTrackedNotificationMap(item, triggerRemoteSync: false);
@@ -245,28 +250,48 @@ class IncomeService {
     final existing = await (_db.select(_db.bankNotifications)
           ..where((tbl) => tbl.fingerprint.equals(model.fingerprint)))
         .getSingleOrNull();
-    if (existing != null) return;
-
-    await _db.into(_db.bankNotifications).insert(
-          BankNotificationsCompanion.insert(
-            fingerprint: model.fingerprint,
-            packageName: model.packageName,
-            bankKey: model.bankApp.key,
-            title: Value(model.title),
-            message: model.message,
-            rawPayload: Value(
-              model.rawPayload ?? jsonEncode(payload),
+    if (existing == null) {
+      await _db.into(_db.bankNotifications).insert(
+            BankNotificationsCompanion.insert(
+              fingerprint: model.fingerprint,
+              packageName: model.packageName,
+              bankKey: model.bankApp.key,
+              title: Value(model.title),
+              message: model.message,
+              rawPayload: Value(
+                model.rawPayload ?? jsonEncode(payload),
+              ),
+              amount: Value(model.amount),
+              currency: Value(model.currency),
+              isIncome: Value(model.isIncome),
+              receivedAt: model.receivedAt,
+              source: Value(model.source),
+              createdAt: Value(model.createdAt),
             ),
-            amount: Value(model.amount),
-            currency: Value(model.currency),
-            isIncome: Value(model.isIncome),
-            receivedAt: model.receivedAt,
-            source: Value(model.source),
-            createdAt: Value(model.createdAt),
+          );
+    } else {
+      await (_db.update(_db.bankNotifications)
+            ..where((tbl) => tbl.id.equals(existing.id)))
+          .write(
+        BankNotificationsCompanion(
+          packageName: Value(model.packageName),
+          bankKey: Value(model.bankApp.key),
+          title: Value(model.title),
+          message: Value(model.message),
+          rawPayload: Value(
+            model.rawPayload ?? jsonEncode(payload),
           ),
-        );
+          amount: Value(model.amount),
+          currency: Value(model.currency),
+          isIncome: Value(model.isIncome),
+          receivedAt: Value(model.receivedAt),
+          source: Value(model.source),
+          createdAt: Value(model.createdAt),
+        ),
+      );
+    }
 
-    if (triggerRemoteSync) {
+    if (triggerRemoteSync && existing == null) {
       await _syncService.syncNotification(model);
     }
   }

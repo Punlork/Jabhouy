@@ -4,5 +4,6 @@ export 'services/firebase_income_sync_service.dart';
 export 'services/income_service.dart';
 export 'services/notification_tracking_bridge.dart';
 export 'views/income_view.dart';
+export 'widgets/bank_branding.dart';
 export 'widgets/income_filter_sheet.dart';
 export 'widgets/income_pie_chart.dart';

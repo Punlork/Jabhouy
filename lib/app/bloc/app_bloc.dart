@@ -1,29 +1,39 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:my_app/income/income.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';
 
 class AppBloc extends Bloc<AppEvent, AppState> {
-  AppBloc()
+  AppBloc(this._incomeSyncService)
       : super(
           const AppState(
             locale: Locale('en'),
             isGridView: true,
             isDarkMode: false,
-            deviceRole: DeviceRole.main,
+            deviceRole: DeviceRole.sub,
           ),
         ) {
     on<InitializeApp>(_onInitializeApp);
     on<SwitchLanguage>(_onSwitchLanguage);
     on<SwitchViewMode>(_onSwitchViewMode);
     on<SwitchThemeMode>(_onSwitchThemeMode);
-    on<SwitchDeviceRole>(_onSwitchDeviceRole);
+    on<RefreshDeviceRole>(_onRefreshDeviceRole);
+    on<_DeviceRoleUpdated>(_onDeviceRoleUpdated);
+
+    _deviceRoleSubscription = _incomeSyncService.deviceRoleStream.listen(
+      (deviceRole) => add(_DeviceRoleUpdated(deviceRole: deviceRole)),
+    );
     add(const InitializeApp());
   }
+
+  final FirebaseIncomeSyncService _incomeSyncService;
+  StreamSubscription<DeviceRole>? _deviceRoleSubscription;
 
   Future<void> _onInitializeApp(
     InitializeApp event,
@@ -33,9 +43,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     final savedLocale = sharedPref.getString('locale') ?? 'km';
     final savedIsGridView = sharedPref.getBool('isGridView') ?? true;
     final savedIsDarkMode = sharedPref.getBool('isDarkMode') ?? false;
-    final savedDeviceRole = DeviceRole.fromStorage(
-      sharedPref.getString('deviceRole'),
-    );
+    final savedDeviceRole = await _incomeSyncService.getStoredDeviceRole();
 
     emit(
       AppState(
@@ -45,6 +53,8 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         deviceRole: savedDeviceRole,
       ),
     );
+
+    add(const RefreshDeviceRole());
   }
 
   Future<void> _onSwitchLanguage(
@@ -76,12 +86,26 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     emit(state.copyWith(isDarkMode: event.isDarkMode));
   }
 
-  Future<void> _onSwitchDeviceRole(
-    SwitchDeviceRole event,
+  Future<void> _onRefreshDeviceRole(
+    RefreshDeviceRole event,
     Emitter<AppState> emit,
   ) async {
-    final sharedPref = await SharedPreferences.getInstance();
-    await sharedPref.setString('deviceRole', event.deviceRole.storageValue);
+    final deviceRole = await _incomeSyncService.refreshDeviceRole();
+    if (deviceRole != state.deviceRole) {
+      emit(state.copyWith(deviceRole: deviceRole));
+    }
+  }
+
+  void _onDeviceRoleUpdated(
+    _DeviceRoleUpdated event,
+    Emitter<AppState> emit,
+  ) {
     emit(state.copyWith(deviceRole: event.deviceRole));
+  }
+
+  @override
+  Future<void> close() async {
+    await _deviceRoleSubscription?.cancel();
+    return super.close();
   }
 }

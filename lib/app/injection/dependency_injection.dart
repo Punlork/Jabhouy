@@ -72,7 +72,7 @@ Future<void> setupDependencies() async {
         getIt<ConnectivityService>(),
       ),
     )
-    ..registerFactory(AppBloc.new)
+    ..registerFactory(() => AppBloc(getIt<FirebaseIncomeSyncService>()))
     ..registerFactory(() => UploadBloc(getIt<UploadService>()))
     ..registerFactory(
       () => AuthBloc(

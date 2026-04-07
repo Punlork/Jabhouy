@@ -44,6 +44,7 @@ class FirebaseIncomeSyncService {
   final AuthService _authService;
   final FcmService _fcmService;
   final ApiService _apiService;
+  final _deviceRoleController = StreamController<DeviceRole>.broadcast();
 
   StreamSubscription<bool>? _connectivitySubscription;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _remoteSubscription;
@@ -55,6 +56,7 @@ class FirebaseIncomeSyncService {
   MainDeviceClaimStatus? _cachedMainDeviceClaimStatus;
 
   bool get isConfigured => Firebase.apps.isNotEmpty;
+  Stream<DeviceRole> get deviceRoleStream => _deviceRoleController.stream;
 
   Future<void> initialize({
     required RemoteNotificationHandler onRemotePayload,
@@ -126,46 +128,106 @@ class FirebaseIncomeSyncService {
     _cachedMainDeviceClaimStatus = null;
   }
 
-  Future<MainDeviceClaimStatus> getMainDeviceClaimStatus() async {
-    final deviceRole = await _getDeviceRole();
-    if (deviceRole.isSub) {
-      await _releaseMainDeviceClaimIfOwned();
-      return const MainDeviceClaimStatus(
-        isActiveOnThisDevice: false,
-        isClaimedByAnotherDevice: false,
-      );
+  Future<DeviceRole> getStoredDeviceRole() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    return DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
+  }
+
+  Future<bool> requestMainDeviceRole() async {
+    if (!isConfigured) {
+      await _persistDeviceRole(DeviceRole.main);
+      return true;
     }
 
+    final scopeId = await _resolveScopeId();
+    if (scopeId == null || scopeId.isEmpty) {
+      await _persistDeviceRole(DeviceRole.main);
+      return true;
+    }
+
+    if (!await _connectivityService.isOnline) {
+      return false;
+    }
+
+    final claimStatus = await _claimMainDevice(scopeId);
+    _cachedMainDeviceClaimStatus = claimStatus;
+    await _persistDeviceRole(
+      claimStatus.isActiveOnThisDevice ? DeviceRole.main : DeviceRole.sub,
+    );
+    return claimStatus.isActiveOnThisDevice;
+  }
+
+  Future<void> releaseMainDeviceRole() async {
+    if (isConfigured && await _connectivityService.isOnline) {
+      await _releaseMainDeviceClaimIfOwned();
+    }
+    await _persistDeviceRole(DeviceRole.sub);
+  }
+
+  Future<DeviceRole> refreshDeviceRole() async {
+    final currentRole = await getStoredDeviceRole();
+
     if (!isConfigured) {
-      return const MainDeviceClaimStatus(
-        isActiveOnThisDevice: true,
+      return currentRole;
+    }
+
+    final scopeId = await _resolveScopeId();
+    if (scopeId == null || scopeId.isEmpty) {
+      return currentRole;
+    }
+
+    if (!await _connectivityService.isOnline) {
+      return currentRole;
+    }
+
+    final claimStatus = currentRole.isMain
+        ? await _claimMainDevice(scopeId)
+        : await _readMainDeviceClaimStatus(scopeId);
+    _cachedMainDeviceClaimStatus = claimStatus;
+    final resolvedRole =
+        claimStatus.isActiveOnThisDevice ? DeviceRole.main : DeviceRole.sub;
+    await _persistDeviceRole(resolvedRole);
+    return resolvedRole;
+  }
+
+  Future<MainDeviceClaimStatus> getMainDeviceClaimStatus() async {
+    final deviceRole = await getStoredDeviceRole();
+
+    if (!isConfigured) {
+      return MainDeviceClaimStatus(
+        isActiveOnThisDevice: deviceRole.isMain,
         isClaimedByAnotherDevice: false,
       );
     }
 
     final scopeId = await _resolveScopeId();
     if (scopeId == null || scopeId.isEmpty) {
-      return const MainDeviceClaimStatus(
-        isActiveOnThisDevice: true,
+      return MainDeviceClaimStatus(
+        isActiveOnThisDevice: deviceRole.isMain,
         isClaimedByAnotherDevice: false,
       );
     }
 
     if (!await _connectivityService.isOnline) {
       return _cachedMainDeviceClaimStatus ??
-          const MainDeviceClaimStatus(
-            isActiveOnThisDevice: true,
+          MainDeviceClaimStatus(
+            isActiveOnThisDevice: deviceRole.isMain,
             isClaimedByAnotherDevice: false,
           );
     }
 
-    final claimStatus = await _claimMainDevice(scopeId);
+    final claimStatus = deviceRole.isMain
+        ? await _claimMainDevice(scopeId)
+        : await _readMainDeviceClaimStatus(scopeId);
     _cachedMainDeviceClaimStatus = claimStatus;
+    await _persistDeviceRole(
+      claimStatus.isActiveOnThisDevice ? DeviceRole.main : DeviceRole.sub,
+    );
     return claimStatus;
   }
 
   Future<bool> canAcceptLocalCapture() async {
-    final deviceRole = await _getDeviceRole();
+    final deviceRole = await getStoredDeviceRole();
     if (deviceRole.isSub) return false;
 
     if (!isConfigured) return true;
@@ -226,7 +288,7 @@ class FirebaseIncomeSyncService {
 
       // Register this device's FCM token so the Cloud Function can push to sub devices.
       final deviceId = await _getOrCreateDeviceId();
-      final deviceRole = await _getDeviceRole();
+      final deviceRole = await getStoredDeviceRole();
       unawaited(
         _fcmService.registerToken(
           scopeId: scopeId,
@@ -306,7 +368,7 @@ class FirebaseIncomeSyncService {
   }
 
   Future<void> _notifySubDeviceIfNeeded(Map<String, dynamic> payload) async {
-    final deviceRole = await _getDeviceRole();
+    final deviceRole = await getStoredDeviceRole();
     if (deviceRole.isSub) {
       await _fcmService.showIncomeNotification(payload);
     }
@@ -338,9 +400,17 @@ class FirebaseIncomeSyncService {
     return value;
   }
 
-  Future<DeviceRole> _getDeviceRole() async {
+  Future<void> _persistDeviceRole(DeviceRole deviceRole) async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    return DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
+    final previousRole =
+        DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
+    if (previousRole == deviceRole) {
+      return;
+    }
+
+    await sharedPreferences.setString('deviceRole', deviceRole.storageValue);
+    _deviceRoleController.add(deviceRole);
+    await _registerCurrentToken(deviceRole);
   }
 
   Future<void> _persistNativeScopeId(String? scopeId) async {
@@ -417,6 +487,32 @@ class FirebaseIncomeSyncService {
     });
   }
 
+  Future<MainDeviceClaimStatus> _readMainDeviceClaimStatus(
+    String scopeId,
+  ) async {
+    final snapshot = await _mainDeviceClaimRef(scopeId).get();
+    final data = snapshot.data();
+    final deviceId = await _getOrCreateDeviceId();
+    final claimedDeviceId = data?['deviceId'] as String?;
+    final updatedAtMs = (data?['updatedAtMs'] as num?)?.toInt() ?? 0;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+    final isStale = claimedDeviceId != null &&
+        nowMs - updatedAtMs > _mainClaimStaleDuration.inMilliseconds;
+
+    if (claimedDeviceId == deviceId && !isStale) {
+      return const MainDeviceClaimStatus(
+        isActiveOnThisDevice: true,
+        isClaimedByAnotherDevice: false,
+      );
+    }
+
+    return MainDeviceClaimStatus(
+      isActiveOnThisDevice: false,
+      isClaimedByAnotherDevice:
+          claimedDeviceId != null && claimedDeviceId != deviceId && !isStale,
+    );
+  }
+
   Future<void> _releaseMainDeviceClaimIfOwned() async {
     if (!isConfigured) return;
     if (!await _connectivityService.isOnline) return;
@@ -439,6 +535,21 @@ class FirebaseIncomeSyncService {
     _cachedMainDeviceClaimStatus = const MainDeviceClaimStatus(
       isActiveOnThisDevice: false,
       isClaimedByAnotherDevice: false,
+    );
+  }
+
+  Future<void> _registerCurrentToken(DeviceRole deviceRole) async {
+    if (!isConfigured) return;
+
+    final scopeId = _scopeId ?? await _resolveScopeId();
+    if (scopeId == null || scopeId.isEmpty) return;
+
+    _scopeId = scopeId;
+    final deviceId = await _getOrCreateDeviceId();
+    await _fcmService.registerToken(
+      scopeId: scopeId,
+      deviceId: deviceId,
+      deviceRole: deviceRole.storageValue,
     );
   }
 }
