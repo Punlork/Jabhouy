@@ -13,11 +13,13 @@ abstract class BaseService {
     String endpoint, {
     T Function(dynamic)? parser,
     Map<String, dynamic>? queryParameters,
+    bool showSnackBar = true,
   }) async {
     final response = await _apiService.get(
       '$basePath$endpoint',
       parser: parser,
       queryParameters: queryParameters,
+      showSnackBar: showSnackBar,
     );
     return ApiResponse<T>(
       success: response.success,

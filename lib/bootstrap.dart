@@ -58,10 +58,14 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
   };
 
   Bloc.observer = const AppBlocObserver();
+
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  FcmService.setupBackgroundHandler();
+
   await FirebaseRuntimeOptions.initialize();
   await setupDependencies();
+  await getIt<FcmService>().initialize();
   runApp(await builder());
 }

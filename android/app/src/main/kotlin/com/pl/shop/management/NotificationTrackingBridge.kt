@@ -131,7 +131,17 @@ object NotificationTrackingBridge {
             "credited",
             "deposit",
             "cash in",
-            "payment received"
+            "payment received",
+            "received from",
+            "transfer in",
+            "incoming transfer",
+            "បានទទួល",
+            "ទទួលបាន",
+            "ផ្ទេរចូល",
+            "វេរចូល",
+            "ប្រាក់ចូល",
+            "ដាក់ប្រាក់",
+            "បញ្ចូលប្រាក់"
         )
         val expenseKeywords = listOf(
             "transfer out",
@@ -140,12 +150,22 @@ object NotificationTrackingBridge {
             "sent",
             "paid",
             "withdraw",
-            "payment to"
+            "payment to",
+            "transfer to",
+            "cash out",
+            "outgoing transfer",
+            "ផ្ទេរចេញ",
+            "វេរចេញ",
+            "ប្រាក់ចេញ",
+            "បានផ្ទេរ",
+            "ទូទាត់",
+            "បង់ប្រាក់",
+            "ដកប្រាក់"
         )
 
         if (expenseKeywords.any { normalizedText.contains(it) }) return false
         if (incomeKeywords.any { normalizedText.contains(it) }) return true
-        return true
+        return !Regex("""(?:usd|us\$|\$|khr|៛)\s*[-–]""").containsMatchIn(normalizedText)
     }
 
     private fun parseAmount(normalizedText: String): Double? {

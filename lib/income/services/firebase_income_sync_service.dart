@@ -26,7 +26,12 @@ class MainDeviceClaimStatus {
 }
 
 class FirebaseIncomeSyncService {
-  FirebaseIncomeSyncService(this._connectivityService, this._authService);
+  FirebaseIncomeSyncService(
+    this._connectivityService,
+    this._authService,
+    this._fcmService,
+    this._apiService,
+  );
 
   static const _collectionName = 'income_sync_scopes';
   static const _systemCollectionName = '_system';
@@ -36,6 +41,8 @@ class FirebaseIncomeSyncService {
 
   final ConnectivityService _connectivityService;
   final AuthService _authService;
+  final FcmService _fcmService;
+  final ApiService _apiService;
 
   StreamSubscription<bool>? _connectivitySubscription;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _remoteSubscription;
@@ -43,6 +50,7 @@ class FirebaseIncomeSyncService {
   LocalNotificationsLoader? _loadLocalNotifications;
   String? _scopeId;
   bool _initialized = false;
+  bool _isFirstSnapshot = true;
   MainDeviceClaimStatus? _cachedMainDeviceClaimStatus;
 
   bool get isConfigured => Firebase.apps.isNotEmpty;
@@ -82,6 +90,26 @@ class FirebaseIncomeSyncService {
           _toRemoteMap(model),
           SetOptions(merge: true),
         );
+
+    unawaited(_pushNotifySubDevices(model));
+  }
+
+  Future<void> _pushNotifySubDevices(BankNotificationModel model) async {
+    final scopeId = _scopeId;
+    if (scopeId == null) return;
+
+    await _apiService.post<void>(
+      '/income/notify',
+      showSnackBar: false,
+      body: {
+        'scopeId': scopeId,
+        'bankKey': model.bankApp.key,
+        'amount': model.amount,
+        'currency': model.currency,
+        'isIncome': model.isIncome,
+        'fingerprint': model.fingerprint,
+      },
+    );
   }
 
   Future<void> dispose() async {
@@ -93,6 +121,7 @@ class FirebaseIncomeSyncService {
     _loadLocalNotifications = null;
     _scopeId = null;
     _initialized = false;
+    _isFirstSnapshot = true;
     _cachedMainDeviceClaimStatus = null;
   }
 
@@ -191,6 +220,18 @@ class FirebaseIncomeSyncService {
     }
 
     _scopeId = scopeId;
+
+    // Register this device's FCM token so the Cloud Function can push to sub devices.
+    final deviceId = await _getOrCreateDeviceId();
+    final deviceRole = await _getDeviceRole();
+    unawaited(
+      _fcmService.registerToken(
+        scopeId: scopeId,
+        deviceId: deviceId,
+        deviceRole: deviceRole.storageValue,
+      ),
+    );
+
     final collection = FirebaseFirestore.instance
         .collection(_collectionName)
         .doc(scopeId)
@@ -232,6 +273,11 @@ class FirebaseIncomeSyncService {
     final remoteHandler = _onRemotePayload;
     if (remoteHandler == null) return;
 
+    // Skip the initial batch so we don't show notifications for existing data
+    // that was already stored before this session.
+    final isInitialLoad = _isFirstSnapshot;
+    _isFirstSnapshot = false;
+
     for (final change in snapshot.docChanges) {
       if (change.type == DocumentChangeType.removed) {
         continue;
@@ -244,6 +290,18 @@ class FirebaseIncomeSyncService {
         ..putIfAbsent('fingerprint', () => change.doc.id);
 
       unawaited(remoteHandler(payload));
+
+      // Notify sub device of a new income transaction pushed by the main device.
+      if (!isInitialLoad && change.type == DocumentChangeType.added) {
+        unawaited(_notifySubDeviceIfNeeded(payload));
+      }
+    }
+  }
+
+  Future<void> _notifySubDeviceIfNeeded(Map<String, dynamic> payload) async {
+    final deviceRole = await _getDeviceRole(); 
+    if (deviceRole.isSub) {
+      await _fcmService.showIncomeNotification(payload);
     }
   }
 

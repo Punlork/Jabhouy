@@ -37,6 +37,7 @@ class AuthService extends BaseService {
   Future<ApiResponse<User?>> getSession() async {
     return get(
       '/get-session',
+      showSnackBar: false,
       parser: (value) => value != null
           ? User.fromJson(
               value['user'] as Map<String, dynamic>,
