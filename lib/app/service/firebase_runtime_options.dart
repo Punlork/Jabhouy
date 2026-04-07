@@ -2,9 +2,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:my_app/app/utils/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseRuntimeOptions {
   const FirebaseRuntimeOptions._();
+
+  static const _nativeApiKeyKey = 'income_sync_firebase_api_key';
+  static const _nativeAppIdKey = 'income_sync_firebase_app_id_android';
+  static const _nativeProjectIdKey = 'income_sync_firebase_project_id';
+  static const _nativeSenderIdKey = 'income_sync_firebase_messaging_sender_id';
+  static const _nativeStorageBucketKey = 'income_sync_firebase_storage_bucket';
+  static const _nativeBaseUrlKey = 'income_sync_api_base_url';
 
   static Future<bool> initialize() async {
     if (Firebase.apps.isNotEmpty) return true;
@@ -82,5 +90,29 @@ class FirebaseRuntimeOptions {
       return null;
     }
     return value;
+  }
+
+  static Future<void> persistNativeSyncConfig() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
+
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final entries = <String, String?>{
+      _nativeApiKeyKey: _readEnv('FIREBASE_API_KEY'),
+      _nativeAppIdKey:
+          _readEnv('FIREBASE_APP_ID_ANDROID') ?? _readEnv('FIREBASE_APP_ID'),
+      _nativeProjectIdKey: _readEnv('FIREBASE_PROJECT_ID'),
+      _nativeSenderIdKey: _readEnv('FIREBASE_MESSAGING_SENDER_ID'),
+      _nativeStorageBucketKey: _readEnv('FIREBASE_STORAGE_BUCKET'),
+      _nativeBaseUrlKey: _readEnv('BASE_URL'),
+    };
+
+    for (final entry in entries.entries) {
+      final value = entry.value;
+      if (value == null || value.isEmpty) {
+        await sharedPreferences.remove(entry.key);
+      } else {
+        await sharedPreferences.setString(entry.key, value);
+      }
+    }
   }
 }

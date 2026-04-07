@@ -37,6 +37,7 @@ class FirebaseIncomeSyncService {
   static const _systemCollectionName = '_system';
   static const _mainDeviceClaimDocumentId = 'main_device';
   static const _deviceIdKey = 'income_sync_device_id';
+  static const _nativeScopeIdKey = 'income_sync_scope_id';
   static const _mainClaimStaleDuration = Duration(minutes: 2);
 
   final ConnectivityService _connectivityService;
@@ -209,28 +210,34 @@ class FirebaseIncomeSyncService {
 
   Future<void> _prepareSync() async {
     if (!isConfigured) return;
-    if (_scopeId != null) return;
 
-    final scopeId = await _resolveScopeId();
-    if (scopeId == null || scopeId.isEmpty) {
-      logger.i(
-        'Firebase income sync skipped because no scope id is available.',
+    if (_scopeId == null) {
+      final scopeId = await _resolveScopeId();
+      if (scopeId == null || scopeId.isEmpty) {
+        await _persistNativeScopeId(null);
+        logger.i(
+          'Firebase income sync skipped because no scope id is available.',
+        );
+        return;
+      }
+
+      _scopeId = scopeId;
+      await _persistNativeScopeId(scopeId);
+
+      // Register this device's FCM token so the Cloud Function can push to sub devices.
+      final deviceId = await _getOrCreateDeviceId();
+      final deviceRole = await _getDeviceRole();
+      unawaited(
+        _fcmService.registerToken(
+          scopeId: scopeId,
+          deviceId: deviceId,
+          deviceRole: deviceRole.storageValue,
+        ),
       );
-      return;
     }
 
-    _scopeId = scopeId;
-
-    // Register this device's FCM token so the Cloud Function can push to sub devices.
-    final deviceId = await _getOrCreateDeviceId();
-    final deviceRole = await _getDeviceRole();
-    unawaited(
-      _fcmService.registerToken(
-        scopeId: scopeId,
-        deviceId: deviceId,
-        deviceRole: deviceRole.storageValue,
-      ),
-    );
+    final scopeId = _scopeId;
+    if (scopeId == null || _remoteSubscription != null) return;
 
     final collection = FirebaseFirestore.instance
         .collection(_collectionName)
@@ -299,7 +306,7 @@ class FirebaseIncomeSyncService {
   }
 
   Future<void> _notifySubDeviceIfNeeded(Map<String, dynamic> payload) async {
-    final deviceRole = await _getDeviceRole(); 
+    final deviceRole = await _getDeviceRole();
     if (deviceRole.isSub) {
       await _fcmService.showIncomeNotification(payload);
     }
@@ -334,6 +341,15 @@ class FirebaseIncomeSyncService {
   Future<DeviceRole> _getDeviceRole() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     return DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
+  }
+
+  Future<void> _persistNativeScopeId(String? scopeId) async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    if (scopeId == null || scopeId.isEmpty) {
+      await sharedPreferences.remove(_nativeScopeIdKey);
+      return;
+    }
+    await sharedPreferences.setString(_nativeScopeIdKey, scopeId);
   }
 
   Future<String> _getOrCreateDeviceId() async {

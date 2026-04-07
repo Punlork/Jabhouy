@@ -124,6 +124,11 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.20"
+    implementation "androidx.work:work-runtime-ktx:2.10.0"
+    implementation platform('com.google.firebase:firebase-bom:33.13.0')
+    implementation 'com.google.firebase:firebase-common'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.android.gms:play-services-tasks:18.3.0'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
 

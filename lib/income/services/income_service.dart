@@ -59,7 +59,8 @@ class IncomeService {
       isSupported: _bridge.isSupported,
       isAccessEnabled: await _bridge.isNotificationAccessEnabled(),
       canCaptureLocally: mainDeviceClaimStatus.isActiveOnThisDevice,
-      isBlockedByAnotherMainDevice: mainDeviceClaimStatus.isClaimedByAnotherDevice,
+      isBlockedByAnotherMainDevice:
+          mainDeviceClaimStatus.isClaimedByAnotherDevice,
     );
   }
 
@@ -70,7 +71,7 @@ class IncomeService {
   Future<void> importPendingTrackedNotifications() async {
     final pending = await _bridge.drainPendingTrackedNotifications();
     for (final item in pending) {
-      await saveTrackedNotificationMap(item);
+      await saveTrackedNotificationMap(item, triggerRemoteSync: false);
     }
   }
 
@@ -99,7 +100,8 @@ class IncomeService {
         'source': 'demo',
       },
       {
-        'fingerprint': 'demo-chip-${now.subtract(const Duration(hours: 3)).millisecondsSinceEpoch}',
+        'fingerprint':
+            'demo-chip-${now.subtract(const Duration(hours: 3)).millisecondsSinceEpoch}',
         'packageName': 'com.chipmongbank.mobileappproduction',
         'bankKey': 'chip_mong',
         'title': 'Incoming transfer',
@@ -107,11 +109,13 @@ class IncomeService {
         'amount': 180.5,
         'currency': 'USD',
         'isIncome': true,
-        'receivedAt': now.subtract(const Duration(hours: 3)).millisecondsSinceEpoch,
+        'receivedAt':
+            now.subtract(const Duration(hours: 3)).millisecondsSinceEpoch,
         'source': 'demo',
       },
       {
-        'fingerprint': 'demo-acleda-${now.subtract(const Duration(days: 1)).millisecondsSinceEpoch}',
+        'fingerprint':
+            'demo-acleda-${now.subtract(const Duration(days: 1)).millisecondsSinceEpoch}',
         'packageName': 'kh.com.acleda.acledamobile',
         'bankKey': 'acleda',
         'title': 'Transfer out',
@@ -119,7 +123,8 @@ class IncomeService {
         'amount': 40000,
         'currency': 'KHR',
         'isIncome': false,
-        'receivedAt': now.subtract(const Duration(days: 1)).millisecondsSinceEpoch,
+        'receivedAt':
+            now.subtract(const Duration(days: 1)).millisecondsSinceEpoch,
         'source': 'demo',
       },
     ];

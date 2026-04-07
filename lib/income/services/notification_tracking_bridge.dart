@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationTrackingBridge {
   static const _methodChannel = MethodChannel(
@@ -10,6 +11,8 @@ class NotificationTrackingBridge {
   static const _eventChannel = EventChannel(
     'jabhouy/notification_tracking/events',
   );
+  static const _pendingKey = 'pending_notifications';
+  static const _uploadedKey = 'uploaded_notification_fingerprints';
 
   bool get isSupported =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
@@ -43,13 +46,22 @@ class NotificationTrackingBridge {
 
   Future<List<Map<String, dynamic>>> drainPendingTrackedNotifications() async {
     if (!isSupported) return const [];
-    final result = await _methodChannel.invokeMethod<List<dynamic>>(
-      'drainPendingTrackedNotifications',
-    );
-    if (result == null) return const [];
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_pendingKey);
+    if (raw == null || raw.isEmpty) {
+      return const [];
+    }
 
-    return result
-        .whereType<Map<Object?, Object?>>()
+    await prefs.remove(_pendingKey);
+    await prefs.remove(_uploadedKey);
+
+    final decoded = jsonDecode(raw);
+    if (decoded is! List) {
+      return const [];
+    }
+
+    return decoded
+        .whereType<Map<dynamic, dynamic>>()
         .map(Map<String, dynamic>.from)
         .toList(growable: false);
   }

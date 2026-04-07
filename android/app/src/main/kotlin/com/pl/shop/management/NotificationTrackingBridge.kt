@@ -9,7 +9,11 @@ import org.json.JSONObject
 
 object NotificationTrackingBridge {
     private const val prefsName = "notification_tracking_bridge"
-    private const val pendingKey = "pending_notifications"
+    private const val pendingKey = "flutter.pending_notifications"
+    private const val uploadedKey = "flutter.uploaded_notification_fingerprints"
+    private const val scopeIdKey = "flutter.income_sync_scope_id"
+    private const val deviceRoleKey = "flutter.deviceRole"
+    private const val sharedPrefsName = "FlutterSharedPreferences"
     private val lock = Any()
     private var eventSink: EventChannel.EventSink? = null
 
@@ -33,9 +37,17 @@ object NotificationTrackingBridge {
 
     fun drainPendingNotifications(context: Context): List<Map<String, Any?>> {
         synchronized(lock) {
-            val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-            val raw = prefs.getString(pendingKey, "[]") ?: "[]"
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            val raw = prefs.getString(pendingKey, null)
+                ?: context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+                    .getString("pending_notifications", "[]")
+                ?: "[]"
             prefs.edit().remove(pendingKey).apply()
+            prefs.edit().remove(uploadedKey).apply()
+            context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+                .edit()
+                .remove("pending_notifications")
+                .apply()
             return jsonArrayToMaps(JSONArray(raw))
         }
     }
@@ -98,13 +110,51 @@ object NotificationTrackingBridge {
 
     fun queueNotification(context: Context, payload: JSONObject) {
         synchronized(lock) {
-            val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
             val raw = prefs.getString(pendingKey, "[]") ?: "[]"
             val array = JSONArray(raw)
             array.put(payload)
             prefs.edit().putString(pendingKey, array.toString()).apply()
         }
         eventSink?.success(jsonToMap(payload))
+        BankNotificationSyncWorker.enqueue(context)
+    }
+
+    fun pendingUploads(context: Context): List<JSONObject> {
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            val pending = JSONArray(prefs.getString(pendingKey, "[]") ?: "[]")
+            val uploaded = prefs.getStringSet(uploadedKey, emptySet()) ?: emptySet()
+            return buildList {
+                for (index in 0 until pending.length()) {
+                    val item = pending.optJSONObject(index) ?: continue
+                    val fingerprint = item.optString("fingerprint")
+                    if (fingerprint.isNotBlank() && uploaded.contains(fingerprint)) continue
+                    add(item)
+                }
+            }
+        }
+    }
+
+    fun markUploaded(context: Context, fingerprints: Collection<String>) {
+        if (fingerprints.isEmpty()) return
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            val current = prefs.getStringSet(uploadedKey, emptySet())?.toMutableSet() ?: mutableSetOf()
+            current.addAll(fingerprints)
+            prefs.edit().putStringSet(uploadedKey, current).apply()
+        }
+    }
+
+    fun readScopeId(context: Context): String? {
+        return context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            .getString(scopeIdKey, null)
+    }
+
+    fun isMainDevice(context: Context): Boolean {
+        val role = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            .getString(deviceRoleKey, "main")
+        return role == null || role == "main"
     }
 
     private fun detectBank(packageName: String, normalizedText: String): String {

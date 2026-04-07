@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_app/app/app.dart';
@@ -181,7 +182,7 @@ class _TrackingStatusCard extends StatelessWidget {
                   icon: Icons.refresh_rounded,
                   tooltip: context.l10n.refreshStatus,
                 ),
-                if (!isBlockedByAnotherMain)
+                if (!kReleaseMode && !isBlockedByAnotherMain)
                   _TinyActionButton(
                     onPressed: () => context.read<IncomeBloc>().add(
                           SeedIncomeDemoData(

@@ -65,6 +65,7 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
   FcmService.setupBackgroundHandler();
 
   await FirebaseRuntimeOptions.initialize();
+  await FirebaseRuntimeOptions.persistNativeSyncConfig();
   await setupDependencies();
   await getIt<FcmService>().initialize();
   runApp(await builder());

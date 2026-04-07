@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -198,6 +199,88 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  void _openShopForm() {
+    context.pushNamed(
+      AppRoutes.formShop,
+      extra: {
+        'shop': context.read<ShopBloc>(),
+        'category': context.read<CategoryBloc>(),
+        'onAdd': (ShopItemModel item) {},
+      },
+    );
+  }
+
+  void _openLoanerForm() {
+    context.pushNamed(
+      AppRoutes.formLoaner,
+      extra: {
+        'loanerBloc': context.read<LoanerBloc>(),
+        'customerBloc': context.read<CustomerBloc>(),
+      },
+    );
+  }
+
+  void _seedIncomeDemoData(AppState appState) {
+    if (appState.deviceRole.isSub) {
+      showErrorSnackBar(null, context.l10n.mainDeviceRoleRequired);
+      return;
+    }
+
+    final trackingStatus =
+        context.read<IncomeBloc>().state.asLoaded?.trackingStatus;
+    if (trackingStatus?.isBlockedByAnotherMainDevice ?? false) {
+      showErrorSnackBar(null, context.l10n.anotherMainDeviceActive);
+      return;
+    }
+
+    context.read<IncomeBloc>().add(
+          SeedIncomeDemoData(
+            context.l10n.demoDataAdded,
+            context.l10n.anotherMainDeviceActive,
+          ),
+        );
+  }
+
+  _BottomActionConfig? _buildBottomActionConfig(AppState appState) {
+    switch (_selectedIndex) {
+      case 0:
+        return _BottomActionConfig(
+          label: context.l10n.addItem,
+          icon: Icons.add_business_rounded,
+          onPressed: _openShopForm,
+        );
+      case 1:
+        return _BottomActionConfig(
+          label: context.l10n.addLoaner,
+          icon: Icons.person_add_alt_1_rounded,
+          onPressed: _openLoanerForm,
+        );
+      case 2:
+        if (kReleaseMode) return null;
+
+        final isMainDevice = appState.deviceRole.isMain;
+        final isBlocked = context
+                .read<IncomeBloc>()
+                .state
+                .asLoaded
+                ?.trackingStatus
+                ?.isBlockedByAnotherMainDevice ??
+            false;
+
+        return _BottomActionConfig(
+          label: isMainDevice
+              ? context.l10n.addDemoData
+              : context.l10n.mainDeviceOnly,
+          icon: Icons.bolt_rounded,
+          onPressed: isMainDevice && !isBlocked
+              ? () => _seedIncomeDemoData(appState)
+              : null,
+        );
+    }
+
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -233,7 +316,8 @@ class _HomePageState extends State<HomePage>
       controller.dispose();
     }
     _pageController.dispose();
-    _searchController.dispose();    super.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -269,8 +353,9 @@ class _HomePageState extends State<HomePage>
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final appState = context.watch<AppBloc>().state;
+    final bottomAction = _buildBottomActionConfig(appState);
     final bottomBarBackground =
-        isDark ? colorScheme.surfaceContainerLow : Colors.white;
+        isDark ? colorScheme.surfaceContainerLow : colorScheme.surface;
     final bottomBarIndicator =
         isDark ? colorScheme.primary : colorScheme.primaryContainer;
     final bottomBarSelectedForeground =
@@ -370,165 +455,170 @@ class _HomePageState extends State<HomePage>
             ),
           ),
           barColor: bottomBarBackground,
-          borderRadius: BorderRadius.circular(20),
-          child: TabBar(
-            dividerColor: Colors.transparent,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: bottomBarIndicator,
+          borderRadius: BorderRadius.circular(24),
+          width: double.infinity,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: bottomBarBackground,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: colorScheme.outlineVariant),
+              boxShadow: [
+                if (!isDark)
+                  BoxShadow(
+                    color: colorScheme.shadow.withValues(alpha: 0.08),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+              ],
             ),
-            onTap: (index) {
-              _pageController.jumpToPage(index);
-              _onItemTapped(index);
-              setState(() => _selectedIndex = index);
-            },
-            splashBorderRadius: BorderRadius.circular(16),
-            tabs: List.generate(
-              bottomBars.length,
-              (index) => Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Icon(
-                      bottomBars[index]['icon']! as IconData,
-                      size: 26,
-                      color: _selectedIndex == index
-                          ? bottomBarSelectedForeground
-                          : bottomBarUnselectedForeground,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TabBar(
+                    dividerColor: Colors.transparent,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicator: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      color: bottomBarIndicator,
                     ),
-                    // Opacity(
-                    //   opacity: _selectedIndex == index ? 1.0 : 0.0,
-                    //   child: Text(
-                    //     bottomBars[index]['name']! as String,
-                    //     style: TextStyle(
-                    //       color: _selectedIndex == index ? bottomBarSelectedForeground : bottomBarUnselectedForeground,
-                    //       fontSize: 16,
-                    //       fontWeight: _selectedIndex == index ? FontWeight.w600 : FontWeight.normal,
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 60),
-          child: SizedBox(
-            height: 42,
-            width: 140,
-            child: FloatingActionButton(
-              onPressed: () {
-                switch (_selectedIndex) {
-                  case 0:
-                    context.pushNamed(
-                      AppRoutes.formShop,
-                      extra: {
-                        'shop': context.read<ShopBloc>(),
-                        'category': context.read<CategoryBloc>(),
-                        'onAdd': (ShopItemModel item) {},
-                      },
-                    );
-                  case 1:
-                    context.pushNamed(
-                      AppRoutes.formLoaner,
-                      extra: {
-                        'loanerBloc': context.read<LoanerBloc>(),
-                        'customerBloc': context.read<CustomerBloc>(),
-                      },
-                    );
-                  case 2:
-                    if (appState.deviceRole.isSub) {
-                      showErrorSnackBar(
-                        null,
-                        context.l10n.mainDeviceRoleRequired,
-                      );
-                      return;
-                    }
-                    final trackingStatus = context
-                        .read<IncomeBloc>()
-                        .state
-                        .asLoaded
-                        ?.trackingStatus;
-                    if (trackingStatus?.isBlockedByAnotherMainDevice ?? false) {
-                      showErrorSnackBar(
-                        null,
-                        context.l10n.anotherMainDeviceActive,
-                      );
-                      return;
-                    }
-                    context.read<IncomeBloc>().add(
-                          SeedIncomeDemoData(
-                            context.l10n.demoDataAdded,
-                            context.l10n.anotherMainDeviceActive,
-                          ),
-                        );
-                }
-              },
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
-              elevation: isDark ? 0 : 4,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
-                  topRight: Radius.circular(4),
-                  bottomLeft: Radius.circular(4),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4(
-                      -1,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                    ),
-                    child: const Icon(
-                      Icons.add_comment_rounded,
-                      size: 24,
+                    labelPadding: EdgeInsets.zero,
+                    onTap: (index) {
+                      _pageController.jumpToPage(index);
+                      _onItemTapped(index);
+                      setState(() => _selectedIndex = index);
+                    },
+                    splashBorderRadius: BorderRadius.circular(18),
+                    tabs: List.generate(
+                      bottomBars.length,
+                      (index) => Tab(
+                        height: 52,
+                        child: _BottomBarTab(
+                          icon: bottomBars[index]['icon']! as IconData,
+                          label: bottomBars[index]['name']! as String,
+                          isSelected: _selectedIndex == index,
+                          selectedColor: bottomBarSelectedForeground,
+                          unselectedColor: bottomBarUnselectedForeground,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _selectedIndex == 0
-                        ? context.l10n.addItem
-                        : _selectedIndex == 1
-                            ? context.l10n.addLoaner
-                            : appState.deviceRole.isMain
-                                ? context.l10n.addDemoData
-                                : context.l10n.mainDeviceOnly,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onPrimary,
-                    ),
+                ),
+                if (bottomAction != null) ...[
+                  const SizedBox(width: 8),
+                  _BottomBarActionButton(
+                    config: bottomAction,
+                    isDark: isDark,
                   ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
-        persistentFooterAlignment: AlignmentDirectional.topEnd,
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      ),
+    );
+  }
+}
+
+class _BottomActionConfig {
+  const _BottomActionConfig({
+    required this.label,
+    required this.icon,
+    this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+}
+
+class _BottomBarTab extends StatelessWidget {
+  const _BottomBarTab({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.selectedColor,
+    required this.unselectedColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final Color selectedColor;
+  final Color unselectedColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final foregroundColor = isSelected ? selectedColor : unselectedColor;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 22, color: foregroundColor),
+          // AnimatedSize(
+          //   duration: const Duration(milliseconds: 180),
+          //   curve: Curves.easeOut,
+          //   child: isSelected
+          //       ? Padding(
+          //           padding: const EdgeInsets.only(left: 8),
+          //           child: Text(
+          //             label,
+          //             maxLines: 1,
+          //             overflow: TextOverflow.fade,
+          //             softWrap: false,
+          //             style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          //                   color: foregroundColor,
+          //                   fontWeight: FontWeight.w700,
+          //                 ),
+          //           ),
+          //         )
+          //       : const SizedBox.shrink(),
+          // ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomBarActionButton extends StatelessWidget {
+  const _BottomBarActionButton({
+    required this.config,
+    required this.isDark,
+  });
+
+  final _BottomActionConfig config;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 180),
+      opacity: config.onPressed == null ? 0.6 : 1,
+      child: FilledButton.icon(
+        onPressed: config.onPressed,
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(0, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+          disabledForegroundColor: colorScheme.onSurfaceVariant,
+          elevation: isDark ? 0 : 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+        icon: Icon(config.icon, size: 18),
+        label: Text(
+          config.label,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
       ),
     );
   }
