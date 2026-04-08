@@ -6,8 +6,40 @@
 
 default_platform(:android)
 
+require "json"
+
 # Project root (parent of android/)
 project_root = File.expand_path("../..", File.dirname(__FILE__))
+android_root = File.expand_path("..", File.dirname(__FILE__))
+
+def firebase_app_id_for_flavor(android_root, flavor)
+  config_path = File.join(
+    android_root,
+    "app",
+    "src",
+    flavor,
+    "google-services.json",
+  )
+
+  UI.user_error!("Missing google-services.json for #{flavor} at #{config_path}") unless File.exist?(config_path)
+
+  payload = JSON.parse(File.read(config_path))
+  app_id = payload.dig("client", 0, "client_info", "mobilesdk_app_id")
+
+  UI.user_error!("Unable to read Firebase app id from #{config_path}") if app_id.to_s.empty?
+  app_id
+end
+
+def flutter_apk_path(project_root, filename)
+  File.join(
+    project_root,
+    "build",
+    "app",
+    "outputs",
+    "flutter-apk",
+    filename,
+  )
+end
 
 platform :android do
   desc "Run Flutter tests and build debug APK"
@@ -19,6 +51,11 @@ platform :android do
   desc "Build development debug APK"
   lane :build_dev do
     sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --debug")
+  end
+
+  desc "Build development release APKs split per ABI"
+  lane :build_dev_release do
+    sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --release --split-per-abi")
   end
 
   desc "Build staging release APK (for internal testing)"
@@ -46,6 +83,25 @@ platform :android do
 
     UI.user_error!("Expected APK not found at #{apk_path}") unless File.exist?(apk_path)
     UI.message("Production APK available at #{apk_path}")
+  end
+
+  desc "Distribute development arm64-v8a release APK to Firebase App Distribution"
+  lane :distribute_dev do
+    build_dev_release
+
+    apk_path = flutter_apk_path(project_root, "app-arm64-v8a-development-release.apk")
+
+    UI.user_error!("Expected APK not found at #{apk_path}") unless File.exist?(apk_path)
+
+    firebase_app_distribution(
+      app: firebase_app_id_for_flavor(android_root, "development"),
+      apk_path: apk_path,
+      groups: 'dev',
+      testers: ENV["FIREBASE_APP_DISTRIBUTION_TESTERS"],
+      release_notes: ENV["FIREBASE_APP_DISTRIBUTION_RELEASE_NOTES"] || "Development release build",
+      service_credentials_file: ENV["GOOGLE_APPLICATION_CREDENTIALS"],
+      firebase_cli_token: ENV["FIREBASE_TOKEN"],
+    )
   end
 
   desc "Deploy to internal testing track (Google Play)"

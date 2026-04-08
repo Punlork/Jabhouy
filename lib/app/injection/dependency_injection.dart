@@ -33,7 +33,11 @@ Future<void> setupDependencies() async {
         getIt<NotificationTrackingBridge>(),
       ),
     )
-    ..registerLazySingleton(FcmService.new)
+    ..registerLazySingleton(
+      () => FcmService(
+        getIt<NotificationDiagnosticsService>(),
+      ),
+    )
     ..registerLazySingleton(
       () => FirebaseIncomeSyncService(
         getIt<ConnectivityService>(),

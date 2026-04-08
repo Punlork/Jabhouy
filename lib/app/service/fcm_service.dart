@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:my_app/app/utils/logger.dart';
 import 'package:my_app/income/models/bank_notification_model.dart';
+import 'package:my_app/income/services/notification_diagnostics_service.dart';
 
 /// Top-level handler required by firebase_messaging for background/terminated
 /// state. Must be annotated with @pragma('vm:entry-point').
@@ -16,13 +17,33 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   logger.d('FCM background message received: ${message.messageId}');
 }
 
+class FcmNotificationContent {
+  const FcmNotificationContent({
+    required this.title,
+    required this.body,
+    required this.groupKey,
+  });
+
+  final String title;
+  final String body;
+  final String groupKey;
+}
+
 class FcmService {
+  FcmService(this._diagnostics);
+
   static const _channelId = 'income_push';
   static const _channelName = 'Income Notifications';
+  static const _androidNotificationIcon = 'ic_launcher_foreground';
   static const _scopesCollection = 'income_sync_scopes';
   static const _tokensCollection = '_fcm_tokens';
+  static const _incomeGroupKey = 'income_updates';
+  static const _syncGroupKey = 'sync_updates';
 
+  final NotificationDiagnosticsService _diagnostics;
   final _localNotifications = FlutterLocalNotificationsPlugin();
+  final _recentNotificationKeys = <String>{};
+  final _recentNotificationOrder = <String>[];
   bool _initialized = false;
 
   bool get _isFirebaseAvailable => Firebase.apps.isNotEmpty;
@@ -64,22 +85,47 @@ class FcmService {
       final token = await FirebaseMessaging.instance.getToken();
       if (token == null) return;
 
+      // print all data as json for backend to test
+      // ignore: leading_newlines_in_multiline_strings
+      final data = {
+        'scopeId': scopeId,
+        'deviceId': deviceId,
+        'deviceRole': deviceRole,
+        'token': token,
+      };
+
+      logger.d('''FCM token data: $data''');
+      await _diagnostics.log(
+        source: 'flutter.fcm',
+        message: 'Prepared FCM token payload for backend registration.',
+        metadata: data,
+      );
+
       await FirebaseFirestore.instance
           .collection(_scopesCollection)
           .doc(scopeId)
           .collection(_tokensCollection)
           .doc(deviceId)
           .set(
-            <String, dynamic>{
-              'fcmToken': token,
-              'deviceRole': deviceRole,
-              'updatedAt': FieldValue.serverTimestamp(),
-            },
-            SetOptions(merge: true),
-          );
+        <String, dynamic>{
+          'fcmToken': token,
+          'deviceRole': deviceRole,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
 
       logger.d(
         'FCM token saved for $deviceRole device $deviceId (scope: $scopeId)',
+      );
+      await _diagnostics.log(
+        source: 'flutter.fcm',
+        message: 'Saved FCM token for device.',
+        metadata: {
+          'scopeId': scopeId,
+          'deviceId': deviceId,
+          'deviceRole': deviceRole,
+        },
       );
     } catch (error, stackTrace) {
       logger.e(
@@ -87,27 +133,31 @@ class FcmService {
         error: error,
         stackTrace: stackTrace,
       );
+      await _diagnostics.log(
+        source: 'flutter.fcm',
+        message: 'Failed to register FCM token.',
+        level: 'error',
+        metadata: {
+          'scopeId': scopeId,
+          'deviceId': deviceId,
+          'deviceRole': deviceRole,
+          'error': error.toString(),
+        },
+      );
     }
   }
 
   /// Show a local push notification derived from a Firestore income payload.
   Future<void> showIncomeNotification(Map<String, dynamic> payload) async {
-    final bank = BankApp.fromKey(payload['bankKey'] as String? ?? '');
-    final amount = payload['amount'];
-    final currency = payload['currency'] as String? ?? 'USD';
-    final isIncome = payload['isIncome'] as bool? ?? true;
     final fingerprint = payload['fingerprint'] as String? ?? '';
-
-    final sign = isIncome ? '+' : '-';
-    final amountStr =
-        amount != null ? '$sign$amount $currency' : currency;
+    if (!_rememberNotificationKey(fingerprint)) return;
+    final content = buildNotificationContentFromPayload(payload);
 
     await _showLocalNotification(
       id: fingerprint.hashCode.abs(),
-      title: isIncome
-          ? 'Income: ${bank.label}'
-          : 'Expense: ${bank.label}',
-      body: amountStr,
+      title: content.title,
+      body: content.body,
+      groupKey: content.groupKey,
     );
   }
 
@@ -117,7 +167,7 @@ class FcmService {
 
   Future<void> _setupLocalNotifications() async {
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings(_androidNotificationIcon);
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -147,14 +197,16 @@ class FcmService {
   }
 
   void _onForegroundFcmMessage(RemoteMessage message) {
-    final notification = message.notification;
-    if (notification == null) return;
+    final key = _notificationKeyFromRemoteMessage(message);
+    if (!_rememberNotificationKey(key)) return;
+    final content = buildNotificationContentFromRemoteMessage(message);
 
     unawaited(
       _showLocalNotification(
-        id: message.messageId.hashCode.abs(),
-        title: notification.title ?? 'New Income',
-        body: notification.body ?? '',
+        id: key.hashCode.abs(),
+        title: content.title,
+        body: content.body,
+        groupKey: content.groupKey,
       ),
     );
   }
@@ -163,30 +215,126 @@ class FcmService {
     required int id,
     required String title,
     required String body,
+    required String groupKey,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       _channelId,
       _channelName,
       channelDescription: 'Income notifications from the main device.',
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
+      icon: _androidNotificationIcon,
+      groupKey: groupKey,
+      category: AndroidNotificationCategory.message,
+      styleInformation: BigTextStyleInformation(body),
     );
 
-    const iosDetails = DarwinNotificationDetails(
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      threadIdentifier: groupKey,
     );
 
     await _localNotifications.show(
       id,
       title,
       body,
-      const NotificationDetails(
+      NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
       ),
     );
+  }
+
+  static FcmNotificationContent buildNotificationContentFromPayload(
+    Map<String, dynamic> payload,
+  ) {
+    final bank = BankApp.fromKey(payload['bankKey'] as String? ?? '');
+    final amount = payload['amount'];
+    final currency = payload['currency'] as String? ?? 'USD';
+    final isIncome = payload['isIncome'] as bool? ?? true;
+    final fallbackMessage =
+        payload['message'] as String? ?? payload['title'] as String?;
+    final bankLabel = bank == BankApp.unknown ? 'Bank update' : bank.label;
+    final parsedAmount = _parseAmount(amount);
+    final formattedAmount = parsedAmount == null
+        ? null
+        : BankNotificationModel.formatAmount(
+            amount: parsedAmount,
+            currency: currency,
+          );
+
+    return FcmNotificationContent(
+      title: isIncome ? 'Income received' : 'Expense recorded',
+      body: formattedAmount != null
+          ? '$bankLabel • $formattedAmount'
+          : _compactNotificationText(fallbackMessage) ?? bankLabel,
+      groupKey: _incomeGroupKey,
+    );
+  }
+
+  static FcmNotificationContent buildNotificationContentFromRemoteMessage(
+    RemoteMessage message,
+  ) {
+    if (message.data.containsKey('bankKey') ||
+        message.data.containsKey('isIncome') ||
+        message.data.containsKey('fingerprint')) {
+      return buildNotificationContentFromPayload(message.data);
+    }
+
+    final notification = message.notification;
+    final title = notification?.title?.trim();
+    final body = notification?.body?.trim();
+
+    return FcmNotificationContent(
+      title: title == null || title.isEmpty ? 'Income update' : title,
+      body: body == null || body.isEmpty
+          ? 'Open the app to review the latest activity.'
+          : _compactNotificationText(body) ?? body,
+      groupKey: _syncGroupKey,
+    );
+  }
+
+  static String? _compactNotificationText(String? text) {
+    final normalized = text?.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (normalized == null || normalized.isEmpty) {
+      return null;
+    }
+
+    const maxLength = 72;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return '${normalized.substring(0, maxLength - 1)}…';
+  }
+
+  static double? _parseAmount(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value.replaceAll(',', '').trim());
+    }
+    return null;
+  }
+
+  String _notificationKeyFromRemoteMessage(RemoteMessage message) {
+    return message.data['fingerprint']?.toString() ??
+        message.messageId ??
+        '${message.sentTime?.millisecondsSinceEpoch ?? 0}:${message.notification?.title ?? ''}:${message.notification?.body ?? ''}';
+  }
+
+  bool _rememberNotificationKey(String key) {
+    if (key.isEmpty) return true;
+    if (_recentNotificationKeys.contains(key)) {
+      return false;
+    }
+
+    _recentNotificationKeys.add(key);
+    _recentNotificationOrder.add(key);
+    if (_recentNotificationOrder.length > 50) {
+      final removed = _recentNotificationOrder.removeAt(0);
+      _recentNotificationKeys.remove(removed);
+    }
+    return true;
   }
 }

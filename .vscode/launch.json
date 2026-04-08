@@ -17,7 +17,8 @@
         "development",
         "--target",
         "lib/main_development.dart",
-        "-v"
+        "-v",
+        "--release"
       ]
     },
     {

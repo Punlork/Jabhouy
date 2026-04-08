@@ -71,6 +71,13 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
     showSuccessSnackBar(context, 'Diagnostics copied');
   }
 
+  Future<void> _copyEntryMetadata(NotificationDiagnosticEntry entry) async {
+    final text = entry.metadata.isEmpty ? entry.message : entry.metadataLabel;
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    showSuccessSnackBar(context, 'Payload copied');
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<IncomeBloc>().state.asLoaded;
@@ -79,6 +86,38 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
     final recentItems = (state?.items ?? const <BankNotificationModel>[])
         .take(5)
         .toList(growable: false);
+    NotificationDiagnosticEntry? latestFcmPayloadEntry;
+    for (final entry in _entries.reversed) {
+      if (entry.source == 'flutter.fcm' &&
+          entry.message ==
+              'Prepared FCM token payload for backend registration.') {
+        latestFcmPayloadEntry = entry;
+        break;
+      }
+    }
+    final fcmPayloadEntry = latestFcmPayloadEntry;
+    final fcmPayloadCardTrailing = fcmPayloadEntry == null
+        ? null
+        : TextButton(
+            onPressed: () => _copyEntryMetadata(fcmPayloadEntry),
+            child: const Text('Copy'),
+          );
+    final fcmPayloadCardChild = fcmPayloadEntry == null
+        ? const Text('No FCM token payload captured yet.')
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _StatusLine(
+                label: 'Captured at',
+                value: fcmPayloadEntry.timeLabel,
+              ),
+              const SizedBox(height: 8),
+              SelectableText(
+                fcmPayloadEntry.metadataLabel,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          );
 
     return Scaffold(
       appBar: AppBar(
@@ -164,6 +203,12 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
                           )
                           .toList(growable: false),
                     ),
+            ),
+            const SizedBox(height: 16),
+            _SectionCard(
+              title: 'FCM token payload',
+              trailing: fcmPayloadCardTrailing,
+              child: fcmPayloadCardChild,
             ),
             const SizedBox(height: 16),
             _SectionCard(
