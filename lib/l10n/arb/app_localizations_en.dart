@@ -423,10 +423,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allRecords => 'All records';
 
   @override
-  String get incomeOnly => 'Income only';
+  String get incomeOnly => 'Income';
 
   @override
-  String get expenseOnly => 'Expense only';
+  String get expenseOnly => 'Expense';
 
   @override
   String get noTrackedNotifications => 'No tracked bank notifications found';

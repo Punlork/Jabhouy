@@ -488,7 +488,7 @@
   "all": "ទាំងអស់",
   "@all": {
     "description": "Label for the all category"
-  }  ,
+  },
   "income": "ចំណូល",
   "@income": {
     "description": "ស្លាកសម្រាប់ផ្នែកចំណូល"
@@ -561,11 +561,11 @@
   "@allRecords": {
     "description": "ស្លាកសម្រាប់បង្ហាញកំណត់ត្រាទាំងអស់"
   },
-  "incomeOnly": "តែចំណូល",
+  "incomeOnly": "ចំណូល",
   "@incomeOnly": {
     "description": "ស្លាកសម្រាប់បង្ហាញតែការជូនដំណឹងចំណូល"
   },
-  "expenseOnly": "តែចំណាយ",
+  "expenseOnly": "ចំណាយ",
   "@expenseOnly": {
     "description": "ស្លាកសម្រាប់បង្ហាញតែការជូនដំណឹងចំណាយ"
   },

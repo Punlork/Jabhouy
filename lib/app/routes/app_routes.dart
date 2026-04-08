@@ -42,6 +42,7 @@ class AppRoutes {
   static const category = 'category';
   static const customer = 'customer';
   static const profile = 'profile';
+  static const incomeDiagnostics = 'income_diagnostics';
 
   static final allowedUnauthenticated = {
     signin.toPath,
@@ -55,6 +56,7 @@ class AppRoutes {
     '${home.toPath}${category.toPath}',
     '${home.toPath}${profile.toPath}',
     '${home.toPath}${customer.toPath}',
+    '${home.toPath}${incomeDiagnostics.toPath}',
   };
 
   static final GoRouter router = GoRouter(
@@ -212,6 +214,25 @@ class AppRoutes {
                     ),
                   ],
                   child: const ProfilePage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: incomeDiagnostics.toPath,
+            name: incomeDiagnostics,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
+                  BlocProvider.of<IncomeBloc>(context);
+              GlobalContext.currentContext = context;
+
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider.value(
+                  value: incomeBloc,
+                  child: const IncomeDiagnosticsPage(),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

@@ -32,17 +32,35 @@ class BankNotificationSyncWorker(
 ) : Worker(appContext, workerParams) {
     override fun doWork(): Result {
         if (!NotificationTrackingBridge.isMainDevice(applicationContext)) {
+            NotificationTrackingBridge.appendDiagnosticLog(
+                context = applicationContext,
+                source = "android.sync_worker",
+                message = "Skipping background notification sync because this device is not the main device.",
+            )
             return Result.success()
         }
 
         val scopeId = NotificationTrackingBridge.readScopeId(applicationContext)
         if (scopeId.isNullOrBlank()) {
+            NotificationTrackingBridge.appendDiagnosticLog(
+                context = applicationContext,
+                source = "android.sync_worker",
+                message = "Skipping background notification sync because no scope id is available.",
+                level = "warning",
+            )
             return Result.success()
         }
 
         val firebaseApp = ensureFirebaseApp() ?: return Result.failure()
         val firestore = FirebaseFirestore.getInstance(firebaseApp)
         if (!ensureActiveMainDevice(firestore, scopeId)) {
+            NotificationTrackingBridge.appendDiagnosticLog(
+                context = applicationContext,
+                source = "android.sync_worker",
+                message = "Skipping background notification sync because another main device owns the scope.",
+                level = "warning",
+                metadata = mapOf("scopeId" to scopeId),
+            )
             return Result.success()
         }
         val pending = NotificationTrackingBridge.pendingUploads(applicationContext)
@@ -60,10 +78,29 @@ class BankNotificationSyncWorker(
                     ?.let(uploadedFingerprints::add)
             }
             NotificationTrackingBridge.markUploaded(applicationContext, uploadedFingerprints)
+            NotificationTrackingBridge.appendDiagnosticLog(
+                context = applicationContext,
+                source = "android.sync_worker",
+                message = "Uploaded pending notifications in background worker.",
+                metadata = mapOf(
+                    "count" to uploadedFingerprints.size,
+                    "scopeId" to scopeId,
+                ),
+            )
             Result.success()
         } catch (error: Exception) {
             NotificationTrackingBridge.markUploaded(applicationContext, uploadedFingerprints)
             Log.e(logTag, "Failed to upload bank notifications.", error)
+            NotificationTrackingBridge.appendDiagnosticLog(
+                context = applicationContext,
+                source = "android.sync_worker",
+                message = "Background notification sync failed.",
+                level = "error",
+                metadata = mapOf(
+                    "error" to (error.message ?: error.toString()),
+                    "scopeId" to scopeId,
+                ),
+            )
             Result.retry()
         }
     }

@@ -39,8 +39,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
@@ -74,8 +73,7 @@ class _HomePageState extends State<HomePage>
         context.read<ShopBloc>().add(
               ShopGetItemsEvent(
                 searchQuery: value,
-                categoryFilter:
-                    context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+                categoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               ),
             );
       case 1:
@@ -90,6 +88,7 @@ class _HomePageState extends State<HomePage>
       case 0:
         showModalBottomSheet<void>(
           context: context,
+          isScrollControlled: true,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
@@ -99,8 +98,7 @@ class _HomePageState extends State<HomePage>
               BlocProvider.value(value: context.read<ShopBloc>()),
             ],
             child: FilterSheet(
-              initialCategoryFilter:
-                  context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+              initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               onApply: (category) => context.read<ShopBloc>().add(
                     ShopGetItemsEvent(categoryFilter: category),
                   ),
@@ -124,20 +122,16 @@ class _HomePageState extends State<HomePage>
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: LoanerFilterSheet(
-                initialFromDate:
-                    context.read<LoanerBloc>().state.asLoaded?.fromDate,
-                initialToDate:
-                    context.read<LoanerBloc>().state.asLoaded?.toDate,
-                initialLoanerFilter:
-                    context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
-                onApply: (fromDate, toDate, loanerFilter) =>
-                    context.read<LoanerBloc>().add(
-                          LoadLoaners(
-                            fromDate: fromDate,
-                            toDate: toDate,
-                            loanerFilter: loanerFilter,
-                          ),
-                        ),
+                initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
+                initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
+                initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
+                onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
+                      LoadLoaners(
+                        fromDate: fromDate,
+                        toDate: toDate,
+                        loanerFilter: loanerFilter,
+                      ),
+                    ),
               ),
             ),
           ),
@@ -156,24 +150,19 @@ class _HomePageState extends State<HomePage>
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: IncomeFilterSheet(
-                initialFromDate:
-                    context.read<IncomeBloc>().state.asLoaded?.fromDate,
-                initialToDate:
-                    context.read<IncomeBloc>().state.asLoaded?.toDate,
-                initialBankFilter:
-                    context.read<IncomeBloc>().state.asLoaded?.bankFilter,
+                initialFromDate: context.read<IncomeBloc>().state.asLoaded?.fromDate,
+                initialToDate: context.read<IncomeBloc>().state.asLoaded?.toDate,
+                initialBankFilter: context.read<IncomeBloc>().state.asLoaded?.bankFilter,
                 initialRecordFilter:
-                    context.read<IncomeBloc>().state.asLoaded?.recordFilter ??
-                        NotificationRecordFilter.all,
-                onApply: (fromDate, toDate, bankFilter, recordFilter) =>
-                    context.read<IncomeBloc>().add(
-                          LoadIncomeDashboard(
-                            fromDate: fromDate,
-                            toDate: toDate,
-                            bankFilter: bankFilter,
-                            recordFilter: recordFilter,
-                          ),
-                        ),
+                    context.read<IncomeBloc>().state.asLoaded?.recordFilter ?? NotificationRecordFilter.all,
+                onApply: (fromDate, toDate, bankFilter, recordFilter) => context.read<IncomeBloc>().add(
+                      LoadIncomeDashboard(
+                        fromDate: fromDate,
+                        toDate: toDate,
+                        bankFilter: bankFilter,
+                        recordFilter: recordFilter,
+                      ),
+                    ),
               ),
             ),
           ),
@@ -193,6 +182,7 @@ class _HomePageState extends State<HomePage>
           BlocProvider.value(value: context.read<CategoryBloc>()),
           BlocProvider.value(value: context.read<ShopBloc>()),
           BlocProvider.value(value: context.read<CustomerBloc>()),
+          BlocProvider.value(value: context.read<IncomeBloc>()),
         ],
         child: SettingsSheet(onSignout: onSignout),
       ),
@@ -226,8 +216,7 @@ class _HomePageState extends State<HomePage>
       return;
     }
 
-    final trackingStatus =
-        context.read<IncomeBloc>().state.asLoaded?.trackingStatus;
+    final trackingStatus = context.read<IncomeBloc>().state.asLoaded?.trackingStatus;
     if (trackingStatus?.isBlockedByAnotherMainDevice ?? false) {
       showErrorSnackBar(null, context.l10n.anotherMainDeviceActive);
       return;
@@ -245,36 +234,35 @@ class _HomePageState extends State<HomePage>
     switch (_selectedIndex) {
       case 0:
         return _BottomActionConfig(
-          label: context.l10n.addItem,
+          tooltip: context.l10n.addItem,
           icon: Icons.add_business_rounded,
           onPressed: _openShopForm,
         );
       case 1:
         return _BottomActionConfig(
-          label: context.l10n.addLoaner,
+          tooltip: context.l10n.addLoaner,
           icon: Icons.person_add_alt_1_rounded,
           onPressed: _openLoanerForm,
         );
       case 2:
-        if (kReleaseMode) return null;
+        if (kReleaseMode) {
+          return _BottomActionConfig(
+            tooltip: context.l10n.refreshStatus,
+            icon: Icons.refresh_rounded,
+            onPressed: () => context.read<IncomeBloc>().add(
+                  const RefreshIncomeTrackingStatus(),
+                ),
+          );
+        }
 
         final isMainDevice = appState.deviceRole.isMain;
-        final isBlocked = context
-                .read<IncomeBloc>()
-                .state
-                .asLoaded
-                ?.trackingStatus
-                ?.isBlockedByAnotherMainDevice ??
-            false;
+        final isBlocked =
+            context.read<IncomeBloc>().state.asLoaded?.trackingStatus?.isBlockedByAnotherMainDevice ?? false;
 
         return _BottomActionConfig(
-          label: isMainDevice
-              ? context.l10n.addDemoData
-              : context.l10n.mainDeviceOnly,
+          tooltip: isMainDevice ? context.l10n.addDemoData : context.l10n.mainDeviceOnly,
           icon: Icons.bolt_rounded,
-          onPressed: isMainDevice && !isBlocked
-              ? () => _seedIncomeDemoData(appState)
-              : null,
+          onPressed: isMainDevice && !isBlocked ? () => _seedIncomeDemoData(appState) : null,
         );
     }
 
@@ -323,8 +311,7 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (previous, current) =>
-          previous.runtimeType != current.runtimeType,
+      listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
       listener: (context, authState) {
         if (authState is Authenticated) {
           _loadProtectedData();
@@ -354,12 +341,9 @@ class _HomePageState extends State<HomePage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final appState = context.watch<AppBloc>().state;
     final bottomAction = _buildBottomActionConfig(appState);
-    final bottomBarBackground =
-        isDark ? colorScheme.surfaceContainerLow : colorScheme.surface;
-    final bottomBarIndicator =
-        isDark ? colorScheme.primary : colorScheme.primaryContainer;
-    final bottomBarSelectedForeground =
-        isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
+    final bottomBarBackground = isDark ? colorScheme.surfaceContainerLow : colorScheme.surface;
+    final bottomBarIndicator = isDark ? colorScheme.primary : colorScheme.primaryContainer;
+    final bottomBarSelectedForeground = isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
     final bottomBarUnselectedForeground = colorScheme.onSurfaceVariant;
 
     final bottomBars = [
@@ -396,9 +380,7 @@ class _HomePageState extends State<HomePage>
                         hasFilter: hasFilter,
                         searchHintText: searchHintText,
                         onSettingsPressed: () => _showSettingsSheet(
-                          () => context
-                              .read<SignoutBloc>()
-                              .add(const SignoutSubmitted()),
+                          () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
                         ),
                         onSearchChanged: _onSearchChanged,
                         onFilterPressed: _showFilterSheet,
@@ -458,7 +440,7 @@ class _HomePageState extends State<HomePage>
           borderRadius: BorderRadius.circular(24),
           width: double.infinity,
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: bottomBarBackground,
               borderRadius: BorderRadius.circular(24),
@@ -492,7 +474,7 @@ class _HomePageState extends State<HomePage>
                     tabs: List.generate(
                       bottomBars.length,
                       (index) => Tab(
-                        height: 52,
+                        height: 42,
                         child: _BottomBarTab(
                           icon: bottomBars[index]['icon']! as IconData,
                           label: bottomBars[index]['name']! as String,
@@ -522,12 +504,12 @@ class _HomePageState extends State<HomePage>
 
 class _BottomActionConfig {
   const _BottomActionConfig({
-    required this.label,
+    required this.tooltip,
     required this.icon,
     this.onPressed,
   });
 
-  final String label;
+  final String tooltip;
   final IconData icon;
   final VoidCallback? onPressed;
 }
@@ -554,30 +536,27 @@ class _BottomBarTab extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 22, color: foregroundColor),
-          // AnimatedSize(
-          //   duration: const Duration(milliseconds: 180),
-          //   curve: Curves.easeOut,
-          //   child: isSelected
-          //       ? Padding(
-          //           padding: const EdgeInsets.only(left: 8),
-          //           child: Text(
-          //             label,
-          //             maxLines: 1,
-          //             overflow: TextOverflow.fade,
-          //             softWrap: false,
-          //             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          //                   color: foregroundColor,
-          //                   fontWeight: FontWeight.w700,
-          //                 ),
-          //           ),
-          //         )
-          //       : const SizedBox.shrink(),
-          // ),
+          Icon(icon, size: 24, color: foregroundColor),
+          const SizedBox(width: 8),
+          Center(
+            child: isSelected
+                ? Text(
+                    label,
+                    key: const ValueKey('selected'),
+                    maxLines: 1,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: foregroundColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('unselected')),
+          ),
         ],
       ),
     );
@@ -597,27 +576,27 @@ class _BottomBarActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 180),
-      opacity: config.onPressed == null ? 0.6 : 1,
-      child: FilledButton.icon(
-        onPressed: config.onPressed,
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(0, 52),
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          disabledBackgroundColor: colorScheme.surfaceContainerHighest,
-          disabledForegroundColor: colorScheme.onSurfaceVariant,
-          elevation: isDark ? 0 : 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+    return Tooltip(
+      message: config.tooltip,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: config.onPressed == null ? 0.6 : 1,
+        child: IconButton.filled(
+          onPressed: config.onPressed,
+          icon: Icon(
+            config.icon,
+            size: 22,
           ),
-        ),
-        icon: Icon(config.icon, size: 18),
-        label: Text(
-          config.label,
-          style: const TextStyle(fontWeight: FontWeight.w700),
+          style: IconButton.styleFrom(
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+            disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+            disabledForegroundColor: colorScheme.onSurfaceVariant,
+            elevation: isDark ? 0 : 1,
+            shape: const CircleBorder(),
+            minimumSize: const Size(62, 52),
+            maximumSize: const Size(62, 52),
+          ),
         ),
       ),
     );

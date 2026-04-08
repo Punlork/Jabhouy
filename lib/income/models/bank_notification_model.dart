@@ -32,7 +32,7 @@ enum BankApp {
         return BankApp.aba;
       case 'com.chipmongbank.mobileappproduction':
         return BankApp.chipMong;
-      case 'kh.com.acleda.acledamobile':
+      case 'com.domain.acledabankqr':
         return BankApp.acleda;
       default:
         return BankApp.unknown;
@@ -64,14 +64,19 @@ class BankNotificationModel extends Equatable {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory BankNotificationModel.fromNativeMap(Map<String, dynamic> json) {
-    final receivedAtRaw =
-        tryCast<int>(json['receivedAt']) ?? tryCast<int>(json['received_at']) ?? DateTime.now().millisecondsSinceEpoch;
-    final packageName = tryCast<String>(json['packageName']) ?? tryCast<String>(json['package_name']) ?? '';
+    final receivedAtRaw = tryCast<int>(json['receivedAt']) ??
+        tryCast<int>(json['received_at']) ??
+        DateTime.now().millisecondsSinceEpoch;
+    final packageName = tryCast<String>(json['packageName']) ??
+        tryCast<String>(json['package_name']) ??
+        '';
     final title = tryCast<String>(json['title']);
-    final message = tryCast<String>(json['message']) ?? tryCast<String>(json['text']) ?? '';
-    final bankApp = BankApp.fromKey(tryCast<String>(json['bankKey'])) == BankApp.unknown
-        ? BankApp.fromPackageName(packageName)
-        : BankApp.fromKey(tryCast<String>(json['bankKey']));
+    final message =
+        tryCast<String>(json['message']) ?? tryCast<String>(json['text']) ?? '';
+    final packageBankApp = BankApp.fromPackageName(packageName);
+    final payloadBankApp = BankApp.fromKey(tryCast<String>(json['bankKey']));
+    final bankApp =
+        packageBankApp == BankApp.unknown ? payloadBankApp : packageBankApp;
 
     return BankNotificationModel(
       fingerprint: tryCast<String>(json['fingerprint']) ??
@@ -85,10 +90,13 @@ class BankNotificationModel extends Equatable {
       bankApp: bankApp,
       title: title,
       message: message,
-      rawPayload: tryCast<String>(json['rawPayload']) ?? tryCast<String>(json['raw_payload']),
+      rawPayload: tryCast<String>(json['rawPayload']) ??
+          tryCast<String>(json['raw_payload']),
       amount: _parseDouble(json['amount']),
       currency: tryCast<String>(json['currency'], fallback: 'USD')!,
-      isIncome: tryCast<bool>(json['isIncome']) ?? tryCast<bool>(json['is_income']) ?? true,
+      isIncome: tryCast<bool>(json['isIncome']) ??
+          tryCast<bool>(json['is_income']) ??
+          true,
       receivedAt: DateTime.fromMillisecondsSinceEpoch(receivedAtRaw).toLocal(),
       source: tryCast<String>(json['source'], fallback: 'native')!,
       createdAt: tryCast<int>(json['createdAt'])?.let(
@@ -126,7 +134,17 @@ class BankNotificationModel extends Equatable {
 
   String get amountLabel {
     if (amount == null) return '--';
-    final hasDecimals = amount!.truncateToDouble() != amount!;
+    return formatAmount(
+      amount: amount!,
+      currency: currency,
+    );
+  }
+
+  static String formatAmount({
+    required double amount,
+    required String currency,
+  }) {
+    final hasDecimals = amount.truncateToDouble() != amount;
     if (currency == 'KHR') {
       return NumberFormat.currency(
         symbol: 'KHR ',
@@ -163,15 +181,22 @@ class IncomeSummary extends Equatable {
     required this.totalExpense,
     required this.totalCount,
     required this.incomeByBank,
+    required this.totalIncomeByCurrency,
+    required this.totalExpenseByCurrency,
+    required this.incomeByBankByCurrency,
   });
 
   factory IncomeSummary.fromItems(List<BankNotificationModel> items) {
     var totalIncome = 0.0;
     var totalExpense = 0.0;
     final incomeByBank = <BankApp, double>{};
+    final totalIncomeByCurrency = <String, double>{};
+    final totalExpenseByCurrency = <String, double>{};
+    final incomeByBankByCurrency = <String, Map<BankApp, double>>{};
 
     for (final item in items) {
       final amount = item.amount ?? 0;
+      final currency = item.currency;
       if (item.isIncome) {
         totalIncome += amount;
         incomeByBank.update(
@@ -179,8 +204,25 @@ class IncomeSummary extends Equatable {
           (value) => value + amount,
           ifAbsent: () => amount,
         );
+        totalIncomeByCurrency.update(
+          currency,
+          (value) => value + amount,
+          ifAbsent: () => amount,
+        );
+        incomeByBankByCurrency
+            .putIfAbsent(currency, () => <BankApp, double>{})
+            .update(
+              item.bankApp,
+              (value) => value + amount,
+              ifAbsent: () => amount,
+            );
       } else {
         totalExpense += amount;
+        totalExpenseByCurrency.update(
+          currency,
+          (value) => value + amount,
+          ifAbsent: () => amount,
+        );
       }
     }
 
@@ -189,6 +231,9 @@ class IncomeSummary extends Equatable {
       totalExpense: totalExpense,
       totalCount: items.length,
       incomeByBank: incomeByBank,
+      totalIncomeByCurrency: totalIncomeByCurrency,
+      totalExpenseByCurrency: totalExpenseByCurrency,
+      incomeByBankByCurrency: incomeByBankByCurrency,
     );
   }
 
@@ -197,18 +242,38 @@ class IncomeSummary extends Equatable {
     totalExpense: 0,
     totalCount: 0,
     incomeByBank: {},
+    totalIncomeByCurrency: {},
+    totalExpenseByCurrency: {},
+    incomeByBankByCurrency: {},
   );
 
   final double totalIncome;
   final double totalExpense;
   final int totalCount;
   final Map<BankApp, double> incomeByBank;
+  final Map<String, double> totalIncomeByCurrency;
+  final Map<String, double> totalExpenseByCurrency;
+  final Map<String, Map<BankApp, double>> incomeByBankByCurrency;
 
   @override
   List<Object?> get props => [
         totalIncome,
         totalExpense,
         totalCount,
-        incomeByBank.entries.map((entry) => '${entry.key.key}:${entry.value}').toList(growable: false),
+        incomeByBank.entries
+            .map((entry) => '${entry.key.key}:${entry.value}')
+            .toList(growable: false),
+        totalIncomeByCurrency.entries
+            .map((entry) => '${entry.key}:${entry.value}')
+            .toList(growable: false),
+        totalExpenseByCurrency.entries
+            .map((entry) => '${entry.key}:${entry.value}')
+            .toList(growable: false),
+        incomeByBankByCurrency.entries
+            .map(
+              (entry) =>
+                  '${entry.key}:${entry.value.entries.map((value) => '${value.key.key}:${value.value}').join(',')}',
+            )
+            .toList(growable: false),
       ];
 }

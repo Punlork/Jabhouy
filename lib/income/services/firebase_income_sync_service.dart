@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/income/models/bank_notification_model.dart';
+import 'package:my_app/income/services/notification_diagnostics_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef RemoteNotificationHandler = Future<void> Function(
@@ -31,6 +32,7 @@ class FirebaseIncomeSyncService {
     this._authService,
     this._fcmService,
     this._apiService,
+    this._diagnostics,
   );
 
   static const _collectionName = 'income_sync_scopes';
@@ -44,6 +46,7 @@ class FirebaseIncomeSyncService {
   final AuthService _authService;
   final FcmService _fcmService;
   final ApiService _apiService;
+  final NotificationDiagnosticsService _diagnostics;
   final _deviceRoleController = StreamController<DeviceRole>.broadcast();
 
   StreamSubscription<bool>? _connectivitySubscription;
@@ -84,15 +87,47 @@ class FirebaseIncomeSyncService {
   }
 
   Future<void> syncNotification(BankNotificationModel model) async {
-    if (!await _shouldUploadLocalChanges()) return;
+    if (!await _shouldUploadLocalChanges()) {
+      await _diagnostics.log(
+        source: 'flutter.firebase_sync',
+        message:
+            'Skipped remote notification sync because this device cannot upload local changes right now.',
+        level: 'warning',
+        metadata: {
+          'fingerprint': model.fingerprint,
+          'packageName': model.packageName,
+        },
+      );
+      return;
+    }
 
     final collection = await _prepareCollection();
-    if (collection == null) return;
+    if (collection == null) {
+      await _diagnostics.log(
+        source: 'flutter.firebase_sync',
+        message:
+            'Skipped remote notification sync because no Firebase collection is available.',
+        level: 'warning',
+        metadata: {
+          'fingerprint': model.fingerprint,
+        },
+      );
+      return;
+    }
 
     await collection.doc(model.fingerprint).set(
           _toRemoteMap(model),
           SetOptions(merge: true),
         );
+
+    await _diagnostics.log(
+      source: 'flutter.firebase_sync',
+      message: 'Synced notification to Firestore.',
+      metadata: {
+        'fingerprint': model.fingerprint,
+        'scopeId': _scopeId,
+      },
+    );
 
     unawaited(_pushNotifySubDevices(model));
   }
@@ -128,6 +163,20 @@ class FirebaseIncomeSyncService {
     _cachedMainDeviceClaimStatus = null;
   }
 
+  Future<void> clearPersistedSessionState() async {
+    if (isConfigured && await _connectivityService.isOnline) {
+      await _releaseMainDeviceClaimIfOwned();
+    }
+
+    await dispose();
+
+    final sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.remove('deviceRole');
+    await sharedPreferences.remove(_nativeScopeIdKey);
+
+    _deviceRoleController.add(DeviceRole.sub);
+  }
+
   Future<DeviceRole> getStoredDeviceRole() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     return DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
@@ -136,16 +185,30 @@ class FirebaseIncomeSyncService {
   Future<bool> requestMainDeviceRole() async {
     if (!isConfigured) {
       await _persistDeviceRole(DeviceRole.main);
+      await _diagnostics.log(
+        source: 'flutter.firebase_sync',
+        message: 'Promoted device to main role without Firebase configuration.',
+      );
       return true;
     }
 
     final scopeId = await _resolveScopeId();
     if (scopeId == null || scopeId.isEmpty) {
       await _persistDeviceRole(DeviceRole.main);
+      await _diagnostics.log(
+        source: 'flutter.firebase_sync',
+        message:
+            'Promoted device to main role because no sync scope id is available.',
+      );
       return true;
     }
 
     if (!await _connectivityService.isOnline) {
+      await _diagnostics.log(
+        source: 'flutter.firebase_sync',
+        message: 'Cannot claim main device role while offline.',
+        level: 'warning',
+      );
       return false;
     }
 
@@ -153,6 +216,16 @@ class FirebaseIncomeSyncService {
     _cachedMainDeviceClaimStatus = claimStatus;
     await _persistDeviceRole(
       claimStatus.isActiveOnThisDevice ? DeviceRole.main : DeviceRole.sub,
+    );
+    await _diagnostics.log(
+      source: 'flutter.firebase_sync',
+      message: claimStatus.isActiveOnThisDevice
+          ? 'Claimed main device role successfully.'
+          : 'Failed to claim main device role because another device is active.',
+      level: claimStatus.isActiveOnThisDevice ? 'info' : 'warning',
+      metadata: {
+        'scopeId': scopeId,
+      },
     );
     return claimStatus.isActiveOnThisDevice;
   }
@@ -162,6 +235,10 @@ class FirebaseIncomeSyncService {
       await _releaseMainDeviceClaimIfOwned();
     }
     await _persistDeviceRole(DeviceRole.sub);
+    await _diagnostics.log(
+      source: 'flutter.firebase_sync',
+      message: 'Released main device role.',
+    );
   }
 
   Future<DeviceRole> refreshDeviceRole() async {
@@ -280,6 +357,12 @@ class FirebaseIncomeSyncService {
         logger.i(
           'Firebase income sync skipped because no scope id is available.',
         );
+        await _diagnostics.log(
+          source: 'flutter.firebase_sync',
+          message:
+              'Skipped Firebase income sync because no scope id is available.',
+          level: 'warning',
+        );
         return;
       }
 
@@ -313,6 +396,16 @@ class FirebaseIncomeSyncService {
           'Firebase income sync listener failed.',
           error: error,
           stackTrace: stackTrace,
+        );
+        unawaited(
+          _diagnostics.log(
+            source: 'flutter.firebase_sync',
+            message: 'Firebase income sync listener failed.',
+            level: 'error',
+            metadata: {
+              'error': error.toString(),
+            },
+          ),
         );
       },
     );
@@ -359,6 +452,17 @@ class FirebaseIncomeSyncService {
         ..putIfAbsent('fingerprint', () => change.doc.id);
 
       unawaited(remoteHandler(payload));
+      unawaited(
+        _diagnostics.log(
+          source: 'flutter.firebase_sync',
+          message: 'Received notification snapshot from Firestore.',
+          metadata: {
+            'fingerprint': payload['fingerprint'],
+            'changeType': change.type.name,
+            'initialLoad': isInitialLoad,
+          },
+        ),
+      );
 
       // Notify sub device of a new income transaction pushed by the main device.
       if (!isInitialLoad && change.type == DocumentChangeType.added) {

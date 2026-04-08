@@ -92,6 +92,7 @@ class BankNotifications extends Table {
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(super.executor);
 
   @override
   int get schemaVersion => 4;
@@ -120,6 +121,16 @@ class AppDatabase extends _$AppDatabase {
         }
       },
     );
+  }
+
+  Future<void> clearUserData() async {
+    await transaction(() async {
+      await delete(bankNotifications).go();
+      await delete(shopItems).go();
+      await delete(loaners).go();
+      await delete(categories).go();
+      await delete(customers).go();
+    });
   }
 }
 

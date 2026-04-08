@@ -893,13 +893,13 @@ abstract class AppLocalizations {
   /// Label for showing income notifications only
   ///
   /// In en, this message translates to:
-  /// **'Income only'**
+  /// **'Income'**
   String get incomeOnly;
 
   /// Label for showing expense notifications only
   ///
   /// In en, this message translates to:
-  /// **'Expense only'**
+  /// **'Expense'**
   String get expenseOnly;
 
   /// Empty state message for the tracked notification list

@@ -16,7 +16,7 @@ void showShopItemDetailSheet({
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
+      builder: (context) => AppBottomSheet(
         child: ShopItemDetailSheet(
           item: item,
           onEdit: onEdit,

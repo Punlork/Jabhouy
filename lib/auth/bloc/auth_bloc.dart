@@ -11,11 +11,16 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 extension AuthStateExtension on AuthState {
-  Authenticated? get asAuthenticated => this is Authenticated ? this as Authenticated : null;
+  Authenticated? get asAuthenticated =>
+      this is Authenticated ? this as Authenticated : null;
 }
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(this.authService, this._connectivityService) : super(AuthInitial()) {
+  AuthBloc(
+    this.authService,
+    this._connectivityService,
+    this._sessionCleanupService,
+  ) : super(AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthSignedIn>(_onAuthSignedIn);
     on<AuthSignedOut>(_onAuthSignedOut);
@@ -28,6 +33,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final AuthService authService;
   final ConnectivityService _connectivityService;
+  final SessionCleanupService _sessionCleanupService;
   late final StreamSubscription<bool> _connectivitySubscription;
 
   @override
@@ -78,9 +84,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSignedOut event,
     Emitter<AuthState> emit,
   ) async {
-    final apiService = getIt<ApiService>();
-    await apiService.cookies.clearCookies();
-    await authService.clearCachedSession();
+    await _sessionCleanupService.clearSignedInUserData();
     emit(Unauthenticated());
   }
 

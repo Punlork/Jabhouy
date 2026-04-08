@@ -7,7 +7,20 @@ import android.service.notification.StatusBarNotification
 class BankNotificationListenerService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val packageName = sbn.packageName ?: return
-        if (packageName !in supportedPackages) return
+        if (packageName !in supportedPackages) {
+            if (looksRelevant(packageName)) {
+                NotificationTrackingBridge.appendDiagnosticLog(
+                    context = applicationContext,
+                    source = "android.listener",
+                    message = "Ignored notification from unsupported package.",
+                    level = "warning",
+                    metadata = mapOf(
+                        "packageName" to packageName,
+                    ),
+                )
+            }
+            return
+        }
 
         val extras = sbn.notification.extras
         val title = extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString()
@@ -19,7 +32,28 @@ class BankNotificationListenerService : NotificationListenerService() {
             textLines?.forEach { add(it?.toString()) }
         }.filterNotNull().map { it.trim() }.filter { it.isNotEmpty() }.distinct()
 
-        val message = messageParts.joinToString("").ifBlank { return }
+        val message = messageParts.joinToString(" ").ifBlank {
+            NotificationTrackingBridge.appendDiagnosticLog(
+                context = applicationContext,
+                source = "android.listener",
+                message = "Ignored notification because the listener could not extract message text.",
+                level = "warning",
+                metadata = mapOf(
+                    "packageName" to packageName,
+                    "title" to (title ?: ""),
+                ),
+            )
+            return
+        }
+        NotificationTrackingBridge.appendDiagnosticLog(
+            context = applicationContext,
+            source = "android.listener",
+            message = "Captured supported bank notification.",
+            metadata = mapOf(
+                "packageName" to packageName,
+                "title" to (title ?: ""),
+            ),
+        )
         val payload = NotificationTrackingBridge.buildPayload(
             packageName = packageName,
             title = title,
@@ -33,7 +67,16 @@ class BankNotificationListenerService : NotificationListenerService() {
         private val supportedPackages = setOf(
             "com.paygo24.ibank",
             "com.chipmongbank.mobileappproduction",
-            "kh.com.acleda.acledamobile",
+            "com.domain.acledabankqr",
         )
+
+        private fun looksRelevant(packageName: String): Boolean {
+            val normalized = packageName.lowercase()
+            return normalized.contains("aba") ||
+                normalized.contains("chip") ||
+                normalized.contains("mong") ||
+                normalized.contains("bank") ||
+                normalized.contains("acleda")
+        }
     }
 }

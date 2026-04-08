@@ -3,6 +3,7 @@ package com.pl.shop.management
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.util.Log
 import io.flutter.plugin.common.EventChannel
 import org.json.JSONArray
 import org.json.JSONObject
@@ -11,14 +12,23 @@ object NotificationTrackingBridge {
     private const val prefsName = "notification_tracking_bridge"
     private const val pendingKey = "flutter.pending_notifications"
     private const val uploadedKey = "flutter.uploaded_notification_fingerprints"
+    private const val diagnosticsKey = "flutter.notification_diagnostics_logs"
     private const val scopeIdKey = "flutter.income_sync_scope_id"
     private const val deviceRoleKey = "flutter.deviceRole"
     private const val sharedPrefsName = "FlutterSharedPreferences"
+    private const val maxDiagnosticEntries = 250
+    private const val logTag = "NotificationTracking"
+
     private val lock = Any()
     private var eventSink: EventChannel.EventSink? = null
+    private var logSink: EventChannel.EventSink? = null
 
     fun attachEventSink(sink: EventChannel.EventSink?) {
         eventSink = sink
+    }
+
+    fun attachLogSink(sink: EventChannel.EventSink?) {
+        logSink = sink
     }
 
     fun isNotificationAccessEnabled(context: Context): Boolean {
@@ -53,6 +63,12 @@ object NotificationTrackingBridge {
     }
 
     fun pushDemoNotifications(context: Context) {
+        appendDiagnosticLog(
+            context = context,
+            source = "android.bridge",
+            message = "Queueing demo notifications."
+        )
+
         val now = System.currentTimeMillis()
         val demos = listOf(
             buildPayload(
@@ -70,7 +86,7 @@ object NotificationTrackingBridge {
                 source = "demo"
             ),
             buildPayload(
-                packageName = "kh.com.acleda.acledamobile",
+                packageName = "com.domain.acledabankqr",
                 title = "Transfer out",
                 message = "ACLEDA transfer out KHR 40,000 from account.",
                 receivedAt = now - 24 * 60 * 60 * 1000,
@@ -116,6 +132,19 @@ object NotificationTrackingBridge {
             array.put(payload)
             prefs.edit().putString(pendingKey, array.toString()).apply()
         }
+
+        appendDiagnosticLog(
+            context = context,
+            source = "android.bridge",
+            message = "Queued notification payload for Flutter and background sync.",
+            metadata = mapOf(
+                "fingerprint" to payload.optString("fingerprint"),
+                "packageName" to payload.optString("packageName"),
+                "bankKey" to payload.optString("bankKey"),
+                "source" to payload.optString("source", "native"),
+            )
+        )
+
         eventSink?.success(jsonToMap(payload))
         BankNotificationSyncWorker.enqueue(context)
     }
@@ -157,12 +186,71 @@ object NotificationTrackingBridge {
         return role == "main"
     }
 
+    fun readDiagnosticsLogs(context: Context): List<Map<String, Any?>> {
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            val raw = prefs.getString(diagnosticsKey, "[]") ?: "[]"
+            return jsonArrayToMaps(JSONArray(raw))
+        }
+    }
+
+    fun clearDiagnosticsLogs(context: Context) {
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            prefs.edit().remove(diagnosticsKey).apply()
+        }
+    }
+
+    fun appendDiagnosticLog(
+        context: Context,
+        source: String,
+        message: String,
+        level: String = "info",
+        metadata: Map<String, Any?>? = null,
+    ) {
+        val entry = JSONObject().apply {
+            put("timestamp", System.currentTimeMillis())
+            put("source", source)
+            put("level", level)
+            put("message", message)
+            put("metadata", metadata?.let(::mapToJsonObject) ?: JSONObject())
+        }
+
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            val raw = prefs.getString(diagnosticsKey, "[]") ?: "[]"
+            val existing = JSONArray(raw)
+            existing.put(entry)
+
+            val trimmed = JSONArray()
+            val startIndex = maxOf(0, existing.length() - maxDiagnosticEntries)
+            for (index in startIndex until existing.length()) {
+                trimmed.put(existing.get(index))
+            }
+
+            prefs.edit().putString(diagnosticsKey, trimmed.toString()).apply()
+        }
+
+        when (level.lowercase()) {
+            "error" -> Log.e(logTag, "[$source] $message ${metadata.orEmpty()}")
+            "warning" -> Log.w(logTag, "[$source] $message ${metadata.orEmpty()}")
+            else -> Log.d(logTag, "[$source] $message ${metadata.orEmpty()}")
+        }
+
+        logSink?.success(jsonToMap(entry))
+    }
+
     private fun detectBank(packageName: String, normalizedText: String): String {
-        return when {
-            packageName == "com.paygo24.ibank" || normalizedText.contains("aba") -> "aba"
-            packageName == "com.chipmongbank.mobileappproduction" || normalizedText.contains("chip mong") -> "chip_mong"
-            packageName == "kh.com.acleda.acledamobile" || normalizedText.contains("acleda") -> "acleda"
-            else -> "unknown"
+        return when (packageName) {
+            "com.paygo24.ibank" -> "aba"
+            "com.chipmongbank.mobileappproduction" -> "chip_mong"
+            "com.domain.acledabankqr" -> "acleda"
+            else -> when {
+                normalizedText.contains("acleda") -> "acleda"
+                normalizedText.contains("chip mong") -> "chip_mong"
+                normalizedText.contains("aba") -> "aba"
+                else -> "unknown"
+            }
         }
     }
 
@@ -191,7 +279,8 @@ object NotificationTrackingBridge {
             "វេរចូល",
             "ប្រាក់ចូល",
             "ដាក់ប្រាក់",
-            "បញ្ចូលប្រាក់"
+            "បញ្ចូលប្រាក់",
+            "ទទួល",
         )
         val expenseKeywords = listOf(
             "transfer out",
@@ -241,8 +330,28 @@ object NotificationTrackingBridge {
         while (iterator.hasNext()) {
             val key = iterator.next()
             val value = json.get(key)
-            map[key] = if (value == JSONObject.NULL) null else value
+            map[key] = when {
+                value == JSONObject.NULL -> null
+                value is JSONObject -> jsonToMap(value)
+                value is JSONArray -> (0 until value.length()).map { index ->
+                    val item = value.get(index)
+                    when (item) {
+                        is JSONObject -> jsonToMap(item)
+                        JSONObject.NULL -> null
+                        else -> item
+                    }
+                }
+                else -> value
+            }
         }
         return map
+    }
+
+    private fun mapToJsonObject(map: Map<String, Any?>): JSONObject {
+        val json = JSONObject()
+        for ((key, value) in map) {
+            json.put(key, value)
+        }
+        return json
     }
 }

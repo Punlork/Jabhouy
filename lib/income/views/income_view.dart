@@ -14,9 +14,7 @@ class IncomeView extends StatefulWidget {
 }
 
 class _IncomeViewState extends State<IncomeView>
-    with
-        AutomaticKeepAliveClientMixin<IncomeView>,
-        InfiniteScrollMixin<IncomeView> {
+    with AutomaticKeepAliveClientMixin<IncomeView>, InfiniteScrollMixin<IncomeView> {
   @override
   void initState() {
     super.initState();
@@ -24,8 +22,7 @@ class _IncomeViewState extends State<IncomeView>
   }
 
   @override
-  ScrollController? getScrollController(BuildContext context) =>
-      TabScrollManager.of(context)?.getController(2);
+  ScrollController? getScrollController(BuildContext context) => TabScrollManager.of(context)?.getController(2);
 
   @override
   void onScrollToBottom() {}
@@ -42,8 +39,7 @@ class _IncomeViewState extends State<IncomeView>
     final deviceRole = context.select((AppBloc bloc) => bloc.state.deviceRole);
 
     return BlocListener<AppBloc, AppState>(
-      listenWhen: (previous, current) =>
-          previous.deviceRole != current.deviceRole,
+      listenWhen: (previous, current) => previous.deviceRole != current.deviceRole,
       listener: (context, state) {
         context.read<IncomeBloc>().add(const RefreshIncomeTrackingStatus());
       },
@@ -58,13 +54,10 @@ class _IncomeViewState extends State<IncomeView>
               ],
             ),
           IncomeLoaded() => RefreshIndicator(
-              onRefresh: () async => context
-                  .read<IncomeBloc>()
-                  .add(const RefreshIncomeTrackingStatus()),
+              onRefresh: () async => context.read<IncomeBloc>().add(const RefreshIncomeTrackingStatus()),
               child: ListView(
                 controller: controller,
-                physics: const BouncingScrollPhysics()
-                    .applyTo(const AlwaysScrollableScrollPhysics()),
+                physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                 children: [
                   _TrackingStatusCard(
@@ -104,8 +97,7 @@ class _TrackingStatusCard extends StatelessWidget {
     final isSupported = status?.isSupported ?? false;
     final isEnabled = status?.isAccessEnabled ?? false;
     final isMainDevice = deviceRole.isMain;
-    final isBlockedByAnotherMain =
-        status?.isBlockedByAnotherMainDevice ?? false;
+    final isBlockedByAnotherMain = status?.isBlockedByAnotherMainDevice ?? false;
     final statusMessage = !isMainDevice
         ? context.l10n.subDeviceTrackingDisabled
         : isBlockedByAnotherMain
@@ -129,12 +121,8 @@ class _TrackingStatusCard extends StatelessWidget {
           Row(
             children: [
               Icon(
-                isEnabled
-                    ? Icons.notifications_active_rounded
-                    : Icons.notifications_off_rounded,
-                color: isEnabled
-                    ? AppColorTheme.success
-                    : colorScheme.onSurfaceVariant,
+                isEnabled ? Icons.notifications_active_rounded : Icons.notifications_off_rounded,
+                color: isEnabled ? AppColorTheme.success : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -163,22 +151,15 @@ class _TrackingStatusCard extends StatelessWidget {
                       ),
                 ),
               ),
-              if (isMainDevice &&
-                  !isBlockedByAnotherMain &&
-                  isSupported &&
-                  !isEnabled)
+              if (isMainDevice && !isBlockedByAnotherMain && isSupported && !isEnabled)
                 _TinyActionButton(
-                  onPressed: () => context
-                      .read<IncomeBloc>()
-                      .add(const OpenNotificationAccessSettings()),
+                  onPressed: () => context.read<IncomeBloc>().add(const OpenNotificationAccessSettings()),
                   icon: Icons.settings,
                   tooltip: context.l10n.enableNotificationAccess,
                 ),
               if (isMainDevice) ...[
                 _TinyActionButton(
-                  onPressed: () => context
-                      .read<IncomeBloc>()
-                      .add(const RefreshIncomeTrackingStatus()),
+                  onPressed: () => context.read<IncomeBloc>().add(const RefreshIncomeTrackingStatus()),
                   icon: Icons.refresh_rounded,
                   tooltip: context.l10n.refreshStatus,
                 ),
@@ -213,8 +194,7 @@ class _RolePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: (isMainDevice ? AppColorTheme.success : AppColorTheme.brand)
-            .withValues(alpha: 0.12),
+        color: (isMainDevice ? AppColorTheme.success : AppColorTheme.brand).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -326,8 +306,7 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final branding = resolveBankBranding(item.bankApp, colorScheme);
-    final amountColor =
-        item.isIncome ? AppColorTheme.success : AppColorTheme.error;
+    final amountColor = item.isIncome ? AppColorTheme.success : AppColorTheme.error;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -414,17 +393,17 @@ class _NotificationCard extends StatelessWidget {
             children: [
               _MetaChip(
                 backgroundColor: branding.primary.withValues(alpha: 0.08),
-                label: item.isIncome
-                    ? context.l10n.incomeOnly
-                    : context.l10n.expenseOnly,
+                label: item.isIncome ? context.l10n.incomeOnly : context.l10n.expenseOnly,
                 color: amountColor,
               ),
-              const SizedBox(width: 8),
-              _MetaChip(
-                backgroundColor: branding.primary.withValues(alpha: 0.08),
-                label: item.source.toUpperCase(),
-                color: branding.primary,
-              ),
+              if (!kReleaseMode) ...[
+                const SizedBox(width: 8),
+                _MetaChip(
+                  backgroundColor: branding.primary.withValues(alpha: 0.08),
+                  label: item.source.toUpperCase(),
+                  color: branding.primary,
+                ),
+              ],
             ],
           ),
         ],

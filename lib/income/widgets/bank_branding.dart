@@ -59,9 +59,6 @@ class BankLogoBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: branding.logoBackground,
         borderRadius: BorderRadius.circular(size * 0.3),
-        border: Border.all(
-          color: borderColor ?? colorScheme.outlineVariant,
-        ),
       ),
       alignment: Alignment.center,
       child: branding.logoAssetPath == null
@@ -73,11 +70,11 @@ class BankLogoBadge extends StatelessWidget {
                     letterSpacing: 0,
                   ),
             )
-          : Padding(
-              padding: EdgeInsets.all(size * 0.14),
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(size * 0.3),
               child: Image.asset(
                 branding.logoAssetPath!,
-                fit: BoxFit.contain,
+                fit: BoxFit.cover,
               ),
             ),
     );

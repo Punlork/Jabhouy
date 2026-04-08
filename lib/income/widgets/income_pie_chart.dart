@@ -5,7 +5,7 @@ import 'package:my_app/app/app.dart';
 import 'package:my_app/income/income.dart';
 import 'package:my_app/l10n/l10n.dart';
 
-class IncomePieChart extends StatelessWidget {
+class IncomePieChart extends StatefulWidget {
   const IncomePieChart({
     required this.summary,
     super.key,
@@ -14,19 +14,67 @@ class IncomePieChart extends StatelessWidget {
   final IncomeSummary summary;
 
   @override
+  State<IncomePieChart> createState() => _IncomePieChartState();
+}
+
+class _IncomePieChartState extends State<IncomePieChart> {
+  String? _selectedCurrency;
+
+  @override
+  void didUpdateWidget(covariant IncomePieChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final currencies = _availableCurrencies;
+    if (currencies.isEmpty) {
+      _selectedCurrency = null;
+      return;
+    }
+
+    if (_selectedCurrency == null || !currencies.contains(_selectedCurrency)) {
+      _selectedCurrency = currencies.first;
+    }
+  }
+
+  List<String> get _availableCurrencies {
+    final currencies = widget.summary.incomeByBankByCurrency.keys.toList()..sort(_compareCurrencies);
+    return currencies;
+  }
+
+  _CurrencyChartSection? get _selectedSection {
+    final currencies = _availableCurrencies;
+    if (currencies.isEmpty) {
+      return null;
+    }
+
+    final currency =
+        _selectedCurrency != null && currencies.contains(_selectedCurrency) ? _selectedCurrency! : currencies.first;
+    _selectedCurrency = currency;
+
+    final summary = widget.summary;
+    final colorScheme = Theme.of(context).colorScheme;
+    final bankTotals = summary.incomeByBankByCurrency[currency] ?? const {};
+
+    return _CurrencyChartSection(
+      currency: currency,
+      total: summary.totalIncomeByCurrency[currency] ?? 0,
+      segments: bankTotals.entries
+          .where((bankEntry) => bankEntry.value > 0)
+          .map(
+            (bankEntry) => _ChartSegment(
+              label: bankEntry.key.label,
+              branding: resolveBankBranding(bankEntry.key, colorScheme),
+              value: bankEntry.value,
+            ),
+          )
+          .toList(growable: false)
+        ..sort((a, b) => b.value.compareTo(a.value)),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final segments = summary.incomeByBank.entries
-        .where((entry) => entry.value > 0)
-        .map(
-          (entry) => _ChartSegment(
-            label: entry.key.label,
-            branding: resolveBankBranding(entry.key, colorScheme),
-            value: entry.value,
-          ),
-        )
-        .toList(growable: false)
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final currencySection = _selectedSection;
+    final currencies = _availableCurrencies;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -38,101 +86,188 @@ class IncomePieChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.l10n.incomeByBank,
-            style: AppTextTheme.title.copyWith(
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 180,
-            child: Row(
-              children: [
-                Expanded(
-                  child: CustomPaint(
-                    painter: _IncomePieChartPainter(
-                      segments: segments,
-                      emptyColor: colorScheme.secondaryContainer,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            context.l10n.totalIncome,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            BankNotificationModel(
-                              fingerprint: 'chart',
-                              packageName: '',
-                              bankApp: BankApp.unknown,
-                              message: '',
-                              amount: summary.totalIncome,
-                              isIncome: true,
-                              receivedAt: DateTime.now(),
-                            ).amountLabel,
-                            style: AppTextTheme.title.copyWith(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                context.l10n.incomeByBank,
+                style: AppTextTheme.title.copyWith(
+                  color: colorScheme.onSurface,
                 ),
+              ),
+              if (currencies.length > 1) ...[
                 const SizedBox(width: 16),
-                Expanded(
-                  child: segments.isEmpty
-                      ? Text(
-                          context.l10n.noIncomeChartData,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                        )
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: segments
-                              .map(
-                                (segment) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Row(
-                                    children: [
-                                      BankLogoBadge(
-                                        branding: segment.branding,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          segment.label,
-                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                                color: colorScheme.onSurface,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                        ),
-                                      ),
-                                      Text(
-                                        segment.value.toStringAsFixed(0),
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                              color: colorScheme.onSurface,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                              .toList(growable: false),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: currencies
+                      .map(
+                        (currency) => ChoiceChip(
+                          label: Text(currency),
+                          selected: currency == _selectedCurrency,
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedCurrency = currency;
+                            });
+                          },
                         ),
+                      )
+                      .toList(growable: false),
                 ),
               ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (currencySection == null)
+            Text(
+              context.l10n.noIncomeChartData,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            )
+          else
+            _CurrencyPieChartSection(
+              section: currencySection,
             ),
+        ],
+      ),
+    );
+  }
+
+  int _compareCurrencies(String left, String right) {
+    const preferredOrder = ['USD', 'KHR'];
+    final leftIndex = preferredOrder.indexOf(left);
+    final rightIndex = preferredOrder.indexOf(right);
+
+    if (leftIndex == -1 && rightIndex == -1) {
+      return left.compareTo(right);
+    }
+    if (leftIndex == -1) {
+      return 1;
+    }
+    if (rightIndex == -1) {
+      return -1;
+    }
+    return leftIndex.compareTo(rightIndex);
+  }
+}
+
+class _CurrencyChartSection {
+  const _CurrencyChartSection({
+    required this.currency,
+    required this.total,
+    required this.segments,
+  });
+
+  final String currency;
+  final double total;
+  final List<_ChartSegment> segments;
+}
+
+class _CurrencyPieChartSection extends StatelessWidget {
+  const _CurrencyPieChartSection({
+    required this.section,
+  });
+
+  final _CurrencyChartSection section;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      height: 180,
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomPaint(
+              painter: _IncomePieChartPainter(
+                segments: section.segments,
+                emptyColor: colorScheme.secondaryContainer,
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${context.l10n.totalIncome} (${section.currency})',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      BankNotificationModel.formatAmount(
+                        amount: section.total,
+                        currency: section.currency,
+                      ),
+                      style: AppTextTheme.title.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: section.segments.isEmpty
+                ? Text(
+                    context.l10n.noIncomeChartData,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: section.segments
+                        .map(
+                          (segment) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              children: [
+                                BankLogoBadge(
+                                  branding: segment.branding,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    segment.label
+                                        .replaceAll(
+                                          RegExp(
+                                            r'\bbank\b',
+                                            caseSensitive: false,
+                                          ),
+                                          '',
+                                        )
+                                        .trim(),
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.onSurface,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ),
+                                Text(
+                                  BankNotificationModel.formatAmount(
+                                    amount: segment.value,
+                                    currency: section.currency,
+                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.onSurface,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
           ),
         ],
       ),

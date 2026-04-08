@@ -488,7 +488,7 @@
   "all": "All",
   "@all": {
     "description": "Label for the all filter"
-  }  ,
+  },
   "income": "Income",
   "@income": {
     "description": "Label for the income section"
@@ -561,11 +561,11 @@
   "@allRecords": {
     "description": "Label for showing all tracked notification records"
   },
-  "incomeOnly": "Income only",
+  "incomeOnly": "Income",
   "@incomeOnly": {
     "description": "Label for showing income notifications only"
   },
-  "expenseOnly": "Expense only",
+  "expenseOnly": "Expense",
   "@expenseOnly": {
     "description": "Label for showing expense notifications only"
   },

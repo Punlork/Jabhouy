@@ -33,60 +33,62 @@ class _FilterSheetState extends State<FilterSheet> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.filterItems,
-            style: AppTextTheme.title.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
+    return AppBottomSheet(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.filterItems,
+              style: AppTextTheme.title.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          CategoryDropdown(
-            initialValue: _categoryFilter,
-            onChanged: (value) {
-              _categoryFilter = value;
-              setState(() {});
-            },
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-                  widget.onApply.call(null);
-                  context.pop();
-                },
-                child: Text(context.l10n.reset),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: isDisabled
-                    ? null
-                    : () {
-                        widget.onApply(_categoryFilter);
-                        context.pop();
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isDisabled
-                      ? colorScheme.surfaceContainerHighest
-                      : colorScheme.primary,
-                  foregroundColor: isDisabled
-                      ? colorScheme.onSurfaceVariant
-                      : colorScheme.onPrimary,
+            const SizedBox(height: 16),
+            CategoryDropdown(
+              initialValue: _categoryFilter,
+              onChanged: (value) {
+                _categoryFilter = value;
+                setState(() {});
+              },
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    widget.onApply.call(null);
+                    context.pop();
+                  },
+                  child: Text(context.l10n.reset),
                 ),
-                child: Text(context.l10n.apply),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-        ],
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: isDisabled
+                      ? null
+                      : () {
+                          widget.onApply(_categoryFilter);
+                          context.pop();
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDisabled
+                        ? colorScheme.surfaceContainerHighest
+                        : colorScheme.primary,
+                    foregroundColor: isDisabled
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onPrimary,
+                  ),
+                  child: Text(context.l10n.apply),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

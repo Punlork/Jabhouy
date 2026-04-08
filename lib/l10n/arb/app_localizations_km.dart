@@ -423,10 +423,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get allRecords => 'កំណត់ត្រាទាំងអស់';
 
   @override
-  String get incomeOnly => 'តែចំណូល';
+  String get incomeOnly => 'ចំណូល';
 
   @override
-  String get expenseOnly => 'តែចំណាយ';
+  String get expenseOnly => 'ចំណាយ';
 
   @override
   String get noTrackedNotifications => 'រកមិនឃើញការជូនដំណឹងធនាគារដែលបានតាមដាន';

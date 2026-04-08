@@ -92,115 +92,117 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
     final inputTheme = Theme.of(context).inputDecorationTheme;
     final l10n = AppLocalizations.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.filterLoaners,
-            style: AppTextTheme.title.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            readOnly: true,
-            onTap: () => _selectDate(context, true),
-            decoration: InputDecoration(
-              labelText: l10n.fromDate,
-              hintText: _fromDate == null ? l10n.notSet : null,
-              filled: inputTheme.filled,
-              fillColor: inputTheme.fillColor,
-              border: inputTheme.border,
-              enabledBorder: inputTheme.enabledBorder,
-              focusedBorder: inputTheme.focusedBorder,
-              suffixIcon: const Icon(Icons.calendar_today, size: 20),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-            ),
-            controller: TextEditingController(
-              text: _formatToRFC3339Date(_fromDate),
-            )..addListener(() {}),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            readOnly: true,
-            onTap: () => _selectDate(context, false),
-            decoration: InputDecoration(
-              labelText: l10n.toDate,
-              hintText: _toDate == null ? l10n.notSet : null,
-              filled: inputTheme.filled,
-              fillColor: inputTheme.fillColor,
-              border: inputTheme.border,
-              enabledBorder: inputTheme.enabledBorder,
-              focusedBorder: inputTheme.focusedBorder,
-              suffixIcon: const Icon(Icons.calendar_today, size: 20),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-            ),
-            controller: TextEditingController(
-              text: _formatToRFC3339Date(_toDate),
-            ),
-          ),
-          const SizedBox(height: 16),
-          CustomerAutocompleteField(
-            controller: _loanerController,
-            label: l10n.name,
-            required: true,
-            direction: VerticalDirection.up,
-            onSelected: (customer) {
-              _loanerFilter = customer;
-              _loanerController.text = customer.name;
-              FocusManager.instance.primaryFocus?.unfocus();
-              setState(() {});
-            },
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-                  context
-                      .read<LoanerBloc>()
-                      .add(LoadLoaners(forceRefresh: true));
-                  Navigator.pop(context);
-                },
-                child: Text(l10n.reset),
+    return AppBottomSheet(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.filterLoaners,
+              style: AppTextTheme.title.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: isDisabled
-                    ? null
-                    : () {
-                        _adjustDatesIfNeeded();
-                        context.read<LoanerBloc>().add(
-                              LoadLoaners(
-                                fromDate: _fromDate,
-                                toDate: _toDate,
-                                loanerFilter: _loanerFilter,
-                                forceRefresh: true,
-                              ),
-                            );
-                        Navigator.pop(context);
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isDisabled
-                      ? colorScheme.surfaceContainerHighest
-                      : colorScheme.primary,
-                  foregroundColor: isDisabled
-                      ? colorScheme.onSurfaceVariant
-                      : colorScheme.onPrimary,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              readOnly: true,
+              onTap: () => _selectDate(context, true),
+              decoration: InputDecoration(
+                labelText: l10n.fromDate,
+                hintText: _fromDate == null ? l10n.notSet : null,
+                filled: inputTheme.filled,
+                fillColor: inputTheme.fillColor,
+                border: inputTheme.border,
+                enabledBorder: inputTheme.enabledBorder,
+                focusedBorder: inputTheme.focusedBorder,
+                suffixIcon: const Icon(Icons.calendar_today, size: 20),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+              ),
+              controller: TextEditingController(
+                text: _formatToRFC3339Date(_fromDate),
+              )..addListener(() {}),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              readOnly: true,
+              onTap: () => _selectDate(context, false),
+              decoration: InputDecoration(
+                labelText: l10n.toDate,
+                hintText: _toDate == null ? l10n.notSet : null,
+                filled: inputTheme.filled,
+                fillColor: inputTheme.fillColor,
+                border: inputTheme.border,
+                enabledBorder: inputTheme.enabledBorder,
+                focusedBorder: inputTheme.focusedBorder,
+                suffixIcon: const Icon(Icons.calendar_today, size: 20),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+              ),
+              controller: TextEditingController(
+                text: _formatToRFC3339Date(_toDate),
+              ),
+            ),
+            const SizedBox(height: 16),
+            CustomerAutocompleteField(
+              controller: _loanerController,
+              label: l10n.name,
+              required: true,
+              direction: VerticalDirection.up,
+              onSelected: (customer) {
+                _loanerFilter = customer;
+                _loanerController.text = customer.name;
+                FocusManager.instance.primaryFocus?.unfocus();
+                setState(() {});
+              },
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    context
+                        .read<LoanerBloc>()
+                        .add(LoadLoaners(forceRefresh: true));
+                    Navigator.pop(context);
+                  },
+                  child: Text(l10n.reset),
                 ),
-                child: Text(l10n.apply),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-        ],
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: isDisabled
+                      ? null
+                      : () {
+                          _adjustDatesIfNeeded();
+                          context.read<LoanerBloc>().add(
+                                LoadLoaners(
+                                  fromDate: _fromDate,
+                                  toDate: _toDate,
+                                  loanerFilter: _loanerFilter,
+                                  forceRefresh: true,
+                                ),
+                              );
+                          Navigator.pop(context);
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDisabled
+                        ? colorScheme.surfaceContainerHighest
+                        : colorScheme.primary,
+                    foregroundColor: isDisabled
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onPrimary,
+                  ),
+                  child: Text(l10n.apply),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

@@ -62,148 +62,150 @@ class _IncomeFilterSheetState extends State<IncomeFilterSheet> {
     final colorScheme = Theme.of(context).colorScheme;
     final inputTheme = Theme.of(context).inputDecorationTheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.filterIncome,
-            style: AppTextTheme.title.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            readOnly: true,
-            onTap: () => _pickDate(true),
-            controller: TextEditingController(text: _formatDate(_fromDate)),
-            decoration: InputDecoration(
-              labelText: context.l10n.fromDate,
-              filled: inputTheme.filled,
-              fillColor: inputTheme.fillColor,
-              border: inputTheme.border,
-              enabledBorder: inputTheme.enabledBorder,
-              focusedBorder: inputTheme.focusedBorder,
-              suffixIcon: const Icon(Icons.calendar_today, size: 20),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            readOnly: true,
-            onTap: () => _pickDate(false),
-            controller: TextEditingController(text: _formatDate(_toDate)),
-            decoration: InputDecoration(
-              labelText: context.l10n.toDate,
-              filled: inputTheme.filled,
-              fillColor: inputTheme.fillColor,
-              border: inputTheme.border,
-              enabledBorder: inputTheme.enabledBorder,
-              focusedBorder: inputTheme.focusedBorder,
-              suffixIcon: const Icon(Icons.calendar_today, size: 20),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.bankLabel,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ChoiceChip(
-                label: Text(context.l10n.all),
-                selected: _bankFilter == null,
-                onSelected: (_) => setState(() => _bankFilter = null),
+    return AppBottomSheet(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.filterIncome,
+              style: AppTextTheme.title.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
               ),
-              for (final bank in [
-                BankApp.aba,
-                BankApp.chipMong,
-                BankApp.acleda,
-              ])
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              readOnly: true,
+              onTap: () => _pickDate(true),
+              controller: TextEditingController(text: _formatDate(_fromDate)),
+              decoration: InputDecoration(
+                labelText: context.l10n.fromDate,
+                filled: inputTheme.filled,
+                fillColor: inputTheme.fillColor,
+                border: inputTheme.border,
+                enabledBorder: inputTheme.enabledBorder,
+                focusedBorder: inputTheme.focusedBorder,
+                suffixIcon: const Icon(Icons.calendar_today, size: 20),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              readOnly: true,
+              onTap: () => _pickDate(false),
+              controller: TextEditingController(text: _formatDate(_toDate)),
+              decoration: InputDecoration(
+                labelText: context.l10n.toDate,
+                filled: inputTheme.filled,
+                fillColor: inputTheme.fillColor,
+                border: inputTheme.border,
+                enabledBorder: inputTheme.enabledBorder,
+                focusedBorder: inputTheme.focusedBorder,
+                suffixIcon: const Icon(Icons.calendar_today, size: 20),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.bankLabel,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
                 ChoiceChip(
-                  label: Text(bank.label),
-                  selected: _bankFilter == bank,
-                  onSelected: (_) => setState(() => _bankFilter = bank),
+                  label: Text(context.l10n.all),
+                  selected: _bankFilter == null,
+                  onSelected: (_) => setState(() => _bankFilter = null),
                 ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.trackedNotifications,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ChoiceChip(
-                label: Text(context.l10n.allRecords),
-                selected: _recordFilter == NotificationRecordFilter.all,
-                onSelected: (_) => setState(
-                  () => _recordFilter = NotificationRecordFilter.all,
+                for (final bank in [
+                  BankApp.aba,
+                  BankApp.chipMong,
+                  BankApp.acleda,
+                ])
+                  ChoiceChip(
+                    label: Text(bank.label),
+                    selected: _bankFilter == bank,
+                    onSelected: (_) => setState(() => _bankFilter = bank),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.trackedNotifications,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  label: Text(context.l10n.allRecords),
+                  selected: _recordFilter == NotificationRecordFilter.all,
+                  onSelected: (_) => setState(
+                    () => _recordFilter = NotificationRecordFilter.all,
+                  ),
                 ),
-              ),
-              ChoiceChip(
-                label: Text(context.l10n.incomeOnly),
-                selected: _recordFilter == NotificationRecordFilter.income,
-                onSelected: (_) => setState(
-                  () => _recordFilter = NotificationRecordFilter.income,
+                ChoiceChip(
+                  label: Text(context.l10n.incomeOnly),
+                  selected: _recordFilter == NotificationRecordFilter.income,
+                  onSelected: (_) => setState(
+                    () => _recordFilter = NotificationRecordFilter.income,
+                  ),
                 ),
-              ),
-              ChoiceChip(
-                label: Text(context.l10n.expenseOnly),
-                selected: _recordFilter == NotificationRecordFilter.expense,
-                onSelected: (_) => setState(
-                  () => _recordFilter = NotificationRecordFilter.expense,
+                ChoiceChip(
+                  label: Text(context.l10n.expenseOnly),
+                  selected: _recordFilter == NotificationRecordFilter.expense,
+                  onSelected: (_) => setState(
+                    () => _recordFilter = NotificationRecordFilter.expense,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-                  widget.onApply(
-                    null,
-                    null,
-                    null,
-                    NotificationRecordFilter.all,
-                  );
-                  Navigator.pop(context);
-                },
-                child: Text(context.l10n.reset),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  if (_fromDate != null &&
-                      _toDate != null &&
-                      _fromDate!.isAfter(_toDate!)) {
-                    final temp = _fromDate;
-                    _fromDate = _toDate;
-                    _toDate = temp;
-                  }
-                  widget.onApply(
-                    _fromDate,
-                    _toDate,
-                    _bankFilter,
-                    _recordFilter,
-                  );
-                  Navigator.pop(context);
-                },
-                child: Text(context.l10n.apply),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    widget.onApply(
+                      null,
+                      null,
+                      null,
+                      NotificationRecordFilter.all,
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Text(context.l10n.reset),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_fromDate != null &&
+                        _toDate != null &&
+                        _fromDate!.isAfter(_toDate!)) {
+                      final temp = _fromDate;
+                      _fromDate = _toDate;
+                      _toDate = temp;
+                    }
+                    widget.onApply(
+                      _fromDate,
+                      _toDate,
+                      _bankFilter,
+                      _recordFilter,
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Text(context.l10n.apply),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

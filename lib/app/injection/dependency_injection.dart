@@ -28,6 +28,11 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerLazySingleton(NotificationTrackingBridge.new)
+    ..registerLazySingleton(
+      () => NotificationDiagnosticsService(
+        getIt<NotificationTrackingBridge>(),
+      ),
+    )
     ..registerLazySingleton(FcmService.new)
     ..registerLazySingleton(
       () => FirebaseIncomeSyncService(
@@ -35,6 +40,7 @@ Future<void> setupDependencies() async {
         getIt<AuthService>(),
         getIt<FcmService>(),
         getIt<ApiService>(),
+        getIt<NotificationDiagnosticsService>(),
       ),
     )
     ..registerLazySingleton(
@@ -63,6 +69,7 @@ Future<void> setupDependencies() async {
         getIt<AppDatabase>(),
         getIt<NotificationTrackingBridge>(),
         getIt<FirebaseIncomeSyncService>(),
+        getIt<NotificationDiagnosticsService>(),
       ),
     )
     ..registerLazySingleton(
@@ -72,12 +79,23 @@ Future<void> setupDependencies() async {
         getIt<ConnectivityService>(),
       ),
     )
+    ..registerLazySingleton(
+      () => SessionCleanupService(
+        apiService: getIt<ApiService>(),
+        authService: getIt<AuthService>(),
+        database: getIt<AppDatabase>(),
+        incomeSyncService: getIt<FirebaseIncomeSyncService>(),
+        notificationTrackingBridge: getIt<NotificationTrackingBridge>(),
+        notificationDiagnosticsService: getIt<NotificationDiagnosticsService>(),
+      ),
+    )
     ..registerFactory(() => AppBloc(getIt<FirebaseIncomeSyncService>()))
     ..registerFactory(() => UploadBloc(getIt<UploadService>()))
     ..registerFactory(
       () => AuthBloc(
         getIt<AuthService>(),
         getIt<ConnectivityService>(),
+        getIt<SessionCleanupService>(),
       )..add(AuthCheckRequested()),
     )
     ..registerFactory(

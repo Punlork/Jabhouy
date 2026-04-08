@@ -20,17 +20,29 @@ class NotificationTrackingStatus {
 }
 
 class IncomeService {
-  IncomeService(this._db, this._bridge, this._syncService);
+  IncomeService(
+    this._db,
+    this._bridge,
+    this._syncService,
+    this._diagnostics,
+  );
 
   final AppDatabase _db;
   final NotificationTrackingBridge _bridge;
   final FirebaseIncomeSyncService _syncService;
+  final NotificationDiagnosticsService _diagnostics;
   StreamSubscription<Map<String, dynamic>>? _nativeSubscription;
   bool _initialized = false;
 
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
+
+    await _diagnostics.initialize();
+    await _diagnostics.log(
+      source: 'flutter.income_service',
+      message: 'Initializing income service.',
+    );
 
     await importPendingTrackedNotifications();
     await _syncService.initialize(
@@ -42,6 +54,14 @@ class IncomeService {
     );
 
     _nativeSubscription = _bridge.notificationStream.listen((payload) async {
+      await _diagnostics.log(
+        source: 'flutter.income_service',
+        message: 'Received native notification event from Android bridge.',
+        metadata: {
+          'packageName': payload['packageName'],
+          'fingerprint': payload['fingerprint'],
+        },
+      );
       await saveTrackedNotificationMap(payload);
     });
   }
@@ -54,10 +74,22 @@ class IncomeService {
 
   Future<NotificationTrackingStatus> getTrackingStatus() async {
     final mainDeviceClaimStatus = await _syncService.getMainDeviceClaimStatus();
+    final isAccessEnabled = await _bridge.isNotificationAccessEnabled();
+
+    await _diagnostics.log(
+      source: 'flutter.income_service',
+      message: 'Fetched notification tracking status.',
+      metadata: {
+        'isSupported': _bridge.isSupported,
+        'isAccessEnabled': isAccessEnabled,
+        'canCaptureLocally': mainDeviceClaimStatus.isActiveOnThisDevice,
+        'blockedByAnotherMain': mainDeviceClaimStatus.isClaimedByAnotherDevice,
+      },
+    );
 
     return NotificationTrackingStatus(
       isSupported: _bridge.isSupported,
-      isAccessEnabled: await _bridge.isNotificationAccessEnabled(),
+      isAccessEnabled: isAccessEnabled,
       canCaptureLocally: mainDeviceClaimStatus.isActiveOnThisDevice,
       isBlockedByAnotherMainDevice:
           mainDeviceClaimStatus.isClaimedByAnotherDevice,
@@ -65,28 +97,67 @@ class IncomeService {
   }
 
   Future<void> openNotificationAccessSettings() {
+    unawaited(
+      _diagnostics.log(
+        source: 'flutter.income_service',
+        message: 'Opening Android notification access settings.',
+      ),
+    );
     return _bridge.openNotificationAccessSettings();
   }
 
   Future<void> importPendingTrackedNotifications() async {
-    if (!await _syncService.canAcceptLocalCapture()) {
-      await _bridge.drainPendingTrackedNotifications();
+    final pending = await _bridge.drainPendingTrackedNotifications();
+    final canAcceptLocalCapture = await _syncService.canAcceptLocalCapture();
+
+    if (!canAcceptLocalCapture) {
+      if (pending.isNotEmpty) {
+        await _diagnostics.log(
+          source: 'flutter.income_service',
+          message:
+              'Dropped pending native notifications because local capture is not allowed on this device.',
+          level: 'warning',
+          metadata: {
+            'count': pending.length,
+          },
+        );
+      }
       return;
     }
 
-    final pending = await _bridge.drainPendingTrackedNotifications();
     for (final item in pending) {
       await saveTrackedNotificationMap(item, triggerRemoteSync: false);
+    }
+
+    if (pending.isNotEmpty) {
+      await _diagnostics.log(
+        source: 'flutter.income_service',
+        message:
+            'Imported pending native notifications from Android shared storage.',
+        metadata: {
+          'count': pending.length,
+        },
+      );
     }
   }
 
   Future<bool> seedDemoNotifications() async {
     if (!await _syncService.canAcceptLocalCapture()) {
+      await _diagnostics.log(
+        source: 'flutter.income_service',
+        message:
+            'Blocked demo notification seed because local capture is not allowed.',
+        level: 'warning',
+      );
       return false;
     }
 
     if (_bridge.isSupported) {
       await _bridge.pushDemoNotifications();
+      await _diagnostics.log(
+        source: 'flutter.income_service',
+        message: 'Queued demo notifications through the Android bridge.',
+      );
       return true;
     }
 
@@ -121,7 +192,7 @@ class IncomeService {
       {
         'fingerprint':
             'demo-acleda-${now.subtract(const Duration(days: 1)).millisecondsSinceEpoch}',
-        'packageName': 'kh.com.acleda.acledamobile',
+        'packageName': 'com.domain.acledabankqr',
         'bankKey': 'acleda',
         'title': 'Transfer out',
         'message': 'Transfer out KHR 40,000 from your account.',
@@ -138,6 +209,13 @@ class IncomeService {
       await saveTrackedNotificationMap(sample);
     }
 
+    await _diagnostics.log(
+      source: 'flutter.income_service',
+      message: 'Seeded fallback demo notifications directly in Flutter.',
+      metadata: {
+        'count': samples.length,
+      },
+    );
     return true;
   }
 
@@ -243,6 +321,16 @@ class IncomeService {
   }) async {
     final canAcceptLocal = await _syncService.canAcceptLocalCapture();
     if (triggerRemoteSync && !canAcceptLocal) {
+      await _diagnostics.log(
+        source: 'flutter.income_service',
+        message:
+            'Ignored tracked notification because local capture is blocked on this device.',
+        level: 'warning',
+        metadata: {
+          'packageName': payload['packageName'],
+          'fingerprint': payload['fingerprint'],
+        },
+      );
       return;
     }
 
@@ -290,6 +378,20 @@ class IncomeService {
         ),
       );
     }
+
+    await _diagnostics.log(
+      source: 'flutter.income_service',
+      message: existing == null
+          ? 'Stored new notification in Drift.'
+          : 'Updated existing notification in Drift.',
+      metadata: {
+        'fingerprint': model.fingerprint,
+        'packageName': model.packageName,
+        'bankKey': model.bankApp.key,
+        'isIncome': model.isIncome,
+        'source': model.source,
+      },
+    );
 
     if (triggerRemoteSync && existing == null) {
       await _syncService.syncNotification(model);
