@@ -4,7 +4,6 @@ import 'package:my_app/app/app.dart';
 import 'package:my_app/bootstrap.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: '.env.dev');
   await bootstrap(
     () => const Directionality(
       textDirection: TextDirection.ltr,
@@ -14,5 +13,6 @@ Future<void> main() async {
         child: App(),
       ),
     ),
+    initialize: () => dotenv.load(fileName: '.env.dev'),
   );
 }

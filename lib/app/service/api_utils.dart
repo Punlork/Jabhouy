@@ -24,7 +24,9 @@ ApiResponse<T> handleResponse<T>(
       return ApiResponse<T>(
         success: true,
         data: responseBody != null ? parser(responseBody) : null,
-        message: responseBody is Map<String, dynamic> ? responseBody['message']?.toString() : null,
+        message: responseBody is Map<String, dynamic>
+            ? responseBody['message']?.toString()
+            : null,
       );
     } catch (e, stackTrace) {
       throw ApiException(
@@ -47,28 +49,64 @@ ApiResponse<T> handleResponse<T>(
 Future<http.Response> interceptRequest(
   Uri uri,
   Future<http.Response> Function() request, {
-  Map<String, dynamic>? body,
+  Map<String, String>? headers,
+  String? requestBody,
   String? method,
 }) async {
   final logger = LoggerFactory.createLogger(
     methodCount: 0,
     printTime: false,
   );
-  final pathWithQuery = uri.query.isNotEmpty ? '${uri.path}?${uri.query}' : uri.path;
+  final inspector = NetworkInspectorService.instance;
+  final pathWithQuery =
+      uri.query.isNotEmpty ? '${uri.path}?${uri.query}' : uri.path;
   final startTime = DateTime.now();
+  final normalizedMethod = method ?? 'REQUEST';
 
-  logger.d('Starting: $method $pathWithQuery');
+  logger.d('Starting: $normalizedMethod $pathWithQuery');
 
-  if (body != null) logger.d('Request body: ${jsonEncode(body)}');
+  if (requestBody != null) logger.d('Request body: $requestBody');
 
-  final response = await request();
+  try {
+    final response = await request();
+    final endTime = DateTime.now();
 
-  final endTime = DateTime.now();
+    logger.d(
+      'Finished: $normalizedMethod $pathWithQuery ${response.statusCode} (${endTime.difference(startTime).inSeconds} sec)',
+    );
 
-  logger.d(
-    'Finished: $method $pathWithQuery ${response.statusCode} (${endTime.difference(startTime).inSeconds} sec)',
-  );
-  return response;
+    inspector.capture(
+      timestamp: startTime,
+      method: normalizedMethod,
+      uri: uri,
+      duration: endTime.difference(startTime),
+      requestHeaders: headers ?? const {},
+      requestBody: requestBody,
+      statusCode: response.statusCode,
+      responseHeaders: response.headers,
+      responseBody: response.bodyBytes.isEmpty
+          ? null
+          : utf8.decode(response.bodyBytes, allowMalformed: true),
+    );
+    return response;
+  } catch (error, stackTrace) {
+    final endTime = DateTime.now();
+    logger.e(
+      'Failed: $normalizedMethod $pathWithQuery',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    inspector.capture(
+      timestamp: startTime,
+      method: normalizedMethod,
+      uri: uri,
+      duration: endTime.difference(startTime),
+      requestHeaders: headers ?? const {},
+      requestBody: requestBody,
+      error: '$error\n$stackTrace',
+    );
+    rethrow;
+  }
 }
 
 Map<String, String> getHeaders() {

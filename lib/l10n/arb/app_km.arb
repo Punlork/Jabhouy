@@ -167,6 +167,98 @@
   "@settings": {
     "description": "Label for the settings button and sheet title"
   },
+  "diagnostics": "ការត្រួតពិនិត្យ",
+  "@diagnostics": {
+    "description": "Label for runtime diagnostics"
+  },
+  "runtimeCapture": "ការចាប់យកពេលដំណើរការ",
+  "@runtimeCapture": {
+    "description": "Section title for runtime diagnostics toggles"
+  },
+  "appLogs": "កំណត់ហេតុកម្មវិធី",
+  "@appLogs": {
+    "description": "Label for app log capture"
+  },
+  "appLogsEnabled": "កំពុងចាប់យក logger, bloc, print និងកំហុស",
+  "@appLogsEnabled": {
+    "description": "Subtitle when app log capture is enabled"
+  },
+  "appLogsDisabled": "បានបិទការចាប់យកកំណត់ហេតុកម្មវិធី",
+  "@appLogsDisabled": {
+    "description": "Subtitle when app log capture is disabled"
+  },
+  "networkInspector": "ការត្រួតពិនិត្យបណ្ដាញ",
+  "@networkInspector": {
+    "description": "Label for network diagnostics"
+  },
+  "networkLogsEnabled": "កំពុងចាប់យកសំណើ និងចម្លើយ API",
+  "@networkLogsEnabled": {
+    "description": "Subtitle when network capture is enabled"
+  },
+  "networkLogsDisabled": "បានបិទការចាប់យកបណ្ដាញ",
+  "@networkLogsDisabled": {
+    "description": "Subtitle when network capture is disabled"
+  },
+  "notificationDiagnostics": "ការត្រួតពិនិត្យការជូនដំណឹង",
+  "@notificationDiagnostics": {
+    "description": "Button label to open notification diagnostics"
+  },
+  "copyLogs": "ចម្លង",
+  "@copyLogs": {
+    "description": "Button label for copying diagnostics logs"
+  },
+  "clearLogs": "សម្អាត",
+  "@clearLogs": {
+    "description": "Button label for clearing diagnostics logs"
+  },
+  "diagnosticsCopied": "បានចម្លងការត្រួតពិនិត្យ",
+  "@diagnosticsCopied": {
+    "description": "Snack bar shown after copying diagnostics"
+  },
+  "noAppLogs": "មិនទាន់មានកំណត់ហេតុកម្មវិធីទេ។",
+  "@noAppLogs": {
+    "description": "Empty state for app logs"
+  },
+  "noNetworkLogs": "មិនទាន់មានសំណើបណ្ដាញទេ។",
+  "@noNetworkLogs": {
+    "description": "Empty state for network logs"
+  },
+  "capturedAtLabel": "ពេលចាប់យក",
+  "@capturedAtLabel": {
+    "description": "Label for diagnostics capture timestamp"
+  },
+  "statusLabel": "ស្ថានភាព",
+  "@statusLabel": {
+    "description": "Label for network response status"
+  },
+  "durationLabel": "រយៈពេល",
+  "@durationLabel": {
+    "description": "Label for request duration"
+  },
+  "requestLabel": "សំណើ",
+  "@requestLabel": {
+    "description": "Label for a request URL"
+  },
+  "requestHeadersLabel": "ក្បាលសំណើ",
+  "@requestHeadersLabel": {
+    "description": "Label for request headers"
+  },
+  "requestBodyLabel": "ខ្លឹមសារសំណើ",
+  "@requestBodyLabel": {
+    "description": "Label for request body"
+  },
+  "responseHeadersLabel": "ក្បាលចម្លើយ",
+  "@responseHeadersLabel": {
+    "description": "Label for response headers"
+  },
+  "responseBodyLabel": "ខ្លឹមសារចម្លើយ",
+  "@responseBodyLabel": {
+    "description": "Label for response body"
+  },
+  "errorLabel": "កំហុស",
+  "@errorLabel": {
+    "description": "Label for a captured error"
+  },
   "switchLanguage": "ប្តូរភាសា",
   "@switchLanguage": {
     "description": "Label for the switch language option"

@@ -129,6 +129,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get diagnostics => 'Diagnostics';
+
+  @override
+  String get runtimeCapture => 'Runtime capture';
+
+  @override
+  String get appLogs => 'App logs';
+
+  @override
+  String get appLogsEnabled =>
+      'Capturing logger, bloc, print, and error events';
+
+  @override
+  String get appLogsDisabled => 'App log capture is off';
+
+  @override
+  String get networkInspector => 'Network inspector';
+
+  @override
+  String get networkLogsEnabled => 'Capturing API requests and responses';
+
+  @override
+  String get networkLogsDisabled => 'Network capture is off';
+
+  @override
+  String get notificationDiagnostics => 'Notification diagnostics';
+
+  @override
+  String get copyLogs => 'Copy';
+
+  @override
+  String get clearLogs => 'Clear';
+
+  @override
+  String get diagnosticsCopied => 'Diagnostics copied';
+
+  @override
+  String get noAppLogs => 'No app logs captured yet.';
+
+  @override
+  String get noNetworkLogs => 'No network requests captured yet.';
+
+  @override
+  String get capturedAtLabel => 'Captured at';
+
+  @override
+  String get statusLabel => 'Status';
+
+  @override
+  String get durationLabel => 'Duration';
+
+  @override
+  String get requestLabel => 'Request';
+
+  @override
+  String get requestHeadersLabel => 'Request headers';
+
+  @override
+  String get requestBodyLabel => 'Request body';
+
+  @override
+  String get responseHeadersLabel => 'Response headers';
+
+  @override
+  String get responseBodyLabel => 'Response body';
+
+  @override
+  String get errorLabel => 'Error';
+
+  @override
   String get switchLanguage => 'Switch Language';
 
   @override

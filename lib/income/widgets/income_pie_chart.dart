@@ -214,7 +214,7 @@ class _CurrencyPieChartSection extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Expanded(
+          Flexible(
             child: section.segments.isEmpty
                 ? Text(
                     context.l10n.noIncomeChartData,
@@ -229,29 +229,25 @@ class _CurrencyPieChartSection extends StatelessWidget {
                           (segment) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                BankLogoBadge(
-                                  branding: segment.branding,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    segment.label
-                                        .replaceAll(
-                                          RegExp(
-                                            r'\bbank\b',
-                                            caseSensitive: false,
-                                          ),
-                                          '',
-                                        )
-                                        .trim(),
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: colorScheme.onSurface,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                  ),
-                                ),
+                                // Expanded(
+                                //   child: Text(
+                                //     segment.label
+                                //         .replaceAll(
+                                //           RegExp(
+                                //             r'\bbank\b',
+                                //             caseSensitive: false,
+                                //           ),
+                                //           '',
+                                //         )
+                                //         .trim(),
+                                //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                //           color: colorScheme.onSurface,
+                                //           fontWeight: FontWeight.w600,
+                                //         ),
+                                //   ),
+                                // ),
                                 Text(
                                   BankNotificationModel.formatAmount(
                                     amount: segment.value,
@@ -261,6 +257,11 @@ class _CurrencyPieChartSection extends StatelessWidget {
                                         color: colorScheme.onSurface,
                                         fontWeight: FontWeight.w600,
                                       ),
+                                ),
+                                const SizedBox(width: 8),
+                                BankLogoBadge(
+                                  branding: segment.branding,
+                                  size: 20,
                                 ),
                               ],
                             ),

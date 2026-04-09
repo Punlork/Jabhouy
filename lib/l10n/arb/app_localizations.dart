@@ -326,6 +326,144 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// Label for runtime diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get diagnostics;
+
+  /// Section title for runtime diagnostics toggles
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime capture'**
+  String get runtimeCapture;
+
+  /// Label for app log capture
+  ///
+  /// In en, this message translates to:
+  /// **'App logs'**
+  String get appLogs;
+
+  /// Subtitle when app log capture is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Capturing logger, bloc, print, and error events'**
+  String get appLogsEnabled;
+
+  /// Subtitle when app log capture is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'App log capture is off'**
+  String get appLogsDisabled;
+
+  /// Label for network diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Network inspector'**
+  String get networkInspector;
+
+  /// Subtitle when network capture is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Capturing API requests and responses'**
+  String get networkLogsEnabled;
+
+  /// Subtitle when network capture is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Network capture is off'**
+  String get networkLogsDisabled;
+
+  /// Button label to open notification diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Notification diagnostics'**
+  String get notificationDiagnostics;
+
+  /// Button label for copying diagnostics logs
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyLogs;
+
+  /// Button label for clearing diagnostics logs
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearLogs;
+
+  /// Snack bar shown after copying diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics copied'**
+  String get diagnosticsCopied;
+
+  /// Empty state for app logs
+  ///
+  /// In en, this message translates to:
+  /// **'No app logs captured yet.'**
+  String get noAppLogs;
+
+  /// Empty state for network logs
+  ///
+  /// In en, this message translates to:
+  /// **'No network requests captured yet.'**
+  String get noNetworkLogs;
+
+  /// Label for diagnostics capture timestamp
+  ///
+  /// In en, this message translates to:
+  /// **'Captured at'**
+  String get capturedAtLabel;
+
+  /// Label for network response status
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get statusLabel;
+
+  /// Label for request duration
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get durationLabel;
+
+  /// Label for a request URL
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get requestLabel;
+
+  /// Label for request headers
+  ///
+  /// In en, this message translates to:
+  /// **'Request headers'**
+  String get requestHeadersLabel;
+
+  /// Label for request body
+  ///
+  /// In en, this message translates to:
+  /// **'Request body'**
+  String get requestBodyLabel;
+
+  /// Label for response headers
+  ///
+  /// In en, this message translates to:
+  /// **'Response headers'**
+  String get responseHeadersLabel;
+
+  /// Label for response body
+  ///
+  /// In en, this message translates to:
+  /// **'Response body'**
+  String get responseBodyLabel;
+
+  /// Label for a captured error
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorLabel;
+
   /// Label for the switch language option
   ///
   /// In en, this message translates to:

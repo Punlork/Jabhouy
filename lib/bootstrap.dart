@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:my_app/app/app.dart';
@@ -20,8 +21,8 @@ class AppBlocObserver extends BlocObserver {
     super.onChange(bloc, change);
     logger.d(
       'Bloc: ${bloc.runtimeType}\n'
-      'Current State: ${change.currentState}\n'
-      'Next State: ${change.nextState}',
+      'Current State: ${change.currentState.runtimeType}\n'
+      'Next State: ${change.nextState.runtimeType}',
     );
   }
 
@@ -39,34 +40,68 @@ class AppBlocObserver extends BlocObserver {
   }
 }
 
-Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
-  FlutterError.onError = (details) {
-    LoggerFactory.createLogger(
-      printTime: false,
-      lineLength: 80,
-      errorMethodCount: 0,
-      methodCount: 0,
-    ).e(
-      'Flutter Error:\n'
-      'Exception: ${details.exceptionAsString()}\n'
-      'Library: ${details.library}\n'
-      'Context: ${details.context}\n'
-      'Stack Trace: ${details.stack}',
-      error: details.exception,
-      stackTrace: details.stack,
-    );
-  };
+Future<void> bootstrap(
+  FutureOr<Widget> Function() builder, {
+  Future<void> Function()? initialize,
+}) async {
+  final appLogService = AppLogService.instance;
 
-  Bloc.observer = const AppBlocObserver();
+  await runZonedGuarded(
+    () async {
+      final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+      if (initialize != null) await initialize();
 
-  FcmService.setupBackgroundHandler();
+      FlutterError.onError = (details) {
+        LoggerFactory.createLogger(
+          printTime: false,
+          lineLength: 80,
+          errorMethodCount: 0,
+          methodCount: 0,
+        ).e(
+          'Flutter Error:\n'
+          'Exception: ${details.exceptionAsString()}\n'
+          'Library: ${details.library}\n'
+          'Context: ${details.context}\n'
+          'Stack Trace: ${details.stack}',
+          error: details.exception,
+          stackTrace: details.stack,
+        );
+      };
 
-  await FirebaseRuntimeOptions.initialize();
-  await FirebaseRuntimeOptions.persistNativeSyncConfig();
-  await setupDependencies();
-  await getIt<FcmService>().initialize();
-  runApp(await builder());
+      PlatformDispatcher.instance.onError = (error, stackTrace) {
+        logger.e(
+          'Platform Error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        return true;
+      };
+
+      Bloc.observer = const AppBlocObserver();
+
+      FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+      FcmService.setupBackgroundHandler();
+
+      await FirebaseRuntimeOptions.initialize();
+      await FirebaseRuntimeOptions.persistNativeSyncConfig();
+      await setupDependencies();
+      await getIt<FcmService>().initialize();
+      runApp(await builder());
+    },
+    (error, stackTrace) {
+      logger.e(
+        'Uncaught zone error: $error',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (self, parent, zone, line) {
+        appLogService.capturePrint(line);
+        parent.print(zone, line);
+      },
+    ),
+  );
 }

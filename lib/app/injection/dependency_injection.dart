@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get_it/get_it.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/app/service/database/app_database.dart';
@@ -17,6 +15,10 @@ Future<void> setupDependencies() async {
   await apiService.cookies.initCookies();
   getIt
     ..registerSingleton<ApiService>(apiService)
+    ..registerSingleton<AppLogService>(AppLogService.instance)
+    ..registerSingleton<NetworkInspectorService>(
+      NetworkInspectorService.instance,
+    )
     ..registerSingleton<AppDatabase>(AppDatabase())
     ..registerSingleton(ConnectivityService())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
@@ -93,7 +95,13 @@ Future<void> setupDependencies() async {
         notificationDiagnosticsService: getIt<NotificationDiagnosticsService>(),
       ),
     )
-    ..registerFactory(() => AppBloc(getIt<FirebaseIncomeSyncService>()))
+    ..registerFactory(
+      () => AppBloc(
+        getIt<FirebaseIncomeSyncService>(),
+        getIt<AppLogService>(),
+        getIt<NetworkInspectorService>(),
+      ),
+    )
     ..registerFactory(() => UploadBloc(getIt<UploadService>()))
     ..registerFactory(
       () => AuthBloc(
@@ -133,5 +141,5 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory(() => IncomeBloc(getIt<IncomeService>()));
 
-  log('Dependencies setup successfully');
+  logger.i('Dependencies setup successfully');
 }

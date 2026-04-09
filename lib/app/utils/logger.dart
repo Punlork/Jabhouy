@@ -19,7 +19,9 @@ class LoggerFactory {
   }) {
     return Logger(
       printer: PrettyPrinter(
-        printTime: printTime,
+        dateTimeFormat: printTime
+            ? DateTimeFormat.onlyTimeAndSinceStart
+            : DateTimeFormat.none,
         printEmojis: printEmojis,
         methodCount: methodCount,
         lineLength: lineLength,

@@ -167,6 +167,98 @@
   "@settings": {
     "description": "Label for the settings button and sheet title"
   },
+  "diagnostics": "Diagnostics",
+  "@diagnostics": {
+    "description": "Label for runtime diagnostics"
+  },
+  "runtimeCapture": "Runtime capture",
+  "@runtimeCapture": {
+    "description": "Section title for runtime diagnostics toggles"
+  },
+  "appLogs": "App logs",
+  "@appLogs": {
+    "description": "Label for app log capture"
+  },
+  "appLogsEnabled": "Capturing logger, bloc, print, and error events",
+  "@appLogsEnabled": {
+    "description": "Subtitle when app log capture is enabled"
+  },
+  "appLogsDisabled": "App log capture is off",
+  "@appLogsDisabled": {
+    "description": "Subtitle when app log capture is disabled"
+  },
+  "networkInspector": "Network inspector",
+  "@networkInspector": {
+    "description": "Label for network diagnostics"
+  },
+  "networkLogsEnabled": "Capturing API requests and responses",
+  "@networkLogsEnabled": {
+    "description": "Subtitle when network capture is enabled"
+  },
+  "networkLogsDisabled": "Network capture is off",
+  "@networkLogsDisabled": {
+    "description": "Subtitle when network capture is disabled"
+  },
+  "notificationDiagnostics": "Notification diagnostics",
+  "@notificationDiagnostics": {
+    "description": "Button label to open notification diagnostics"
+  },
+  "copyLogs": "Copy",
+  "@copyLogs": {
+    "description": "Button label for copying diagnostics logs"
+  },
+  "clearLogs": "Clear",
+  "@clearLogs": {
+    "description": "Button label for clearing diagnostics logs"
+  },
+  "diagnosticsCopied": "Diagnostics copied",
+  "@diagnosticsCopied": {
+    "description": "Snack bar shown after copying diagnostics"
+  },
+  "noAppLogs": "No app logs captured yet.",
+  "@noAppLogs": {
+    "description": "Empty state for app logs"
+  },
+  "noNetworkLogs": "No network requests captured yet.",
+  "@noNetworkLogs": {
+    "description": "Empty state for network logs"
+  },
+  "capturedAtLabel": "Captured at",
+  "@capturedAtLabel": {
+    "description": "Label for diagnostics capture timestamp"
+  },
+  "statusLabel": "Status",
+  "@statusLabel": {
+    "description": "Label for network response status"
+  },
+  "durationLabel": "Duration",
+  "@durationLabel": {
+    "description": "Label for request duration"
+  },
+  "requestLabel": "Request",
+  "@requestLabel": {
+    "description": "Label for a request URL"
+  },
+  "requestHeadersLabel": "Request headers",
+  "@requestHeadersLabel": {
+    "description": "Label for request headers"
+  },
+  "requestBodyLabel": "Request body",
+  "@requestBodyLabel": {
+    "description": "Label for request body"
+  },
+  "responseHeadersLabel": "Response headers",
+  "@responseHeadersLabel": {
+    "description": "Label for response headers"
+  },
+  "responseBodyLabel": "Response body",
+  "@responseBodyLabel": {
+    "description": "Label for response body"
+  },
+  "errorLabel": "Error",
+  "@errorLabel": {
+    "description": "Label for a captured error"
+  },
   "switchLanguage": "Switch Language",
   "@switchLanguage": {
     "description": "Label for the switch language option"

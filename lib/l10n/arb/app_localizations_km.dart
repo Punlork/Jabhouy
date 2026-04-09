@@ -129,6 +129,75 @@ class AppLocalizationsKm extends AppLocalizations {
   String get settings => 'ការកំណត់';
 
   @override
+  String get diagnostics => 'ការត្រួតពិនិត្យ';
+
+  @override
+  String get runtimeCapture => 'ការចាប់យកពេលដំណើរការ';
+
+  @override
+  String get appLogs => 'កំណត់ហេតុកម្មវិធី';
+
+  @override
+  String get appLogsEnabled => 'កំពុងចាប់យក logger, bloc, print និងកំហុស';
+
+  @override
+  String get appLogsDisabled => 'បានបិទការចាប់យកកំណត់ហេតុកម្មវិធី';
+
+  @override
+  String get networkInspector => 'ការត្រួតពិនិត្យបណ្ដាញ';
+
+  @override
+  String get networkLogsEnabled => 'កំពុងចាប់យកសំណើ និងចម្លើយ API';
+
+  @override
+  String get networkLogsDisabled => 'បានបិទការចាប់យកបណ្ដាញ';
+
+  @override
+  String get notificationDiagnostics => 'ការត្រួតពិនិត្យការជូនដំណឹង';
+
+  @override
+  String get copyLogs => 'ចម្លង';
+
+  @override
+  String get clearLogs => 'សម្អាត';
+
+  @override
+  String get diagnosticsCopied => 'បានចម្លងការត្រួតពិនិត្យ';
+
+  @override
+  String get noAppLogs => 'មិនទាន់មានកំណត់ហេតុកម្មវិធីទេ។';
+
+  @override
+  String get noNetworkLogs => 'មិនទាន់មានសំណើបណ្ដាញទេ។';
+
+  @override
+  String get capturedAtLabel => 'ពេលចាប់យក';
+
+  @override
+  String get statusLabel => 'ស្ថានភាព';
+
+  @override
+  String get durationLabel => 'រយៈពេល';
+
+  @override
+  String get requestLabel => 'សំណើ';
+
+  @override
+  String get requestHeadersLabel => 'ក្បាលសំណើ';
+
+  @override
+  String get requestBodyLabel => 'ខ្លឹមសារសំណើ';
+
+  @override
+  String get responseHeadersLabel => 'ក្បាលចម្លើយ';
+
+  @override
+  String get responseBodyLabel => 'ខ្លឹមសារចម្លើយ';
+
+  @override
+  String get errorLabel => 'កំហុស';
+
+  @override
   String get switchLanguage => 'ប្តូរភាសា';
 
   @override

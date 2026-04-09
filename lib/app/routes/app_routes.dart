@@ -42,6 +42,7 @@ class AppRoutes {
   static const category = 'category';
   static const customer = 'customer';
   static const profile = 'profile';
+  static const appDiagnostics = 'app_diagnostics';
   static const incomeDiagnostics = 'income_diagnostics';
 
   static final allowedUnauthenticated = {
@@ -55,6 +56,7 @@ class AppRoutes {
     '${home.toPath}${formLoaner.toPath}',
     '${home.toPath}${category.toPath}',
     '${home.toPath}${profile.toPath}',
+    '${home.toPath}${appDiagnostics.toPath}',
     '${home.toPath}${customer.toPath}',
     '${home.toPath}${incomeDiagnostics.toPath}',
   };
@@ -215,6 +217,33 @@ class AppRoutes {
                   ],
                   child: const ProfilePage(),
                 ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: appDiagnostics.toPath,
+            name: appDiagnostics,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
+                  (() {
+                    try {
+                      return context.read<IncomeBloc>();
+                    } on ProviderNotFoundException {
+                      return null;
+                    }
+                  })();
+              GlobalContext.currentContext = context;
+
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: incomeBloc == null
+                    ? const AppDiagnosticsPage()
+                    : BlocProvider.value(
+                        value: incomeBloc,
+                        child: const AppDiagnosticsPage(),
+                      ),
                 transitionsBuilder: _rightToLeftTransition,
               );
             },

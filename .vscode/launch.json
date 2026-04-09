@@ -16,9 +16,8 @@
         "--flavor",
         "development",
         "--target",
-        "lib/main_development.dart",
-        "-v",
-        "--release"
+        "lib/main_development.dart"
+        // "-v"
       ]
     },
     {

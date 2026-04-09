@@ -35,6 +35,22 @@ class SwitchThemeMode extends AppEvent {
   List<Object?> get props => [isDarkMode];
 }
 
+class SwitchAppLogCapture extends AppEvent {
+  const SwitchAppLogCapture({required this.isEnabled});
+  final bool isEnabled;
+
+  @override
+  List<Object?> get props => [isEnabled];
+}
+
+class SwitchNetworkLogCapture extends AppEvent {
+  const SwitchNetworkLogCapture({required this.isEnabled});
+  final bool isEnabled;
+
+  @override
+  List<Object?> get props => [isEnabled];
+}
+
 class RefreshDeviceRole extends AppEvent {
   const RefreshDeviceRole();
 }

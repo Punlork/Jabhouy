@@ -32,7 +32,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
     final incomeBloc = context.read<IncomeBloc>();
     Navigator.pop(context);
     router.pushNamed(
-      AppRoutes.incomeDiagnostics,
+      AppRoutes.appDiagnostics,
       extra: {
         'incomeBloc': incomeBloc,
       },
@@ -57,6 +57,29 @@ class _SettingsSheetState extends State<SettingsSheet> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                Icons.bug_report_outlined,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              title: Text(
+                l10n.diagnostics,
+                style: AppTextTheme.body,
+              ),
+              onTap: () {
+                final router = GoRouter.of(context);
+                final incomeBloc = context.read<IncomeBloc>();
+                Navigator.pop(context);
+                router.pushNamed(
+                  AppRoutes.appDiagnostics,
+                  extra: {
+                    'incomeBloc': incomeBloc,
+                  },
+                );
+              },
             ),
             const SizedBox(height: 16),
             ListTile(
