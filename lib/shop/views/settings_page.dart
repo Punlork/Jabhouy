@@ -7,6 +7,7 @@ import 'package:my_app/customer/customer.dart';
 import 'package:my_app/income/income.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -17,6 +18,13 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   int _diagnosticsTapCount = 0;
+  late final Future<String> _appVersionFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _appVersionFuture = _loadAppVersion();
+  }
 
   void _handleHiddenDiagnosticsTap() {
     _diagnosticsTapCount += 1;
@@ -101,6 +109,11 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<String> _loadAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    return '${packageInfo.version}+${packageInfo.buildNumber}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -175,7 +188,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
-                                isMainDevice ? Icons.phone_android_rounded : Icons.devices_rounded,
+                                isMainDevice
+                                    ? Icons.phone_android_rounded
+                                    : Icons.devices_rounded,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 12),
@@ -189,7 +204,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      isMainDevice ? l10n.deviceRoleMainDescription : l10n.deviceRoleSubDescription,
+                                      isMainDevice
+                                          ? l10n.deviceRoleMainDescription
+                                          : l10n.deviceRoleSubDescription,
                                       style: AppTextTheme.caption.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
@@ -213,10 +230,14 @@ class _SettingsPageState extends State<SettingsPage> {
                               l10n: l10n,
                             ),
                             icon: Icon(
-                              isMainDevice ? Icons.sync_alt_rounded : Icons.security_update_good_rounded,
+                              isMainDevice
+                                  ? Icons.sync_alt_rounded
+                                  : Icons.security_update_good_rounded,
                             ),
                             label: Text(
-                              isMainDevice ? l10n.releaseMainDevice : l10n.setAsMainDevice,
+                              isMainDevice
+                                  ? l10n.releaseMainDevice
+                                  : l10n.setAsMainDevice,
                             ),
                           ),
                         ],
@@ -236,7 +257,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             horizontal: 12,
                           ),
                           secondary: Icon(
-                            state.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                            state.isDarkMode
+                                ? Icons.dark_mode_rounded
+                                : Icons.light_mode_rounded,
                             color: colorScheme.onSurfaceVariant,
                           ),
                           title: Text(
@@ -244,14 +267,18 @@ class _SettingsPageState extends State<SettingsPage> {
                             style: AppTextTheme.body,
                           ),
                           subtitle: Text(
-                            state.isDarkMode ? l10n.darkModeOn : l10n.darkModeOff,
+                            state.isDarkMode
+                                ? l10n.darkModeOn
+                                : l10n.darkModeOff,
                             style: AppTextTheme.caption.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                           value: state.isDarkMode,
                           onChanged: (value) {
-                            context.read<AppBloc>().add(SwitchThemeMode(isDarkMode: value));
+                            context
+                                .read<AppBloc>()
+                                .add(SwitchThemeMode(isDarkMode: value));
                           },
                         );
                       },
@@ -263,10 +290,25 @@ class _SettingsPageState extends State<SettingsPage> {
                         return _SettingsRow(
                           icon: Icons.language_rounded,
                           title: l10n.switchLanguage,
-                          subtitle: currentLocale == 'en' ? l10n.languageEnglish : l10n.languageKhmer,
+                          subtitle: currentLocale == 'en'
+                              ? l10n.languageEnglish
+                              : l10n.languageKhmer,
                           onTap: () {
-                            context.read<AppBloc>().add(SwitchLanguage(currentLocale));
+                            context
+                                .read<AppBloc>()
+                                .add(SwitchLanguage(currentLocale));
                           },
+                        );
+                      },
+                    ),
+                    _SectionDivider(color: colorScheme.outlineVariant),
+                    FutureBuilder<String>(
+                      future: _appVersionFuture,
+                      builder: (context, snapshot) {
+                        final version = snapshot.data ?? '--';
+                        return _SettingsInfoRow(
+                          icon: Icons.info_outline_rounded,
+                          title: l10n.appVersion(version),
                         );
                       },
                     ),
@@ -350,6 +392,29 @@ class _SettingsRow extends StatelessWidget {
         color: colorScheme.onSurfaceVariant,
       ),
       onTap: onTap,
+    );
+  }
+}
+
+class _SettingsInfoRow extends StatelessWidget {
+  const _SettingsInfoRow({
+    required this.icon,
+    required this.title,
+  });
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      leading: Icon(icon, color: colorScheme.onSurfaceVariant),
+      title: Text(
+        title,
+        style: AppTextTheme.body,
+      ),
     );
   }
 }

@@ -83,6 +83,10 @@ class BankNotificationListenerService : NotificationListenerService() {
             receivedAt = sbn.postTime,
         )
         NotificationTrackingBridge.queueNotification(applicationContext, payload)
+        BankNotificationPushDispatcher.dispatchImmediatelyIfFlutterInactive(
+            applicationContext,
+            payload,
+        )
     }
 
     companion object {

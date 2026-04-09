@@ -2,6 +2,8 @@ package com.pl.shop.management
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import io.flutter.plugin.common.EventChannel
@@ -20,6 +22,7 @@ object NotificationTrackingBridge {
     private const val logTag = "NotificationTracking"
 
     private val lock = Any()
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var eventSink: EventChannel.EventSink? = null
     private var logSink: EventChannel.EventSink? = null
 
@@ -29,6 +32,10 @@ object NotificationTrackingBridge {
 
     fun attachLogSink(sink: EventChannel.EventSink?) {
         logSink = sink
+    }
+
+    fun hasActiveFlutterListener(): Boolean {
+        return eventSink != null
     }
 
     fun isNotificationAccessEnabled(context: Context): Boolean {
@@ -145,7 +152,10 @@ object NotificationTrackingBridge {
             )
         )
 
-        eventSink?.success(jsonToMap(payload))
+        val event = jsonToMap(payload)
+        mainHandler.post {
+            eventSink?.success(event)
+        }
         BankNotificationSyncWorker.enqueue(context)
     }
 
@@ -250,7 +260,10 @@ object NotificationTrackingBridge {
             else -> Log.d(logTag, "[$source] $message ${metadata.orEmpty()}")
         }
 
-        logSink?.success(jsonToMap(entry))
+        val logEvent = jsonToMap(entry)
+        mainHandler.post {
+            logSink?.success(logEvent)
+        }
     }
 
     private fun detectBank(packageName: String, normalizedText: String): String {

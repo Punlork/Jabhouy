@@ -1,6 +1,6 @@
 name: my_app
 description: Shop management
-version: 1.0.10+15
+version: 1.0.12+17
 publish_to: none
 
 environment:
