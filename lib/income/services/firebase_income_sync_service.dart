@@ -9,7 +9,8 @@ import 'package:my_app/income/models/bank_notification_model.dart';
 import 'package:my_app/income/services/notification_diagnostics_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-typedef LocalNotificationsLoader = Future<List<BankNotificationModel>> Function();
+typedef LocalNotificationsLoader = Future<List<BankNotificationModel>>
+    Function();
 typedef NotificationSyncStatusUpdater = Future<void> Function(
   String fingerprint,
   int syncStatus,
@@ -81,7 +82,8 @@ class FirebaseIncomeSyncService {
     if (!await _shouldUploadLocalChanges()) {
       await _diagnostics.log(
         source: 'flutter.firebase_sync',
-        message: 'Skipped remote notification sync because this device cannot upload local changes right now.',
+        message:
+            'Skipped remote notification sync because this device cannot upload local changes right now.',
         level: 'warning',
         metadata: {
           'fingerprint': model.fingerprint,
@@ -92,7 +94,8 @@ class FirebaseIncomeSyncService {
     }
 
     await _prepareSync();
-    final didSync = await sendTestNotification(_notificationPayloadFromModel(model));
+    final didSync =
+        await sendTestNotification(_notificationPayloadFromModel(model));
 
     if (didSync) {
       await _diagnostics.log(
@@ -201,7 +204,8 @@ class FirebaseIncomeSyncService {
         );
         await _diagnostics.log(
           source: 'flutter.firebase_sync',
-          message: 'Skipped Firebase income sync because no scope id is available.',
+          message:
+              'Skipped Firebase income sync because no scope id is available.',
           level: 'warning',
         );
         return;
@@ -211,14 +215,8 @@ class FirebaseIncomeSyncService {
       await _persistNativeScopeId(scopeId);
 
       if (isConfigured) {
-        final deviceId = await _getOrCreateDeviceId();
         final deviceRole = await getStoredDeviceRole();
-        unawaited(
-          _fcmService.registerToken(
-            deviceId: deviceId,
-            deviceRole: deviceRole.storageValue,
-          ),
-        );
+        unawaited(_syncCurrentTokenRegistration(deviceRole));
       }
     }
   }
@@ -227,7 +225,8 @@ class FirebaseIncomeSyncService {
     if (!await _shouldUploadLocalChanges()) {
       await _diagnostics.log(
         source: 'flutter.firebase_sync',
-        message: 'Skipped demo push notification because this device cannot upload local changes right now.',
+        message:
+            'Skipped demo push notification because this device cannot upload local changes right now.',
         level: 'warning',
       );
       return false;
@@ -307,7 +306,8 @@ class FirebaseIncomeSyncService {
 
   Future<void> _persistDeviceRole(DeviceRole deviceRole) async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    final previousRole = DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
+    final previousRole =
+        DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
     if (previousRole == deviceRole) {
       return;
     }
@@ -350,6 +350,15 @@ class FirebaseIncomeSyncService {
     if (scopeId == null || scopeId.isEmpty) return;
 
     _scopeId = scopeId;
+    await _syncCurrentTokenRegistration(deviceRole);
+  }
+
+  Future<void> _syncCurrentTokenRegistration(DeviceRole deviceRole) async {
+    if (deviceRole.isMain) {
+      await _fcmService.unregisterToken();
+      return;
+    }
+
     final deviceId = await _getOrCreateDeviceId();
     await _fcmService.registerToken(
       deviceId: deviceId,
