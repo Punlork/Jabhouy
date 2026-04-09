@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -83,20 +84,7 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
   Future<void> _sendNativeTestPush(
     BankNotificationModel? latestItem,
   ) async {
-    final now = DateTime.now();
-    final sample = latestItem ??
-        BankNotificationModel(
-          fingerprint: 'native-test-${now.millisecondsSinceEpoch}',
-          packageName: 'com.paygo24.ibank',
-          bankApp: BankApp.aba,
-          title: 'Income received',
-          message: 'Manual native test push',
-          amount: 1,
-          currency: 'USD',
-          isIncome: true,
-          receivedAt: now,
-          source: 'manual_native_test',
-        );
+    final sample = _buildRandomTestSample(latestItem);
 
     final payload = <String, dynamic>{
       'fingerprint': sample.fingerprint,
@@ -126,6 +114,79 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
         error.message ?? 'Native push test failed',
       );
     }
+  }
+
+  Future<void> _simulateNotificationListener(
+    BankNotificationModel? latestItem,
+  ) async {
+    final sample = _buildRandomTestSample(latestItem);
+    final payload = <String, dynamic>{
+      'fingerprint': sample.fingerprint,
+      'packageName': sample.packageName,
+      'bankKey': sample.bankApp.key,
+      'title': sample.title ?? '',
+      'message': sample.message,
+      'amount': sample.amount,
+      'currency': sample.currency,
+      'isIncome': sample.isIncome,
+      'receivedAt': sample.receivedAt.millisecondsSinceEpoch,
+      'source': sample.source,
+    };
+
+    try {
+      final sent = await _trackingBridge.simulateNotificationListener(payload);
+      if (!mounted) return;
+      if (sent) {
+        showSuccessSnackBar(context, 'Listener simulation sent');
+      } else {
+        showErrorSnackBar(context, 'Listener simulation was not sent');
+      }
+    } on PlatformException catch (error) {
+      if (!mounted) return;
+      showErrorSnackBar(
+        context,
+        error.message ?? 'Listener simulation failed',
+      );
+    }
+  }
+
+  BankNotificationModel _buildRandomTestSample(BankNotificationModel? latestItem) {
+    final now = DateTime.now();
+    final random = Random();
+    final sampleBanks = <({String packageName, BankApp bankApp, String title})>[
+      (
+        packageName: 'com.paygo24.ibank',
+        bankApp: BankApp.aba,
+        title: 'ABA income received',
+      ),
+      (
+        packageName: 'com.chipmongbank.mobileappproduction',
+        bankApp: BankApp.chipMong,
+        title: 'Chip Mong transfer received',
+      ),
+      (
+        packageName: 'com.domain.acledabankqr',
+        bankApp: BankApp.acleda,
+        title: 'ACLEDA payment received',
+      ),
+    ];
+    final selectedBank = sampleBanks[random.nextInt(sampleBanks.length)];
+    final amount = double.parse(
+      (5 + random.nextDouble() * 495).toStringAsFixed(2),
+    );
+    return BankNotificationModel(
+      fingerprint: 'native-test-${now.millisecondsSinceEpoch}',
+      packageName: selectedBank.packageName,
+      bankApp: selectedBank.bankApp,
+      title: selectedBank.title,
+      message:
+          'Manual native test push for ${selectedBank.bankApp.label} \$${amount.toStringAsFixed(2)}',
+      amount: amount,
+      currency: 'USD',
+      isIncome: true,
+      receivedAt: now,
+      source: latestItem == null ? 'manual_native_test' : latestItem.source,
+    );
   }
 
   @override
@@ -222,6 +283,13 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
                         ),
                         icon: const Icon(Icons.send_rounded),
                         label: const Text('Send native push test'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => _simulateNotificationListener(
+                          recentItems.isEmpty ? null : recentItems.first,
+                        ),
+                        icon: const Icon(Icons.notifications_active_rounded),
+                        label: const Text('Simulate listener'),
                       ),
                       OutlinedButton.icon(
                         onPressed: () => context

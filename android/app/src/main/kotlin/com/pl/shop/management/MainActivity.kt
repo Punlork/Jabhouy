@@ -90,6 +90,37 @@ class MainActivity: FlutterActivity() {
                         }
                     }.start()
                 }
+                "simulateNotificationListener" -> {
+                    val arguments = call.argument<Map<String, Any?>>("payload").orEmpty()
+                    val packageName = arguments["packageName"]?.toString().orEmpty()
+                    val title = arguments["title"]?.toString()
+                    val message = arguments["message"]?.toString().orEmpty()
+                    val receivedAt = (arguments["receivedAt"] as? Number)?.toLong()
+                        ?: System.currentTimeMillis()
+
+                    Thread {
+                        try {
+                            BankNotificationListenerService.simulateNotificationPosted(
+                                context = applicationContext,
+                                packageName = packageName,
+                                title = title,
+                                messageParts = listOf(message),
+                                receivedAt = receivedAt,
+                            )
+                            Handler(Looper.getMainLooper()).post {
+                                result.success(true)
+                            }
+                        } catch (error: Exception) {
+                            Handler(Looper.getMainLooper()).post {
+                                result.error(
+                                    "listener_simulation_failed",
+                                    error.message ?: error.toString(),
+                                    null,
+                                )
+                            }
+                        }
+                    }.start()
+                }
                 "getDiagnosticsLogs" -> {
                     result.success(NotificationTrackingBridge.readDiagnosticsLogs(applicationContext))
                 }

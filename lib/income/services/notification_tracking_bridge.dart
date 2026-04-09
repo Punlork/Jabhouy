@@ -82,6 +82,17 @@ class NotificationTrackingBridge {
         false;
   }
 
+  Future<bool> simulateNotificationListener(Map<String, dynamic> payload) async {
+    if (!isSupported) return false;
+    return await _methodChannel.invokeMethod<bool>(
+          'simulateNotificationListener',
+          {
+            'payload': payload,
+          },
+        ) ??
+        false;
+  }
+
   Future<List<Map<String, dynamic>>> getDiagnosticsLogs() async {
     if (!isSupported) return const [];
     final result = await _methodChannel.invokeMethod<List<dynamic>>(
