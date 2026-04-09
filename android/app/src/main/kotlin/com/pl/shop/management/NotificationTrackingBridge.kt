@@ -171,7 +171,20 @@ object NotificationTrackingBridge {
             val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
             val current = prefs.getStringSet(uploadedKey, emptySet())?.toMutableSet() ?: mutableSetOf()
             current.addAll(fingerprints)
-            prefs.edit().putStringSet(uploadedKey, current).apply()
+            val pending = JSONArray(prefs.getString(pendingKey, "[]") ?: "[]")
+            val retained = JSONArray()
+            for (index in 0 until pending.length()) {
+                val item = pending.optJSONObject(index) ?: continue
+                val fingerprint = item.optString("fingerprint")
+                if (fingerprint.isNotBlank() && fingerprints.contains(fingerprint)) {
+                    continue
+                }
+                retained.put(item)
+            }
+            prefs.edit()
+                .putStringSet(uploadedKey, current)
+                .putString(pendingKey, retained.toString())
+                .apply()
         }
     }
 

@@ -53,6 +53,7 @@ class CustomTextFormField extends StatefulWidget {
 
 class _CustomTextFormFieldState extends State<CustomTextFormField> {
   late FocusNode _focusNode;
+  late VoidCallback _controllerListener;
   bool _hasText = false;
 
   @override
@@ -60,15 +61,38 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
     _hasText = widget.controller.text.isNotEmpty;
-    widget.controller.addListener(() {
+    _controllerListener = () {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _hasText = widget.controller.text.isNotEmpty;
       });
-    });
+    };
+    widget.controller.addListener(_controllerListener);
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomTextFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_controllerListener);
+      _hasText = widget.controller.text.isNotEmpty;
+      widget.controller.addListener(_controllerListener);
+    }
+
+    if (oldWidget.focusNode != widget.focusNode) {
+      if (oldWidget.focusNode == null) {
+        _focusNode.dispose();
+      }
+      _focusNode = widget.focusNode ?? FocusNode();
+    }
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_controllerListener);
     if (widget.focusNode == null) {
       _focusNode.dispose();
     }

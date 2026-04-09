@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:my_app/app/app.dart';
@@ -10,11 +9,11 @@ import 'package:my_app/income/models/bank_notification_model.dart';
 import 'package:my_app/income/services/notification_diagnostics_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-typedef RemoteNotificationHandler = Future<void> Function(
-  Map<String, dynamic> payload,
+typedef LocalNotificationsLoader = Future<List<BankNotificationModel>> Function();
+typedef NotificationSyncStatusUpdater = Future<void> Function(
+  String fingerprint,
+  int syncStatus,
 );
-typedef LocalNotificationsLoader = Future<List<BankNotificationModel>>
-    Function();
 
 class MainDeviceClaimStatus {
   const MainDeviceClaimStatus({
@@ -31,42 +30,34 @@ class FirebaseIncomeSyncService {
     this._connectivityService,
     this._authService,
     this._fcmService,
-    this._apiService,
     this._diagnostics,
   );
 
-  static const _collectionName = 'income_sync_scopes';
-  static const _systemCollectionName = '_system';
-  static const _mainDeviceClaimDocumentId = 'main_device';
   static const _deviceIdKey = 'income_sync_device_id';
   static const _nativeScopeIdKey = 'income_sync_scope_id';
-  static const _mainClaimStaleDuration = Duration(minutes: 2);
 
   final ConnectivityService _connectivityService;
   final AuthService _authService;
   final FcmService _fcmService;
-  final ApiService _apiService;
   final NotificationDiagnosticsService _diagnostics;
   final _deviceRoleController = StreamController<DeviceRole>.broadcast();
 
   StreamSubscription<bool>? _connectivitySubscription;
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _remoteSubscription;
-  RemoteNotificationHandler? _onRemotePayload;
   LocalNotificationsLoader? _loadLocalNotifications;
+  NotificationSyncStatusUpdater? _updateNotificationSyncStatus;
   String? _scopeId;
   bool _initialized = false;
-  bool _isFirstSnapshot = true;
-  MainDeviceClaimStatus? _cachedMainDeviceClaimStatus;
+  bool _isSyncingLocalBacklog = false;
 
   bool get isConfigured => Firebase.apps.isNotEmpty;
   Stream<DeviceRole> get deviceRoleStream => _deviceRoleController.stream;
 
   Future<void> initialize({
-    required RemoteNotificationHandler onRemotePayload,
     required LocalNotificationsLoader loadLocalNotifications,
+    required NotificationSyncStatusUpdater updateNotificationSyncStatus,
   }) async {
-    _onRemotePayload = onRemotePayload;
     _loadLocalNotifications = loadLocalNotifications;
+    _updateNotificationSyncStatus = updateNotificationSyncStatus;
 
     if (_initialized) {
       await _syncLocalBacklog();
@@ -86,86 +77,48 @@ class FirebaseIncomeSyncService {
     await _syncLocalBacklog();
   }
 
-  Future<void> syncNotification(BankNotificationModel model) async {
+  Future<bool> syncNotification(BankNotificationModel model) async {
     if (!await _shouldUploadLocalChanges()) {
       await _diagnostics.log(
         source: 'flutter.firebase_sync',
-        message:
-            'Skipped remote notification sync because this device cannot upload local changes right now.',
+        message: 'Skipped remote notification sync because this device cannot upload local changes right now.',
         level: 'warning',
         metadata: {
           'fingerprint': model.fingerprint,
           'packageName': model.packageName,
         },
       );
-      return;
+      return false;
     }
 
-    final collection = await _prepareCollection();
-    if (collection == null) {
+    await _prepareSync();
+    final didSync = await sendTestNotification(_notificationPayloadFromModel(model));
+
+    if (didSync) {
       await _diagnostics.log(
         source: 'flutter.firebase_sync',
-        message:
-            'Skipped remote notification sync because no Firebase collection is available.',
-        level: 'warning',
+        message: 'Synced notification through backend test notification flow.',
         metadata: {
           'fingerprint': model.fingerprint,
         },
       );
-      return;
     }
-
-    await collection.doc(model.fingerprint).set(
-          _toRemoteMap(model),
-          SetOptions(merge: true),
-        );
-
-    await _diagnostics.log(
-      source: 'flutter.firebase_sync',
-      message: 'Synced notification to Firestore.',
-      metadata: {
-        'fingerprint': model.fingerprint,
-        'scopeId': _scopeId,
-      },
-    );
-
-    unawaited(_pushNotifySubDevices(model));
-  }
-
-  Future<void> _pushNotifySubDevices(BankNotificationModel model) async {
-    final scopeId = _scopeId;
-    if (scopeId == null) return;
-
-    await _apiService.post<void>(
-      '/income/notify',
-      showSnackBar: false,
-      body: {
-        'scopeId': scopeId,
-        'bankKey': model.bankApp.key,
-        'amount': model.amount,
-        'currency': model.currency,
-        'isIncome': model.isIncome,
-        'fingerprint': model.fingerprint,
-      },
-    );
+    return didSync;
   }
 
   Future<void> dispose() async {
-    await _remoteSubscription?.cancel();
     await _connectivitySubscription?.cancel();
-    _remoteSubscription = null;
     _connectivitySubscription = null;
-    _onRemotePayload = null;
     _loadLocalNotifications = null;
+    _updateNotificationSyncStatus = null;
     _scopeId = null;
     _initialized = false;
-    _isFirstSnapshot = true;
-    _cachedMainDeviceClaimStatus = null;
+    _isSyncingLocalBacklog = false;
   }
 
   Future<void> clearPersistedSessionState() async {
-    if (isConfigured && await _connectivityService.isOnline) {
-      await _releaseMainDeviceClaimIfOwned();
+    if (await _connectivityService.isOnline) {
+      await _fcmService.unregisterToken();
     }
 
     await dispose();
@@ -183,57 +136,15 @@ class FirebaseIncomeSyncService {
   }
 
   Future<bool> requestMainDeviceRole() async {
-    if (!isConfigured) {
-      await _persistDeviceRole(DeviceRole.main);
-      await _diagnostics.log(
-        source: 'flutter.firebase_sync',
-        message: 'Promoted device to main role without Firebase configuration.',
-      );
-      return true;
-    }
-
-    final scopeId = await _resolveScopeId();
-    if (scopeId == null || scopeId.isEmpty) {
-      await _persistDeviceRole(DeviceRole.main);
-      await _diagnostics.log(
-        source: 'flutter.firebase_sync',
-        message:
-            'Promoted device to main role because no sync scope id is available.',
-      );
-      return true;
-    }
-
-    if (!await _connectivityService.isOnline) {
-      await _diagnostics.log(
-        source: 'flutter.firebase_sync',
-        message: 'Cannot claim main device role while offline.',
-        level: 'warning',
-      );
-      return false;
-    }
-
-    final claimStatus = await _claimMainDevice(scopeId);
-    _cachedMainDeviceClaimStatus = claimStatus;
-    await _persistDeviceRole(
-      claimStatus.isActiveOnThisDevice ? DeviceRole.main : DeviceRole.sub,
-    );
+    await _persistDeviceRole(DeviceRole.main);
     await _diagnostics.log(
       source: 'flutter.firebase_sync',
-      message: claimStatus.isActiveOnThisDevice
-          ? 'Claimed main device role successfully.'
-          : 'Failed to claim main device role because another device is active.',
-      level: claimStatus.isActiveOnThisDevice ? 'info' : 'warning',
-      metadata: {
-        'scopeId': scopeId,
-      },
+      message: 'Promoted device to main role.',
     );
-    return claimStatus.isActiveOnThisDevice;
+    return true;
   }
 
   Future<void> releaseMainDeviceRole() async {
-    if (isConfigured && await _connectivityService.isOnline) {
-      await _releaseMainDeviceClaimIfOwned();
-    }
     await _persistDeviceRole(DeviceRole.sub);
     await _diagnostics.log(
       source: 'flutter.firebase_sync',
@@ -242,114 +153,45 @@ class FirebaseIncomeSyncService {
   }
 
   Future<DeviceRole> refreshDeviceRole() async {
-    final currentRole = await getStoredDeviceRole();
-
-    if (!isConfigured) {
-      return currentRole;
-    }
-
-    final scopeId = await _resolveScopeId();
-    if (scopeId == null || scopeId.isEmpty) {
-      return currentRole;
-    }
-
-    if (!await _connectivityService.isOnline) {
-      return currentRole;
-    }
-
-    final claimStatus = currentRole.isMain
-        ? await _claimMainDevice(scopeId)
-        : await _readMainDeviceClaimStatus(scopeId);
-    _cachedMainDeviceClaimStatus = claimStatus;
-    final resolvedRole =
-        claimStatus.isActiveOnThisDevice ? DeviceRole.main : DeviceRole.sub;
-    await _persistDeviceRole(resolvedRole);
-    return resolvedRole;
+    return getStoredDeviceRole();
   }
 
   Future<MainDeviceClaimStatus> getMainDeviceClaimStatus() async {
     final deviceRole = await getStoredDeviceRole();
-
-    if (!isConfigured) {
-      return MainDeviceClaimStatus(
-        isActiveOnThisDevice: deviceRole.isMain,
-        isClaimedByAnotherDevice: false,
-      );
-    }
-
-    final scopeId = await _resolveScopeId();
-    if (scopeId == null || scopeId.isEmpty) {
-      return MainDeviceClaimStatus(
-        isActiveOnThisDevice: deviceRole.isMain,
-        isClaimedByAnotherDevice: false,
-      );
-    }
-
-    if (!await _connectivityService.isOnline) {
-      return _cachedMainDeviceClaimStatus ??
-          MainDeviceClaimStatus(
-            isActiveOnThisDevice: deviceRole.isMain,
-            isClaimedByAnotherDevice: false,
-          );
-    }
-
-    final claimStatus = deviceRole.isMain
-        ? await _claimMainDevice(scopeId)
-        : await _readMainDeviceClaimStatus(scopeId);
-    _cachedMainDeviceClaimStatus = claimStatus;
-    await _persistDeviceRole(
-      claimStatus.isActiveOnThisDevice ? DeviceRole.main : DeviceRole.sub,
+    final claimStatus = MainDeviceClaimStatus(
+      isActiveOnThisDevice: deviceRole.isMain,
+      isClaimedByAnotherDevice: false,
     );
     return claimStatus;
   }
 
   Future<bool> canAcceptLocalCapture() async {
-    final deviceRole = await getStoredDeviceRole();
-    if (deviceRole.isSub) return false;
-
-    if (!isConfigured) return true;
-
-    if (!await _connectivityService.isOnline) {
-      return _cachedMainDeviceClaimStatus?.isActiveOnThisDevice ?? true;
-    }
-
-    final claimStatus = await getMainDeviceClaimStatus();
-    return claimStatus.isActiveOnThisDevice;
+    return (await getStoredDeviceRole()).isMain;
   }
 
   Future<void> _syncLocalBacklog() async {
-    if (!await _shouldUploadLocalChanges()) return;
+    if (_isSyncingLocalBacklog || !await _shouldUploadLocalChanges()) return;
 
     final loader = _loadLocalNotifications;
-    if (loader == null) return;
+    final updateNotificationSyncStatus = _updateNotificationSyncStatus;
+    if (loader == null || updateNotificationSyncStatus == null) return;
 
-    final collection = await _prepareCollection();
-    if (collection == null) return;
-
-    final items = await loader();
-    for (final item in items) {
-      await collection.doc(item.fingerprint).set(
-            _toRemoteMap(item),
-            SetOptions(merge: true),
-          );
+    _isSyncingLocalBacklog = true;
+    try {
+      final items = await loader();
+      for (final item in items) {
+        final didSync = await syncNotification(item);
+        await updateNotificationSyncStatus(
+          item.fingerprint,
+          didSync ? 0 : 2,
+        );
+      }
+    } finally {
+      _isSyncingLocalBacklog = false;
     }
   }
 
-  Future<CollectionReference<Map<String, dynamic>>?>
-      _prepareCollection() async {
-    await _prepareSync();
-    final scopeId = _scopeId;
-    if (!isConfigured || scopeId == null) return null;
-
-    return FirebaseFirestore.instance
-        .collection(_collectionName)
-        .doc(scopeId)
-        .collection('notifications');
-  }
-
   Future<void> _prepareSync() async {
-    if (!isConfigured) return;
-
     if (_scopeId == null) {
       final scopeId = await _resolveScopeId();
       if (scopeId == null || scopeId.isEmpty) {
@@ -359,8 +201,7 @@ class FirebaseIncomeSyncService {
         );
         await _diagnostics.log(
           source: 'flutter.firebase_sync',
-          message:
-              'Skipped Firebase income sync because no scope id is available.',
+          message: 'Skipped Firebase income sync because no scope id is available.',
           level: 'warning',
         );
         return;
@@ -369,47 +210,77 @@ class FirebaseIncomeSyncService {
       _scopeId = scopeId;
       await _persistNativeScopeId(scopeId);
 
-      // Register this device's FCM token so the Cloud Function can push to sub devices.
-      final deviceId = await _getOrCreateDeviceId();
-      final deviceRole = await getStoredDeviceRole();
-      unawaited(
-        _fcmService.registerToken(
-          scopeId: scopeId,
-          deviceId: deviceId,
-          deviceRole: deviceRole.storageValue,
-        ),
-      );
-    }
-
-    final scopeId = _scopeId;
-    if (scopeId == null || _remoteSubscription != null) return;
-
-    final collection = FirebaseFirestore.instance
-        .collection(_collectionName)
-        .doc(scopeId)
-        .collection('notifications');
-
-    _remoteSubscription = collection.snapshots().listen(
-      _onRemoteSnapshot,
-      onError: (Object error, StackTrace stackTrace) {
-        logger.e(
-          'Firebase income sync listener failed.',
-          error: error,
-          stackTrace: stackTrace,
-        );
+      if (isConfigured) {
+        final deviceId = await _getOrCreateDeviceId();
+        final deviceRole = await getStoredDeviceRole();
         unawaited(
-          _diagnostics.log(
-            source: 'flutter.firebase_sync',
-            message: 'Firebase income sync listener failed.',
-            level: 'error',
-            metadata: {
-              'error': error.toString(),
-            },
+          _fcmService.registerToken(
+            deviceId: deviceId,
+            deviceRole: deviceRole.storageValue,
           ),
         );
+      }
+    }
+  }
+
+  Future<bool> sendTestNotification(Map<String, dynamic> payload) async {
+    if (!await _shouldUploadLocalChanges()) {
+      await _diagnostics.log(
+        source: 'flutter.firebase_sync',
+        message: 'Skipped demo push notification because this device cannot upload local changes right now.',
+        level: 'warning',
+      );
+      return false;
+    }
+
+    final content = FcmService.buildNotificationContentFromPayload(payload);
+    final response = await _fcmService.sendTestNotification(
+      title: content.title,
+      body: content.body,
+      data: {
+        'fingerprint': payload['fingerprint']?.toString() ?? '',
+        'bankKey': payload['bankKey']?.toString() ?? '',
+        'amount': payload['amount']?.toString() ?? '',
+        'currency': payload['currency']?.toString() ?? '',
+        'isIncome': payload['isIncome']?.toString() ?? 'true',
+        'message': payload['message']?.toString() ?? '',
+        'title': payload['title']?.toString() ?? '',
       },
     );
+
+    await _diagnostics.log(
+      source: 'flutter.firebase_sync',
+      message: response.success
+          ? 'Sent push notification through backend test endpoint.'
+          : 'Failed to send push notification through backend test endpoint.',
+      level: response.success ? 'info' : 'warning',
+      metadata: {
+        'fingerprint': payload['fingerprint'],
+        'attempted': response.data?['attempted'],
+        'succeeded': response.data?['succeeded'],
+        'failed': response.data?['failed'],
+        'pruned': response.data?['pruned'],
+        'message': response.message,
+      },
+    );
+    return response.success;
   }
+
+  Map<String, dynamic> _notificationPayloadFromModel(
+    BankNotificationModel model,
+  ) =>
+      {
+        'fingerprint': model.fingerprint,
+        'packageName': model.packageName,
+        'bankKey': model.bankApp.key,
+        'title': model.title ?? '',
+        'message': model.message,
+        'amount': model.amount,
+        'currency': model.currency,
+        'isIncome': model.isIncome,
+        'receivedAt': model.receivedAt.millisecondsSinceEpoch,
+        'source': model.source,
+      };
 
   Future<String?> _resolveScopeId() async {
     final configuredScope = _readEnv('FIREBASE_INCOME_SCOPE_ID');
@@ -422,78 +293,8 @@ class FirebaseIncomeSyncService {
   }
 
   Future<bool> _shouldUploadLocalChanges() async {
-    if (!isConfigured) return false;
     if (!await _connectivityService.isOnline) return false;
-
-    final claimStatus = await getMainDeviceClaimStatus();
-    return claimStatus.isActiveOnThisDevice;
-  }
-
-  void _onRemoteSnapshot(
-    QuerySnapshot<Map<String, dynamic>> snapshot,
-  ) {
-    final remoteHandler = _onRemotePayload;
-    if (remoteHandler == null) return;
-
-    // Skip the initial batch so we don't show notifications for existing data
-    // that was already stored before this session.
-    final isInitialLoad = _isFirstSnapshot;
-    _isFirstSnapshot = false;
-
-    for (final change in snapshot.docChanges) {
-      if (change.type == DocumentChangeType.removed) {
-        continue;
-      }
-
-      final data = change.doc.data();
-      if (data == null) continue;
-
-      final payload = Map<String, dynamic>.from(data)
-        ..putIfAbsent('fingerprint', () => change.doc.id);
-
-      unawaited(remoteHandler(payload));
-      unawaited(
-        _diagnostics.log(
-          source: 'flutter.firebase_sync',
-          message: 'Received notification snapshot from Firestore.',
-          metadata: {
-            'fingerprint': payload['fingerprint'],
-            'changeType': change.type.name,
-            'initialLoad': isInitialLoad,
-          },
-        ),
-      );
-
-      // Notify sub device of a new income transaction pushed by the main device.
-      if (!isInitialLoad && change.type == DocumentChangeType.added) {
-        unawaited(_notifySubDeviceIfNeeded(payload));
-      }
-    }
-  }
-
-  Future<void> _notifySubDeviceIfNeeded(Map<String, dynamic> payload) async {
-    final deviceRole = await getStoredDeviceRole();
-    if (deviceRole.isSub) {
-      await _fcmService.showIncomeNotification(payload);
-    }
-  }
-
-  Map<String, dynamic> _toRemoteMap(BankNotificationModel model) {
-    return <String, dynamic>{
-      'fingerprint': model.fingerprint,
-      'packageName': model.packageName,
-      'bankKey': model.bankApp.key,
-      'title': model.title,
-      'message': model.message,
-      'rawPayload': model.rawPayload,
-      'amount': model.amount,
-      'currency': model.currency,
-      'isIncome': model.isIncome,
-      'receivedAt': model.receivedAt.millisecondsSinceEpoch,
-      'source': model.source,
-      'createdAt': model.createdAt.toIso8601String(),
-      'syncedAt': FieldValue.serverTimestamp(),
-    };
+    return (await getStoredDeviceRole()).isMain;
   }
 
   String? _readEnv(String key) {
@@ -506,8 +307,7 @@ class FirebaseIncomeSyncService {
 
   Future<void> _persistDeviceRole(DeviceRole deviceRole) async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    final previousRole =
-        DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
+    final previousRole = DeviceRole.fromStorage(sharedPreferences.getString('deviceRole'));
     if (previousRole == deviceRole) {
       return;
     }
@@ -543,105 +343,6 @@ class FirebaseIncomeSyncService {
     return deviceId;
   }
 
-  DocumentReference<Map<String, dynamic>> _mainDeviceClaimRef(String scopeId) {
-    return FirebaseFirestore.instance
-        .collection(_collectionName)
-        .doc(scopeId)
-        .collection(_systemCollectionName)
-        .doc(_mainDeviceClaimDocumentId);
-  }
-
-  Future<MainDeviceClaimStatus> _claimMainDevice(String scopeId) async {
-    final claimRef = _mainDeviceClaimRef(scopeId);
-    final deviceId = await _getOrCreateDeviceId();
-    final nowMs = DateTime.now().millisecondsSinceEpoch;
-
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      final snapshot = await transaction.get(claimRef);
-      final data = snapshot.data();
-      final claimedDeviceId = data?['deviceId'] as String?;
-      final updatedAtMs = data?['updatedAtMs'] as int? ?? 0;
-      final isStale =
-          nowMs - updatedAtMs > _mainClaimStaleDuration.inMilliseconds;
-
-      if (claimedDeviceId == null || claimedDeviceId == deviceId || isStale) {
-        transaction.set(
-          claimRef,
-          <String, dynamic>{
-            'deviceId': deviceId,
-            'claimedAtMs': claimedDeviceId == deviceId
-                ? (data?['claimedAtMs'] as int? ?? nowMs)
-                : nowMs,
-            'updatedAtMs': nowMs,
-            'updatedAt': FieldValue.serverTimestamp(),
-          },
-          SetOptions(merge: true),
-        );
-
-        return const MainDeviceClaimStatus(
-          isActiveOnThisDevice: true,
-          isClaimedByAnotherDevice: false,
-        );
-      }
-
-      return const MainDeviceClaimStatus(
-        isActiveOnThisDevice: false,
-        isClaimedByAnotherDevice: true,
-      );
-    });
-  }
-
-  Future<MainDeviceClaimStatus> _readMainDeviceClaimStatus(
-    String scopeId,
-  ) async {
-    final snapshot = await _mainDeviceClaimRef(scopeId).get();
-    final data = snapshot.data();
-    final deviceId = await _getOrCreateDeviceId();
-    final claimedDeviceId = data?['deviceId'] as String?;
-    final updatedAtMs = (data?['updatedAtMs'] as num?)?.toInt() ?? 0;
-    final nowMs = DateTime.now().millisecondsSinceEpoch;
-    final isStale = claimedDeviceId != null &&
-        nowMs - updatedAtMs > _mainClaimStaleDuration.inMilliseconds;
-
-    if (claimedDeviceId == deviceId && !isStale) {
-      return const MainDeviceClaimStatus(
-        isActiveOnThisDevice: true,
-        isClaimedByAnotherDevice: false,
-      );
-    }
-
-    return MainDeviceClaimStatus(
-      isActiveOnThisDevice: false,
-      isClaimedByAnotherDevice:
-          claimedDeviceId != null && claimedDeviceId != deviceId && !isStale,
-    );
-  }
-
-  Future<void> _releaseMainDeviceClaimIfOwned() async {
-    if (!isConfigured) return;
-    if (!await _connectivityService.isOnline) return;
-
-    final scopeId = await _resolveScopeId();
-    if (scopeId == null || scopeId.isEmpty) return;
-
-    final claimRef = _mainDeviceClaimRef(scopeId);
-    final deviceId = await _getOrCreateDeviceId();
-
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final snapshot = await transaction.get(claimRef);
-      final data = snapshot.data();
-      final claimedDeviceId = data?['deviceId'] as String?;
-      if (claimedDeviceId == deviceId) {
-        transaction.delete(claimRef);
-      }
-    });
-
-    _cachedMainDeviceClaimStatus = const MainDeviceClaimStatus(
-      isActiveOnThisDevice: false,
-      isClaimedByAnotherDevice: false,
-    );
-  }
-
   Future<void> _registerCurrentToken(DeviceRole deviceRole) async {
     if (!isConfigured) return;
 
@@ -651,7 +352,6 @@ class FirebaseIncomeSyncService {
     _scopeId = scopeId;
     final deviceId = await _getOrCreateDeviceId();
     await _fcmService.registerToken(
-      scopeId: scopeId,
       deviceId: deviceId,
       deviceRole: deviceRole.storageValue,
     );

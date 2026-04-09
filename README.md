@@ -102,6 +102,16 @@ flutter build apk --flavor staging --target lib/main_staging.dart
 flutter build apk --flavor production --target lib/main_production.dart
 ```
 
+### 5. Bump app version
+
+```sh
+# Preview the next patch/build version
+./scripts/bump_pubspec_version.sh --dry-run
+
+# Update pubspec.yaml from 1.0.9+14 to 1.0.10+15
+./scripts/bump_pubspec_version.sh
+```
+
 ## Development notes
 
 - Preferences such as theme, locale, and view mode are stored locally.

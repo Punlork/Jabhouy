@@ -42,6 +42,7 @@ class AppRoutes {
   static const category = 'category';
   static const customer = 'customer';
   static const profile = 'profile';
+  static const settings = 'settings';
   static const appDiagnostics = 'app_diagnostics';
   static const incomeDiagnostics = 'income_diagnostics';
 
@@ -56,6 +57,7 @@ class AppRoutes {
     '${home.toPath}${formLoaner.toPath}',
     '${home.toPath}${category.toPath}',
     '${home.toPath}${profile.toPath}',
+    '${home.toPath}${settings.toPath}',
     '${home.toPath}${appDiagnostics.toPath}',
     '${home.toPath}${customer.toPath}',
     '${home.toPath}${incomeDiagnostics.toPath}',
@@ -216,6 +218,39 @@ class AppRoutes {
                     ),
                   ],
                   child: const ProfilePage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: settings.toPath,
+            name: settings,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final categoryBloc = extra?['category'] as CategoryBloc? ??
+                  context.read<CategoryBloc>();
+              final shopBloc =
+                  extra?['shop'] as ShopBloc? ?? context.read<ShopBloc>();
+              final customerBloc = extra?['customerBloc'] as CustomerBloc? ??
+                  context.read<CustomerBloc>();
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
+                  context.read<IncomeBloc>();
+              final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ??
+                  context.read<SignoutBloc>();
+              GlobalContext.currentContext = context;
+
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: categoryBloc),
+                    BlocProvider.value(value: shopBloc),
+                    BlocProvider.value(value: customerBloc),
+                    BlocProvider.value(value: incomeBloc),
+                    BlocProvider.value(value: signoutBloc),
+                  ],
+                  child: const SettingsPage(),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

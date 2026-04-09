@@ -79,6 +79,7 @@ class BankNotifications extends Table {
   BoolColumn get isIncome => boolean().withDefault(const Constant(true))();
   DateTimeColumn get receivedAt => dateTime()();
   TextColumn get source => text().withDefault(const Constant('native'))();
+  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -95,7 +96,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -118,6 +119,10 @@ class AppDatabase extends _$AppDatabase {
 
         if (from < 4) {
           await m.createTable(bankNotifications);
+        }
+
+        if (from < 5) {
+          await m.addColumn(bankNotifications, bankNotifications.syncStatus);
         }
       },
     );

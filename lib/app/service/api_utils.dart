@@ -24,9 +24,7 @@ ApiResponse<T> handleResponse<T>(
       return ApiResponse<T>(
         success: true,
         data: responseBody != null ? parser(responseBody) : null,
-        message: responseBody is Map<String, dynamic>
-            ? responseBody['message']?.toString()
-            : null,
+        message: responseBody is Map<String, dynamic> ? responseBody['message']?.toString() : null,
       );
     } catch (e, stackTrace) {
       throw ApiException(
@@ -58,14 +56,24 @@ Future<http.Response> interceptRequest(
     printTime: false,
   );
   final inspector = NetworkInspectorService.instance;
-  final pathWithQuery =
-      uri.query.isNotEmpty ? '${uri.path}?${uri.query}' : uri.path;
+  final pathWithQuery = uri.query.isNotEmpty ? '${uri.path}?${uri.query}' : uri.path;
   final startTime = DateTime.now();
   final normalizedMethod = method ?? 'REQUEST';
 
-  logger.d('Starting: $normalizedMethod $pathWithQuery');
+  String? formattedBody;
+  if (requestBody != null) {
+    try {
+      final decoded = jsonDecode(requestBody);
+      formattedBody = const JsonEncoder.withIndent('  ').convert(decoded);
+    } catch (_) {
+      formattedBody = requestBody; // fallback to raw if not JSON
+    }
+  }
 
-  if (requestBody != null) logger.d('Request body: $requestBody');
+  logger.d(
+    'Starting: $normalizedMethod $pathWithQuery'
+    '${formattedBody != null ? ' | body:\n$formattedBody' : ''}',
+  );
 
   try {
     final response = await request();
@@ -84,9 +92,7 @@ Future<http.Response> interceptRequest(
       requestBody: requestBody,
       statusCode: response.statusCode,
       responseHeaders: response.headers,
-      responseBody: response.bodyBytes.isEmpty
-          ? null
-          : utf8.decode(response.bodyBytes, allowMalformed: true),
+      responseBody: response.bodyBytes.isEmpty ? null : utf8.decode(response.bodyBytes, allowMalformed: true),
     );
     return response;
   } catch (error, stackTrace) {

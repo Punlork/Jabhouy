@@ -1785,6 +1785,14 @@ class $BankNotificationsTable extends BankNotifications
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('native'));
+  static const VerificationMeta _syncStatusMeta =
+      const VerificationMeta('syncStatus');
+  @override
+  late final GeneratedColumn<int> syncStatus = GeneratedColumn<int>(
+      'sync_status', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1807,6 +1815,7 @@ class $BankNotificationsTable extends BankNotifications
         isIncome,
         receivedAt,
         source,
+        syncStatus,
         createdAt
       ];
   @override
@@ -1884,6 +1893,12 @@ class $BankNotificationsTable extends BankNotifications
       context.handle(_sourceMeta,
           source.isAcceptableOrUnknown(data['source']!, _sourceMeta));
     }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+          _syncStatusMeta,
+          syncStatus.isAcceptableOrUnknown(
+              data['sync_status']!, _syncStatusMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1925,6 +1940,8 @@ class $BankNotificationsTable extends BankNotifications
           .read(DriftSqlType.dateTime, data['${effectivePrefix}received_at'])!,
       source: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}source'])!,
+      syncStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -1950,6 +1967,7 @@ class BankNotification extends DataClass
   final bool isIncome;
   final DateTime receivedAt;
   final String source;
+  final int syncStatus;
   final DateTime createdAt;
   const BankNotification(
       {required this.id,
@@ -1964,6 +1982,7 @@ class BankNotification extends DataClass
       required this.isIncome,
       required this.receivedAt,
       required this.source,
+      required this.syncStatus,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1986,6 +2005,7 @@ class BankNotification extends DataClass
     map['is_income'] = Variable<bool>(isIncome);
     map['received_at'] = Variable<DateTime>(receivedAt);
     map['source'] = Variable<String>(source);
+    map['sync_status'] = Variable<int>(syncStatus);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -2008,6 +2028,7 @@ class BankNotification extends DataClass
       isIncome: Value(isIncome),
       receivedAt: Value(receivedAt),
       source: Value(source),
+      syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
     );
   }
@@ -2028,6 +2049,7 @@ class BankNotification extends DataClass
       isIncome: serializer.fromJson<bool>(json['isIncome']),
       receivedAt: serializer.fromJson<DateTime>(json['receivedAt']),
       source: serializer.fromJson<String>(json['source']),
+      syncStatus: serializer.fromJson<int>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -2047,6 +2069,7 @@ class BankNotification extends DataClass
       'isIncome': serializer.toJson<bool>(isIncome),
       'receivedAt': serializer.toJson<DateTime>(receivedAt),
       'source': serializer.toJson<String>(source),
+      'syncStatus': serializer.toJson<int>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -2064,6 +2087,7 @@ class BankNotification extends DataClass
           bool? isIncome,
           DateTime? receivedAt,
           String? source,
+          int? syncStatus,
           DateTime? createdAt}) =>
       BankNotification(
         id: id ?? this.id,
@@ -2078,6 +2102,7 @@ class BankNotification extends DataClass
         isIncome: isIncome ?? this.isIncome,
         receivedAt: receivedAt ?? this.receivedAt,
         source: source ?? this.source,
+        syncStatus: syncStatus ?? this.syncStatus,
         createdAt: createdAt ?? this.createdAt,
       );
   BankNotification copyWithCompanion(BankNotificationsCompanion data) {
@@ -2098,6 +2123,8 @@ class BankNotification extends DataClass
       receivedAt:
           data.receivedAt.present ? data.receivedAt.value : this.receivedAt,
       source: data.source.present ? data.source.value : this.source,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -2117,6 +2144,7 @@ class BankNotification extends DataClass
           ..write('isIncome: $isIncome, ')
           ..write('receivedAt: $receivedAt, ')
           ..write('source: $source, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -2136,6 +2164,7 @@ class BankNotification extends DataClass
       isIncome,
       receivedAt,
       source,
+      syncStatus,
       createdAt);
   @override
   bool operator ==(Object other) =>
@@ -2153,6 +2182,7 @@ class BankNotification extends DataClass
           other.isIncome == this.isIncome &&
           other.receivedAt == this.receivedAt &&
           other.source == this.source &&
+          other.syncStatus == this.syncStatus &&
           other.createdAt == this.createdAt);
 }
 
@@ -2169,6 +2199,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
   final Value<bool> isIncome;
   final Value<DateTime> receivedAt;
   final Value<String> source;
+  final Value<int> syncStatus;
   final Value<DateTime> createdAt;
   const BankNotificationsCompanion({
     this.id = const Value.absent(),
@@ -2183,6 +2214,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
     this.isIncome = const Value.absent(),
     this.receivedAt = const Value.absent(),
     this.source = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   BankNotificationsCompanion.insert({
@@ -2198,6 +2230,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
     this.isIncome = const Value.absent(),
     required DateTime receivedAt,
     this.source = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
   })  : fingerprint = Value(fingerprint),
         packageName = Value(packageName),
@@ -2217,6 +2250,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
     Expression<bool>? isIncome,
     Expression<DateTime>? receivedAt,
     Expression<String>? source,
+    Expression<int>? syncStatus,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -2232,6 +2266,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
       if (isIncome != null) 'is_income': isIncome,
       if (receivedAt != null) 'received_at': receivedAt,
       if (source != null) 'source': source,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -2249,6 +2284,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
       Value<bool>? isIncome,
       Value<DateTime>? receivedAt,
       Value<String>? source,
+      Value<int>? syncStatus,
       Value<DateTime>? createdAt}) {
     return BankNotificationsCompanion(
       id: id ?? this.id,
@@ -2263,6 +2299,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
       isIncome: isIncome ?? this.isIncome,
       receivedAt: receivedAt ?? this.receivedAt,
       source: source ?? this.source,
+      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -2306,6 +2343,9 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
     if (source.present) {
       map['source'] = Variable<String>(source.value);
     }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<int>(syncStatus.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2327,6 +2367,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
           ..write('isIncome: $isIncome, ')
           ..write('receivedAt: $receivedAt, ')
           ..write('source: $source, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -3572,6 +3613,7 @@ typedef $$BankNotificationsTableCreateCompanionBuilder
   Value<bool> isIncome,
   required DateTime receivedAt,
   Value<String> source,
+  Value<int> syncStatus,
   Value<DateTime> createdAt,
 });
 typedef $$BankNotificationsTableUpdateCompanionBuilder
@@ -3588,6 +3630,7 @@ typedef $$BankNotificationsTableUpdateCompanionBuilder
   Value<bool> isIncome,
   Value<DateTime> receivedAt,
   Value<String> source,
+  Value<int> syncStatus,
   Value<DateTime> createdAt,
 });
 
@@ -3635,6 +3678,9 @@ class $$BankNotificationsTableFilterComposer
 
   ColumnFilters<String> get source => $composableBuilder(
       column: $table.source, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -3685,6 +3731,9 @@ class $$BankNotificationsTableOrderingComposer
   ColumnOrderings<String> get source => $composableBuilder(
       column: $table.source, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
@@ -3734,6 +3783,9 @@ class $$BankNotificationsTableAnnotationComposer
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
 
+  GeneratedColumn<int> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
@@ -3778,6 +3830,7 @@ class $$BankNotificationsTableTableManager extends RootTableManager<
             Value<bool> isIncome = const Value.absent(),
             Value<DateTime> receivedAt = const Value.absent(),
             Value<String> source = const Value.absent(),
+            Value<int> syncStatus = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               BankNotificationsCompanion(
@@ -3793,6 +3846,7 @@ class $$BankNotificationsTableTableManager extends RootTableManager<
             isIncome: isIncome,
             receivedAt: receivedAt,
             source: source,
+            syncStatus: syncStatus,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
@@ -3808,6 +3862,7 @@ class $$BankNotificationsTableTableManager extends RootTableManager<
             Value<bool> isIncome = const Value.absent(),
             required DateTime receivedAt,
             Value<String> source = const Value.absent(),
+            Value<int> syncStatus = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               BankNotificationsCompanion.insert(
@@ -3823,6 +3878,7 @@ class $$BankNotificationsTableTableManager extends RootTableManager<
             isIncome: isIncome,
             receivedAt: receivedAt,
             source: source,
+            syncStatus: syncStatus,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0

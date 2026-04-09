@@ -39,7 +39,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
@@ -73,7 +74,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         context.read<ShopBloc>().add(
               ShopGetItemsEvent(
                 searchQuery: value,
-                categoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+                categoryFilter:
+                    context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               ),
             );
       case 1:
@@ -98,7 +100,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               BlocProvider.value(value: context.read<ShopBloc>()),
             ],
             child: FilterSheet(
-              initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+              initialCategoryFilter:
+                  context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               onApply: (category) => context.read<ShopBloc>().add(
                     ShopGetItemsEvent(categoryFilter: category),
                   ),
@@ -122,16 +125,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: LoanerFilterSheet(
-                initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
-                initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
-                initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
-                onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
-                      LoadLoaners(
-                        fromDate: fromDate,
-                        toDate: toDate,
-                        loanerFilter: loanerFilter,
-                      ),
-                    ),
+                initialFromDate:
+                    context.read<LoanerBloc>().state.asLoaded?.fromDate,
+                initialToDate:
+                    context.read<LoanerBloc>().state.asLoaded?.toDate,
+                initialLoanerFilter:
+                    context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
+                onApply: (fromDate, toDate, loanerFilter) =>
+                    context.read<LoanerBloc>().add(
+                          LoadLoaners(
+                            fromDate: fromDate,
+                            toDate: toDate,
+                            loanerFilter: loanerFilter,
+                          ),
+                        ),
               ),
             ),
           ),
@@ -150,19 +157,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: IncomeFilterSheet(
-                initialFromDate: context.read<IncomeBloc>().state.asLoaded?.fromDate,
-                initialToDate: context.read<IncomeBloc>().state.asLoaded?.toDate,
-                initialBankFilter: context.read<IncomeBloc>().state.asLoaded?.bankFilter,
+                initialFromDate:
+                    context.read<IncomeBloc>().state.asLoaded?.fromDate,
+                initialToDate:
+                    context.read<IncomeBloc>().state.asLoaded?.toDate,
+                initialBankFilter:
+                    context.read<IncomeBloc>().state.asLoaded?.bankFilter,
                 initialRecordFilter:
-                    context.read<IncomeBloc>().state.asLoaded?.recordFilter ?? NotificationRecordFilter.all,
-                onApply: (fromDate, toDate, bankFilter, recordFilter) => context.read<IncomeBloc>().add(
-                      LoadIncomeDashboard(
-                        fromDate: fromDate,
-                        toDate: toDate,
-                        bankFilter: bankFilter,
-                        recordFilter: recordFilter,
-                      ),
-                    ),
+                    context.read<IncomeBloc>().state.asLoaded?.recordFilter ??
+                        NotificationRecordFilter.all,
+                onApply: (fromDate, toDate, bankFilter, recordFilter) =>
+                    context.read<IncomeBloc>().add(
+                          LoadIncomeDashboard(
+                            fromDate: fromDate,
+                            toDate: toDate,
+                            bankFilter: bankFilter,
+                            recordFilter: recordFilter,
+                          ),
+                        ),
               ),
             ),
           ),
@@ -170,22 +182,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
-  void _showSettingsSheet(VoidCallback onSignout) {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      isScrollControlled: true,
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: context.read<CategoryBloc>()),
-          BlocProvider.value(value: context.read<ShopBloc>()),
-          BlocProvider.value(value: context.read<CustomerBloc>()),
-          BlocProvider.value(value: context.read<IncomeBloc>()),
-        ],
-        child: SettingsSheet(onSignout: onSignout),
-      ),
+  void _openSettingsPage() {
+    context.pushNamed(
+      AppRoutes.settings,
+      extra: {
+        'category': context.read<CategoryBloc>(),
+        'shop': context.read<ShopBloc>(),
+        'customerBloc': context.read<CustomerBloc>(),
+        'incomeBloc': context.read<IncomeBloc>(),
+        'signoutBloc': context.read<SignoutBloc>(),
+      },
     );
   }
 
@@ -216,7 +222,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       return;
     }
 
-    final trackingStatus = context.read<IncomeBloc>().state.asLoaded?.trackingStatus;
+    final trackingStatus =
+        context.read<IncomeBloc>().state.asLoaded?.trackingStatus;
     if (trackingStatus?.isBlockedByAnotherMainDevice ?? false) {
       showErrorSnackBar(null, context.l10n.anotherMainDeviceActive);
       return;
@@ -256,13 +263,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         }
 
         final isMainDevice = appState.deviceRole.isMain;
-        final isBlocked =
-            context.read<IncomeBloc>().state.asLoaded?.trackingStatus?.isBlockedByAnotherMainDevice ?? false;
+        final isBlocked = context
+                .read<IncomeBloc>()
+                .state
+                .asLoaded
+                ?.trackingStatus
+                ?.isBlockedByAnotherMainDevice ??
+            false;
 
         return _BottomActionConfig(
-          tooltip: isMainDevice ? context.l10n.addDemoData : context.l10n.mainDeviceOnly,
+          tooltip: isMainDevice
+              ? context.l10n.addDemoData
+              : context.l10n.mainDeviceOnly,
           icon: Icons.bolt_rounded,
-          onPressed: isMainDevice && !isBlocked ? () => _seedIncomeDemoData(appState) : null,
+          onPressed: isMainDevice && !isBlocked
+              ? () => _seedIncomeDemoData(appState)
+              : null,
         );
     }
 
@@ -311,7 +327,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
+      listenWhen: (previous, current) =>
+          previous.runtimeType != current.runtimeType,
       listener: (context, authState) {
         if (authState is Authenticated) {
           _loadProtectedData();
@@ -341,9 +358,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final appState = context.watch<AppBloc>().state;
     final bottomAction = _buildBottomActionConfig(appState);
-    final bottomBarBackground = isDark ? colorScheme.surfaceContainerLow : colorScheme.surface;
-    final bottomBarIndicator = isDark ? colorScheme.primary : colorScheme.primaryContainer;
-    final bottomBarSelectedForeground = isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
+    final bottomBarBackground =
+        isDark ? colorScheme.surfaceContainerLow : colorScheme.surface;
+    final bottomBarIndicator =
+        isDark ? colorScheme.primary : colorScheme.primaryContainer;
+    final bottomBarSelectedForeground =
+        isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
     final bottomBarUnselectedForeground = colorScheme.onSurfaceVariant;
 
     final bottomBars = [
@@ -379,9 +399,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       return ShopHeader(
                         hasFilter: hasFilter,
                         searchHintText: searchHintText,
-                        onSettingsPressed: () => _showSettingsSheet(
-                          () => context.read<SignoutBloc>().add(const SignoutSubmitted()),
-                        ),
+                        onSettingsPressed: _openSettingsPage,
                         onSearchChanged: _onSearchChanged,
                         onFilterPressed: _showFilterSheet,
                         searchController: _searchController,

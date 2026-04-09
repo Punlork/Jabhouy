@@ -34,6 +34,10 @@ class IncomeService {
   StreamSubscription<Map<String, dynamic>>? _nativeSubscription;
   bool _initialized = false;
 
+  static const _notificationSyncStatusSynced = 0;
+  static const _notificationSyncStatusPending = 1;
+  static const _notificationSyncStatusError = 2;
+
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
@@ -46,11 +50,8 @@ class IncomeService {
 
     await importPendingTrackedNotifications();
     await _syncService.initialize(
-      onRemotePayload: (payload) => saveTrackedNotificationMap(
-        payload,
-        triggerRemoteSync: false,
-      ),
-      loadLocalNotifications: _loadAllNotifications,
+      loadLocalNotifications: _loadPendingNotifications,
+      updateNotificationSyncStatus: _updateNotificationSyncStatus,
     );
 
     _nativeSubscription = _bridge.notificationStream.listen((payload) async {
@@ -211,7 +212,8 @@ class IncomeService {
 
     await _diagnostics.log(
       source: 'flutter.income_service',
-      message: 'Seeded fallback demo notifications directly in Flutter.',
+      message:
+          'Seeded demo notifications locally and pushed them through backend test notifications.',
       metadata: {
         'count': samples.length,
       },
@@ -302,8 +304,13 @@ class IncomeService {
     );
   }
 
-  Future<List<BankNotificationModel>> _loadAllNotifications() async {
+  Future<List<BankNotificationModel>> _loadPendingNotifications() async {
     final rows = await (_db.select(_db.bankNotifications)
+          ..where(
+            (tbl) =>
+                tbl.syncStatus.equals(_notificationSyncStatusPending) |
+                tbl.syncStatus.equals(_notificationSyncStatusError),
+          )
           ..orderBy([
             (tbl) => OrderingTerm(
                   expression: tbl.receivedAt,
@@ -335,6 +342,7 @@ class IncomeService {
     }
 
     final model = BankNotificationModel.fromNativeMap(payload);
+    final shouldQueueRemoteSync = canAcceptLocal;
     final existing = await (_db.select(_db.bankNotifications)
           ..where((tbl) => tbl.fingerprint.equals(model.fingerprint)))
         .getSingleOrNull();
@@ -354,6 +362,11 @@ class IncomeService {
               isIncome: Value(model.isIncome),
               receivedAt: model.receivedAt,
               source: Value(model.source),
+              syncStatus: Value(
+                shouldQueueRemoteSync
+                    ? _notificationSyncStatusPending
+                    : _notificationSyncStatusSynced,
+              ),
               createdAt: Value(model.createdAt),
             ),
           );
@@ -374,6 +387,7 @@ class IncomeService {
           isIncome: Value(model.isIncome),
           receivedAt: Value(model.receivedAt),
           source: Value(model.source),
+          syncStatus: Value(existing.syncStatus),
           createdAt: Value(model.createdAt),
         ),
       );
@@ -394,7 +408,24 @@ class IncomeService {
     );
 
     if (triggerRemoteSync && existing == null) {
-      await _syncService.syncNotification(model);
+      final didSync = await _syncService.syncNotification(model);
+      await _updateNotificationSyncStatus(
+        model.fingerprint,
+        didSync ? _notificationSyncStatusSynced : _notificationSyncStatusError,
+      );
     }
+  }
+
+  Future<void> _updateNotificationSyncStatus(
+    String fingerprint,
+    int syncStatus,
+  ) async {
+    await (_db.update(_db.bankNotifications)
+          ..where((tbl) => tbl.fingerprint.equals(fingerprint)))
+        .write(
+      BankNotificationsCompanion(
+        syncStatus: Value(syncStatus),
+      ),
+    );
   }
 }

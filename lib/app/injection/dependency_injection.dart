@@ -37,6 +37,7 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton(
       () => FcmService(
+        getIt<ApiService>(),
         getIt<NotificationDiagnosticsService>(),
       ),
     )
@@ -45,7 +46,6 @@ Future<void> setupDependencies() async {
         getIt<ConnectivityService>(),
         getIt<AuthService>(),
         getIt<FcmService>(),
-        getIt<ApiService>(),
         getIt<NotificationDiagnosticsService>(),
       ),
     )
