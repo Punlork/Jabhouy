@@ -25,6 +25,8 @@ object NotificationTrackingBridge {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var eventSink: EventChannel.EventSink? = null
     private var logSink: EventChannel.EventSink? = null
+    @Volatile
+    private var isFlutterAppForeground: Boolean = false
 
     fun attachEventSink(sink: EventChannel.EventSink?) {
         eventSink = sink
@@ -34,8 +36,12 @@ object NotificationTrackingBridge {
         logSink = sink
     }
 
+    fun setFlutterAppForeground(isForeground: Boolean) {
+        isFlutterAppForeground = isForeground
+    }
+
     fun hasActiveFlutterListener(): Boolean {
-        return eventSink != null
+        return eventSink != null && isFlutterAppForeground
     }
 
     fun isNotificationAccessEnabled(context: Context): Boolean {

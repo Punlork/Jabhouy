@@ -6,6 +6,21 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
+    override fun onStart() {
+        super.onStart()
+        NotificationTrackingBridge.setFlutterAppForeground(true)
+    }
+
+    override fun onStop() {
+        NotificationTrackingBridge.setFlutterAppForeground(false)
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        NotificationTrackingBridge.setFlutterAppForeground(false)
+        super.onDestroy()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
