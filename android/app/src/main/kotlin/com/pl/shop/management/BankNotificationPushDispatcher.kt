@@ -190,7 +190,7 @@ object BankNotificationPushDispatcher {
         val cookiesJson = JSONObject(rawCookies)
         val host = URL(endpoint).host
         val domainCookies = cookiesJson.optJSONObject(host) ?: return null
-        val names = JSONArray(domainCookies.names() ?: return null)
+        val names = domainCookies.names() ?: return null
         val pairs = buildList {
             for (index in 0 until names.length()) {
                 val name = names.optString(index)

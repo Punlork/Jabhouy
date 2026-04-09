@@ -1,14 +1,19 @@
 package com.pl.shop.management
 
+import android.os.Handler
+import android.os.Looper
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity: FlutterActivity() {
     override fun onStart() {
         super.onStart()
         NotificationTrackingBridge.setFlutterAppForeground(true)
+        NotificationTrackingBridge.requestNotificationListenerRebindIfNeeded(applicationContext)
     }
 
     override fun onStop() {
@@ -42,6 +47,48 @@ class MainActivity: FlutterActivity() {
                 "pushDemoNotifications" -> {
                     NotificationTrackingBridge.pushDemoNotifications(applicationContext)
                     result.success(null)
+                }
+                "sendNativeTestPush" -> {
+                    val payload = JSONObject()
+                    val arguments = call.argument<Map<String, Any?>>("payload").orEmpty()
+                    arguments.forEach { (key, value) ->
+                        payload.put(key, value.toJsonValue())
+                    }
+
+                    Thread {
+                        try {
+                            BankNotificationPushDispatcher.sendPayload(applicationContext, payload)
+                            NotificationTrackingBridge.appendDiagnosticLog(
+                                context = applicationContext,
+                                source = "android.push_dispatcher",
+                                message = "Manual native push test succeeded.",
+                                metadata = mapOf(
+                                    "fingerprint" to payload.optString("fingerprint"),
+                                ),
+                            )
+                            Handler(Looper.getMainLooper()).post {
+                                result.success(true)
+                            }
+                        } catch (error: Exception) {
+                            NotificationTrackingBridge.appendDiagnosticLog(
+                                context = applicationContext,
+                                source = "android.push_dispatcher",
+                                message = "Manual native push test failed.",
+                                level = "error",
+                                metadata = mapOf(
+                                    "fingerprint" to payload.optString("fingerprint"),
+                                    "error" to (error.message ?: error.toString()),
+                                ),
+                            )
+                            Handler(Looper.getMainLooper()).post {
+                                result.error(
+                                    "native_push_failed",
+                                    error.message ?: error.toString(),
+                                    null,
+                                )
+                            }
+                        }
+                    }.start()
                 }
                 "getDiagnosticsLogs" -> {
                     result.success(NotificationTrackingBridge.readDiagnosticsLogs(applicationContext))
@@ -93,5 +140,32 @@ class MainActivity: FlutterActivity() {
                 NotificationTrackingBridge.attachLogSink(null)
             }
         })
+    }
+
+    private fun Any?.toJsonValue(): Any? {
+        return when (this) {
+            null -> JSONObject.NULL
+            is JSONObject, is JSONArray, is String, is Boolean, is Int, is Long, is Double -> this
+            is Float -> this.toDouble()
+            is Number -> this.toDouble()
+            is Map<*, *> -> JSONObject().apply {
+                this@toJsonValue.forEach { (key, value) ->
+                    if (key != null) {
+                        put(key.toString(), value.toJsonValue())
+                    }
+                }
+            }
+            is Iterable<*> -> JSONArray().apply {
+                this@toJsonValue.forEach { item ->
+                    put(item.toJsonValue())
+                }
+            }
+            is Array<*> -> JSONArray().apply {
+                this@toJsonValue.forEach { item ->
+                    put(item.toJsonValue())
+                }
+            }
+            else -> this.toString()
+        }
     }
 }

@@ -1,10 +1,13 @@
 package com.pl.shop.management
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
 import android.util.Log
 import io.flutter.plugin.common.EventChannel
 import org.json.JSONArray
@@ -49,13 +52,34 @@ object NotificationTrackingBridge {
             context.contentResolver,
             "enabled_notification_listeners"
         ) ?: return false
-        return enabledListeners.contains(context.packageName)
+        val expectedComponent = ComponentName(
+            context,
+            BankNotificationListenerService::class.java,
+        )
+        return enabledListeners
+            .split(':')
+            .mapNotNull(ComponentName::unflattenFromString)
+            .any { component ->
+                component == expectedComponent
+            }
     }
 
     fun openNotificationAccessSettings(context: Context) {
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
+    }
+
+    fun requestNotificationListenerRebindIfNeeded(context: Context) {
+        if (!isNotificationAccessEnabled(context)) {
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            NotificationListenerService.requestRebind(
+                ComponentName(context, BankNotificationListenerService::class.java),
+            )
+        }
     }
 
     fun drainPendingNotifications(context: Context): List<Map<String, Any?>> {
@@ -382,8 +406,35 @@ object NotificationTrackingBridge {
     private fun mapToJsonObject(map: Map<String, Any?>): JSONObject {
         val json = JSONObject()
         for ((key, value) in map) {
-            json.put(key, value)
+            json.put(key, value.toJsonValue())
         }
         return json
+    }
+
+    private fun Any?.toJsonValue(): Any? {
+        return when (this) {
+            null -> JSONObject.NULL
+            is JSONObject, is JSONArray, is String, is Boolean, is Int, is Long, is Double -> this
+            is Float -> this.toDouble()
+            is Number -> this.toDouble()
+            is Map<*, *> -> JSONObject().apply {
+                this@toJsonValue.forEach { (key, value) ->
+                    if (key != null) {
+                        put(key.toString(), value.toJsonValue())
+                    }
+                }
+            }
+            is Iterable<*> -> JSONArray().apply {
+                this@toJsonValue.forEach { item ->
+                    put(item.toJsonValue())
+                }
+            }
+            is Array<*> -> JSONArray().apply {
+                this@toJsonValue.forEach { item ->
+                    put(item.toJsonValue())
+                }
+            }
+            else -> this.toString()
+        }
     }
 }

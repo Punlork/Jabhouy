@@ -5,23 +5,28 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 
 class BankNotificationListenerService : NotificationListenerService() {
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        NotificationTrackingBridge.appendDiagnosticLog(
+            context = applicationContext,
+            source = "android.listener",
+            message = "Notification listener connected.",
+        )
+    }
+
+    override fun onListenerDisconnected() {
+        NotificationTrackingBridge.appendDiagnosticLog(
+            context = applicationContext,
+            source = "android.listener",
+            message = "Notification listener disconnected; requesting rebind.",
+            level = "warning",
+        )
+        NotificationTrackingBridge.requestNotificationListenerRebindIfNeeded(applicationContext)
+        super.onListenerDisconnected()
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val packageName = sbn.packageName ?: return
-        if (packageName !in supportedPackages) {
-            if (looksRelevant(packageName)) {
-                NotificationTrackingBridge.appendDiagnosticLog(
-                    context = applicationContext,
-                    source = "android.listener",
-                    message = "Ignored notification from unsupported package.",
-                    level = "warning",
-                    metadata = mapOf(
-                        "packageName" to packageName,
-                    ),
-                )
-            }
-            return
-        }
-
         val extras = sbn.notification.extras
         val title = extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString()
         val messageParts = buildList {
@@ -36,6 +41,11 @@ class BankNotificationListenerService : NotificationListenerService() {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
             .distinct()
+
+        if (!shouldTrackNotification(packageName, title, messageParts)) {
+            return
+        }
+
         val visibleMessageParts = messageParts.filterNot(::isRedactedPlaceholder)
 
         val message = visibleMessageParts.joinToString(" ").ifBlank {
@@ -90,19 +100,84 @@ class BankNotificationListenerService : NotificationListenerService() {
     }
 
     companion object {
-        private val supportedPackages = setOf(
-            "com.paygo24.ibank",
-            "com.chipmongbank.mobileappproduction",
-            "com.domain.acledabankqr",
-        )
+        private fun shouldTrackNotification(
+            packageName: String,
+            title: String?,
+            messageParts: List<String>,
+        ): Boolean {
+            if (looksRelevantPackage(packageName)) {
+                return true
+            }
 
-        private fun looksRelevant(packageName: String): Boolean {
+            val normalizedText = buildString {
+                append(title.orEmpty())
+                if (messageParts.isNotEmpty()) {
+                    append(' ')
+                    append(messageParts.joinToString(" "))
+                }
+            }.lowercase()
+
+            if (looksRelevantText(normalizedText)) {
+                return true
+            }
+
+            return false
+        }
+
+        private fun looksRelevantPackage(packageName: String): Boolean {
             val normalized = packageName.lowercase()
             return normalized.contains("aba") ||
                 normalized.contains("chip") ||
                 normalized.contains("mong") ||
                 normalized.contains("bank") ||
-                normalized.contains("acleda")
+                normalized.contains("acleda") ||
+                normalized.contains("wing") ||
+                normalized.contains("wallet") ||
+                normalized.contains("pay")
+        }
+
+        private fun looksRelevantText(normalizedText: String): Boolean {
+            if (normalizedText.isBlank()) return false
+
+            val financialKeywords = listOf(
+                "received",
+                "incoming",
+                "credited",
+                "credit",
+                "deposit",
+                "transfer",
+                "payment",
+                "debit",
+                "debited",
+                "withdraw",
+                "cash in",
+                "cash out",
+                "received from",
+                "transfer in",
+                "transfer out",
+                "bank",
+                "account",
+                "wallet",
+                "khqr",
+                "usd",
+                "khr",
+                "៛",
+                "បានទទួល",
+                "ទទួលបាន",
+                "ផ្ទេរចូល",
+                "ផ្ទេរចេញ",
+                "វេរចូល",
+                "វេរចេញ",
+                "ប្រាក់ចូល",
+                "ប្រាក់ចេញ",
+                "ដាក់ប្រាក់",
+                "ដកប្រាក់",
+                "បញ្ចូលប្រាក់",
+                "ទូទាត់",
+                "បង់ប្រាក់",
+            )
+
+            return financialKeywords.any(normalizedText::contains)
         }
 
         private fun isRedactedPlaceholder(value: String): Boolean {

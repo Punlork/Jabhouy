@@ -15,6 +15,7 @@ class IncomeDiagnosticsPage extends StatefulWidget {
 
 class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
   late final NotificationDiagnosticsService _diagnosticsService;
+  late final NotificationTrackingBridge _trackingBridge;
   StreamSubscription<List<NotificationDiagnosticEntry>>?
       _diagnosticsSubscription;
   List<NotificationDiagnosticEntry> _entries = const [];
@@ -23,6 +24,7 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
   void initState() {
     super.initState();
     _diagnosticsService = getIt<NotificationDiagnosticsService>();
+    _trackingBridge = getIt<NotificationTrackingBridge>();
     _entries = _diagnosticsService.entries;
     _diagnosticsSubscription =
         _diagnosticsService.entriesStream.listen((entries) {
@@ -76,6 +78,54 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
     await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
     showSuccessSnackBar(context, 'Payload copied');
+  }
+
+  Future<void> _sendNativeTestPush(
+    BankNotificationModel? latestItem,
+  ) async {
+    final now = DateTime.now();
+    final sample = latestItem ??
+        BankNotificationModel(
+          fingerprint: 'native-test-${now.millisecondsSinceEpoch}',
+          packageName: 'com.paygo24.ibank',
+          bankApp: BankApp.aba,
+          title: 'Income received',
+          message: 'Manual native test push',
+          amount: 1,
+          currency: 'USD',
+          isIncome: true,
+          receivedAt: now,
+          source: 'manual_native_test',
+        );
+
+    final payload = <String, dynamic>{
+      'fingerprint': sample.fingerprint,
+      'packageName': sample.packageName,
+      'bankKey': sample.bankApp.key,
+      'title': sample.title ?? '',
+      'message': sample.message,
+      'amount': sample.amount,
+      'currency': sample.currency,
+      'isIncome': sample.isIncome,
+      'receivedAt': sample.receivedAt.millisecondsSinceEpoch,
+      'source': sample.source,
+    };
+
+    try {
+      final sent = await _trackingBridge.sendNativeTestPush(payload);
+      if (!mounted) return;
+      if (sent) {
+        showSuccessSnackBar(context, 'Native push test sent');
+      } else {
+        showErrorSnackBar(context, 'Native push test was not sent');
+      }
+    } on PlatformException catch (error) {
+      if (!mounted) return;
+      showErrorSnackBar(
+        context,
+        error.message ?? 'Native push test failed',
+      );
+    }
   }
 
   @override
@@ -165,6 +215,13 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
                             .add(const RefreshIncomeTrackingStatus()),
                         icon: const Icon(Icons.refresh_rounded),
                         label: const Text('Refresh status'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => _sendNativeTestPush(
+                          recentItems.isEmpty ? null : recentItems.first,
+                        ),
+                        icon: const Icon(Icons.send_rounded),
+                        label: const Text('Send native push test'),
                       ),
                       OutlinedButton.icon(
                         onPressed: () => context
