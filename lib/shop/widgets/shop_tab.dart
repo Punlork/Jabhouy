@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/home/home.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -26,6 +27,22 @@ class _ShopTabState extends State<_ShopTabView>
   bool _shouldRebuild(ShopState previous, ShopState current) =>
       previous != current;
 
+  void _scrollToTop() {
+    final controller = TabScrollManager.of(context)?.getController(0);
+
+    if (controller == null ||
+        !controller.hasClients ||
+        controller.offset <= 0) {
+      return;
+    }
+
+    controller.animateTo(
+      0,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   Future<void> _refreshItems() async {
     if (!mounted) return;
     final currentState = context.read<ShopBloc>().state.asLoaded;
@@ -47,58 +64,64 @@ class _ShopTabState extends State<_ShopTabView>
 
     return Stack(
       children: [
-        BlocBuilder<ShopBloc, ShopState>(
-          buildWhen: _shouldRebuild,
-          builder: (context, state) => switch (state) {
-            ShopInitial() || ShopLoading() => const ShopGridLoading(),
-            ShopLoaded(
-              :final items,
-              :final pagination,
-              :final isFiltering,
-              :final isOffline,
-              :final syncMessage,
-            ) =>
-              RefreshIndicator(
-                onRefresh: _refreshItems,
-                child: Column(
-                  children: [
-                    if (syncMessage != null)
-                      _SyncStatusBanner(
-                        message: syncMessage,
-                        isOffline: isOffline,
-                      ),
-                    Expanded(
-                      child: Builder(
-                        builder: (context) {
-                          if ((isFiltering ?? false) && items.isEmpty) {
-                            return const ShopGridLoading();
-                          }
-                          if (items.isEmpty) {
-                            return const EmptyView();
-                          }
-                          return Stack(
-                            children: [
-                              ShopGridBuilder(
-                                items: items,
-                                pagination: pagination,
-                              ),
-                              if (isFiltering ?? false)
-                                const Positioned(
-                                  top: 52,
-                                  left: 16,
-                                  right: 16,
-                                  child: LinearProgressIndicator(),
+        BlocListener<ShopBloc, ShopState>(
+          listenWhen: (previous, current) =>
+              previous.asLoaded?.categoryFilter !=
+              current.asLoaded?.categoryFilter,
+          listener: (context, state) => _scrollToTop(),
+          child: BlocBuilder<ShopBloc, ShopState>(
+            buildWhen: _shouldRebuild,
+            builder: (context, state) => switch (state) {
+              ShopInitial() || ShopLoading() => const ShopGridLoading(),
+              ShopLoaded(
+                :final items,
+                :final pagination,
+                :final isFiltering,
+                :final isOffline,
+                :final syncMessage,
+              ) =>
+                RefreshIndicator(
+                  onRefresh: _refreshItems,
+                  child: Column(
+                    children: [
+                      if (syncMessage != null)
+                        _SyncStatusBanner(
+                          message: syncMessage,
+                          isOffline: isOffline,
+                        ),
+                      Expanded(
+                        child: Builder(
+                          builder: (context) {
+                            if ((isFiltering ?? false) && items.isEmpty) {
+                              return const ShopGridLoading();
+                            }
+                            if (items.isEmpty) {
+                              return const EmptyView();
+                            }
+                            return Stack(
+                              children: [
+                                ShopGridBuilder(
+                                  items: items,
+                                  pagination: pagination,
                                 ),
-                            ],
-                          );
-                        },
+                                if (isFiltering ?? false)
+                                  const Positioned(
+                                    top: 52,
+                                    left: 16,
+                                    right: 16,
+                                    child: LinearProgressIndicator(),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ShopError(:final message) => ErrorView(message: message),
-          },
+              ShopError(:final message) => ErrorView(message: message),
+            },
+          ),
         ),
         const CategoryChips(),
       ],

@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -85,6 +87,9 @@ Future<void> bootstrap(
       FcmService.setupBackgroundHandler();
 
       await FirebaseRuntimeOptions.initialize();
+      if (Firebase.apps.isNotEmpty) {
+        await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+      }
       await FirebaseRuntimeOptions.persistNativeSyncConfig();
       await setupDependencies();
       await getIt<FcmService>().initialize();
