@@ -34,11 +34,17 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       ),
     )
         .listen((items) {
-      add(_LoanerUpdatedFromLocal(items));
+      if (!isClosed) {
+        add(_LoanerUpdatedFromLocal(items));
+      }
     });
 
     _connectivitySubscription = _connectivityService.connectivityStream.listen(
-      (isOnline) => add(_LoanerConnectivityChanged(isOnline: isOnline)),
+      (isOnline) {
+        if (!isClosed) {
+          add(_LoanerConnectivityChanged(isOnline: isOnline));
+        }
+      },
     );
 
     on<_LoanerUpdatedFromLocal>((event, emit) {
@@ -98,6 +104,10 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     LoadLoaners event,
     Emitter<LoanerState> emit,
   ) async {
+    if (isClosed) {
+      return;
+    }
+
     final currentState = state.asLoaded;
 
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
@@ -121,15 +131,21 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     );
     final isOnline = await _connectivityService.isOnline;
 
+    if (isClosed) {
+      return;
+    }
+
     if (isFilterChange) {
-      _filtersController.add(
-        _LoanerFilters(
-          searchQuery: newSearchQuery,
-          fromDate: newFromDate,
-          toDate: newToDate,
-          loanerFilter: newLoanerFilter,
-        ),
-      );
+      if (!_filtersController.isClosed) {
+        _filtersController.add(
+          _LoanerFilters(
+            searchQuery: newSearchQuery,
+            fromDate: newFromDate,
+            toDate: newToDate,
+            loanerFilter: newLoanerFilter,
+          ),
+        );
+      }
     }
 
     if ((state is LoanerInitial || effectivePage == 1 || event.forceRefresh) &&
@@ -167,6 +183,10 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       fromDate: newFromDate,
       toDate: newToDate,
     );
+
+    if (isClosed) {
+      return;
+    }
 
     if (response.success && response.data != null) {
       final latestState = state.asLoaded;
@@ -276,6 +296,10 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     _LoanerConnectivityChanged event,
     Emitter<LoanerState> emit,
   ) async {
+    if (isClosed) {
+      return;
+    }
+
     final currentState = state.asLoaded;
     if (currentState == null) {
       return;
@@ -307,6 +331,11 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       fromDate: currentState.fromDate,
       toDate: currentState.toDate,
     );
+
+    if (isClosed) {
+      return;
+    }
+
     final latestState = state.asLoaded;
     if (latestState == null) {
       return;

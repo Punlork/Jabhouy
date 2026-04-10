@@ -58,3 +58,4 @@ flutter gen-l10n --arb-dir="lib/l10n/arb"
 - The analyzer config extends `very_good_analysis`, but this repo intentionally relaxes some defaults such as line length and public API docs.
 - The income feature has release-mode differences: some demo/debug actions are intentionally guarded by `kReleaseMode`. Preserve those checks when touching the income UI or setup flow.
 - Keep the answer short and focused on the question. If you need to ask for clarification, ask one question at a time and wait for the answer before asking another.
+- Dart line length is 100, but for Flutter widgets, feel free to break lines more aggressively for readability.

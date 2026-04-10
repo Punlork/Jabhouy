@@ -318,9 +318,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           return;
         }
 
-        // redirect to splash screen to trigger auth check and data reload
-        context.go(AppRoutes.signin.toPath);
-        _hasLoadedProtectedData = false;
+        if (authState is Unauthenticated) {
+          context.go(AppRoutes.signin.toPath);
+          _hasLoadedProtectedData = false;
+        }
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) {

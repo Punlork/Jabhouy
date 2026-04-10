@@ -72,15 +72,27 @@ Future<http.Response> interceptRequest(
 
   logger.d(
     'Starting: $normalizedMethod $pathWithQuery'
-    '${formattedBody != null ? ' | body:\n$formattedBody' : ''}',
+    '${formattedBody != null ? ' | Request body:\n$formattedBody' : ''}',
   );
 
   try {
     final response = await request();
     final endTime = DateTime.now();
 
+    String? formattedResponseBody;
+
+    if (response.bodyBytes.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes, allowMalformed: true));
+        formattedResponseBody = const JsonEncoder.withIndent('  ').convert(decoded);
+      } catch (_) {
+        formattedResponseBody = utf8.decode(response.bodyBytes, allowMalformed: true);
+      }
+    }
+
     logger.d(
-      'Finished: $normalizedMethod $pathWithQuery ${response.statusCode} (${endTime.difference(startTime).inSeconds} sec)',
+      'Finished: $normalizedMethod $pathWithQuery ${response.statusCode} (${endTime.difference(startTime).inSeconds} sec)'
+      '${formattedResponseBody != null ? ' | Response body:\n$formattedResponseBody' : ''}',
     );
 
     inspector.capture(

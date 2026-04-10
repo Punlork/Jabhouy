@@ -20,10 +20,16 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       : super(CustomerInitial()) {
     _customerSubscription =
         customerService.watchCustomers().listen((customers) {
-      add(CustomerUpdatedFromLocal(customers));
+      if (!isClosed) {
+        add(CustomerUpdatedFromLocal(customers));
+      }
     });
     _connectivitySubscription = _connectivityService.connectivityStream.listen(
-      (isOnline) => add(_CustomerConnectivityChanged(isOnline: isOnline)),
+      (isOnline) {
+        if (!isClosed) {
+          add(_CustomerConnectivityChanged(isOnline: isOnline));
+        }
+      },
     );
 
     on<LoadCustomers>(_onLoadCustomers);

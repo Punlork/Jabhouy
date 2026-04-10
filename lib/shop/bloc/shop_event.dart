@@ -24,15 +24,23 @@ class ShopGetItemsEvent extends ShopEvent {
 }
 
 class ShopCreateItemEvent extends ShopEvent {
-  ShopCreateItemEvent({required this.body});
+  ShopCreateItemEvent({
+    required this.body,
+    this.onSuccess,
+  });
 
   final ShopItemModel body;
+  final VoidCallback? onSuccess;
 }
 
 class ShopEditItemEvent extends ShopEvent {
-  ShopEditItemEvent({required this.body});
+  ShopEditItemEvent({
+    required this.body,
+    this.onSuccess,
+  });
 
   final ShopItemModel body;
+  final VoidCallback? onSuccess;
 }
 
 class ShopDeleteItemEvent extends ShopEvent {

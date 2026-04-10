@@ -421,11 +421,25 @@ class FcmService extends BaseService {
       metadata: data,
     );
 
-    await post<void>(
+    final response = await post<void>(
       '/devices/register',
       showSnackBar: false,
       body: data,
     );
+
+    if (!response.success) {
+      await _diagnostics.log(
+        source: 'flutter.fcm',
+        message: 'Failed to register FCM token with backend device registry.',
+        level: 'warning',
+        metadata: {
+          'deviceId': deviceId,
+          'deviceRole': deviceRole,
+          'message': response.message,
+        },
+      );
+      return;
+    }
 
     logger.d('FCM token registered for $deviceRole device $deviceId');
     await _diagnostics.log(

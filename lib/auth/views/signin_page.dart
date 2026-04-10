@@ -108,8 +108,10 @@ class _SigninPageContentState extends State<_SigninPageContent>
                     ),
                     BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
-                        if (state is Authenticated && state.isSessionTrusted) {
-                          showSuccessSnackBar(context, l10n.signinSuccessful);
+                        if (state is Authenticated) {
+                          if (state.isSessionTrusted) {
+                            showSuccessSnackBar(context, l10n.signinSuccessful);
+                          }
                           context.goNamed(AppRoutes.home);
                         }
                       },
@@ -134,7 +136,7 @@ class _SigninPageContentState extends State<_SigninPageContent>
                         Text(
                           l10n.signInToContinue,
                           style: AppTextTheme.body.copyWith(
-                            color: colorScheme.onPrimary.withOpacity(.8),
+                            color: colorScheme.onPrimary.withValues(alpha: .8),
                           ),
                         ),
                         const SizedBox(height: 40),

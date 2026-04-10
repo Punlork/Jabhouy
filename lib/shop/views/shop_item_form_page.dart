@@ -94,16 +94,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
       final item = widget.existingItem!;
       _controllers['name']!.text = item.name;
       _controllers['defaultPrice']!.text = item.defaultPrice?.toString() ?? '';
-      _controllers['customerPrice']!.text =
-          item.customerPrice?.toString() ?? '';
+      _controllers['customerPrice']!.text = item.customerPrice?.toString() ?? '';
       _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
       _controllers['note']!.text = item.note ?? '';
       _categoryFilter = item.category;
 
       _initialTextValues['name'] = item.name;
       _initialTextValues['defaultPrice'] = item.defaultPrice?.toString() ?? '';
-      _initialTextValues['customerPrice'] =
-          item.customerPrice?.toString() ?? '';
+      _initialTextValues['customerPrice'] = item.customerPrice?.toString() ?? '';
       _initialTextValues['sellerPrice'] = item.sellerPrice?.toString() ?? '';
       _initialTextValues['note'] = item.note ?? '';
       _initialCategory = item.category;
@@ -159,10 +157,9 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
       (entry) => entry.value.text != _initialTextValues[entry.key],
     );
     final hasCategoryChanges = _categoryFilter != _initialCategory;
-    final hasImageChanges =
-        context.read<ShopBloc>().upload.selectedImage != null ||
-            _imageUrl != _initialImageUrl ||
-            uploadState is UploadSuccess;
+    final hasImageChanges = context.read<ShopBloc>().upload.selectedImage != null ||
+        _imageUrl != _initialImageUrl ||
+        uploadState is UploadSuccess;
 
     _hasChanges = hasTextChanges || hasCategoryChanges || hasImageChanges;
     setState(() {});
@@ -172,18 +169,13 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
     return ShopItemModel(
       id: widget.existingItem?.id ?? 0,
       name: _controllers['name']!.text.trim(),
-      defaultPrice: _controllers['defaultPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['defaultPrice']!.text)
-          : null,
-      customerPrice: _controllers['customerPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['customerPrice']!.text)
-          : null,
-      sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['sellerPrice']!.text)
-          : null,
-      note: _controllers['note']!.text.trim().isEmpty
-          ? null
-          : _controllers['note']!.text.trim(),
+      defaultPrice:
+          _controllers['defaultPrice']!.text.isNotEmpty ? int.tryParse(_controllers['defaultPrice']!.text) : null,
+      customerPrice:
+          _controllers['customerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['customerPrice']!.text) : null,
+      sellerPrice:
+          _controllers['sellerPrice']!.text.isNotEmpty ? int.tryParse(_controllers['sellerPrice']!.text) : null,
+      note: _controllers['note']!.text.trim().isEmpty ? null : _controllers['note']!.text.trim(),
       imageUrl: imageUrl ?? _imageUrl,
       category: _categoryFilter,
     );
@@ -192,10 +184,38 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
   void _saveItem(ShopItemModel item) {
     final shopBloc = context.read<ShopBloc>();
     if (widget.existingItem != null) {
-      shopBloc.add(ShopEditItemEvent(body: item));
+      shopBloc.add(
+        ShopEditItemEvent(
+          body: item,
+          onSuccess: () {
+            if (!mounted) return;
+            widget.onSaved(item);
+            context.pop();
+          },
+        ),
+      );
     } else {
-      shopBloc.add(ShopCreateItemEvent(body: item));
+      shopBloc.add(
+        ShopCreateItemEvent(
+          body: item,
+          onSuccess: () {
+            if (!mounted) return;
+            widget.onSaved(item);
+            context.pop();
+          },
+        ),
+      );
     }
+  }
+
+  void _openCategoryPage() {
+    context.push(
+      '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
+      extra: {
+        'shop': context.read<ShopBloc>(),
+        'category': context.read<CategoryBloc>(),
+      },
+    );
   }
 
   Future<bool> _onWillPop() async {
@@ -258,18 +278,13 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
         hintText: '',
         textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
-        keyboardType: maxLines != null
-            ? TextInputType.multiline
-            : (isPrice ? TextInputType.number : keyboardType),
+        keyboardType: maxLines != null ? TextInputType.multiline : (isPrice ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
-        validator: required
-            ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null
-            : null,
+        validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
         maxLines: maxLines ?? 1,
         decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           labelStyle: AppTextTheme.body,
           suffixText: isPrice ? 'រៀល' : null,
           suffixStyle: isPrice ? AppTextTheme.caption : null,
@@ -328,11 +343,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                     }
                   },
                 ),
-                BlocListener<ShopBloc, ShopState>(
-                  listener: (context, state) {
-                    if (state is ShopLoaded) context.pop();
-                  },
-                ),
               ],
               child: Form(
                 key: _formKey,
@@ -386,6 +396,15 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                           ),
                         ),
                       ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: _openCategoryPage,
+                          icon: const Icon(Icons.add_circle_outline_rounded),
+                          label: Text(l10n.createCategory),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       _buildTextField(
                         key: 'note',
                         maxLines: 3,
@@ -405,8 +424,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                             BlocBuilder<UploadBloc, UploadState>(
                               bloc: context.read<ShopBloc>().upload,
                               builder: (context, state) {
-                                final uploadBloc =
-                                    context.read<ShopBloc>().upload;
+                                final uploadBloc = context.read<ShopBloc>().upload;
                                 return Row(
                                   children: [
                                     ElevatedButton.icon(
@@ -419,8 +437,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                               ImageSource.camera,
                                             ),
                                           ),
-                                          onChoseFromGallery: () =>
-                                              uploadBloc.add(
+                                          onChoseFromGallery: () => uploadBloc.add(
                                             SelectImageEvent(
                                               ImageSource.gallery,
                                             ),
@@ -434,8 +451,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                       ),
                                       style: ElevatedButton.styleFrom(
                                         foregroundColor: colorScheme.onSurface,
-                                        backgroundColor:
-                                            colorScheme.surfaceContainerHighest,
+                                        backgroundColor: colorScheme.surfaceContainerHighest,
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -443,8 +459,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                       UploadImageSelected() => Stack(
                                           children: [
                                             ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(8),
                                               child: Image.file(
                                                 state.selectedImage,
                                                 width: 80,
@@ -465,14 +480,12 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                 width: 24,
                                                 height: 24,
                                                 decoration: BoxDecoration(
-                                                  color: colorScheme.scrim
-                                                      .withValues(alpha: 0.55),
+                                                  color: colorScheme.scrim.withValues(alpha: 0.55),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    uploadBloc
-                                                        .add(ClearImageEvent());
+                                                    uploadBloc.add(ClearImageEvent());
                                                     _imageUrl = null;
                                                     _detectChanges();
                                                   },
@@ -489,8 +502,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                       UploadImageUrlLoaded() => Stack(
                                           children: [
                                             ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(8),
                                               child: Image.network(
                                                 state.imageUrl,
                                                 width: 80,
@@ -511,14 +523,12 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                 width: 24,
                                                 height: 24,
                                                 decoration: BoxDecoration(
-                                                  color: colorScheme.scrim
-                                                      .withValues(alpha: 0.55),
+                                                  color: colorScheme.scrim.withValues(alpha: 0.55),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    uploadBloc
-                                                        .add(ClearImageEvent());
+                                                    uploadBloc.add(ClearImageEvent());
                                                     _imageUrl = null;
                                                     _detectChanges();
                                                   },
@@ -563,9 +573,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                         foregroundColor: colorScheme.onPrimary,
                       ),
                       child: Text(
-                        widget.existingItem != null
-                            ? l10n.saveChanges
-                            : l10n.addItem,
+                        widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
                         style: AppTextTheme.body,
                       ),
                     ),
@@ -579,9 +587,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                       label: Text(
-                        widget.existingItem != null
-                            ? l10n.saveChanges
-                            : l10n.addItem,
+                        widget.existingItem != null ? l10n.saveChanges : l10n.addItem,
                         style: AppTextTheme.body,
                       ),
                       icon: const Icon(Icons.save),

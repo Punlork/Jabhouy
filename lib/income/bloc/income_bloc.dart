@@ -34,7 +34,11 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
             recordFilter: filters.recordFilter,
           ),
         )
-        .listen((items) => add(_IncomeUpdated(items)));
+        .listen((items) {
+      if (!isClosed) {
+        add(_IncomeUpdated(items));
+      }
+    });
     _filtersController.add(const _IncomeFilters());
 
     on<LoadIncomeDashboard>(_onLoadIncomeDashboard);
@@ -63,13 +67,19 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
   Future<void> _bootstrap() async {
     await _service.initialize();
     final status = await _service.getTrackingStatus();
-    add(_IncomeBootstrapCompleted(status));
+    if (!isClosed) {
+      add(_IncomeBootstrapCompleted(status));
+    }
   }
 
   Future<void> _onLoadIncomeDashboard(
     LoadIncomeDashboard event,
     Emitter<IncomeState> emit,
   ) async {
+    if (isClosed) {
+      return;
+    }
+
     final currentState = state.asLoaded;
     final searchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
     final fromDate = identical(event.fromDate, _incomeDateUnset)
@@ -86,15 +96,17 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
         : event.recordFilter as NotificationRecordFilter? ??
             NotificationRecordFilter.all;
 
-    _filtersController.add(
-      _IncomeFilters(
-        searchQuery: searchQuery,
-        fromDate: fromDate,
-        toDate: toDate,
-        bankFilter: bankFilter,
-        recordFilter: recordFilter,
-      ),
-    );
+    if (!_filtersController.isClosed) {
+      _filtersController.add(
+        _IncomeFilters(
+          searchQuery: searchQuery,
+          fromDate: fromDate,
+          toDate: toDate,
+          bankFilter: bankFilter,
+          recordFilter: recordFilter,
+        ),
+      );
+    }
 
     if (currentState == null) {
       emit(const IncomeLoading());
@@ -156,7 +168,9 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
   ) async {
     await _service.importPendingTrackedNotifications();
     final status = await _service.getTrackingStatus();
-    add(_IncomeBootstrapCompleted(status));
+    if (!isClosed) {
+      add(_IncomeBootstrapCompleted(status));
+    }
   }
 
   Future<void> _onOpenNotificationAccessSettings(

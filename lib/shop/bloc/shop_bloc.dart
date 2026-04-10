@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -26,17 +26,23 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 
     _itemsSubscription = _filtersController.stream
         .switchMap(
-          (filters) => _service.watchShopItems(
-            searchQuery: filters.searchQuery,
-            categoryFilter: filters.categoryFilter,
-          ),
-        )
-        .listen(
-          (items) => add(_ShopInternalItemsUpdated(items)),
-        );
+      (filters) => _service.watchShopItems(
+        searchQuery: filters.searchQuery,
+        categoryFilter: filters.categoryFilter,
+      ),
+    )
+        .listen((items) {
+      if (!isClosed) {
+        add(_ShopInternalItemsUpdated(items));
+      }
+    });
 
     _connectivitySubscription = _connectivityService.connectivityStream.listen(
-      (isOnline) => add(_ShopConnectivityChanged(isOnline: isOnline)),
+      (isOnline) {
+        if (!isClosed) {
+          add(_ShopConnectivityChanged(isOnline: isOnline));
+        }
+      },
     );
 
     on<_ShopInternalItemsUpdated>((event, emit) {
@@ -109,6 +115,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         null,
         response.message ?? 'Created ${response.data?.name}',
       );
+      event.onSuccess?.call();
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
@@ -128,6 +135,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         null,
         response.message ?? 'Updated: ${response.data?.name}',
       );
+      event.onSuccess?.call();
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
     } finally {
@@ -158,6 +166,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     ShopGetItemsEvent event,
     Emitter<ShopState> emit,
   ) async {
+    if (isClosed) {
+      return;
+    }
+
     final currentState = state.asLoaded;
 
     final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
@@ -177,6 +189,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     );
 
     final isOnline = await _connectivityService.isOnline;
+
+    if (isClosed) {
+      return;
+    }
 
     final showFilterLoading = event.forceRefresh &&
         !hasCachedItems &&
@@ -203,12 +219,14 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     }
 
     if (isFilterChange || isCategoryChange) {
-      _filtersController.add(
-        _ShopFilters(
-          searchQuery: newSearchQuery,
-          categoryFilter: newCategoryFilter,
-        ),
-      );
+      if (!_filtersController.isClosed) {
+        _filtersController.add(
+          _ShopFilters(
+            searchQuery: newSearchQuery,
+            categoryFilter: newCategoryFilter,
+          ),
+        );
+      }
     }
 
     if (!isOnline) {
@@ -238,6 +256,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       searchQuery: newSearchQuery,
       categoryFilter: newCategoryFilter?.id.toString() ?? '',
     );
+
+    if (isClosed) {
+      return;
+    }
 
     if (response.success && response.data != null) {
       final loadedState = state.asLoaded;
@@ -287,6 +309,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     _ShopConnectivityChanged event,
     Emitter<ShopState> emit,
   ) async {
+    if (isClosed) {
+      return;
+    }
+
     final currentState = state.asLoaded;
 
     if (!event.isOnline) {
@@ -318,6 +344,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       searchQuery: currentState?.searchQuery ?? '',
       categoryFilter: currentState?.categoryFilter?.id.toString() ?? '',
     );
+
+    if (isClosed) {
+      return;
+    }
 
     final latestState = state.asLoaded;
     if (latestState == null) {

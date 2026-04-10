@@ -60,8 +60,8 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                       onPressed: () {
                         context
                           ..pop()
-                          ..pushNamed(
-                            AppRoutes.category,
+                          ..push(
+                            '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
                             extra: {
                               'shop': context.read<ShopBloc>(),
                               'category': context.read<CategoryBloc>(),

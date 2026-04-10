@@ -28,9 +28,13 @@ class CategoryChips extends StatelessWidget {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () => context.read<ShopBloc>().add(
-                        ShopGetItemsEvent(clearCategoryFilter: true),
-                      ),
+                  onTap: () {
+                    if (currentShopState?.categoryFilter == null) return;
+
+                    context.read<ShopBloc>().add(
+                          ShopGetItemsEvent(clearCategoryFilter: true),
+                        );
+                  },
                   child: _buildChip(
                     context,
                     label: context.l10n.all,
@@ -57,20 +61,21 @@ class CategoryChips extends StatelessWidget {
                               state.items.length,
                               (index) {
                                 final category = state.items[index];
-                                final isSelected =
-                                    currentShopState?.categoryFilter?.name ==
-                                        category.name;
+                                final isSelected = currentShopState?.categoryFilter?.name == category.name;
                                 return Padding(
                                   padding: EdgeInsets.only(
-                                    right:
-                                        index == state.items.length - 1 ? 0 : 4,
+                                    right: index == state.items.length - 1 ? 0 : 4,
                                   ),
                                   child: InkWell(
-                                    onTap: () => context.read<ShopBloc>().add(
-                                          ShopGetItemsEvent(
-                                            categoryFilter: category,
-                                          ),
-                                        ),
+                                    onTap: () {
+                                      if (isSelected) return;
+
+                                      context.read<ShopBloc>().add(
+                                            ShopGetItemsEvent(
+                                              categoryFilter: category,
+                                            ),
+                                          );
+                                    },
                                     child: _buildChip(
                                       context,
                                       label: category.name,
@@ -97,13 +102,10 @@ class CategoryChips extends StatelessWidget {
                                   right: index == 4 ? 0 : 4,
                                 ),
                                 child: Shimmer.fromColors(
-                                  baseColor:
-                                      colorScheme.surfaceContainerHighest,
-                                  highlightColor:
-                                      colorScheme.surfaceContainerHigh,
+                                  baseColor: colorScheme.surfaceContainerHighest,
+                                  highlightColor: colorScheme.surfaceContainerHigh,
                                   child: Chip(
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     visualDensity: VisualDensity.compact,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -111,8 +113,7 @@ class CategoryChips extends StatelessWidget {
                                     label: Container(
                                       width: 30,
                                       height: 20,
-                                      color:
-                                          colorScheme.surfaceContainerHighest,
+                                      color: colorScheme.surfaceContainerHighest,
                                     ),
                                     backgroundColor: colorScheme.surface,
                                   ),
@@ -157,12 +158,9 @@ class CategoryChips extends StatelessWidget {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
         label: Text(label),
-        backgroundColor:
-            isSelected ? colorScheme.primaryContainer : Colors.transparent,
+        backgroundColor: isSelected ? colorScheme.primaryContainer : Colors.transparent,
         labelStyle: TextStyle(
-          color: isSelected
-              ? colorScheme.onPrimaryContainer
-              : colorScheme.onSurface,
+          color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
         ),
       ),
     );

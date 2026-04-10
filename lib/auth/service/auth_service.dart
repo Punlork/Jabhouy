@@ -86,21 +86,21 @@ class AuthService extends BaseService {
     final hasPersistedSession = await this.hasPersistedSession;
     final isOnline = await _connectivityService.isOnline;
 
+    if (!isOnline && cachedUser != null) {
+      return AuthBootstrapResult(
+        response: ApiResponse(
+          success: true,
+          data: cachedUser,
+          message: 'Offline session restored',
+        ),
+        usedCachedSession: true,
+      );
+    }
+
     if (!hasPersistedSession) {
       return AuthBootstrapResult(
         response: ApiResponse(success: false, message: 'No saved session'),
         usedCachedSession: false,
-      );
-    }
-
-    if (!isOnline) {
-      return AuthBootstrapResult(
-        response: ApiResponse(
-          success: cachedUser != null,
-          data: cachedUser,
-          message: cachedUser != null ? 'Offline session restored' : 'Offline and no cached user',
-        ),
-        usedCachedSession: cachedUser != null,
       );
     }
 
