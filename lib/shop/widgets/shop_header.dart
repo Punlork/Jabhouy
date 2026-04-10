@@ -13,6 +13,7 @@ class ShopHeader extends StatelessWidget {
     required this.onFilterPressed,
     required this.searchController,
     required this.hasFilter,
+    this.searchHintText,
     super.key,
   });
   final VoidCallback onSettingsPressed;
@@ -20,6 +21,7 @@ class ShopHeader extends StatelessWidget {
   final VoidCallback onFilterPressed;
   final TextEditingController searchController;
   final bool hasFilter;
+  final String? searchHintText;
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +37,13 @@ class ShopHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Row(
-          //   children: [
-          //     const _UserProfile(),
-          //     const Spacer(),
-          //     _SettingsButton(onPressed: onSettingsPressed),
-          //   ],
-          // ),
           _SearchBar(
             hasFilter: hasFilter,
             controller: searchController,
             onChanged: onSearchChanged,
             onFilterPressed: onFilterPressed,
             onSettingsPressed: onSettingsPressed,
+            searchHintText: searchHintText,
           ),
           const SizedBox(height: 4),
         ],
@@ -55,57 +51,6 @@ class ShopHeader extends StatelessWidget {
     );
   }
 }
-
-// class _UserProfile extends StatelessWidget {
-//   const _UserProfile();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final l10n = AppLocalizations.of(context);
-
-//     return GestureDetector(
-//       behavior: HitTestBehavior.opaque,
-//       onTap: () async {},
-//       child: BlocBuilder<AuthBloc, AuthState>(
-//         builder: (context, state) {
-//           if (state is Authenticated) {
-//             return Row(
-//               children: [
-//                 if (state.user.image != null)
-//                   ClipOval(
-//                     child: Image.network(
-//                       state.user.image!,
-//                       width: 40,
-//                       height: 40,
-//                       fit: BoxFit.cover,
-//                       errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-//                     ),
-//                   )
-//                 else
-//                   const AppLogo(size: 40, useBg: false),
-//                 const SizedBox(width: 8),
-//                 Row(
-//                   children: [
-//                     Text(
-//                       state.user.name ?? l10n.noName,
-//                       style: TextStyle(
-//                         fontSize: 18,
-//                         fontWeight: FontWeight.bold,
-//                         color: Theme.of(context).colorScheme.onPrimary,
-//                       ),
-//                     ),
-//                     const SizedBox(width: 4),
-//                   ],
-//                 ),
-//               ],
-//             );
-//           }
-//           return const SizedBox.shrink();
-//         },
-//       ),
-//     );
-//   }
-// }
 
 class _SettingsButton extends StatelessWidget {
   const _SettingsButton({required this.onPressed});
@@ -133,8 +78,9 @@ class _SettingsButton extends StatelessWidget {
         ),
       ],
       child: IconButtonWidget(
-        icon: Icons.settings,
+        svgAsset: AppAssets.actionSettings,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
+        tooltip: AppLocalizations.of(context).settings,
         onPressed: onPressed,
         colorScheme: Theme.of(context).colorScheme,
       ),
@@ -149,12 +95,14 @@ class _SearchBar extends StatelessWidget {
     required this.onFilterPressed,
     required this.onSettingsPressed,
     required this.hasFilter,
+    this.searchHintText,
   });
   final TextEditingController controller;
   final ValueChanged<String?> onChanged;
   final VoidCallback onFilterPressed;
   final VoidCallback onSettingsPressed;
   final bool hasFilter;
+  final String? searchHintText;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +116,7 @@ class _SearchBar extends StatelessWidget {
           Expanded(
             child: CustomTextFormField(
               controller: controller,
-              hintText: l10n.searchItems,
+              hintText: searchHintText ?? l10n.searchItems,
               labelText: '',
               prefixIcon: Icons.search,
               onChanged: onChanged,
@@ -207,6 +155,19 @@ class _SearchBar extends StatelessWidget {
                 fillColor: colorScheme.surfaceContainerHigh,
               ),
             ),
+          ),
+          const SizedBox(width: 8),
+          IconButtonWidget(
+            svgAsset: AppAssets.actionFilter,
+            color: hasFilter
+                ? colorScheme.onPrimaryContainer
+                : colorScheme.onSurfaceVariant,
+            backgroundColor: hasFilter
+                ? colorScheme.primaryContainer
+                : colorScheme.surfaceContainerHigh,
+            tooltip: l10n.filterItems,
+            onPressed: onFilterPressed,
+            colorScheme: colorScheme,
           ),
           const SizedBox(width: 8),
           _SettingsButton(onPressed: onSettingsPressed),

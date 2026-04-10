@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
-
 import 'package:my_app/shop/shop.dart';
 
 class ShopItemFormPage extends StatelessWidget {
@@ -15,11 +13,13 @@ class ShopItemFormPage extends StatelessWidget {
     required this.onSaved,
     required this.shop,
     required this.category,
+    this.activeCategory,
     this.existingItem,
     super.key,
   });
 
   final ShopItemModel? existingItem;
+  final CategoryItemModel? activeCategory;
   final void Function(ShopItemModel) onSaved;
   final ShopBloc shop;
   final CategoryBloc category;
@@ -33,6 +33,7 @@ class ShopItemFormPage extends StatelessWidget {
       ],
       child: _ShopItemFormPageContent(
         onSaved: onSaved,
+        activeCategory: activeCategory,
         existingItem: existingItem,
       ),
     );
@@ -42,10 +43,12 @@ class ShopItemFormPage extends StatelessWidget {
 class _ShopItemFormPageContent extends StatefulWidget {
   const _ShopItemFormPageContent({
     required this.onSaved,
+    this.activeCategory,
     this.existingItem,
   });
 
   final ShopItemModel? existingItem;
+  final CategoryItemModel? activeCategory;
   final void Function(ShopItemModel) onSaved;
 
   @override
@@ -55,74 +58,39 @@ class _ShopItemFormPageContent extends StatefulWidget {
 class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
     with ClipboardImageMixin<_ShopItemFormPageContent> {
   final _formKey = GlobalKey<FormState>();
-  late final Map<String, TextEditingController> _controllers;
-  CategoryItemModel? _categoryFilter;
-  bool _hasChanges = false;
+  late final ShopItemFormController _formController;
 
-  late Map<String, String> _initialTextValues;
-  late CategoryItemModel? _initialCategory;
+  UploadBloc get _uploadBloc => context.read<ShopBloc>().upload;
 
   @override
   void initState() {
     super.initState();
-
     registerClipboardObserver();
+    _formController = ShopItemFormController(
+      existingItem: widget.existingItem,
+      activeCategory: widget.activeCategory,
+      onChanged: _notifyFormChanged,
+    );
 
-    _controllers = {
-      'name': TextEditingController(),
-      'defaultPrice': TextEditingController(),
-      'customerPrice': TextEditingController(),
-      'sellerPrice': TextEditingController(),
-      'note': TextEditingController(),
-    };
+    _uploadBloc.add(ClearImageEvent());
 
-    _initialTextValues = {};
-    _initialCategory = null;
-
-    context.read<ShopBloc>().upload.add(ClearImageEvent());
-
-    if (widget.existingItem != null) {
-      final item = widget.existingItem!;
-      _controllers['name']!.text = item.name;
-      _controllers['defaultPrice']!.text = item.defaultPrice?.toString() ?? '';
-      _controllers['customerPrice']!.text =
-          item.customerPrice?.toString() ?? '';
-      _controllers['sellerPrice']!.text = item.sellerPrice?.toString() ?? '';
-      _controllers['note']!.text = item.note ?? '';
-      _categoryFilter = item.category;
-
-      _initialTextValues['name'] = item.name;
-      _initialTextValues['defaultPrice'] = item.defaultPrice?.toString() ?? '';
-      _initialTextValues['customerPrice'] =
-          item.customerPrice?.toString() ?? '';
-      _initialTextValues['sellerPrice'] = item.sellerPrice?.toString() ?? '';
-      _initialTextValues['note'] = item.note ?? '';
-      _initialCategory = item.category;
-
+    if (widget.existingItem case final item?) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (item.imageUrl?.isNotEmpty ?? false) {
-          context.read<ShopBloc>().upload.add(
-                LoadExistingImageEvent(
-                  imageUrl: item.imageUrl,
-                ),
-              );
+          _uploadBloc.add(LoadExistingImageEvent(imageUrl: item.imageUrl));
         }
       });
-    } else {
-      _initialTextValues['name'] = '';
-      _initialTextValues['defaultPrice'] = '';
-      _initialTextValues['customerPrice'] = '';
-      _initialTextValues['sellerPrice'] = '';
-      _initialTextValues['note'] = '';
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       forceCheckClipboardForImage();
     });
+  }
 
-    _controllers.forEach((key, controller) {
-      controller.addListener(_detectChanges);
-    });
+  void _notifyFormChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -130,30 +98,27 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
 
   @override
   void onImageSelected(File file) {
-    context.read<ShopBloc>().upload.add(SelectUiImageEvent(image: file));
+    _uploadBloc.add(SelectUiImageEvent(image: file));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    _detectChanges();
+    _notifyFormChanged();
   }
 
   @override
   void dispose() {
-    _controllers.forEach((_, controller) => controller.dispose());
+    _formController.dispose();
     unregisterClipboardObserver();
     super.dispose();
   }
 
-  void _detectChanges() {
-    final hasTextChanges = _controllers.entries.any(
-      (entry) => entry.value.text != _initialTextValues[entry.key],
-    );
-    final hasCategoryChanges = _categoryFilter != _initialCategory;
+  bool get _hasChanges => _formController.hasChanges(
+        uploadState: _uploadBloc.state,
+        selectedImage: _uploadBloc.selectedImage,
+      );
 
-    _hasChanges = hasTextChanges || hasCategoryChanges;
-    setState(() {});
-  }
-
-  Future<bool> _onWillPop() async {
-    if (!_hasChanges) return true;
+  Future<bool> _confirmDiscardChanges() async {
+    if (!_hasChanges) {
+      return true;
+    }
 
     final l10n = AppLocalizations.of(context);
     final shouldPop = await showDialog<bool>(
@@ -180,83 +145,248 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
     return shouldPop ?? false;
   }
 
-  void _submitItem() {
-    if (!_formKey.currentState!.validate()) return;
-
-    final shopBloc = context.read<ShopBloc>();
-    final uploadBloc = shopBloc.upload;
-    final item = ShopItemModel(
-      id: widget.existingItem?.id ?? 0,
-      name: _controllers['name']!.text,
-      defaultPrice: _controllers['defaultPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['defaultPrice']!.text)
-          : null,
-      customerPrice: _controllers['customerPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['customerPrice']!.text)
-          : null,
-      sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['sellerPrice']!.text)
-          : null,
-      note: _controllers['note']!.text.isEmpty
-          ? null
-          : _controllers['note']!.text,
-      imageUrl: uploadBloc.selectedImage?.path,
-      category: _categoryFilter,
-    );
-
-    if (uploadBloc.selectedImage != null) {
-      uploadBloc.add(UploadImageEvent(uploadBloc.selectedImage!));
-    } else {
-      if (widget.existingItem != null) {
-        shopBloc.add(ShopEditItemEvent(body: item));
-      } else {
-        shopBloc.add(ShopCreateItemEvent(body: item));
+  Future<void> _handleBack() async {
+    if (!_hasChanges || await _confirmDiscardChanges()) {
+      if (mounted) {
+        context.pop();
       }
     }
   }
 
+  void _handleCategoryChanged(CategoryItemModel? category) {
+    _formController.setCategory(category);
+  }
+
+  void _openCategoryPage() {
+    context.push(
+      '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
+      extra: {
+        'shop': context.read<ShopBloc>(),
+        'category': context.read<CategoryBloc>(),
+      },
+    );
+  }
+
+  void _saveEditedItem(ShopItemModel item) {
+    context.read<ShopBloc>().add(
+          ShopEditItemEvent(
+            body: item,
+            onSuccess: () {
+              if (!mounted) return;
+              widget.onSaved(item);
+              context.pop();
+            },
+          ),
+        );
+  }
+
+  void _saveNewItems(List<ShopItemModel> items) {
+    context.read<ShopBloc>().add(
+          ShopCreateItemsEvent(
+            items: items,
+            onSuccess: () {
+              if (!mounted) return;
+              if (items.isNotEmpty) {
+                widget.onSaved(items.first);
+              }
+              context.pop();
+            },
+          ),
+        );
+  }
+
+  void _submitItem() {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (!_formController.isEditing && _formController.variantDrafts.isEmpty) {
+      showErrorSnackBar(
+        context,
+        AppLocalizations.of(context).selectVariantError,
+      );
+      return;
+    }
+
+    if (_uploadBloc.selectedImage != null) {
+      _uploadBloc.add(UploadImageEvent(_uploadBloc.selectedImage!));
+      return;
+    }
+
+    if (_formController.isEditing) {
+      _saveEditedItem(_formController.buildEditedItem());
+    } else {
+      _saveNewItems(_formController.buildNewItems());
+    }
+  }
+
   Widget _buildTextField({
-    required String key,
+    required TextEditingController controller,
     required String label,
     bool required = false,
     bool isPrice = false,
+    String? helperText,
+    String? suffixText,
+    String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
     TextInputAction textInputAction = TextInputAction.next,
     int? maxLines,
     TextCapitalization? textCapitalization,
   }) {
     final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: CustomTextFormField(
         onTapOutside: (_) {},
-        controller: _controllers[key]!,
+        controller: controller,
         hintText: '',
         textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
-        keyboardType: maxLines != null
-            ? TextInputType.multiline
-            : (isPrice ? TextInputType.number : keyboardType),
+        keyboardType: maxLines != null ? TextInputType.multiline : (isPrice ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
-        validator: required
-            ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null
-            : null,
+        validator: (value) {
+          if (required && (value == null || value.isEmpty)) {
+            return l10n.nameRequired(label);
+          }
+          return validator?.call(value);
+        },
         maxLines: maxLines ?? 1,
         decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 20,
+            horizontal: 16,
+          ),
           labelStyle: AppTextTheme.body,
-          suffixText: isPrice ? 'រៀល' : null,
+          helperText: helperText,
+          suffixText: suffixText ?? (isPrice ? 'រៀល' : null),
           suffixStyle: isPrice ? AppTextTheme.caption : null,
         ),
       ),
     );
   }
 
+  Widget _buildEditOnlyVariantType() {
+    final l10n = AppLocalizations.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.itemType,
+          style: AppTextTheme.body,
+        ),
+        const SizedBox(height: 8),
+        SegmentedButton<ShopItemKind>(
+          segments: [
+            ButtonSegment(
+              value: ShopItemKind.single,
+              label: Text(l10n.singleItem),
+              icon: const Icon(Icons.sell_outlined),
+            ),
+            ButtonSegment(
+              value: ShopItemKind.pack,
+              label: Text(l10n.packItem),
+              icon: const Icon(Icons.inventory_2_outlined),
+            ),
+          ],
+          selected: {_formController.itemKind},
+          onSelectionChanged: (selection) {
+            final nextKind = selection.first;
+            if (_formController.itemKind != nextKind) {
+              _formController.setItemKind(nextKind);
+            }
+          },
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildEditOnlyPricingFields() {
+    final l10n = AppLocalizations.of(context);
+
+    return Column(
+      children: [
+        if (_formController.itemKind == ShopItemKind.pack)
+          _buildTextField(
+            controller: _formController.packAmountController,
+            label: l10n.packSize,
+            helperText: l10n.packSizeHint,
+            suffixText: l10n.itemsSuffix,
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return l10n.packSizeRequired;
+              }
+              final parsed = int.tryParse(value);
+              if (parsed == null || parsed <= 1) {
+                return l10n.packSizeValidation;
+              }
+              return null;
+            },
+          ),
+        _buildTextField(
+          controller: _formController.customerPriceController,
+          label: l10n.customerPrice,
+          isPrice: true,
+          required: true,
+          keyboardType: TextInputType.number,
+        ),
+        _buildTextField(
+          controller: _formController.defaultPriceController,
+          label: l10n.defaultPrice,
+          isPrice: true,
+          keyboardType: TextInputType.number,
+        ),
+        _buildTextField(
+          controller: _formController.sellerPriceController,
+          label: l10n.sellerPrice,
+          isPrice: true,
+          keyboardType: TextInputType.number,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton(bool isKeyboardVisible) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final label = _formController.isEditing
+        ? l10n.saveChanges
+        : (_formController.variantDrafts.length > 1 ? l10n.addItems : l10n.addItem);
+
+    if (!isKeyboardVisible) {
+      return Positioned(
+        bottom: 16,
+        left: 16,
+        right: 16,
+        child: ElevatedButton(
+          onPressed: _submitItem,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 50),
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+          ),
+          child: Text(label, style: AppTextTheme.body),
+        ),
+      );
+    }
+
+    return Positioned(
+      bottom: 16,
+      right: 16,
+      child: FloatingActionButton.extended(
+        onPressed: _submitItem,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        label: Text(label, style: AppTextTheme.body),
+        icon: const Icon(Icons.save),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final inputTheme = Theme.of(context).inputDecorationTheme;
     final l10n = AppLocalizations.of(context);
 
@@ -264,26 +394,18 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
       canPop: !_hasChanges,
       onPopInvokedWithResult: (didPop, _) async {
         if (!didPop && _hasChanges) {
-          final shouldPop = await _onWillPop();
-          if (shouldPop && context.mounted) Navigator.pop(context);
+          await _handleBack();
         }
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.existingItem != null ? l10n.editItem : l10n.addNewItem,
+            _formController.isEditing ? l10n.editItem : l10n.addNewItem,
             style: AppTextTheme.title,
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              if (!_hasChanges) {
-                context.pop();
-                return;
-              }
-              final shouldPop = await _onWillPop();
-              if (shouldPop && context.mounted) context.pop();
-            },
+            onPressed: _handleBack,
           ),
         ),
         body: Stack(
@@ -291,36 +413,22 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
             MultiBlocListener(
               listeners: [
                 BlocListener<UploadBloc, UploadState>(
-                  bloc: context.read<ShopBloc>().upload,
+                  bloc: _uploadBloc,
                   listener: (context, state) {
                     if (state is UploadSuccess) {
-                      final shopBloc = context.read<ShopBloc>();
-                      final item = ShopItemModel(
-                        id: widget.existingItem?.id ?? 0,
-                        name: _controllers['name']!.text,
-                        defaultPrice:
-                            int.tryParse(_controllers['defaultPrice']!.text) ??
-                                0,
-                        customerPrice: _controllers['customerPrice']!
-                                .text
-                                .isNotEmpty
-                            ? int.tryParse(_controllers['customerPrice']!.text)
-                            : null,
-                        sellerPrice: _controllers['sellerPrice']!
-                                .text
-                                .isNotEmpty
-                            ? int.tryParse(_controllers['sellerPrice']!.text)
-                            : null,
-                        note: _controllers['note']!.text.isEmpty
-                            ? null
-                            : _controllers['note']!.text,
-                        imageUrl: state.imageUrl, // Use uploaded URL
-                        category: _categoryFilter,
-                      );
-                      if (widget.existingItem != null) {
-                        shopBloc.add(ShopEditItemEvent(body: item));
+                      _formController.setImageUrl(state.imageUrl);
+                      if (_formController.isEditing) {
+                        _saveEditedItem(
+                          _formController.buildEditedItem(
+                            imageUrlOverride: state.imageUrl,
+                          ),
+                        );
                       } else {
-                        shopBloc.add(ShopCreateItemEvent(body: item));
+                        _saveNewItems(
+                          _formController.buildNewItems(
+                            imageUrlOverride: state.imageUrl,
+                          ),
+                        );
                       }
                     } else if (state is UploadFailure) {
                       showErrorSnackBar(
@@ -328,11 +436,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                         'Upload failed: ${state.error}',
                       );
                     }
-                  },
-                ),
-                BlocListener<ShopBloc, ShopState>(
-                  listener: (context, state) {
-                    if (state is ShopLoaded) context.pop();
                   },
                 ),
               ],
@@ -344,205 +447,82 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildTextField(
-                        textCapitalization: TextCapitalization.sentences,
-                        key: 'name',
+                        controller: _formController.nameController,
                         label: l10n.name,
                         required: true,
+                        textCapitalization: TextCapitalization.sentences,
                       ),
-                      _buildTextField(
-                        key: 'customerPrice',
-                        label: l10n.customerPrice,
-                        isPrice: true,
-                        required: true,
-                        keyboardType: TextInputType.number,
-                      ),
-                      _buildTextField(
-                        key: 'defaultPrice',
-                        isPrice: true,
-                        label: l10n.defaultPrice,
-                        keyboardType: TextInputType.number,
-                      ),
-                      _buildTextField(
-                        key: 'sellerPrice',
-                        label: l10n.sellerPrice,
-                        isPrice: true,
-                        keyboardType: TextInputType.number,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: CategoryDropdown(
-                          initialValue: widget.existingItem?.category,
-                          onChanged: (value) {
-                            _categoryFilter = value;
-                            _detectChanges();
-                          },
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 20,
-                            ),
-                            filled: inputTheme.filled,
-                            fillColor: inputTheme.fillColor,
-                            border: inputTheme.border,
-                            enabledBorder: inputTheme.enabledBorder,
-                            focusedBorder: inputTheme.focusedBorder,
+                      if (_formController.isEditing)
+                        _buildEditOnlyVariantType()
+                      else ...[
+                        ShopItemVariantBuilder(
+                          variants: _formController.variantDrafts,
+                          onAddSingle: () => _formController.addVariantDraft(
+                            ShopItemVariantDraft.single(),
                           ),
+                          onAddPack: () => _formController.addVariantDraft(
+                            ShopItemVariantDraft.pack(),
+                          ),
+                          onAddCustom: () => _formController.addVariantDraft(
+                            ShopItemVariantDraft.single(),
+                          ),
+                          onRemove: _formController.removeVariantDraft,
                         ),
-                      ),
-                      _buildTextField(
-                        key: 'note',
-                        maxLines: 3,
-                        label: l10n.note,
-                        textInputAction: TextInputAction.newline,
-                      ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (_formController.isEditing) _buildEditOnlyPricingFields(),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
-                        child: Column(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              l10n.image,
-                              style: AppTextTheme.body,
+                            Expanded(
+                              child: CategoryDropdown(
+                                initialValue: widget.existingItem?.category,
+                                onChanged: _handleCategoryChanged,
+                                decoration: InputDecoration(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 20,
+                                  ),
+                                  filled: inputTheme.filled,
+                                  fillColor: inputTheme.fillColor,
+                                  border: inputTheme.border,
+                                  enabledBorder: inputTheme.enabledBorder,
+                                  focusedBorder: inputTheme.focusedBorder,
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            BlocBuilder<UploadBloc, UploadState>(
-                              bloc: context.read<ShopBloc>().upload,
-                              builder: (context, state) {
-                                final uploadBloc =
-                                    context.read<ShopBloc>().upload;
-                                return Row(
-                                  children: [
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        if (state is UploadInProgress) return;
-                                        uploadBloc.showImageSourceDialog(
-                                          context,
-                                          onTakePhoto: () => uploadBloc.add(
-                                            SelectImageEvent(
-                                              ImageSource.camera,
-                                            ),
-                                          ),
-                                          onChoseFromGallery: () =>
-                                              uploadBloc.add(
-                                            SelectImageEvent(
-                                              ImageSource.gallery,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.upload),
-                                      label: Text(
-                                        l10n.uploadImage,
-                                        style: AppTextTheme.body,
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        foregroundColor: colorScheme.onSurface,
-                                        backgroundColor:
-                                            colorScheme.surfaceContainerHighest,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    switch (state) {
-                                      UploadImageSelected() => Stack(
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: Image.file(
-                                                state.selectedImage,
-                                                width: 80,
-                                                height: 80,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (
-                                                  context,
-                                                  error,
-                                                  stackTrace,
-                                                ) =>
-                                                    const SizedBox.shrink(),
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 5,
-                                              right: 5,
-                                              child: Container(
-                                                width: 24,
-                                                height: 24,
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme.scrim
-                                                      .withValues(alpha: 0.55),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    uploadBloc
-                                                        .add(ClearImageEvent());
-                                                    _detectChanges();
-                                                  },
-                                                  child: const Icon(
-                                                    Icons.close,
-                                                    color: Colors.white,
-                                                    size: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      UploadImageUrlLoaded() => Stack(
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: Image.network(
-                                                state.imageUrl,
-                                                width: 80,
-                                                height: 80,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (
-                                                  context,
-                                                  error,
-                                                  stackTrace,
-                                                ) =>
-                                                    const SizedBox.shrink(),
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 5,
-                                              right: 5,
-                                              child: Container(
-                                                width: 24,
-                                                height: 24,
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme.scrim
-                                                      .withValues(alpha: 0.55),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    uploadBloc
-                                                        .add(ClearImageEvent());
-                                                    _detectChanges();
-                                                  },
-                                                  child: const Icon(
-                                                    Icons.close,
-                                                    color: Colors.white,
-                                                    size: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      _ => const SizedBox.shrink(),
-                                    },
-                                  ],
-                                );
-                              },
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              height: 64,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                onPressed: _openCategoryPage,
+                                icon: const Icon(
+                                  Icons.add_circle_outline_rounded,
+                                ),
+                                label: Text(l10n.createCategory),
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 80), // Extra space for FAB
-                      // Button removed from here
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _formController.noteController,
+                        label: l10n.note,
+                        maxLines: 3,
+                        textInputAction: TextInputAction.newline,
+                      ),
+                      ShopItemImageSection(
+                        uploadBloc: _uploadBloc,
+                        onImageCleared: () => _formController.setImageUrl(null),
+                      ),
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
@@ -550,44 +530,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
             ),
             KeyboardVisibilityBuilder(
               builder: (context, isKeyboardVisible) {
-                if (!isKeyboardVisible) {
-                  return Positioned(
-                    bottom: 16,
-                    left: 16,
-                    right: 16,
-                    child: ElevatedButton(
-                      onPressed: _submitItem,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                      ),
-                      child: Text(
-                        widget.existingItem != null
-                            ? l10n.saveChanges
-                            : l10n.addItem,
-                        style: AppTextTheme.body,
-                      ),
-                    ),
-                  );
-                } else {
-                  return Positioned(
-                    bottom: 16,
-                    right: 16,
-                    child: FloatingActionButton.extended(
-                      onPressed: _submitItem,
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      label: Text(
-                        widget.existingItem != null
-                            ? l10n.saveChanges
-                            : l10n.addItem,
-                        style: AppTextTheme.body,
-                      ),
-                      icon: const Icon(Icons.save),
-                    ),
-                  );
-                }
+                return _buildSubmitButton(isKeyboardVisible);
               },
             ),
           ],

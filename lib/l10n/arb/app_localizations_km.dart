@@ -129,6 +129,75 @@ class AppLocalizationsKm extends AppLocalizations {
   String get settings => 'ការកំណត់';
 
   @override
+  String get diagnostics => 'ការត្រួតពិនិត្យ';
+
+  @override
+  String get runtimeCapture => 'ការចាប់យកពេលដំណើរការ';
+
+  @override
+  String get appLogs => 'កំណត់ហេតុកម្មវិធី';
+
+  @override
+  String get appLogsEnabled => 'កំពុងចាប់យក logger, bloc, print និងកំហុស';
+
+  @override
+  String get appLogsDisabled => 'បានបិទការចាប់យកកំណត់ហេតុកម្មវិធី';
+
+  @override
+  String get networkInspector => 'ការត្រួតពិនិត្យបណ្ដាញ';
+
+  @override
+  String get networkLogsEnabled => 'កំពុងចាប់យកសំណើ និងចម្លើយ API';
+
+  @override
+  String get networkLogsDisabled => 'បានបិទការចាប់យកបណ្ដាញ';
+
+  @override
+  String get notificationDiagnostics => 'ការត្រួតពិនិត្យការជូនដំណឹង';
+
+  @override
+  String get copyLogs => 'ចម្លង';
+
+  @override
+  String get clearLogs => 'សម្អាត';
+
+  @override
+  String get diagnosticsCopied => 'បានចម្លងការត្រួតពិនិត្យ';
+
+  @override
+  String get noAppLogs => 'មិនទាន់មានកំណត់ហេតុកម្មវិធីទេ។';
+
+  @override
+  String get noNetworkLogs => 'មិនទាន់មានសំណើបណ្ដាញទេ។';
+
+  @override
+  String get capturedAtLabel => 'ពេលចាប់យក';
+
+  @override
+  String get statusLabel => 'ស្ថានភាព';
+
+  @override
+  String get durationLabel => 'រយៈពេល';
+
+  @override
+  String get requestLabel => 'សំណើ';
+
+  @override
+  String get requestHeadersLabel => 'ក្បាលសំណើ';
+
+  @override
+  String get requestBodyLabel => 'ខ្លឹមសារសំណើ';
+
+  @override
+  String get responseHeadersLabel => 'ក្បាលចម្លើយ';
+
+  @override
+  String get responseBodyLabel => 'ខ្លឹមសារចម្លើយ';
+
+  @override
+  String get errorLabel => 'កំហុស';
+
+  @override
   String get switchLanguage => 'ប្តូរភាសា';
 
   @override
@@ -340,6 +409,58 @@ class AppLocalizationsKm extends AppLocalizations {
   String get amount => 'ចំនួនទឹកប្រាក់';
 
   @override
+  String get itemType => 'ប្រភេទទំនិញ';
+
+  @override
+  String get singleItem => 'ទំនិញរាយ';
+
+  @override
+  String get packItem => 'ទំនិញកញ្ចប់';
+
+  @override
+  String get packSize => 'ចំនួនក្នុងកញ្ចប់';
+
+  @override
+  String get packSizeHint =>
+      'មិនបាច់បំពេញក៏បាន។ បើបំពេញ វានឹងរក្សាទុកជា ឈ្មោះ xចំនួន។';
+
+  @override
+  String get packSizeValidation => 'សូមបញ្ចូលចំនួនក្នុងកញ្ចប់ធំជាង 1';
+
+  @override
+  String get packSizeRequired => 'សូមបញ្ចូលចំនួនក្នុងកញ្ចប់';
+
+  @override
+  String get itemsSuffix => 'មុខទំនិញ';
+
+  @override
+  String get variants => 'ជម្រើសទំនិញ';
+
+  @override
+  String get variantLabel => 'ឈ្មោះជម្រើស';
+
+  @override
+  String get addVariant => 'បន្ថែមជម្រើស';
+
+  @override
+  String get smallVariant => 'តូច';
+
+  @override
+  String get bigVariant => 'ធំ';
+
+  @override
+  String get canVariant => 'កំប៉ុង';
+
+  @override
+  String get bottleVariant => 'ដប';
+
+  @override
+  String get selectVariantError => 'សូមជ្រើសយ៉ាងហោចណាស់មួយជម្រើស';
+
+  @override
+  String get addItems => 'បន្ថែមទំនិញ';
+
+  @override
   String get addLoaner => 'បន្ថែមអ្នកខ្ចី';
 
   @override
@@ -362,4 +483,126 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get all => 'ទាំងអស់';
+
+  @override
+  String get income => 'ចំណូល';
+
+  @override
+  String get notifications => 'ការជូនដំណឹង';
+
+  @override
+  String get searchIncome => 'ស្វែងរកការជូនដំណឹងចំណូល...';
+
+  @override
+  String get filterIncome => 'តម្រងចំណូល';
+
+  @override
+  String get notificationTracking => 'ការតាមដានការជូនដំណឹង';
+
+  @override
+  String get notificationTrackingEnabled =>
+      'ការតាមដានការជូនដំណឹងធនាគារកំពុងដំណើរការនៅលើឧបករណ៍នេះ។';
+
+  @override
+  String get notificationTrackingDisabled =>
+      'សូមបើកសិទ្ធិការជូនដំណឹង ដើម្បីឱ្យឧបករណ៍មេនេះអាចចាប់ ABA, Chip Mong និង ACLEDA បាន។';
+
+  @override
+  String get enableNotificationAccess => 'បើកសិទ្ធិ';
+
+  @override
+  String get refreshStatus => 'ផ្ទុកស្ថានភាពឡើងវិញ';
+
+  @override
+  String get mainDeviceTrackingHint =>
+      'សូមប្រើវានៅលើទូរស័ព្ទ Android មេ។ ការធ្វើសមកាលកម្មទៅឧបករណ៍រងអាចបន្ថែមនៅពេលក្រោយលើទិន្នន័យដូចគ្នា។';
+
+  @override
+  String get bankNotificationUnsupported =>
+      'ឧបករណ៍នេះមិនអាចចាប់ការជូនដំណឹងធនាគារបានទេ។ សូមប្រើ Android សម្រាប់ទូរស័ព្ទមេ។';
+
+  @override
+  String get incomeByBank => 'ចំណូលតាមធនាគារ';
+
+  @override
+  String get noIncomeChartData =>
+      'មិនទាន់មានទិន្នន័យចំណូលទេ។ បន្ថែមទិន្នន័យសាកល្បង ឬបើកការតាមដានដើម្បីមើលគំនូសតាង។';
+
+  @override
+  String get totalIncome => 'ចំណូលសរុប';
+
+  @override
+  String get totalExpense => 'ចំណាយសរុប';
+
+  @override
+  String get trackedCount => 'ចំនួនតាមដាន';
+
+  @override
+  String get trackedNotifications => 'ការជូនដំណឹងដែលបានតាមដាន';
+
+  @override
+  String get allRecords => 'កំណត់ត្រាទាំងអស់';
+
+  @override
+  String get incomeOnly => 'ចំណូល';
+
+  @override
+  String get expenseOnly => 'ចំណាយ';
+
+  @override
+  String get noTrackedNotifications => 'រកមិនឃើញការជូនដំណឹងធនាគារដែលបានតាមដាន';
+
+  @override
+  String get addDemoData => 'ទិន្នន័យសាកល្បង';
+
+  @override
+  String get demoDataAdded => 'បានបន្ថែមការជូនដំណឹងធនាគារសាកល្បង';
+
+  @override
+  String get bankLabel => 'ធនាគារ';
+
+  @override
+  String get deviceRole => 'តួនាទីឧបករណ៍';
+
+  @override
+  String get mainDeviceRole => 'ឧបករណ៍មេ';
+
+  @override
+  String get subDeviceRole => 'ឧបករណ៍រង';
+
+  @override
+  String get deviceRoleMainDescription => 'ឧបករណ៍នេះចាប់ការជូនដំណឹងធនាគារ។';
+
+  @override
+  String get deviceRoleSubDescription =>
+      'ឧបករណ៍នេះជាឧបករណ៍រងសម្រាប់មើលទិន្នន័យសមកាលកម្មនៅពេលក្រោយ។';
+
+  @override
+  String get subDeviceTrackingDisabled =>
+      'ឧបករណ៍រងមិនចាប់ការជូនដំណឹងធនាគារនៅក្នុងការរៀបចំ local-only បច្ចុប្បន្នទេ។';
+
+  @override
+  String get subDeviceTrackingHint =>
+      'កំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។';
+
+  @override
+  String get mainDeviceRoleRequired =>
+      'សូមកំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។';
+
+  @override
+  String get setAsMainDevice => 'កំណត់ជា ឧបករណ៍មេ';
+
+  @override
+  String get releaseMainDevice => 'បោះបង់ឧបករណ៍មេ';
+
+  @override
+  String get mainDeviceOnly => 'សម្រាប់មេប៉ុណ្ណោះ';
+
+  @override
+  String get singleMainDeviceHint =>
+      'អាចមានឧបករណ៍មេបានតែមួយប៉ុណ្ណោះ សម្រាប់ income sync ដូចគ្នា នៅពេលតែមួយ។';
+
+  @override
+  String get anotherMainDeviceActive =>
+      'មានឧបករណ៍មេមួយផ្សេងទៀតកំពុងសកម្មសម្រាប់ income sync នេះ។';
 }

@@ -66,31 +66,49 @@ class Loaners extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Customers, Categories, ShopItems, Loaners])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+class BankNotifications extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get fingerprint => text()();
+  TextColumn get packageName => text()();
+  TextColumn get bankKey => text()();
+  TextColumn get title => text().nullable()();
+  TextColumn get message => text()();
+  TextColumn get rawPayload => text().nullable()();
+  RealColumn get amount => real().nullable()();
+  TextColumn get currency => text().withDefault(const Constant('USD'))();
+  BoolColumn get isIncome => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get receivedAt => dateTime()();
+  TextColumn get source => text().withDefault(const Constant('native'))();
+  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
-  int get schemaVersion => 3;
+  List<Set<Column>> get uniqueKeys => [
+        {fingerprint},
+      ];
+}
+
+@DriftDatabase(
+  tables: [Customers, Categories, ShopItems, Loaners, BankNotifications],
+)
+class AppDatabase extends _$AppDatabase {
+  AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(super.executor);
+
+  @override
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onUpgrade: (m, from, to) async {
         if (from < 2) {
-          // Add columns to Customers
           await m.addColumn(customers, customers.isDeleted);
           await m.addColumn(customers, customers.syncStatus);
-
-          // Add columns to Categories
           await m.addColumn(categories, categories.isDeleted);
           await m.addColumn(categories, categories.syncStatus);
-
-          // Add columns to ShopItems
           await m.addColumn(shopItems, shopItems.isDeleted);
           await m.addColumn(shopItems, shopItems.syncStatus);
-
-          // Add columns to Loaners
           await m.addColumn(loaners, loaners.isDeleted);
           await m.addColumn(loaners, loaners.syncStatus);
         }
@@ -98,8 +116,26 @@ class AppDatabase extends _$AppDatabase {
         if (from < 3) {
           await m.addColumn(loaners, loaners.customer);
         }
+
+        if (from < 4) {
+          await m.createTable(bankNotifications);
+        }
+
+        if (from < 5) {
+          await m.addColumn(bankNotifications, bankNotifications.syncStatus);
+        }
       },
     );
+  }
+
+  Future<void> clearUserData() async {
+    await transaction(() async {
+      await delete(bankNotifications).go();
+      await delete(shopItems).go();
+      await delete(loaners).go();
+      await delete(categories).go();
+      await delete(customers).go();
+    });
   }
 }
 
@@ -107,10 +143,6 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
-
-    // if (Platform.isAndroid) {
-    //   await applyWorkaroundToOpenSqlite3OnOldAndroidDevices();
-    // }
 
     final cacheDatabase = await getTemporaryDirectory();
     sqlite3.tempDirectory = cacheDatabase.path;

@@ -1,10 +1,9 @@
-import 'dart:developer';
-
 import 'package:get_it/get_it.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/app/service/database/app_database.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/customer/customer.dart';
+import 'package:my_app/income/income.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/profile/profile.dart';
 import 'package:my_app/shop/shop.dart';
@@ -16,10 +15,40 @@ Future<void> setupDependencies() async {
   await apiService.cookies.initCookies();
   getIt
     ..registerSingleton<ApiService>(apiService)
+    ..registerSingleton<AppLogService>(AppLogService.instance)
+    ..registerSingleton<NetworkInspectorService>(
+      NetworkInspectorService.instance,
+    )
     ..registerSingleton<AppDatabase>(AppDatabase())
     ..registerSingleton(ConnectivityService())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
+    ..registerLazySingleton(
+      () => AuthService(
+        getIt<ApiService>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerLazySingleton(NotificationTrackingBridge.new)
+    ..registerLazySingleton(
+      () => NotificationDiagnosticsService(
+        getIt<NotificationTrackingBridge>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => FcmService(
+        getIt<ApiService>(),
+        getIt<NotificationDiagnosticsService>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => FirebaseIncomeSyncService(
+        getIt<ConnectivityService>(),
+        getIt<AuthService>(),
+        getIt<FcmService>(),
+        getIt<NotificationDiagnosticsService>(),
+      ),
+    )
     ..registerLazySingleton(
       () => ShopService(
         getIt<ApiService>(),
@@ -42,9 +71,11 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerLazySingleton(
-      () => AuthService(
-        getIt<ApiService>(),
-        getIt<ConnectivityService>(),
+      () => IncomeService(
+        getIt<AppDatabase>(),
+        getIt<NotificationTrackingBridge>(),
+        getIt<FirebaseIncomeSyncService>(),
+        getIt<NotificationDiagnosticsService>(),
       ),
     )
     ..registerLazySingleton(
@@ -54,12 +85,29 @@ Future<void> setupDependencies() async {
         getIt<ConnectivityService>(),
       ),
     )
-    ..registerFactory(AppBloc.new)
+    ..registerLazySingleton(
+      () => SessionCleanupService(
+        apiService: getIt<ApiService>(),
+        authService: getIt<AuthService>(),
+        database: getIt<AppDatabase>(),
+        incomeSyncService: getIt<FirebaseIncomeSyncService>(),
+        notificationTrackingBridge: getIt<NotificationTrackingBridge>(),
+        notificationDiagnosticsService: getIt<NotificationDiagnosticsService>(),
+      ),
+    )
+    ..registerFactory(
+      () => AppBloc(
+        getIt<FirebaseIncomeSyncService>(),
+        getIt<AppLogService>(),
+        getIt<NetworkInspectorService>(),
+      ),
+    )
     ..registerFactory(() => UploadBloc(getIt<UploadService>()))
     ..registerFactory(
       () => AuthBloc(
         getIt<AuthService>(),
         getIt<ConnectivityService>(),
+        getIt<SessionCleanupService>(),
       )..add(AuthCheckRequested()),
     )
     ..registerFactory(
@@ -90,7 +138,8 @@ Future<void> setupDependencies() async {
         getIt<CustomerService>(),
         getIt<ConnectivityService>(),
       ),
-    );
+    )
+    ..registerFactory(() => IncomeBloc(getIt<IncomeService>()));
 
-  log('Dependencies setup successfully');
+  logger.i('Dependencies setup successfully');
 }

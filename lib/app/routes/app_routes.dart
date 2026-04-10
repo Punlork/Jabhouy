@@ -1,3 +1,5 @@
+// ignore_for_file: inference_failure_on_instance_creation
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:my_app/auth/auth.dart';
 import 'package:my_app/customer/customer.dart';
 import 'package:my_app/home/home.dart';
 import 'package:my_app/home/views/home_page.dart';
+import 'package:my_app/income/income.dart';
 import 'package:my_app/loaner/loaner.dart';
 import 'package:my_app/profile/profile.dart';
 import 'package:my_app/shop/shop.dart';
@@ -39,6 +42,9 @@ class AppRoutes {
   static const category = 'category';
   static const customer = 'customer';
   static const profile = 'profile';
+  static const settings = 'settings';
+  static const appDiagnostics = 'app_diagnostics';
+  static const incomeDiagnostics = 'income_diagnostics';
 
   static final allowedUnauthenticated = {
     signin.toPath,
@@ -51,7 +57,10 @@ class AppRoutes {
     '${home.toPath}${formLoaner.toPath}',
     '${home.toPath}${category.toPath}',
     '${home.toPath}${profile.toPath}',
+    '${home.toPath}${settings.toPath}',
+    '${home.toPath}${appDiagnostics.toPath}',
     '${home.toPath}${customer.toPath}',
+    '${home.toPath}${incomeDiagnostics.toPath}',
   };
 
   static final GoRouter router = GoRouter(
@@ -107,6 +116,9 @@ class AppRoutes {
                     getIt<ConnectivityService>(),
                   ),
                 ),
+                BlocProvider(
+                  create: (context) => IncomeBloc(getIt<IncomeService>()),
+                ),
               ],
               child: const HomePage(),
             ),
@@ -122,6 +134,8 @@ class AppRoutes {
               final extra = state.extra! as Map<String, dynamic>;
               final onAdd = extra['onAdd'] as void Function(ShopItemModel)?;
               final existingItem = extra['existingItem'] as ShopItemModel?;
+              final activeCategory =
+                  extra['activeCategory'] as CategoryItemModel?;
               final shop = extra['shop'] as ShopBloc;
               final category = extra['category'] as CategoryBloc;
               return CustomTransitionPage(
@@ -129,6 +143,7 @@ class AppRoutes {
                 child: ShopItemFormPage(
                   onSaved: onAdd ?? (_) {},
                   existingItem: existingItem,
+                  activeCategory: activeCategory,
                   shop: shop,
                   category: category,
                 ),
@@ -211,6 +226,85 @@ class AppRoutes {
               );
             },
           ),
+          GoRoute(
+            path: settings.toPath,
+            name: settings,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final categoryBloc = extra?['category'] as CategoryBloc? ??
+                  context.read<CategoryBloc>();
+              final shopBloc =
+                  extra?['shop'] as ShopBloc? ?? context.read<ShopBloc>();
+              final customerBloc = extra?['customerBloc'] as CustomerBloc? ??
+                  context.read<CustomerBloc>();
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
+                  context.read<IncomeBloc>();
+              final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ??
+                  context.read<SignoutBloc>();
+              GlobalContext.currentContext = context;
+
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: categoryBloc),
+                    BlocProvider.value(value: shopBloc),
+                    BlocProvider.value(value: customerBloc),
+                    BlocProvider.value(value: incomeBloc),
+                    BlocProvider.value(value: signoutBloc),
+                  ],
+                  child: const SettingsPage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: appDiagnostics.toPath,
+            name: appDiagnostics,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
+                  (() {
+                    try {
+                      return context.read<IncomeBloc>();
+                    } on ProviderNotFoundException {
+                      return null;
+                    }
+                  })();
+              GlobalContext.currentContext = context;
+
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: incomeBloc == null
+                    ? const AppDiagnosticsPage()
+                    : BlocProvider.value(
+                        value: incomeBloc,
+                        child: const AppDiagnosticsPage(),
+                      ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: incomeDiagnostics.toPath,
+            name: incomeDiagnostics,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
+                  BlocProvider.of<IncomeBloc>(context);
+              GlobalContext.currentContext = context;
+
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider.value(
+                  value: incomeBloc,
+                  child: const IncomeDiagnosticsPage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
         ],
       ),
       GoRoute(
@@ -239,15 +333,6 @@ class AppRoutes {
       ),
     ],
   );
-
-  static Widget _fadeTransition(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return FadeTransition(opacity: animation, child: child);
-  }
 
   static Widget _rightToLeftTransition(
     BuildContext context,

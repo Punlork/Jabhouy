@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -18,6 +19,14 @@ class GridShopItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context);
+    final titleStyle = textTheme.titleSmall?.copyWith(
+      color: colorScheme.onSurface,
+      fontWeight: FontWeight.w600,
+      height: 1.2,
+    );
+    final titleHeight =
+        (titleStyle?.fontSize ?? 14) * (titleStyle?.height ?? 1.2) * 2;
 
     return Card(
       elevation: 0,
@@ -50,7 +59,8 @@ class GridShopItemCard extends StatelessWidget {
                         imageCacheHeight: 250,
                         imageCacheWidth: 250,
                         placeholder: kTransparentImage,
-                        imageErrorBuilder: (context, url, error) => const Center(
+                        imageErrorBuilder: (context, url, error) =>
+                            const Center(
                           child: AppLogo(
                             shape: BoxShape.rectangle,
                             useBg: false,
@@ -68,14 +78,25 @@ class GridShopItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.name,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
+                  SizedBox(
+                    height: titleHeight,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        item.displayName,
+                        style: titleStyle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    item.isPack ? l10n.packItem : l10n.singleItem,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
@@ -125,7 +146,8 @@ class GridShopItemShimmer extends StatelessWidget {
         ),
       ),
       child: ColoredBox(
-        color: Theme.of(context).cardTheme.color ?? colorScheme.surfaceContainerLow,
+        color: Theme.of(context).cardTheme.color ??
+            colorScheme.surfaceContainerLow,
         child: Shimmer.fromColors(
           baseColor: colorScheme.surfaceContainerHighest,
           highlightColor: colorScheme.surfaceContainerHigh,

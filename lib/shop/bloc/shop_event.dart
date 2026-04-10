@@ -7,30 +7,53 @@ class ShopGetItemsEvent extends ShopEvent {
   ShopGetItemsEvent({
     this.searchQuery,
     this.categoryFilter,
+    this.clearCategoryFilter = false,
     this.forceRefresh = false,
     this.limit,
     this.page,
-  }) : isSearch = searchQuery != null && searchQuery.isNotEmpty;
+  }) : isSearchChange = searchQuery != null;
 
   final String? searchQuery;
   final CategoryItemModel? categoryFilter;
+  final bool clearCategoryFilter;
 
   final bool forceRefresh;
   final int? limit;
   final int? page;
-  final bool isSearch;
+  final bool isSearchChange;
+
+  bool get isCategoryChangeRequest =>
+      clearCategoryFilter || categoryFilter != null;
 }
 
 class ShopCreateItemEvent extends ShopEvent {
-  ShopCreateItemEvent({required this.body});
+  ShopCreateItemEvent({
+    required this.body,
+    this.onSuccess,
+  });
 
   final ShopItemModel body;
+  final VoidCallback? onSuccess;
+}
+
+class ShopCreateItemsEvent extends ShopEvent {
+  ShopCreateItemsEvent({
+    required this.items,
+    this.onSuccess,
+  });
+
+  final List<ShopItemModel> items;
+  final VoidCallback? onSuccess;
 }
 
 class ShopEditItemEvent extends ShopEvent {
-  ShopEditItemEvent({required this.body});
+  ShopEditItemEvent({
+    required this.body,
+    this.onSuccess,
+  });
 
   final ShopItemModel body;
+  final VoidCallback? onSuccess;
 }
 
 class ShopDeleteItemEvent extends ShopEvent {

@@ -17,9 +17,8 @@ class ApiCookies {
           (key, value) => MapEntry(key, (value as Map).cast<String, String>()),
         );
       } catch (e) {
-        developer.log(
+        logger.e(
           'Failed to load cookies: $e',
-          level: 1000,
         );
         _cookies = <String, Map<String, String>>{};
       }
@@ -29,7 +28,8 @@ class ApiCookies {
   void updateCookies(Uri uri, http.Response response) {
     final setCookieHeaders = response.headers['set-cookie'];
     if (setCookieHeaders != null) {
-      final cookies = setCookieHeaders.split(',').map((str) => str.trim()).toList();
+      final cookies =
+          setCookieHeaders.split(',').map((str) => str.trim()).toList();
       final domain = uri.host;
 
       _cookies[domain] ??= {};
@@ -52,7 +52,7 @@ class ApiCookies {
       final cookieString = jsonEncode(_cookies);
       await sharePref.setString('cookies', cookieString);
     } catch (e) {
-      developer.log('Failed to save cookies: $e', level: 1000);
+      logger.e('Failed to save cookies: $e');
     }
   }
 
@@ -69,9 +69,11 @@ class ApiCookies {
       } else {
         await sharePref.remove('cookies');
       }
-      developer.log('Cookies cleared successfully${domain != null ? ' for $domain' : ''}');
+      logger.i(
+        'Cookies cleared successfully${domain != null ? ' for $domain' : ''}',
+      );
     } catch (e) {
-      developer.log('Failed to clear cookies from storage: $e', level: 1000);
+      logger.e('Failed to clear cookies from storage: $e');
     }
   }
 

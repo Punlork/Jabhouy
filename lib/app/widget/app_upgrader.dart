@@ -44,11 +44,24 @@ class _AppUpgraderState extends State<AppUpgrader> {
     _isChecking = true;
     try {
       final packageInfo = await PackageInfo.fromPlatform();
+      final requestStartedAt = DateTime.now();
       final response = await http.get(
         _latestReleaseUri,
         headers: const {
           'Accept': 'application/vnd.github+json',
         },
+      );
+      NetworkInspectorService.instance.capture(
+        timestamp: requestStartedAt,
+        method: 'GET',
+        uri: _latestReleaseUri,
+        duration: DateTime.now().difference(requestStartedAt),
+        requestHeaders: const {
+          'Accept': 'application/vnd.github+json',
+        },
+        statusCode: response.statusCode,
+        responseHeaders: response.headers,
+        responseBody: response.body,
       );
 
       if (response.statusCode != 200) return;
@@ -76,7 +89,22 @@ class _AppUpgraderState extends State<AppUpgrader> {
         latestVersion: latestVersion,
         releaseUrl: releaseUrl,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      logger.e(
+        'Failed to check for updates.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      NetworkInspectorService.instance.capture(
+        timestamp: DateTime.now(),
+        method: 'GET',
+        uri: _latestReleaseUri,
+        duration: Duration.zero,
+        requestHeaders: const {
+          'Accept': 'application/vnd.github+json',
+        },
+        error: '$error\n$stackTrace',
+      );
       // Ignore update-check failures and keep the app usable.
       // rethrow;
     } finally {
@@ -89,7 +117,8 @@ class _AppUpgraderState extends State<AppUpgrader> {
     required String latestVersion,
     required Uri releaseUrl,
   }) async {
-    final overlayContext = AppRoutes.router.routerDelegate.navigatorKey.currentState?.overlay?.context;
+    final overlayContext = AppRoutes
+        .router.routerDelegate.navigatorKey.currentState?.overlay?.context;
     if (overlayContext == null) return;
 
     final l10n = AppLocalizations.of(overlayContext);
@@ -178,7 +207,9 @@ class _AppUpgraderState extends State<AppUpgrader> {
   }) {
     final currentParts = _parseVersion(currentVersion);
     final latestParts = _parseVersion(latestVersion);
-    final maxLength = currentParts.length > latestParts.length ? currentParts.length : latestParts.length;
+    final maxLength = currentParts.length > latestParts.length
+        ? currentParts.length
+        : latestParts.length;
 
     for (var index = 0; index < maxLength; index++) {
       final currentPart = index < currentParts.length ? currentParts[index] : 0;
@@ -191,7 +222,12 @@ class _AppUpgraderState extends State<AppUpgrader> {
   }
 
   List<int> _parseVersion(String version) {
-    return version.split('+').first.split('.').map((part) => int.tryParse(part) ?? 0).toList();
+    return version
+        .split('+')
+        .first
+        .split('.')
+        .map((part) => int.tryParse(part) ?? 0)
+        .toList();
   }
 
   @override

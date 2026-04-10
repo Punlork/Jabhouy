@@ -31,6 +31,14 @@ Run Flutter tests and build debug APK
 
 Build development debug APK
 
+### android build_dev_release
+
+```sh
+[bundle exec] fastlane android build_dev_release
+```
+
+Build development release APKs split per ABI
+
 ### android build_staging
 
 ```sh
@@ -54,6 +62,14 @@ Build production release APK
 ```
 
 Build production release APK for CI/GitHub Releases
+
+### android distribute_dev
+
+```sh
+[bundle exec] fastlane android distribute_dev
+```
+
+Distribute development arm64-v8a release APK to Firebase App Distribution
 
 ### android internal
 

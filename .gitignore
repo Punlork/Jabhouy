@@ -55,6 +55,9 @@ unlinked_spec.ds
 **/android/app/release
 *.jks
 
+# hide google services config files in android
+**/android/app/src/**/google-services.json
+
 # iOS/XCode related
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
@@ -114,6 +117,8 @@ app.*.map.json
 
 .env
 .env.dev
+
+
 
 # Patrol generated test bundle (do not commit)
 patrol_test/test_bundle.dart

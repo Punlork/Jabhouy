@@ -1699,6 +1699,681 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
   }
 }
 
+class $BankNotificationsTable extends BankNotifications
+    with TableInfo<$BankNotificationsTable, BankNotification> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BankNotificationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _fingerprintMeta =
+      const VerificationMeta('fingerprint');
+  @override
+  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
+      'fingerprint', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _packageNameMeta =
+      const VerificationMeta('packageName');
+  @override
+  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
+      'package_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _bankKeyMeta =
+      const VerificationMeta('bankKey');
+  @override
+  late final GeneratedColumn<String> bankKey = GeneratedColumn<String>(
+      'bank_key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _messageMeta =
+      const VerificationMeta('message');
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+      'message', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _rawPayloadMeta =
+      const VerificationMeta('rawPayload');
+  @override
+  late final GeneratedColumn<String> rawPayload = GeneratedColumn<String>(
+      'raw_payload', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('USD'));
+  static const VerificationMeta _isIncomeMeta =
+      const VerificationMeta('isIncome');
+  @override
+  late final GeneratedColumn<bool> isIncome = GeneratedColumn<bool>(
+      'is_income', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_income" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _receivedAtMeta =
+      const VerificationMeta('receivedAt');
+  @override
+  late final GeneratedColumn<DateTime> receivedAt = GeneratedColumn<DateTime>(
+      'received_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+      'source', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('native'));
+  static const VerificationMeta _syncStatusMeta =
+      const VerificationMeta('syncStatus');
+  @override
+  late final GeneratedColumn<int> syncStatus = GeneratedColumn<int>(
+      'sync_status', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        fingerprint,
+        packageName,
+        bankKey,
+        title,
+        message,
+        rawPayload,
+        amount,
+        currency,
+        isIncome,
+        receivedAt,
+        source,
+        syncStatus,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bank_notifications';
+  @override
+  VerificationContext validateIntegrity(Insertable<BankNotification> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('fingerprint')) {
+      context.handle(
+          _fingerprintMeta,
+          fingerprint.isAcceptableOrUnknown(
+              data['fingerprint']!, _fingerprintMeta));
+    } else if (isInserting) {
+      context.missing(_fingerprintMeta);
+    }
+    if (data.containsKey('package_name')) {
+      context.handle(
+          _packageNameMeta,
+          packageName.isAcceptableOrUnknown(
+              data['package_name']!, _packageNameMeta));
+    } else if (isInserting) {
+      context.missing(_packageNameMeta);
+    }
+    if (data.containsKey('bank_key')) {
+      context.handle(_bankKeyMeta,
+          bankKey.isAcceptableOrUnknown(data['bank_key']!, _bankKeyMeta));
+    } else if (isInserting) {
+      context.missing(_bankKeyMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    }
+    if (data.containsKey('message')) {
+      context.handle(_messageMeta,
+          message.isAcceptableOrUnknown(data['message']!, _messageMeta));
+    } else if (isInserting) {
+      context.missing(_messageMeta);
+    }
+    if (data.containsKey('raw_payload')) {
+      context.handle(
+          _rawPayloadMeta,
+          rawPayload.isAcceptableOrUnknown(
+              data['raw_payload']!, _rawPayloadMeta));
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    }
+    if (data.containsKey('is_income')) {
+      context.handle(_isIncomeMeta,
+          isIncome.isAcceptableOrUnknown(data['is_income']!, _isIncomeMeta));
+    }
+    if (data.containsKey('received_at')) {
+      context.handle(
+          _receivedAtMeta,
+          receivedAt.isAcceptableOrUnknown(
+              data['received_at']!, _receivedAtMeta));
+    } else if (isInserting) {
+      context.missing(_receivedAtMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(_sourceMeta,
+          source.isAcceptableOrUnknown(data['source']!, _sourceMeta));
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+          _syncStatusMeta,
+          syncStatus.isAcceptableOrUnknown(
+              data['sync_status']!, _syncStatusMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {fingerprint},
+      ];
+  @override
+  BankNotification map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BankNotification(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      fingerprint: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}fingerprint'])!,
+      packageName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}package_name'])!,
+      bankKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}bank_key'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title']),
+      message: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message'])!,
+      rawPayload: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}raw_payload']),
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount']),
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      isIncome: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_income'])!,
+      receivedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}received_at'])!,
+      source: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}source'])!,
+      syncStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $BankNotificationsTable createAlias(String alias) {
+    return $BankNotificationsTable(attachedDatabase, alias);
+  }
+}
+
+class BankNotification extends DataClass
+    implements Insertable<BankNotification> {
+  final int id;
+  final String fingerprint;
+  final String packageName;
+  final String bankKey;
+  final String? title;
+  final String message;
+  final String? rawPayload;
+  final double? amount;
+  final String currency;
+  final bool isIncome;
+  final DateTime receivedAt;
+  final String source;
+  final int syncStatus;
+  final DateTime createdAt;
+  const BankNotification(
+      {required this.id,
+      required this.fingerprint,
+      required this.packageName,
+      required this.bankKey,
+      this.title,
+      required this.message,
+      this.rawPayload,
+      this.amount,
+      required this.currency,
+      required this.isIncome,
+      required this.receivedAt,
+      required this.source,
+      required this.syncStatus,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['fingerprint'] = Variable<String>(fingerprint);
+    map['package_name'] = Variable<String>(packageName);
+    map['bank_key'] = Variable<String>(bankKey);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    map['message'] = Variable<String>(message);
+    if (!nullToAbsent || rawPayload != null) {
+      map['raw_payload'] = Variable<String>(rawPayload);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    map['currency'] = Variable<String>(currency);
+    map['is_income'] = Variable<bool>(isIncome);
+    map['received_at'] = Variable<DateTime>(receivedAt);
+    map['source'] = Variable<String>(source);
+    map['sync_status'] = Variable<int>(syncStatus);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  BankNotificationsCompanion toCompanion(bool nullToAbsent) {
+    return BankNotificationsCompanion(
+      id: Value(id),
+      fingerprint: Value(fingerprint),
+      packageName: Value(packageName),
+      bankKey: Value(bankKey),
+      title:
+          title == null && nullToAbsent ? const Value.absent() : Value(title),
+      message: Value(message),
+      rawPayload: rawPayload == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rawPayload),
+      amount:
+          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
+      currency: Value(currency),
+      isIncome: Value(isIncome),
+      receivedAt: Value(receivedAt),
+      source: Value(source),
+      syncStatus: Value(syncStatus),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory BankNotification.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BankNotification(
+      id: serializer.fromJson<int>(json['id']),
+      fingerprint: serializer.fromJson<String>(json['fingerprint']),
+      packageName: serializer.fromJson<String>(json['packageName']),
+      bankKey: serializer.fromJson<String>(json['bankKey']),
+      title: serializer.fromJson<String?>(json['title']),
+      message: serializer.fromJson<String>(json['message']),
+      rawPayload: serializer.fromJson<String?>(json['rawPayload']),
+      amount: serializer.fromJson<double?>(json['amount']),
+      currency: serializer.fromJson<String>(json['currency']),
+      isIncome: serializer.fromJson<bool>(json['isIncome']),
+      receivedAt: serializer.fromJson<DateTime>(json['receivedAt']),
+      source: serializer.fromJson<String>(json['source']),
+      syncStatus: serializer.fromJson<int>(json['syncStatus']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'fingerprint': serializer.toJson<String>(fingerprint),
+      'packageName': serializer.toJson<String>(packageName),
+      'bankKey': serializer.toJson<String>(bankKey),
+      'title': serializer.toJson<String?>(title),
+      'message': serializer.toJson<String>(message),
+      'rawPayload': serializer.toJson<String?>(rawPayload),
+      'amount': serializer.toJson<double?>(amount),
+      'currency': serializer.toJson<String>(currency),
+      'isIncome': serializer.toJson<bool>(isIncome),
+      'receivedAt': serializer.toJson<DateTime>(receivedAt),
+      'source': serializer.toJson<String>(source),
+      'syncStatus': serializer.toJson<int>(syncStatus),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  BankNotification copyWith(
+          {int? id,
+          String? fingerprint,
+          String? packageName,
+          String? bankKey,
+          Value<String?> title = const Value.absent(),
+          String? message,
+          Value<String?> rawPayload = const Value.absent(),
+          Value<double?> amount = const Value.absent(),
+          String? currency,
+          bool? isIncome,
+          DateTime? receivedAt,
+          String? source,
+          int? syncStatus,
+          DateTime? createdAt}) =>
+      BankNotification(
+        id: id ?? this.id,
+        fingerprint: fingerprint ?? this.fingerprint,
+        packageName: packageName ?? this.packageName,
+        bankKey: bankKey ?? this.bankKey,
+        title: title.present ? title.value : this.title,
+        message: message ?? this.message,
+        rawPayload: rawPayload.present ? rawPayload.value : this.rawPayload,
+        amount: amount.present ? amount.value : this.amount,
+        currency: currency ?? this.currency,
+        isIncome: isIncome ?? this.isIncome,
+        receivedAt: receivedAt ?? this.receivedAt,
+        source: source ?? this.source,
+        syncStatus: syncStatus ?? this.syncStatus,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  BankNotification copyWithCompanion(BankNotificationsCompanion data) {
+    return BankNotification(
+      id: data.id.present ? data.id.value : this.id,
+      fingerprint:
+          data.fingerprint.present ? data.fingerprint.value : this.fingerprint,
+      packageName:
+          data.packageName.present ? data.packageName.value : this.packageName,
+      bankKey: data.bankKey.present ? data.bankKey.value : this.bankKey,
+      title: data.title.present ? data.title.value : this.title,
+      message: data.message.present ? data.message.value : this.message,
+      rawPayload:
+          data.rawPayload.present ? data.rawPayload.value : this.rawPayload,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      isIncome: data.isIncome.present ? data.isIncome.value : this.isIncome,
+      receivedAt:
+          data.receivedAt.present ? data.receivedAt.value : this.receivedAt,
+      source: data.source.present ? data.source.value : this.source,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BankNotification(')
+          ..write('id: $id, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('packageName: $packageName, ')
+          ..write('bankKey: $bankKey, ')
+          ..write('title: $title, ')
+          ..write('message: $message, ')
+          ..write('rawPayload: $rawPayload, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('isIncome: $isIncome, ')
+          ..write('receivedAt: $receivedAt, ')
+          ..write('source: $source, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      fingerprint,
+      packageName,
+      bankKey,
+      title,
+      message,
+      rawPayload,
+      amount,
+      currency,
+      isIncome,
+      receivedAt,
+      source,
+      syncStatus,
+      createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BankNotification &&
+          other.id == this.id &&
+          other.fingerprint == this.fingerprint &&
+          other.packageName == this.packageName &&
+          other.bankKey == this.bankKey &&
+          other.title == this.title &&
+          other.message == this.message &&
+          other.rawPayload == this.rawPayload &&
+          other.amount == this.amount &&
+          other.currency == this.currency &&
+          other.isIncome == this.isIncome &&
+          other.receivedAt == this.receivedAt &&
+          other.source == this.source &&
+          other.syncStatus == this.syncStatus &&
+          other.createdAt == this.createdAt);
+}
+
+class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
+  final Value<int> id;
+  final Value<String> fingerprint;
+  final Value<String> packageName;
+  final Value<String> bankKey;
+  final Value<String?> title;
+  final Value<String> message;
+  final Value<String?> rawPayload;
+  final Value<double?> amount;
+  final Value<String> currency;
+  final Value<bool> isIncome;
+  final Value<DateTime> receivedAt;
+  final Value<String> source;
+  final Value<int> syncStatus;
+  final Value<DateTime> createdAt;
+  const BankNotificationsCompanion({
+    this.id = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.packageName = const Value.absent(),
+    this.bankKey = const Value.absent(),
+    this.title = const Value.absent(),
+    this.message = const Value.absent(),
+    this.rawPayload = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.isIncome = const Value.absent(),
+    this.receivedAt = const Value.absent(),
+    this.source = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  BankNotificationsCompanion.insert({
+    this.id = const Value.absent(),
+    required String fingerprint,
+    required String packageName,
+    required String bankKey,
+    this.title = const Value.absent(),
+    required String message,
+    this.rawPayload = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.isIncome = const Value.absent(),
+    required DateTime receivedAt,
+    this.source = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  })  : fingerprint = Value(fingerprint),
+        packageName = Value(packageName),
+        bankKey = Value(bankKey),
+        message = Value(message),
+        receivedAt = Value(receivedAt);
+  static Insertable<BankNotification> custom({
+    Expression<int>? id,
+    Expression<String>? fingerprint,
+    Expression<String>? packageName,
+    Expression<String>? bankKey,
+    Expression<String>? title,
+    Expression<String>? message,
+    Expression<String>? rawPayload,
+    Expression<double>? amount,
+    Expression<String>? currency,
+    Expression<bool>? isIncome,
+    Expression<DateTime>? receivedAt,
+    Expression<String>? source,
+    Expression<int>? syncStatus,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (packageName != null) 'package_name': packageName,
+      if (bankKey != null) 'bank_key': bankKey,
+      if (title != null) 'title': title,
+      if (message != null) 'message': message,
+      if (rawPayload != null) 'raw_payload': rawPayload,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (isIncome != null) 'is_income': isIncome,
+      if (receivedAt != null) 'received_at': receivedAt,
+      if (source != null) 'source': source,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  BankNotificationsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? fingerprint,
+      Value<String>? packageName,
+      Value<String>? bankKey,
+      Value<String?>? title,
+      Value<String>? message,
+      Value<String?>? rawPayload,
+      Value<double?>? amount,
+      Value<String>? currency,
+      Value<bool>? isIncome,
+      Value<DateTime>? receivedAt,
+      Value<String>? source,
+      Value<int>? syncStatus,
+      Value<DateTime>? createdAt}) {
+    return BankNotificationsCompanion(
+      id: id ?? this.id,
+      fingerprint: fingerprint ?? this.fingerprint,
+      packageName: packageName ?? this.packageName,
+      bankKey: bankKey ?? this.bankKey,
+      title: title ?? this.title,
+      message: message ?? this.message,
+      rawPayload: rawPayload ?? this.rawPayload,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      isIncome: isIncome ?? this.isIncome,
+      receivedAt: receivedAt ?? this.receivedAt,
+      source: source ?? this.source,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (fingerprint.present) {
+      map['fingerprint'] = Variable<String>(fingerprint.value);
+    }
+    if (packageName.present) {
+      map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (bankKey.present) {
+      map['bank_key'] = Variable<String>(bankKey.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    if (rawPayload.present) {
+      map['raw_payload'] = Variable<String>(rawPayload.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (isIncome.present) {
+      map['is_income'] = Variable<bool>(isIncome.value);
+    }
+    if (receivedAt.present) {
+      map['received_at'] = Variable<DateTime>(receivedAt.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<int>(syncStatus.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BankNotificationsCompanion(')
+          ..write('id: $id, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('packageName: $packageName, ')
+          ..write('bankKey: $bankKey, ')
+          ..write('title: $title, ')
+          ..write('message: $message, ')
+          ..write('rawPayload: $rawPayload, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('isIncome: $isIncome, ')
+          ..write('receivedAt: $receivedAt, ')
+          ..write('source: $source, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1706,12 +2381,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $ShopItemsTable shopItems = $ShopItemsTable(this);
   late final $LoanersTable loaners = $LoanersTable(this);
+  late final $BankNotificationsTable bankNotifications =
+      $BankNotificationsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [customers, categories, shopItems, loaners];
+      [customers, categories, shopItems, loaners, bankNotifications];
 }
 
 typedef $$CustomersTableCreateCompanionBuilder = CustomersCompanion Function({
@@ -2922,6 +3599,310 @@ typedef $$LoanersTableProcessedTableManager = ProcessedTableManager<
     (Loaner, $$LoanersTableReferences),
     Loaner,
     PrefetchHooks Function({bool customerId})>;
+typedef $$BankNotificationsTableCreateCompanionBuilder
+    = BankNotificationsCompanion Function({
+  Value<int> id,
+  required String fingerprint,
+  required String packageName,
+  required String bankKey,
+  Value<String?> title,
+  required String message,
+  Value<String?> rawPayload,
+  Value<double?> amount,
+  Value<String> currency,
+  Value<bool> isIncome,
+  required DateTime receivedAt,
+  Value<String> source,
+  Value<int> syncStatus,
+  Value<DateTime> createdAt,
+});
+typedef $$BankNotificationsTableUpdateCompanionBuilder
+    = BankNotificationsCompanion Function({
+  Value<int> id,
+  Value<String> fingerprint,
+  Value<String> packageName,
+  Value<String> bankKey,
+  Value<String?> title,
+  Value<String> message,
+  Value<String?> rawPayload,
+  Value<double?> amount,
+  Value<String> currency,
+  Value<bool> isIncome,
+  Value<DateTime> receivedAt,
+  Value<String> source,
+  Value<int> syncStatus,
+  Value<DateTime> createdAt,
+});
+
+class $$BankNotificationsTableFilterComposer
+    extends Composer<_$AppDatabase, $BankNotificationsTable> {
+  $$BankNotificationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fingerprint => $composableBuilder(
+      column: $table.fingerprint, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get packageName => $composableBuilder(
+      column: $table.packageName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get bankKey => $composableBuilder(
+      column: $table.bankKey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get rawPayload => $composableBuilder(
+      column: $table.rawPayload, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isIncome => $composableBuilder(
+      column: $table.isIncome, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get receivedAt => $composableBuilder(
+      column: $table.receivedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$BankNotificationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BankNotificationsTable> {
+  $$BankNotificationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fingerprint => $composableBuilder(
+      column: $table.fingerprint, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get packageName => $composableBuilder(
+      column: $table.packageName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get bankKey => $composableBuilder(
+      column: $table.bankKey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get rawPayload => $composableBuilder(
+      column: $table.rawPayload, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isIncome => $composableBuilder(
+      column: $table.isIncome, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get receivedAt => $composableBuilder(
+      column: $table.receivedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$BankNotificationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BankNotificationsTable> {
+  $$BankNotificationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get fingerprint => $composableBuilder(
+      column: $table.fingerprint, builder: (column) => column);
+
+  GeneratedColumn<String> get packageName => $composableBuilder(
+      column: $table.packageName, builder: (column) => column);
+
+  GeneratedColumn<String> get bankKey =>
+      $composableBuilder(column: $table.bankKey, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+
+  GeneratedColumn<String> get rawPayload => $composableBuilder(
+      column: $table.rawPayload, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<bool> get isIncome =>
+      $composableBuilder(column: $table.isIncome, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get receivedAt => $composableBuilder(
+      column: $table.receivedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<int> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$BankNotificationsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $BankNotificationsTable,
+    BankNotification,
+    $$BankNotificationsTableFilterComposer,
+    $$BankNotificationsTableOrderingComposer,
+    $$BankNotificationsTableAnnotationComposer,
+    $$BankNotificationsTableCreateCompanionBuilder,
+    $$BankNotificationsTableUpdateCompanionBuilder,
+    (
+      BankNotification,
+      BaseReferences<_$AppDatabase, $BankNotificationsTable, BankNotification>
+    ),
+    BankNotification,
+    PrefetchHooks Function()> {
+  $$BankNotificationsTableTableManager(
+      _$AppDatabase db, $BankNotificationsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BankNotificationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BankNotificationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BankNotificationsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> fingerprint = const Value.absent(),
+            Value<String> packageName = const Value.absent(),
+            Value<String> bankKey = const Value.absent(),
+            Value<String?> title = const Value.absent(),
+            Value<String> message = const Value.absent(),
+            Value<String?> rawPayload = const Value.absent(),
+            Value<double?> amount = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<bool> isIncome = const Value.absent(),
+            Value<DateTime> receivedAt = const Value.absent(),
+            Value<String> source = const Value.absent(),
+            Value<int> syncStatus = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              BankNotificationsCompanion(
+            id: id,
+            fingerprint: fingerprint,
+            packageName: packageName,
+            bankKey: bankKey,
+            title: title,
+            message: message,
+            rawPayload: rawPayload,
+            amount: amount,
+            currency: currency,
+            isIncome: isIncome,
+            receivedAt: receivedAt,
+            source: source,
+            syncStatus: syncStatus,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String fingerprint,
+            required String packageName,
+            required String bankKey,
+            Value<String?> title = const Value.absent(),
+            required String message,
+            Value<String?> rawPayload = const Value.absent(),
+            Value<double?> amount = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<bool> isIncome = const Value.absent(),
+            required DateTime receivedAt,
+            Value<String> source = const Value.absent(),
+            Value<int> syncStatus = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              BankNotificationsCompanion.insert(
+            id: id,
+            fingerprint: fingerprint,
+            packageName: packageName,
+            bankKey: bankKey,
+            title: title,
+            message: message,
+            rawPayload: rawPayload,
+            amount: amount,
+            currency: currency,
+            isIncome: isIncome,
+            receivedAt: receivedAt,
+            source: source,
+            syncStatus: syncStatus,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$BankNotificationsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $BankNotificationsTable,
+    BankNotification,
+    $$BankNotificationsTableFilterComposer,
+    $$BankNotificationsTableOrderingComposer,
+    $$BankNotificationsTableAnnotationComposer,
+    $$BankNotificationsTableCreateCompanionBuilder,
+    $$BankNotificationsTableUpdateCompanionBuilder,
+    (
+      BankNotification,
+      BaseReferences<_$AppDatabase, $BankNotificationsTable, BankNotification>
+    ),
+    BankNotification,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2934,4 +3915,6 @@ class $AppDatabaseManager {
       $$ShopItemsTableTableManager(_db, _db.shopItems);
   $$LoanersTableTableManager get loaners =>
       $$LoanersTableTableManager(_db, _db.loaners);
+  $$BankNotificationsTableTableManager get bankNotifications =>
+      $$BankNotificationsTableTableManager(_db, _db.bankNotifications);
 }

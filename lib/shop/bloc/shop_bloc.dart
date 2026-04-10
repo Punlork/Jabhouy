@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -17,7 +17,8 @@ extension ShopStateExtension on ShopState {
 }
 
 class ShopBloc extends Bloc<ShopEvent, ShopState> {
-  ShopBloc(this._service, this.upload, this._connectivityService) : super(const ShopInitial()) {
+  ShopBloc(this._service, this.upload, this._connectivityService)
+      : super(const ShopInitial()) {
     _filtersController = StreamController<_ShopFilters>.broadcast(sync: true)
       ..add(
         const _ShopFilters(),
@@ -25,17 +26,23 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 
     _itemsSubscription = _filtersController.stream
         .switchMap(
-          (filters) => _service.watchShopItems(
-            searchQuery: filters.searchQuery,
-            categoryFilter: filters.categoryFilter,
-          ),
-        )
-        .listen(
-          (items) => add(_ShopInternalItemsUpdated(items)),
-        );
+      (filters) => _service.watchShopItems(
+        searchQuery: filters.searchQuery,
+        categoryFilter: filters.categoryFilter,
+      ),
+    )
+        .listen((items) {
+      if (!isClosed) {
+        add(_ShopInternalItemsUpdated(items));
+      }
+    });
 
     _connectivitySubscription = _connectivityService.connectivityStream.listen(
-      (isOnline) => add(_ShopConnectivityChanged(isOnline: isOnline)),
+      (isOnline) {
+        if (!isClosed) {
+          add(_ShopConnectivityChanged(isOnline: isOnline));
+        }
+      },
     );
 
     on<_ShopInternalItemsUpdated>((event, emit) {
@@ -62,15 +69,34 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     on<ShopGetItemsEvent>(
       _onGetItems,
       transformer: (events, mapper) {
-        final searchEvents = events.where((e) => e.isSearch).debounce(throttleDuration);
-        final scrollEvents = events.where((e) => !e.isSearch).throttle(throttleDuration);
-        return droppable<ShopGetItemsEvent>().call(
-          searchEvents.merge(scrollEvents),
+        final searchEvents = restartable<ShopGetItemsEvent>().call(
+          events.where((e) => e.isSearchChange).debounce(throttleDuration),
           mapper,
         );
+        final immediateEvents = restartable<ShopGetItemsEvent>().call(
+          events.where(
+            (e) =>
+                !e.isSearchChange &&
+                (e.isCategoryChangeRequest || e.forceRefresh),
+          ),
+          mapper,
+        );
+        final scrollEvents = droppable<ShopGetItemsEvent>().call(
+          events
+              .where(
+                (e) =>
+                    !e.isSearchChange &&
+                    !e.isCategoryChangeRequest &&
+                    !e.forceRefresh,
+              )
+              .throttle(throttleDuration),
+          mapper,
+        );
+        return searchEvents.merge(immediateEvents).merge(scrollEvents);
       },
     );
     on<ShopCreateItemEvent>(_onCreateItem);
+    on<ShopCreateItemsEvent>(_onCreateItems);
     on<ShopDeleteItemEvent>(_onDeleteItem);
     on<ShopEditItemEvent>(_onEditItem);
     on<_ShopConnectivityChanged>(_onConnectivityChanged);
@@ -105,6 +131,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         null,
         response.message ?? 'Created ${response.data?.name}',
       );
+      event.onSuccess?.call();
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
@@ -124,8 +151,44 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         null,
         response.message ?? 'Updated: ${response.data?.name}',
       );
+      event.onSuccess?.call();
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
+    } finally {
+      LoadingOverlay.hide();
+    }
+  }
+
+  Future<void> _onCreateItems(
+    ShopCreateItemsEvent event,
+    Emitter<ShopState> emit,
+  ) async {
+    if (event.items.isEmpty) {
+      return;
+    }
+
+    LoadingOverlay.show();
+    try {
+      for (final item in event.items) {
+        final response = await _service.createShopItem(item);
+        if (!response.success) {
+          showErrorSnackBar(
+            null,
+            response.message ?? 'Failed to create ${item.name}',
+          );
+          return;
+        }
+      }
+
+      showSuccessSnackBar(
+        null,
+        event.items.length == 1
+            ? 'Created ${event.items.first.name}'
+            : 'Created ${event.items.length} items',
+      );
+      event.onSuccess?.call();
+    } catch (e) {
+      showErrorSnackBar(null, 'Failed to create items: $e');
     } finally {
       LoadingOverlay.hide();
     }
@@ -154,25 +217,25 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     ShopGetItemsEvent event,
     Emitter<ShopState> emit,
   ) async {
+    if (isClosed) {
+      return;
+    }
+
     final currentState = state.asLoaded;
 
     final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
-    final newCategoryFilter = event.categoryFilter;
+    final newCategoryFilter = event.clearCategoryFilter
+        ? null
+        : event.categoryFilter ?? currentState?.categoryFilter;
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
     final newPageSize = event.limit ?? (currentState?.pagination.limit ?? 100);
 
     final isFilterChange = newSearchQuery != currentState?.searchQuery;
     final isCategoryChange = newCategoryFilter != currentState?.categoryFilter;
     final effectivePage = isFilterChange || isCategoryChange ? 1 : newPage;
+    final shouldUpdateFilters = isFilterChange || isCategoryChange;
 
-    final hasCachedItems = await _service.hasCachedShopItems(
-      searchQuery: newSearchQuery,
-      categoryFilter: newCategoryFilter,
-    );
-
-    final isOnline = await _connectivityService.isOnline;
-
-    if (isFilterChange || isCategoryChange) {
+    if (shouldUpdateFilters && !_filtersController.isClosed) {
       _filtersController.add(
         _ShopFilters(
           searchQuery: newSearchQuery,
@@ -181,12 +244,36 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       );
     }
 
-    final showFilterLoading = !hasCachedItems && effectivePage == 1 && (isFilterChange || isCategoryChange);
+    if (currentState != null && (shouldUpdateFilters || event.forceRefresh)) {
+      emit(
+        currentState.copyWith(
+          categoryFilter: newCategoryFilter,
+          searchQuery: newSearchQuery,
+          isFiltering: false,
+        ),
+      );
+    }
+
+    final hasCachedItems = await _service.hasCachedShopItems(
+      searchQuery: newSearchQuery,
+      categoryFilter: newCategoryFilter,
+    );
+
+    final isOnline = await _connectivityService.isOnline;
+
+    if (isClosed) {
+      return;
+    }
+
+    final showFilterLoading = event.forceRefresh &&
+        !hasCachedItems &&
+        effectivePage == 1 &&
+        currentState == null;
 
     if (isCategoryChange || event.forceRefresh || isFilterChange) {
       if (currentState != null) {
         emit(
-          currentState.copyWith(
+          state.asLoaded!.copyWith(
             isFiltering: showFilterLoading,
             categoryFilter: newCategoryFilter,
             searchQuery: newSearchQuery,
@@ -197,14 +284,15 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       } else if (!hasCachedItems) {
         emit(const ShopLoading());
       }
-    } else if ((state is ShopInitial || effectivePage == 1) && !hasCachedItems) {
+    } else if ((state is ShopInitial || effectivePage == 1) &&
+        !hasCachedItems) {
       emit(const ShopLoading());
     }
 
     if (!isOnline) {
       if (currentState != null) {
         emit(
-          currentState.copyWith(
+          state.asLoaded!.copyWith(
             categoryFilter: newCategoryFilter,
             searchQuery: newSearchQuery,
             isFiltering: false,
@@ -228,6 +316,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       searchQuery: newSearchQuery,
       categoryFilter: newCategoryFilter?.id.toString() ?? '',
     );
+
+    if (isClosed) {
+      return;
+    }
 
     if (response.success && response.data != null) {
       final loadedState = state.asLoaded;
@@ -277,6 +369,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     _ShopConnectivityChanged event,
     Emitter<ShopState> emit,
   ) async {
+    if (isClosed) {
+      return;
+    }
+
     final currentState = state.asLoaded;
 
     if (!event.isOnline) {
@@ -309,6 +405,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       categoryFilter: currentState?.categoryFilter?.id.toString() ?? '',
     );
 
+    if (isClosed) {
+      return;
+    }
+
     final latestState = state.asLoaded;
     if (latestState == null) {
       return;
@@ -332,7 +432,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       latestState.copyWith(
         isFiltering: false,
         isOffline: false,
-        syncMessage: response.message == null ? null : 'Back online, but refresh failed.',
+        syncMessage: response.message == null
+            ? null
+            : 'Back online, but refresh failed.',
       ),
     );
   }

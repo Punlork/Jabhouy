@@ -28,7 +28,11 @@ class ShopItemModel extends Equatable {
       note: tryCast<String>(json['note']),
       imageUrl: tryCast<String>(json['imageUrl']),
       category: tryCast<CategoryItemModel>(
-        json['category'] != null ? CategoryItemModel.fromJson(json['category'] as Map<String, dynamic>) : null,
+        json['category'] != null
+            ? CategoryItemModel.fromJson(
+                json['category'] as Map<String, dynamic>,
+              )
+            : null,
       ),
       createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
       updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
@@ -36,6 +40,8 @@ class ShopItemModel extends Equatable {
       isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }
+
+  static final RegExp _packSuffixPattern = RegExp(r'\s*[x×]\s*(\d+)$');
 
   final int id;
   final String name;
@@ -49,6 +55,41 @@ class ShopItemModel extends Equatable {
   final DateTime? updatedAt;
   final int syncStatus;
   final bool isDeleted;
+
+  String get baseName =>
+      name.trim().replaceFirst(_packSuffixPattern, '').trim();
+
+  int? get packAmount {
+    final match = _packSuffixPattern.firstMatch(name.trim());
+    if (match == null) {
+      return null;
+    }
+    return int.tryParse(match.group(1)!);
+  }
+
+  bool get isPack => (packAmount ?? 0) > 1;
+
+  String get displayName => buildDisplayName(
+        baseName,
+        packAmount: packAmount,
+      );
+
+  static String buildDisplayName(
+    String name, {
+    int? packAmount,
+  }) {
+    final normalizedName =
+        name.trim().replaceFirst(_packSuffixPattern, '').trim();
+    if (normalizedName.isEmpty) {
+      return normalizedName;
+    }
+
+    if (packAmount != null && packAmount > 1) {
+      return '$normalizedName x$packAmount';
+    }
+
+    return normalizedName;
+  }
 
   Map<String, dynamic> toJson() {
     return {

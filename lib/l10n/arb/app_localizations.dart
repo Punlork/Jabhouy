@@ -326,6 +326,144 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// Label for runtime diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get diagnostics;
+
+  /// Section title for runtime diagnostics toggles
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime capture'**
+  String get runtimeCapture;
+
+  /// Label for app log capture
+  ///
+  /// In en, this message translates to:
+  /// **'App logs'**
+  String get appLogs;
+
+  /// Subtitle when app log capture is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Capturing logger, bloc, print, and error events'**
+  String get appLogsEnabled;
+
+  /// Subtitle when app log capture is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'App log capture is off'**
+  String get appLogsDisabled;
+
+  /// Label for network diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Network inspector'**
+  String get networkInspector;
+
+  /// Subtitle when network capture is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Capturing API requests and responses'**
+  String get networkLogsEnabled;
+
+  /// Subtitle when network capture is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Network capture is off'**
+  String get networkLogsDisabled;
+
+  /// Button label to open notification diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Notification diagnostics'**
+  String get notificationDiagnostics;
+
+  /// Button label for copying diagnostics logs
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyLogs;
+
+  /// Button label for clearing diagnostics logs
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearLogs;
+
+  /// Snack bar shown after copying diagnostics
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics copied'**
+  String get diagnosticsCopied;
+
+  /// Empty state for app logs
+  ///
+  /// In en, this message translates to:
+  /// **'No app logs captured yet.'**
+  String get noAppLogs;
+
+  /// Empty state for network logs
+  ///
+  /// In en, this message translates to:
+  /// **'No network requests captured yet.'**
+  String get noNetworkLogs;
+
+  /// Label for diagnostics capture timestamp
+  ///
+  /// In en, this message translates to:
+  /// **'Captured at'**
+  String get capturedAtLabel;
+
+  /// Label for network response status
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get statusLabel;
+
+  /// Label for request duration
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get durationLabel;
+
+  /// Label for a request URL
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get requestLabel;
+
+  /// Label for request headers
+  ///
+  /// In en, this message translates to:
+  /// **'Request headers'**
+  String get requestHeadersLabel;
+
+  /// Label for request body
+  ///
+  /// In en, this message translates to:
+  /// **'Request body'**
+  String get requestBodyLabel;
+
+  /// Label for response headers
+  ///
+  /// In en, this message translates to:
+  /// **'Response headers'**
+  String get responseHeadersLabel;
+
+  /// Label for response body
+  ///
+  /// In en, this message translates to:
+  /// **'Response body'**
+  String get responseBodyLabel;
+
+  /// Label for a captured error
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorLabel;
+
   /// Label for the switch language option
   ///
   /// In en, this message translates to:
@@ -734,6 +872,108 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get amount;
 
+  /// Label for choosing the type of a shop item
+  ///
+  /// In en, this message translates to:
+  /// **'Item Type'**
+  String get itemType;
+
+  /// Label for a single-item shop type
+  ///
+  /// In en, this message translates to:
+  /// **'Single'**
+  String get singleItem;
+
+  /// Label for a pack-item shop type
+  ///
+  /// In en, this message translates to:
+  /// **'Pack'**
+  String get packItem;
+
+  /// Label for the quantity field of a pack item
+  ///
+  /// In en, this message translates to:
+  /// **'Pack Size'**
+  String get packSize;
+
+  /// Helper text shown under the pack size field
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. If filled, the item will be saved as Name xQuantity.'**
+  String get packSizeHint;
+
+  /// Validation message for invalid pack size
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a pack size greater than 1'**
+  String get packSizeValidation;
+
+  /// Validation message when pack size is required
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the pack size'**
+  String get packSizeRequired;
+
+  /// Suffix used after a pack quantity count
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get itemsSuffix;
+
+  /// Label for the variants section in the shop item form
+  ///
+  /// In en, this message translates to:
+  /// **'Variants'**
+  String get variants;
+
+  /// Label for a shop item variant name
+  ///
+  /// In en, this message translates to:
+  /// **'Variant'**
+  String get variantLabel;
+
+  /// Button text for adding a custom variant row
+  ///
+  /// In en, this message translates to:
+  /// **'Add Variant'**
+  String get addVariant;
+
+  /// Preset label for a small variant
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get smallVariant;
+
+  /// Preset label for a big variant
+  ///
+  /// In en, this message translates to:
+  /// **'Big'**
+  String get bigVariant;
+
+  /// Preset label for a can variant
+  ///
+  /// In en, this message translates to:
+  /// **'Can'**
+  String get canVariant;
+
+  /// Preset label for a bottle variant
+  ///
+  /// In en, this message translates to:
+  /// **'Bottle'**
+  String get bottleVariant;
+
+  /// Error shown when no item variant is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one variant'**
+  String get selectVariantError;
+
+  /// Text for the button to add multiple shop items
+  ///
+  /// In en, this message translates to:
+  /// **'Add Items'**
+  String get addItems;
+
   /// Text for the button to add a new loaner
   ///
   /// In en, this message translates to:
@@ -781,6 +1021,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get all;
+
+  /// Label for the income section
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get income;
+
+  /// Label for the notifications view inside income
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// Hint text for searching tracked bank notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Search income notifications...'**
+  String get searchIncome;
+
+  /// Title for the income filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Income'**
+  String get filterIncome;
+
+  /// Title for the bank notification tracking status card
+  ///
+  /// In en, this message translates to:
+  /// **'Notification tracking'**
+  String get notificationTracking;
+
+  /// Message shown when notification tracking access is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Bank notification tracking is active on this device.'**
+  String get notificationTrackingEnabled;
+
+  /// Message shown when notification tracking access is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notification access so this main device can capture ABA, Chip Mong, and ACLEDA notifications.'**
+  String get notificationTrackingDisabled;
+
+  /// Button label to open Android notification listener settings
+  ///
+  /// In en, this message translates to:
+  /// **'Enable access'**
+  String get enableNotificationAccess;
+
+  /// Button label to refresh notification tracking status
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get refreshStatus;
+
+  /// Helper text describing the current tracking scope
+  ///
+  /// In en, this message translates to:
+  /// **'Use this on the main Android phone. Sub-device sync can be added later on top of the same data model.'**
+  String get mainDeviceTrackingHint;
+
+  /// Message shown on unsupported platforms for notification capture
+  ///
+  /// In en, this message translates to:
+  /// **'This device cannot capture bank notifications. Use Android for the main tracking phone.'**
+  String get bankNotificationUnsupported;
+
+  /// Title above the pie chart showing income grouped by bank
+  ///
+  /// In en, this message translates to:
+  /// **'Income by bank'**
+  String get incomeByBank;
+
+  /// Empty state text for the income chart
+  ///
+  /// In en, this message translates to:
+  /// **'No income data yet. Add demo data or enable tracking to see the chart.'**
+  String get noIncomeChartData;
+
+  /// Label for the total income summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Total income'**
+  String get totalIncome;
+
+  /// Label for the total expense summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Total expense'**
+  String get totalExpense;
+
+  /// Label for the total tracked notifications summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked count'**
+  String get trackedCount;
+
+  /// Label for the notification filters
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked notifications'**
+  String get trackedNotifications;
+
+  /// Label for showing all tracked notification records
+  ///
+  /// In en, this message translates to:
+  /// **'All records'**
+  String get allRecords;
+
+  /// Label for showing income notifications only
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get incomeOnly;
+
+  /// Label for showing expense notifications only
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get expenseOnly;
+
+  /// Empty state message for the tracked notification list
+  ///
+  /// In en, this message translates to:
+  /// **'No tracked bank notifications found'**
+  String get noTrackedNotifications;
+
+  /// Button label to inject demo bank notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data'**
+  String get addDemoData;
+
+  /// Success message after adding demo tracked notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Demo bank notifications added'**
+  String get demoDataAdded;
+
+  /// Label for the bank filter section
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get bankLabel;
+
+  /// Label for showing the current device role
+  ///
+  /// In en, this message translates to:
+  /// **'Device role'**
+  String get deviceRole;
+
+  /// Label for the main device role
+  ///
+  /// In en, this message translates to:
+  /// **'Main device'**
+  String get mainDeviceRole;
+
+  /// Label for the sub device role
+  ///
+  /// In en, this message translates to:
+  /// **'Sub device'**
+  String get subDeviceRole;
+
+  /// Subtitle for the main device role in settings
+  ///
+  /// In en, this message translates to:
+  /// **'This device captures bank notifications.'**
+  String get deviceRoleMainDescription;
+
+  /// Subtitle for the sub device role in settings
+  ///
+  /// In en, this message translates to:
+  /// **'This device is a sub device for viewing synced data later.'**
+  String get deviceRoleSubDescription;
+
+  /// Message shown on the income page when the device role is sub
+  ///
+  /// In en, this message translates to:
+  /// **'Sub devices do not capture bank notifications in the current local-only setup.'**
+  String get subDeviceTrackingDisabled;
+
+  /// Helper text shown for sub devices on the income page
+  ///
+  /// In en, this message translates to:
+  /// **'Set this device as main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.'**
+  String get subDeviceTrackingHint;
+
+  /// Error message shown when a sub device tries to use main-device-only actions
+  ///
+  /// In en, this message translates to:
+  /// **'Set this device as Main device before adding demo or tracked notifications.'**
+  String get mainDeviceRoleRequired;
+
+  /// Action label for claiming this device as the active main device
+  ///
+  /// In en, this message translates to:
+  /// **'Set as main device'**
+  String get setAsMainDevice;
+
+  /// Action label for releasing the current main-device claim
+  ///
+  /// In en, this message translates to:
+  /// **'Release main device'**
+  String get releaseMainDevice;
+
+  /// Short label shown for actions available only on the main device
+  ///
+  /// In en, this message translates to:
+  /// **'Main only'**
+  String get mainDeviceOnly;
+
+  /// Hint explaining the single active main-device rule
+  ///
+  /// In en, this message translates to:
+  /// **'Only one main device can be active for the same synced income scope at a time.'**
+  String get singleMainDeviceHint;
+
+  /// Shown when another device already owns the main-device claim
+  ///
+  /// In en, this message translates to:
+  /// **'Another main device is already active for this income sync.'**
+  String get anotherMainDeviceActive;
 }
 
 class _AppLocalizationsDelegate

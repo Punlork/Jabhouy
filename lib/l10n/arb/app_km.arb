@@ -167,6 +167,98 @@
   "@settings": {
     "description": "Label for the settings button and sheet title"
   },
+  "diagnostics": "ការត្រួតពិនិត្យ",
+  "@diagnostics": {
+    "description": "Label for runtime diagnostics"
+  },
+  "runtimeCapture": "ការចាប់យកពេលដំណើរការ",
+  "@runtimeCapture": {
+    "description": "Section title for runtime diagnostics toggles"
+  },
+  "appLogs": "កំណត់ហេតុកម្មវិធី",
+  "@appLogs": {
+    "description": "Label for app log capture"
+  },
+  "appLogsEnabled": "កំពុងចាប់យក logger, bloc, print និងកំហុស",
+  "@appLogsEnabled": {
+    "description": "Subtitle when app log capture is enabled"
+  },
+  "appLogsDisabled": "បានបិទការចាប់យកកំណត់ហេតុកម្មវិធី",
+  "@appLogsDisabled": {
+    "description": "Subtitle when app log capture is disabled"
+  },
+  "networkInspector": "ការត្រួតពិនិត្យបណ្ដាញ",
+  "@networkInspector": {
+    "description": "Label for network diagnostics"
+  },
+  "networkLogsEnabled": "កំពុងចាប់យកសំណើ និងចម្លើយ API",
+  "@networkLogsEnabled": {
+    "description": "Subtitle when network capture is enabled"
+  },
+  "networkLogsDisabled": "បានបិទការចាប់យកបណ្ដាញ",
+  "@networkLogsDisabled": {
+    "description": "Subtitle when network capture is disabled"
+  },
+  "notificationDiagnostics": "ការត្រួតពិនិត្យការជូនដំណឹង",
+  "@notificationDiagnostics": {
+    "description": "Button label to open notification diagnostics"
+  },
+  "copyLogs": "ចម្លង",
+  "@copyLogs": {
+    "description": "Button label for copying diagnostics logs"
+  },
+  "clearLogs": "សម្អាត",
+  "@clearLogs": {
+    "description": "Button label for clearing diagnostics logs"
+  },
+  "diagnosticsCopied": "បានចម្លងការត្រួតពិនិត្យ",
+  "@diagnosticsCopied": {
+    "description": "Snack bar shown after copying diagnostics"
+  },
+  "noAppLogs": "មិនទាន់មានកំណត់ហេតុកម្មវិធីទេ។",
+  "@noAppLogs": {
+    "description": "Empty state for app logs"
+  },
+  "noNetworkLogs": "មិនទាន់មានសំណើបណ្ដាញទេ។",
+  "@noNetworkLogs": {
+    "description": "Empty state for network logs"
+  },
+  "capturedAtLabel": "ពេលចាប់យក",
+  "@capturedAtLabel": {
+    "description": "Label for diagnostics capture timestamp"
+  },
+  "statusLabel": "ស្ថានភាព",
+  "@statusLabel": {
+    "description": "Label for network response status"
+  },
+  "durationLabel": "រយៈពេល",
+  "@durationLabel": {
+    "description": "Label for request duration"
+  },
+  "requestLabel": "សំណើ",
+  "@requestLabel": {
+    "description": "Label for a request URL"
+  },
+  "requestHeadersLabel": "ក្បាលសំណើ",
+  "@requestHeadersLabel": {
+    "description": "Label for request headers"
+  },
+  "requestBodyLabel": "ខ្លឹមសារសំណើ",
+  "@requestBodyLabel": {
+    "description": "Label for request body"
+  },
+  "responseHeadersLabel": "ក្បាលចម្លើយ",
+  "@responseHeadersLabel": {
+    "description": "Label for response headers"
+  },
+  "responseBodyLabel": "ខ្លឹមសារចម្លើយ",
+  "@responseBodyLabel": {
+    "description": "Label for response body"
+  },
+  "errorLabel": "កំហុស",
+  "@errorLabel": {
+    "description": "Label for a captured error"
+  },
   "switchLanguage": "ប្តូរភាសា",
   "@switchLanguage": {
     "description": "Label for the switch language option"
@@ -457,6 +549,74 @@
   "@amount": {
     "description": "Label for the amount field in the loaner form"
   },
+  "itemType": "ប្រភេទទំនិញ",
+  "@itemType": {
+    "description": "Label for choosing the type of a shop item"
+  },
+  "singleItem": "ទំនិញរាយ",
+  "@singleItem": {
+    "description": "Label for a single-item shop type"
+  },
+  "packItem": "ទំនិញកញ្ចប់",
+  "@packItem": {
+    "description": "Label for a pack-item shop type"
+  },
+  "packSize": "ចំនួនក្នុងកញ្ចប់",
+  "@packSize": {
+    "description": "Label for the quantity field of a pack item"
+  },
+  "packSizeHint": "មិនបាច់បំពេញក៏បាន។ បើបំពេញ វានឹងរក្សាទុកជា ឈ្មោះ xចំនួន។",
+  "@packSizeHint": {
+    "description": "Helper text shown under the pack size field"
+  },
+  "packSizeValidation": "សូមបញ្ចូលចំនួនក្នុងកញ្ចប់ធំជាង 1",
+  "@packSizeValidation": {
+    "description": "Validation message for invalid pack size"
+  },
+  "packSizeRequired": "សូមបញ្ចូលចំនួនក្នុងកញ្ចប់",
+  "@packSizeRequired": {
+    "description": "Validation message when pack size is required"
+  },
+  "itemsSuffix": "មុខទំនិញ",
+  "@itemsSuffix": {
+    "description": "Suffix used after a pack quantity count"
+  },
+  "variants": "ជម្រើសទំនិញ",
+  "@variants": {
+    "description": "Label for the variants section in the shop item form"
+  },
+  "variantLabel": "ឈ្មោះជម្រើស",
+  "@variantLabel": {
+    "description": "Label for a shop item variant name"
+  },
+  "addVariant": "បន្ថែមជម្រើស",
+  "@addVariant": {
+    "description": "Button text for adding a custom variant row"
+  },
+  "smallVariant": "តូច",
+  "@smallVariant": {
+    "description": "Preset label for a small variant"
+  },
+  "bigVariant": "ធំ",
+  "@bigVariant": {
+    "description": "Preset label for a big variant"
+  },
+  "canVariant": "កំប៉ុង",
+  "@canVariant": {
+    "description": "Preset label for a can variant"
+  },
+  "bottleVariant": "ដប",
+  "@bottleVariant": {
+    "description": "Preset label for a bottle variant"
+  },
+  "selectVariantError": "សូមជ្រើសយ៉ាងហោចណាស់មួយជម្រើស",
+  "@selectVariantError": {
+    "description": "Error shown when no item variant is selected"
+  },
+  "addItems": "បន្ថែមទំនិញ",
+  "@addItems": {
+    "description": "Text for the button to add multiple shop items"
+  },
   "addLoaner": "បន្ថែមអ្នកខ្ចី",
   "@addLoaner": {
     "description": "Text for the button to add a new loaner"
@@ -488,5 +648,153 @@
   "all": "ទាំងអស់",
   "@all": {
     "description": "Label for the all category"
+  },
+  "income": "ចំណូល",
+  "@income": {
+    "description": "ស្លាកសម្រាប់ផ្នែកចំណូល"
+  },
+  "notifications": "ការជូនដំណឹង",
+  "@notifications": {
+    "description": "ស្លាកសម្រាប់មើលការជូនដំណឹងក្នុងផ្នែកចំណូល"
+  },
+  "searchIncome": "ស្វែងរកការជូនដំណឹងចំណូល...",
+  "@searchIncome": {
+    "description": "អត្ថបទជំនួយសម្រាប់ស្វែងរកការជូនដំណឹងធនាគារ"
+  },
+  "filterIncome": "តម្រងចំណូល",
+  "@filterIncome": {
+    "description": "ចំណងជើងសន្លឹកតម្រងចំណូល"
+  },
+  "notificationTracking": "ការតាមដានការជូនដំណឹង",
+  "@notificationTracking": {
+    "description": "ចំណងជើងកាតស្ថានភាពតាមដានការជូនដំណឹងធនាគារ"
+  },
+  "notificationTrackingEnabled": "ការតាមដានការជូនដំណឹងធនាគារកំពុងដំណើរការនៅលើឧបករណ៍នេះ។",
+  "@notificationTrackingEnabled": {
+    "description": "សារ បង្ហាញនៅពេលបើកសិទ្ធិតាមដានការជូនដំណឹង"
+  },
+  "notificationTrackingDisabled": "សូមបើកសិទ្ធិការជូនដំណឹង ដើម្បីឱ្យឧបករណ៍មេនេះអាចចាប់ ABA, Chip Mong និង ACLEDA បាន។",
+  "@notificationTrackingDisabled": {
+    "description": "សារ បង្ហាញនៅពេលមិនទាន់បើកសិទ្ធិតាមដានការជូនដំណឹង"
+  },
+  "enableNotificationAccess": "បើកសិទ្ធិ",
+  "@enableNotificationAccess": {
+    "description": "ស្លាកប៊ូតុងសម្រាប់បើកការកំណត់សិទ្ធិការជូនដំណឹង Android"
+  },
+  "refreshStatus": "ផ្ទុកស្ថានភាពឡើងវិញ",
+  "@refreshStatus": {
+    "description": "ស្លាកប៊ូតុងសម្រាប់ធ្វើបច្ចុប្បន្នភាពស្ថានភាពតាមដាន"
+  },
+  "mainDeviceTrackingHint": "សូមប្រើវានៅលើទូរស័ព្ទ Android មេ។ ការធ្វើសមកាលកម្មទៅឧបករណ៍រងអាចបន្ថែមនៅពេលក្រោយលើទិន្នន័យដូចគ្នា។",
+  "@mainDeviceTrackingHint": {
+    "description": "អត្ថបទជំនួយពណ៌នាអំពីវិសាលភាពតាមដានបច្ចុប្បន្ន"
+  },
+  "bankNotificationUnsupported": "ឧបករណ៍នេះមិនអាចចាប់ការជូនដំណឹងធនាគារបានទេ។ សូមប្រើ Android សម្រាប់ទូរស័ព្ទមេ។",
+  "@bankNotificationUnsupported": {
+    "description": "សារបង្ហាញលើវេទិកាដែលមិនគាំទ្រការចាប់ការជូនដំណឹង"
+  },
+  "incomeByBank": "ចំណូលតាមធនាគារ",
+  "@incomeByBank": {
+    "description": "ចំណងជើងខាងលើគំនូសតាងរង្វង់បង្ហាញចំណូលតាមធនាគារ"
+  },
+  "noIncomeChartData": "មិនទាន់មានទិន្នន័យចំណូលទេ។ បន្ថែមទិន្នន័យសាកល្បង ឬបើកការតាមដានដើម្បីមើលគំនូសតាង។",
+  "@noIncomeChartData": {
+    "description": "អត្ថបទពេលទទេសម្រាប់គំនូសតាងចំណូល"
+  },
+  "totalIncome": "ចំណូលសរុប",
+  "@totalIncome": {
+    "description": "ស្លាកសម្រាប់កាតសង្ខេបចំណូលសរុប"
+  },
+  "totalExpense": "ចំណាយសរុប",
+  "@totalExpense": {
+    "description": "ស្លាកសម្រាប់កាតសង្ខេបចំណាយសរុប"
+  },
+  "trackedCount": "ចំនួនតាមដាន",
+  "@trackedCount": {
+    "description": "ស្លាកសម្រាប់កាតសង្ខេបចំនួនការជូនដំណឹងដែលតាមដាន"
+  },
+  "trackedNotifications": "ការជូនដំណឹងដែលបានតាមដាន",
+  "@trackedNotifications": {
+    "description": "ស្លាកសម្រាប់តម្រងការជូនដំណឹង"
+  },
+  "allRecords": "កំណត់ត្រាទាំងអស់",
+  "@allRecords": {
+    "description": "ស្លាកសម្រាប់បង្ហាញកំណត់ត្រាទាំងអស់"
+  },
+  "incomeOnly": "ចំណូល",
+  "@incomeOnly": {
+    "description": "ស្លាកសម្រាប់បង្ហាញតែការជូនដំណឹងចំណូល"
+  },
+  "expenseOnly": "ចំណាយ",
+  "@expenseOnly": {
+    "description": "ស្លាកសម្រាប់បង្ហាញតែការជូនដំណឹងចំណាយ"
+  },
+  "noTrackedNotifications": "រកមិនឃើញការជូនដំណឹងធនាគារដែលបានតាមដាន",
+  "@noTrackedNotifications": {
+    "description": "សារពេលបញ្ជីការជូនដំណឹងធនាគារទទេ"
+  },
+  "addDemoData": "ទិន្នន័យសាកល្បង",
+  "@addDemoData": {
+    "description": "ស្លាកប៊ូតុងសម្រាប់បញ្ចូលទិន្នន័យធនាគារសាកល្បង"
+  },
+  "demoDataAdded": "បានបន្ថែមការជូនដំណឹងធនាគារសាកល្បង",
+  "@demoDataAdded": {
+    "description": "សារជោគជ័យបន្ទាប់ពីបន្ថែមទិន្នន័យសាកល្បង"
+  },
+  "bankLabel": "ធនាគារ",
+  "@bankLabel": {
+    "description": "ស្លាកសម្រាប់ផ្នែកតម្រងធនាគារ"
+  },
+  "deviceRole": "តួនាទីឧបករណ៍",
+  "@deviceRole": {
+    "description": "ស្លាកសម្រាប់បង្ហាញតួនាទីឧបករណ៍បច្ចុប្បន្ន"
+  },
+  "mainDeviceRole": "ឧបករណ៍មេ",
+  "@mainDeviceRole": {
+    "description": "ស្លាកសម្រាប់តួនាទីឧបករណ៍មេ"
+  },
+  "subDeviceRole": "ឧបករណ៍រង",
+  "@subDeviceRole": {
+    "description": "ស្លាកសម្រាប់តួនាទីឧបករណ៍រង"
+  },
+  "deviceRoleMainDescription": "ឧបករណ៍នេះចាប់ការជូនដំណឹងធនាគារ។",
+  "@deviceRoleMainDescription": {
+    "description": "អត្ថបទរងសម្រាប់តួនាទីឧបករណ៍មេនៅក្នុងការកំណត់"
+  },
+  "deviceRoleSubDescription": "ឧបករណ៍នេះជាឧបករណ៍រងសម្រាប់មើលទិន្នន័យសមកាលកម្មនៅពេលក្រោយ។",
+  "@deviceRoleSubDescription": {
+    "description": "អត្ថបទរងសម្រាប់តួនាទីឧបករណ៍រងនៅក្នុងការកំណត់"
+  },
+  "subDeviceTrackingDisabled": "ឧបករណ៍រងមិនចាប់ការជូនដំណឹងធនាគារនៅក្នុងការរៀបចំ local-only បច្ចុប្បន្នទេ។",
+  "@subDeviceTrackingDisabled": {
+    "description": "សារបង្ហាញនៅលើទំព័រចំណូលនៅពេលតួនាទីឧបករណ៍ជាឧបករណ៍រង"
+  },
+  "subDeviceTrackingHint": "កំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។",
+  "@subDeviceTrackingHint": {
+    "description": "អត្ថបទជំនួយសម្រាប់ឧបករណ៍រងនៅលើទំព័រចំណូល"
+  },
+  "mainDeviceRoleRequired": "សូមកំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។",
+  "@mainDeviceRoleRequired": {
+    "description": "សារកំហុសបង្ហាញនៅពេលឧបករណ៍រងព្យាយាមប្រើសកម្មភាពសម្រាប់ឧបករណ៍មេ"
+  },
+  "setAsMainDevice": "កំណត់ជា ឧបករណ៍មេ",
+  "@setAsMainDevice": {
+    "description": "ស្លាកសកម្មភាពសម្រាប់ទាមទារឧបករណ៍នេះជាឧបករណ៍មេសកម្ម"
+  },
+  "releaseMainDevice": "បោះបង់ឧបករណ៍មេ",
+  "@releaseMainDevice": {
+    "description": "ស្លាកសកម្មភាពសម្រាប់បោះបង់ main-device claim បច្ចុប្បន្ន"
+  },
+  "mainDeviceOnly": "សម្រាប់មេប៉ុណ្ណោះ",
+  "@mainDeviceOnly": {
+    "description": "ស្លាកខ្លីសម្រាប់សកម្មភាពដែលមានសម្រាប់តែឧបករណ៍មេ"
+  },
+  "singleMainDeviceHint": "អាចមានឧបករណ៍មេបានតែមួយប៉ុណ្ណោះ សម្រាប់ income sync ដូចគ្នា នៅពេលតែមួយ។",
+  "@singleMainDeviceHint": {
+    "description": "អត្ថបទពន្យល់អំពីច្បាប់ឧបករណ៍មេសកម្មតែមួយ"
+  },
+  "anotherMainDeviceActive": "មានឧបករណ៍មេមួយផ្សេងទៀតកំពុងសកម្មសម្រាប់ income sync នេះ។",
+  "@anotherMainDeviceActive": {
+    "description": "បង្ហាញនៅពេលឧបករណ៍មួយផ្សេងទៀតកាន់ main-device claim រួចហើយ"
   }
 }

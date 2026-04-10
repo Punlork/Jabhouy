@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -43,6 +44,7 @@ class ShopItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -125,7 +127,7 @@ class ShopItemCard extends StatelessWidget {
                       children: [
                         // Name
                         Text(
-                          item.name,
+                          item.displayName,
                           style: textTheme.titleMedium?.copyWith(
                             color: colorScheme.onSurface,
                             fontWeight: FontWeight.w600,
@@ -133,6 +135,47 @@ class ShopItemCard extends StatelessWidget {
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                item.isPack ? l10n.packItem : l10n.singleItem,
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (item.category?.name case final categoryName?)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  categoryName,
+                                  style: textTheme.labelMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         // Price

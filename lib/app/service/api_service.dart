@@ -1,13 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,6 +60,7 @@ class ApiService {
               headers: tempHeaders,
             )
             .timeout(_timeout),
+        headers: tempHeaders,
         method: 'GET',
       );
 
@@ -133,6 +132,10 @@ class ApiService {
             final streamedResponse = await request.send().timeout(_timeout);
             return http.Response.fromStream(streamedResponse);
           },
+          headers: tempHeaders,
+          requestBody:
+              request.fields.isEmpty ? null : jsonEncode(request.fields),
+          method: 'POST',
         );
       } else {
         final tempBody = <String, dynamic>{};
@@ -152,7 +155,8 @@ class ApiService {
                 body: encodeBody,
               )
               .timeout(_timeout),
-          body: tempBody,
+          headers: tempHeaders,
+          requestBody: encodeBody,
           method: 'POST',
         );
       }
@@ -207,8 +211,9 @@ class ApiService {
               body: encodeBody,
             )
             .timeout(_timeout),
+        headers: tempHeaders,
         method: 'PUT',
-        body: tempBody,
+        requestBody: encodeBody,
       );
 
       cookies.updateCookies(uri, response);
@@ -244,6 +249,7 @@ class ApiService {
       final response = await interceptRequest(
         uri,
         () => _client.delete(uri, headers: tempHeaders).timeout(_timeout),
+        headers: tempHeaders,
         method: 'DELETE',
       );
 

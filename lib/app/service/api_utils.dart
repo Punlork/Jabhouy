@@ -47,28 +47,84 @@ ApiResponse<T> handleResponse<T>(
 Future<http.Response> interceptRequest(
   Uri uri,
   Future<http.Response> Function() request, {
-  Map<String, dynamic>? body,
+  Map<String, String>? headers,
+  String? requestBody,
   String? method,
 }) async {
   final logger = LoggerFactory.createLogger(
     methodCount: 0,
     printTime: false,
   );
+  final inspector = NetworkInspectorService.instance;
   final pathWithQuery = uri.query.isNotEmpty ? '${uri.path}?${uri.query}' : uri.path;
   final startTime = DateTime.now();
+  final normalizedMethod = method ?? 'REQUEST';
 
-  logger.d('Starting: $method $pathWithQuery');
-
-  if (body != null) logger.d('Request body: ${jsonEncode(body)}');
-
-  final response = await request();
-
-  final endTime = DateTime.now();
+  String? formattedBody;
+  if (requestBody != null) {
+    try {
+      final decoded = jsonDecode(requestBody);
+      formattedBody = const JsonEncoder.withIndent('  ').convert(decoded);
+    } catch (_) {
+      formattedBody = requestBody; // fallback to raw if not JSON
+    }
+  }
 
   logger.d(
-    'Finished: $method $pathWithQuery ${response.statusCode} (${endTime.difference(startTime).inSeconds} sec)',
+    'Starting: $normalizedMethod $pathWithQuery'
+    '${formattedBody != null ? ' | Request body:\n$formattedBody' : ''}',
   );
-  return response;
+
+  try {
+    final response = await request();
+    final endTime = DateTime.now();
+
+    String? formattedResponseBody;
+
+    if (response.bodyBytes.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes, allowMalformed: true));
+        formattedResponseBody = const JsonEncoder.withIndent('  ').convert(decoded);
+      } catch (_) {
+        formattedResponseBody = utf8.decode(response.bodyBytes, allowMalformed: true);
+      }
+    }
+
+    logger.d(
+      'Finished: $normalizedMethod $pathWithQuery ${response.statusCode} (${endTime.difference(startTime).inSeconds} sec)'
+      '${formattedResponseBody != null ? ' | Response body:\n$formattedResponseBody' : ''}',
+    );
+
+    inspector.capture(
+      timestamp: startTime,
+      method: normalizedMethod,
+      uri: uri,
+      duration: endTime.difference(startTime),
+      requestHeaders: headers ?? const {},
+      requestBody: requestBody,
+      statusCode: response.statusCode,
+      responseHeaders: response.headers,
+      responseBody: response.bodyBytes.isEmpty ? null : utf8.decode(response.bodyBytes, allowMalformed: true),
+    );
+    return response;
+  } catch (error, stackTrace) {
+    final endTime = DateTime.now();
+    logger.e(
+      'Failed: $normalizedMethod $pathWithQuery',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    inspector.capture(
+      timestamp: startTime,
+      method: normalizedMethod,
+      uri: uri,
+      duration: endTime.difference(startTime),
+      requestHeaders: headers ?? const {},
+      requestBody: requestBody,
+      error: '$error\n$stackTrace',
+    );
+    rethrow;
+  }
 }
 
 Map<String, String> getHeaders() {

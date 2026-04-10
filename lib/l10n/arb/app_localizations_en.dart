@@ -129,6 +129,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get diagnostics => 'Diagnostics';
+
+  @override
+  String get runtimeCapture => 'Runtime capture';
+
+  @override
+  String get appLogs => 'App logs';
+
+  @override
+  String get appLogsEnabled =>
+      'Capturing logger, bloc, print, and error events';
+
+  @override
+  String get appLogsDisabled => 'App log capture is off';
+
+  @override
+  String get networkInspector => 'Network inspector';
+
+  @override
+  String get networkLogsEnabled => 'Capturing API requests and responses';
+
+  @override
+  String get networkLogsDisabled => 'Network capture is off';
+
+  @override
+  String get notificationDiagnostics => 'Notification diagnostics';
+
+  @override
+  String get copyLogs => 'Copy';
+
+  @override
+  String get clearLogs => 'Clear';
+
+  @override
+  String get diagnosticsCopied => 'Diagnostics copied';
+
+  @override
+  String get noAppLogs => 'No app logs captured yet.';
+
+  @override
+  String get noNetworkLogs => 'No network requests captured yet.';
+
+  @override
+  String get capturedAtLabel => 'Captured at';
+
+  @override
+  String get statusLabel => 'Status';
+
+  @override
+  String get durationLabel => 'Duration';
+
+  @override
+  String get requestLabel => 'Request';
+
+  @override
+  String get requestHeadersLabel => 'Request headers';
+
+  @override
+  String get requestBodyLabel => 'Request body';
+
+  @override
+  String get responseHeadersLabel => 'Response headers';
+
+  @override
+  String get responseBodyLabel => 'Response body';
+
+  @override
+  String get errorLabel => 'Error';
+
+  @override
   String get switchLanguage => 'Switch Language';
 
   @override
@@ -340,6 +410,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amount => 'Amount';
 
   @override
+  String get itemType => 'Item Type';
+
+  @override
+  String get singleItem => 'Single';
+
+  @override
+  String get packItem => 'Pack';
+
+  @override
+  String get packSize => 'Pack Size';
+
+  @override
+  String get packSizeHint =>
+      'Optional. If filled, the item will be saved as Name xQuantity.';
+
+  @override
+  String get packSizeValidation => 'Enter a pack size greater than 1';
+
+  @override
+  String get packSizeRequired => 'Enter the pack size';
+
+  @override
+  String get itemsSuffix => 'items';
+
+  @override
+  String get variants => 'Variants';
+
+  @override
+  String get variantLabel => 'Variant';
+
+  @override
+  String get addVariant => 'Add Variant';
+
+  @override
+  String get smallVariant => 'Small';
+
+  @override
+  String get bigVariant => 'Big';
+
+  @override
+  String get canVariant => 'Can';
+
+  @override
+  String get bottleVariant => 'Bottle';
+
+  @override
+  String get selectVariantError => 'Select at least one variant';
+
+  @override
+  String get addItems => 'Add Items';
+
+  @override
   String get addLoaner => 'Add Loaner';
 
   @override
@@ -362,4 +484,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get all => 'All';
+
+  @override
+  String get income => 'Income';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get searchIncome => 'Search income notifications...';
+
+  @override
+  String get filterIncome => 'Filter Income';
+
+  @override
+  String get notificationTracking => 'Notification tracking';
+
+  @override
+  String get notificationTrackingEnabled =>
+      'Bank notification tracking is active on this device.';
+
+  @override
+  String get notificationTrackingDisabled =>
+      'Enable notification access so this main device can capture ABA, Chip Mong, and ACLEDA notifications.';
+
+  @override
+  String get enableNotificationAccess => 'Enable access';
+
+  @override
+  String get refreshStatus => 'Refresh status';
+
+  @override
+  String get mainDeviceTrackingHint =>
+      'Use this on the main Android phone. Sub-device sync can be added later on top of the same data model.';
+
+  @override
+  String get bankNotificationUnsupported =>
+      'This device cannot capture bank notifications. Use Android for the main tracking phone.';
+
+  @override
+  String get incomeByBank => 'Income by bank';
+
+  @override
+  String get noIncomeChartData =>
+      'No income data yet. Add demo data or enable tracking to see the chart.';
+
+  @override
+  String get totalIncome => 'Total income';
+
+  @override
+  String get totalExpense => 'Total expense';
+
+  @override
+  String get trackedCount => 'Tracked count';
+
+  @override
+  String get trackedNotifications => 'Tracked notifications';
+
+  @override
+  String get allRecords => 'All records';
+
+  @override
+  String get incomeOnly => 'Income';
+
+  @override
+  String get expenseOnly => 'Expense';
+
+  @override
+  String get noTrackedNotifications => 'No tracked bank notifications found';
+
+  @override
+  String get addDemoData => 'Demo data';
+
+  @override
+  String get demoDataAdded => 'Demo bank notifications added';
+
+  @override
+  String get bankLabel => 'Bank';
+
+  @override
+  String get deviceRole => 'Device role';
+
+  @override
+  String get mainDeviceRole => 'Main device';
+
+  @override
+  String get subDeviceRole => 'Sub device';
+
+  @override
+  String get deviceRoleMainDescription =>
+      'This device captures bank notifications.';
+
+  @override
+  String get deviceRoleSubDescription =>
+      'This device is a sub device for viewing synced data later.';
+
+  @override
+  String get subDeviceTrackingDisabled =>
+      'Sub devices do not capture bank notifications in the current local-only setup.';
+
+  @override
+  String get subDeviceTrackingHint =>
+      'Set this device as main if you want it to capture ABA, Chip Mong, and ACLEDA notifications on this phone.';
+
+  @override
+  String get mainDeviceRoleRequired =>
+      'Set this device as Main device before adding demo or tracked notifications.';
+
+  @override
+  String get setAsMainDevice => 'Set as main device';
+
+  @override
+  String get releaseMainDevice => 'Release main device';
+
+  @override
+  String get mainDeviceOnly => 'Main only';
+
+  @override
+  String get singleMainDeviceHint =>
+      'Only one main device can be active for the same synced income scope at a time.';
+
+  @override
+  String get anotherMainDeviceActive =>
+      'Another main device is already active for this income sync.';
 }

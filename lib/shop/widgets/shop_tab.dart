@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:my_app/app/app.dart';
+import 'package:my_app/home/home.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
 import 'package:my_app/shop/shop.dart';
 
@@ -23,26 +24,35 @@ class _ShopTabView extends StatefulWidget {
 
 class _ShopTabState extends State<_ShopTabView>
     with AutomaticKeepAliveClientMixin {
-  bool _shouldRebuild(ShopState previous, ShopState current) {
-    if (previous.runtimeType != current.runtimeType) return true;
-    if (previous is ShopLoaded && current is ShopLoaded) {
-      return previous.items.length != current.items.length ||
-          previous.searchQuery != current.searchQuery ||
-          previous.itemCategories != current.itemCategories ||
-          previous.isOffline != current.isOffline ||
-          previous.syncMessage != current.syncMessage ||
-          previous.isFiltering != current.isFiltering;
+  bool _shouldRebuild(ShopState previous, ShopState current) =>
+      previous != current;
+
+  void _scrollToTop() {
+    final controller = TabScrollManager.of(context)?.getController(0);
+
+    if (controller == null ||
+        !controller.hasClients ||
+        controller.offset <= 0) {
+      return;
     }
-    return true;
+
+    controller.animateTo(
+      0,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   Future<void> _refreshItems() async {
     if (!mounted) return;
+    final currentState = context.read<ShopBloc>().state.asLoaded;
     context.read<ShopBloc>().add(
           ShopGetItemsEvent(
             forceRefresh: true,
             page: 1,
-            limit: 100,
+            limit: currentState?.pagination.limit ?? 100,
+            searchQuery: currentState?.searchQuery,
+            categoryFilter: currentState?.categoryFilter,
           ),
         );
     context.read<CategoryBloc>().add(CategoryGetEvent());
@@ -54,47 +64,64 @@ class _ShopTabState extends State<_ShopTabView>
 
     return Stack(
       children: [
-        BlocBuilder<ShopBloc, ShopState>(
-          buildWhen: _shouldRebuild,
-          builder: (context, state) => switch (state) {
-            ShopInitial() || ShopLoading() => const ShopGridLoading(),
-            ShopLoaded(
-              :final items,
-              :final pagination,
-              :final isFiltering,
-              :final isOffline,
-              :final syncMessage,
-            ) =>
-              RefreshIndicator(
-                onRefresh: _refreshItems,
-                child: Column(
-                  children: [
-                    if (syncMessage != null)
-                      _SyncStatusBanner(
-                        message: syncMessage,
-                        isOffline: isOffline,
+        BlocListener<ShopBloc, ShopState>(
+          listenWhen: (previous, current) =>
+              previous.asLoaded?.categoryFilter !=
+              current.asLoaded?.categoryFilter,
+          listener: (context, state) => _scrollToTop(),
+          child: BlocBuilder<ShopBloc, ShopState>(
+            buildWhen: _shouldRebuild,
+            builder: (context, state) => switch (state) {
+              ShopInitial() || ShopLoading() => const ShopGridLoading(),
+              ShopLoaded(
+                :final items,
+                :final pagination,
+                :final isFiltering,
+                :final isOffline,
+                :final syncMessage,
+              ) =>
+                RefreshIndicator(
+                  onRefresh: _refreshItems,
+                  child: Column(
+                    children: [
+                      if (syncMessage != null)
+                        _SyncStatusBanner(
+                          message: syncMessage,
+                          isOffline: isOffline,
+                        ),
+                      Expanded(
+                        child: Builder(
+                          builder: (context) {
+                            if ((isFiltering ?? false) && items.isEmpty) {
+                              return const ShopGridLoading();
+                            }
+                            if (items.isEmpty) {
+                              return const EmptyView();
+                            }
+                            return Stack(
+                              children: [
+                                ShopGridBuilder(
+                                  items: items,
+                                  pagination: pagination,
+                                ),
+                                if (isFiltering ?? false)
+                                  const Positioned(
+                                    top: 52,
+                                    left: 16,
+                                    right: 16,
+                                    child: LinearProgressIndicator(),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    Expanded(
-                      child: Builder(
-                        builder: (context) {
-                          if (isFiltering != null && isFiltering) {
-                            return const ShopGridLoading();
-                          }
-                          if (items.isEmpty) {
-                            return const EmptyView();
-                          }
-                          return ShopGridBuilder(
-                            items: items,
-                            pagination: pagination,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ShopError(:final message) => ErrorView(message: message),
-          },
+              ShopError(:final message) => ErrorView(message: message),
+            },
+          ),
         ),
         const CategoryChips(),
       ],
@@ -153,6 +180,8 @@ class ShopGridLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crossAxisCount = _resolveCrossAxisCount(context);
+
     return CustomScrollView(
       physics: const BouncingScrollPhysics()
           .applyTo(const AlwaysScrollableScrollPhysics()),
@@ -160,24 +189,28 @@ class ShopGridLoading extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
             bottom: 52,
+            top: 52,
           ),
-          sliver: SliverToBoxAdapter(
-            child: MasonryGridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 6,
-              itemBuilder: (context, index) => const GridShopItemShimmer(),
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              padding: EdgeInsets.zero,
-              gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-              ),
-            ),
+          sliver: SliverAlignedGrid.count(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            itemCount: 6,
+            itemBuilder: (context, index) => const GridShopItemShimmer(),
           ),
         ),
       ],
     );
+  }
+
+  int _resolveCrossAxisCount(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+
+    if (width > 600) {
+      return 3;
+    }
+
+    return 2;
   }
 }
 

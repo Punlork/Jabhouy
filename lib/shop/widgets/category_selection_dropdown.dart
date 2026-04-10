@@ -54,14 +54,13 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                       onPressed: () {
                         context
                           ..pop()
-                          ..pushNamed(
-                            AppRoutes.category,
+                          ..push(
+                            '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
                             extra: {
                               'shop': context.read<ShopBloc>(),
                               'category': context.read<CategoryBloc>(),
