@@ -409,6 +409,58 @@ class AppLocalizationsKm extends AppLocalizations {
   String get amount => 'ចំនួនទឹកប្រាក់';
 
   @override
+  String get itemType => 'ប្រភេទទំនិញ';
+
+  @override
+  String get singleItem => 'ទំនិញរាយ';
+
+  @override
+  String get packItem => 'ទំនិញកញ្ចប់';
+
+  @override
+  String get packSize => 'ចំនួនក្នុងកញ្ចប់';
+
+  @override
+  String get packSizeHint =>
+      'មិនបាច់បំពេញក៏បាន។ បើបំពេញ វានឹងរក្សាទុកជា ឈ្មោះ xចំនួន។';
+
+  @override
+  String get packSizeValidation => 'សូមបញ្ចូលចំនួនក្នុងកញ្ចប់ធំជាង 1';
+
+  @override
+  String get packSizeRequired => 'សូមបញ្ចូលចំនួនក្នុងកញ្ចប់';
+
+  @override
+  String get itemsSuffix => 'មុខទំនិញ';
+
+  @override
+  String get variants => 'ជម្រើសទំនិញ';
+
+  @override
+  String get variantLabel => 'ឈ្មោះជម្រើស';
+
+  @override
+  String get addVariant => 'បន្ថែមជម្រើស';
+
+  @override
+  String get smallVariant => 'តូច';
+
+  @override
+  String get bigVariant => 'ធំ';
+
+  @override
+  String get canVariant => 'កំប៉ុង';
+
+  @override
+  String get bottleVariant => 'ដប';
+
+  @override
+  String get selectVariantError => 'សូមជ្រើសយ៉ាងហោចណាស់មួយជម្រើស';
+
+  @override
+  String get addItems => 'បន្ថែមទំនិញ';
+
+  @override
   String get addLoaner => 'បន្ថែមអ្នកខ្ចី';
 
   @override

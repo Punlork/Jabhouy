@@ -410,6 +410,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amount => 'Amount';
 
   @override
+  String get itemType => 'Item Type';
+
+  @override
+  String get singleItem => 'Single';
+
+  @override
+  String get packItem => 'Pack';
+
+  @override
+  String get packSize => 'Pack Size';
+
+  @override
+  String get packSizeHint =>
+      'Optional. If filled, the item will be saved as Name xQuantity.';
+
+  @override
+  String get packSizeValidation => 'Enter a pack size greater than 1';
+
+  @override
+  String get packSizeRequired => 'Enter the pack size';
+
+  @override
+  String get itemsSuffix => 'items';
+
+  @override
+  String get variants => 'Variants';
+
+  @override
+  String get variantLabel => 'Variant';
+
+  @override
+  String get addVariant => 'Add Variant';
+
+  @override
+  String get smallVariant => 'Small';
+
+  @override
+  String get bigVariant => 'Big';
+
+  @override
+  String get canVariant => 'Can';
+
+  @override
+  String get bottleVariant => 'Bottle';
+
+  @override
+  String get selectVariantError => 'Select at least one variant';
+
+  @override
+  String get addItems => 'Add Items';
+
+  @override
   String get addLoaner => 'Add Loaner';
 
   @override

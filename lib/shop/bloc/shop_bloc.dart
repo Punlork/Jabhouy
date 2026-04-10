@@ -73,14 +73,30 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
           events.where((e) => e.isSearchChange).debounce(throttleDuration),
           mapper,
         );
-        final scrollEvents = droppable<ShopGetItemsEvent>().call(
-          events.where((e) => !e.isSearchChange).throttle(throttleDuration),
+        final immediateEvents = restartable<ShopGetItemsEvent>().call(
+          events.where(
+            (e) =>
+                !e.isSearchChange &&
+                (e.isCategoryChangeRequest || e.forceRefresh),
+          ),
           mapper,
         );
-        return searchEvents.merge(scrollEvents);
+        final scrollEvents = droppable<ShopGetItemsEvent>().call(
+          events
+              .where(
+                (e) =>
+                    !e.isSearchChange &&
+                    !e.isCategoryChangeRequest &&
+                    !e.forceRefresh,
+              )
+              .throttle(throttleDuration),
+          mapper,
+        );
+        return searchEvents.merge(immediateEvents).merge(scrollEvents);
       },
     );
     on<ShopCreateItemEvent>(_onCreateItem);
+    on<ShopCreateItemsEvent>(_onCreateItems);
     on<ShopDeleteItemEvent>(_onDeleteItem);
     on<ShopEditItemEvent>(_onEditItem);
     on<_ShopConnectivityChanged>(_onConnectivityChanged);
@@ -143,6 +159,41 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     }
   }
 
+  Future<void> _onCreateItems(
+    ShopCreateItemsEvent event,
+    Emitter<ShopState> emit,
+  ) async {
+    if (event.items.isEmpty) {
+      return;
+    }
+
+    LoadingOverlay.show();
+    try {
+      for (final item in event.items) {
+        final response = await _service.createShopItem(item);
+        if (!response.success) {
+          showErrorSnackBar(
+            null,
+            response.message ?? 'Failed to create ${item.name}',
+          );
+          return;
+        }
+      }
+
+      showSuccessSnackBar(
+        null,
+        event.items.length == 1
+            ? 'Created ${event.items.first.name}'
+            : 'Created ${event.items.length} items',
+      );
+      event.onSuccess?.call();
+    } catch (e) {
+      showErrorSnackBar(null, 'Failed to create items: $e');
+    } finally {
+      LoadingOverlay.hide();
+    }
+  }
+
   Future<void> _onDeleteItem(
     ShopDeleteItemEvent event,
     Emitter<ShopState> emit,
@@ -182,6 +233,26 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     final isFilterChange = newSearchQuery != currentState?.searchQuery;
     final isCategoryChange = newCategoryFilter != currentState?.categoryFilter;
     final effectivePage = isFilterChange || isCategoryChange ? 1 : newPage;
+    final shouldUpdateFilters = isFilterChange || isCategoryChange;
+
+    if (shouldUpdateFilters && !_filtersController.isClosed) {
+      _filtersController.add(
+        _ShopFilters(
+          searchQuery: newSearchQuery,
+          categoryFilter: newCategoryFilter,
+        ),
+      );
+    }
+
+    if (currentState != null && (shouldUpdateFilters || event.forceRefresh)) {
+      emit(
+        currentState.copyWith(
+          categoryFilter: newCategoryFilter,
+          searchQuery: newSearchQuery,
+          isFiltering: false,
+        ),
+      );
+    }
 
     final hasCachedItems = await _service.hasCachedShopItems(
       searchQuery: newSearchQuery,
@@ -202,7 +273,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     if (isCategoryChange || event.forceRefresh || isFilterChange) {
       if (currentState != null) {
         emit(
-          currentState.copyWith(
+          state.asLoaded!.copyWith(
             isFiltering: showFilterLoading,
             categoryFilter: newCategoryFilter,
             searchQuery: newSearchQuery,
@@ -218,21 +289,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       emit(const ShopLoading());
     }
 
-    if (isFilterChange || isCategoryChange) {
-      if (!_filtersController.isClosed) {
-        _filtersController.add(
-          _ShopFilters(
-            searchQuery: newSearchQuery,
-            categoryFilter: newCategoryFilter,
-          ),
-        );
-      }
-    }
-
     if (!isOnline) {
       if (currentState != null) {
         emit(
-          currentState.copyWith(
+          state.asLoaded!.copyWith(
             categoryFilter: newCategoryFilter,
             searchQuery: newSearchQuery,
             isFiltering: false,

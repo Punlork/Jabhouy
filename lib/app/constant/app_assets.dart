@@ -7,4 +7,6 @@ class AppAssets {
   static const actionAddLoaner = 'assets/icons/action_add_loaner.svg';
   static const actionRefresh = 'assets/icons/action_refresh.svg';
   static const actionDemo = 'assets/icons/action_demo.svg';
+  static const actionFilter = 'assets/icons/action_filter.svg';
+  static const actionSettings = 'assets/icons/action_settings.svg';
 }

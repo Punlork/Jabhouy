@@ -21,6 +21,9 @@ class ShopGetItemsEvent extends ShopEvent {
   final int? limit;
   final int? page;
   final bool isSearchChange;
+
+  bool get isCategoryChangeRequest =>
+      clearCategoryFilter || categoryFilter != null;
 }
 
 class ShopCreateItemEvent extends ShopEvent {
@@ -30,6 +33,16 @@ class ShopCreateItemEvent extends ShopEvent {
   });
 
   final ShopItemModel body;
+  final VoidCallback? onSuccess;
+}
+
+class ShopCreateItemsEvent extends ShopEvent {
+  ShopCreateItemsEvent({
+    required this.items,
+    this.onSuccess,
+  });
+
+  final List<ShopItemModel> items;
   final VoidCallback? onSuccess;
 }
 

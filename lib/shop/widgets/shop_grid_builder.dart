@@ -50,9 +50,16 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final crossAxisCount = _resolveCrossAxisCount(
+      context,
+      itemCount: widget.items.length,
+    );
+
     return CustomScrollView(
       controller: controller,
-      physics: const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics()),
+      physics: const BouncingScrollPhysics().applyTo(
+        const AlwaysScrollableScrollPhysics(),
+      ),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.symmetric(
@@ -61,22 +68,15 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
             bottom: 52,
             top: 52,
           ),
-          sliver: SliverToBoxAdapter(
-            child: MasonryGridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: widget.items.length,
-              itemBuilder: (context, index) => GridShopItemCard(
-                key: ValueKey(widget.items[index].id),
-                item: widget.items[index],
-                onEdit: (item) => _showEditSheet(context, item),
-              ),
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              padding: EdgeInsets.zero,
-              gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-              ),
+          sliver: SliverAlignedGrid.count(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            itemCount: widget.items.length,
+            itemBuilder: (context, index) => GridShopItemCard(
+              key: ValueKey(widget.items[index].id),
+              item: widget.items[index],
+              onEdit: (item) => _showEditSheet(context, item),
             ),
           ),
         ),
@@ -92,7 +92,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
           ),
         ),
         const SliverToBoxAdapter(
-          child: SizedBox(height: 70),
+          child: SizedBox(height: 20),
         ),
       ],
     );
@@ -133,4 +133,17 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
 
   @override
   bool get wantKeepAlive => true;
+
+  int _resolveCrossAxisCount(
+    BuildContext context, {
+    required int itemCount,
+  }) {
+    final preferredCount = MediaQuery.sizeOf(context).width > 600 ? 3 : 2;
+
+    if (itemCount <= 0) {
+      return preferredCount;
+    }
+
+    return preferredCount;
+  }
 }

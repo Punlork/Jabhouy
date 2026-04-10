@@ -81,7 +81,7 @@ class ShopItemDetailSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.name,
+                      item.displayName,
                       style: AppTextTheme.headline.copyWith(
                         fontWeight: FontWeight
                             .bold, // Already w700, but explicit for clarity
@@ -102,6 +102,17 @@ class ShopItemDetailSheet extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Price Details
+          _buildDetailRow(
+            l10n.itemType,
+            item.isPack ? l10n.packItem : l10n.singleItem,
+            context,
+          ),
+          if (item.packAmount case final packAmount?)
+            _buildDetailRow(
+              l10n.packSize,
+              '$packAmount ${l10n.itemsSuffix}',
+              context,
+            ),
           _buildDetailRow(
             l10n.defaultPrice,
             item.defaultPrice != null ? '${item.defaultPrice!} រៀល' : l10n.na,

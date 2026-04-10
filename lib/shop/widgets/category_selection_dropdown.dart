@@ -54,8 +54,7 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                       onPressed: () {
                         context

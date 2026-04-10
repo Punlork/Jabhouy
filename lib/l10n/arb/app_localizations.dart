@@ -872,6 +872,108 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get amount;
 
+  /// Label for choosing the type of a shop item
+  ///
+  /// In en, this message translates to:
+  /// **'Item Type'**
+  String get itemType;
+
+  /// Label for a single-item shop type
+  ///
+  /// In en, this message translates to:
+  /// **'Single'**
+  String get singleItem;
+
+  /// Label for a pack-item shop type
+  ///
+  /// In en, this message translates to:
+  /// **'Pack'**
+  String get packItem;
+
+  /// Label for the quantity field of a pack item
+  ///
+  /// In en, this message translates to:
+  /// **'Pack Size'**
+  String get packSize;
+
+  /// Helper text shown under the pack size field
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. If filled, the item will be saved as Name xQuantity.'**
+  String get packSizeHint;
+
+  /// Validation message for invalid pack size
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a pack size greater than 1'**
+  String get packSizeValidation;
+
+  /// Validation message when pack size is required
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the pack size'**
+  String get packSizeRequired;
+
+  /// Suffix used after a pack quantity count
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get itemsSuffix;
+
+  /// Label for the variants section in the shop item form
+  ///
+  /// In en, this message translates to:
+  /// **'Variants'**
+  String get variants;
+
+  /// Label for a shop item variant name
+  ///
+  /// In en, this message translates to:
+  /// **'Variant'**
+  String get variantLabel;
+
+  /// Button text for adding a custom variant row
+  ///
+  /// In en, this message translates to:
+  /// **'Add Variant'**
+  String get addVariant;
+
+  /// Preset label for a small variant
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get smallVariant;
+
+  /// Preset label for a big variant
+  ///
+  /// In en, this message translates to:
+  /// **'Big'**
+  String get bigVariant;
+
+  /// Preset label for a can variant
+  ///
+  /// In en, this message translates to:
+  /// **'Can'**
+  String get canVariant;
+
+  /// Preset label for a bottle variant
+  ///
+  /// In en, this message translates to:
+  /// **'Bottle'**
+  String get bottleVariant;
+
+  /// Error shown when no item variant is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one variant'**
+  String get selectVariantError;
+
+  /// Text for the button to add multiple shop items
+  ///
+  /// In en, this message translates to:
+  /// **'Add Items'**
+  String get addItems;
+
   /// Text for the button to add a new loaner
   ///
   /// In en, this message translates to:

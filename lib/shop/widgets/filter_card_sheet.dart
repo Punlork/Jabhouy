@@ -21,7 +21,10 @@ class FilterSheet extends StatefulWidget {
 class _FilterSheetState extends State<FilterSheet> {
   late CategoryItemModel? _categoryFilter;
 
-  bool get isDisabled => _categoryFilter == null;
+  bool get hasActiveFilter => _categoryFilter != null;
+
+  bool get hasChanges =>
+      _categoryFilter?.id != widget.initialCategoryFilter?.id;
 
   @override
   void initState() {
@@ -60,25 +63,27 @@ class _FilterSheetState extends State<FilterSheet> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () {
-                    widget.onApply.call(null);
-                    context.pop();
-                  },
+                  onPressed: hasActiveFilter
+                      ? () {
+                          widget.onApply.call(null);
+                          context.pop();
+                        }
+                      : null,
                   child: Text(context.l10n.reset),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: isDisabled
+                  onPressed: !hasChanges
                       ? null
                       : () {
                           widget.onApply(_categoryFilter);
                           context.pop();
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDisabled
+                    backgroundColor: !hasChanges
                         ? colorScheme.surfaceContainerHighest
                         : colorScheme.primary,
-                    foregroundColor: isDisabled
+                    foregroundColor: !hasChanges
                         ? colorScheme.onSurfaceVariant
                         : colorScheme.onPrimary,
                   ),

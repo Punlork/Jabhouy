@@ -549,6 +549,74 @@
   "@amount": {
     "description": "Label for the amount field in the loaner form"
   },
+  "itemType": "ប្រភេទទំនិញ",
+  "@itemType": {
+    "description": "Label for choosing the type of a shop item"
+  },
+  "singleItem": "ទំនិញរាយ",
+  "@singleItem": {
+    "description": "Label for a single-item shop type"
+  },
+  "packItem": "ទំនិញកញ្ចប់",
+  "@packItem": {
+    "description": "Label for a pack-item shop type"
+  },
+  "packSize": "ចំនួនក្នុងកញ្ចប់",
+  "@packSize": {
+    "description": "Label for the quantity field of a pack item"
+  },
+  "packSizeHint": "មិនបាច់បំពេញក៏បាន។ បើបំពេញ វានឹងរក្សាទុកជា ឈ្មោះ xចំនួន។",
+  "@packSizeHint": {
+    "description": "Helper text shown under the pack size field"
+  },
+  "packSizeValidation": "សូមបញ្ចូលចំនួនក្នុងកញ្ចប់ធំជាង 1",
+  "@packSizeValidation": {
+    "description": "Validation message for invalid pack size"
+  },
+  "packSizeRequired": "សូមបញ្ចូលចំនួនក្នុងកញ្ចប់",
+  "@packSizeRequired": {
+    "description": "Validation message when pack size is required"
+  },
+  "itemsSuffix": "មុខទំនិញ",
+  "@itemsSuffix": {
+    "description": "Suffix used after a pack quantity count"
+  },
+  "variants": "ជម្រើសទំនិញ",
+  "@variants": {
+    "description": "Label for the variants section in the shop item form"
+  },
+  "variantLabel": "ឈ្មោះជម្រើស",
+  "@variantLabel": {
+    "description": "Label for a shop item variant name"
+  },
+  "addVariant": "បន្ថែមជម្រើស",
+  "@addVariant": {
+    "description": "Button text for adding a custom variant row"
+  },
+  "smallVariant": "តូច",
+  "@smallVariant": {
+    "description": "Preset label for a small variant"
+  },
+  "bigVariant": "ធំ",
+  "@bigVariant": {
+    "description": "Preset label for a big variant"
+  },
+  "canVariant": "កំប៉ុង",
+  "@canVariant": {
+    "description": "Preset label for a can variant"
+  },
+  "bottleVariant": "ដប",
+  "@bottleVariant": {
+    "description": "Preset label for a bottle variant"
+  },
+  "selectVariantError": "សូមជ្រើសយ៉ាងហោចណាស់មួយជម្រើស",
+  "@selectVariantError": {
+    "description": "Error shown when no item variant is selected"
+  },
+  "addItems": "បន្ថែមទំនិញ",
+  "@addItems": {
+    "description": "Text for the button to add multiple shop items"
+  },
   "addLoaner": "បន្ថែមអ្នកខ្ចី",
   "@addLoaner": {
     "description": "Text for the button to add a new loaner"

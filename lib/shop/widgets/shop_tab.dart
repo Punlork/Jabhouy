@@ -157,6 +157,8 @@ class ShopGridLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crossAxisCount = _resolveCrossAxisCount(context);
+
     return CustomScrollView(
       physics: const BouncingScrollPhysics()
           .applyTo(const AlwaysScrollableScrollPhysics()),
@@ -164,24 +166,28 @@ class ShopGridLoading extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
             bottom: 52,
+            top: 52,
           ),
-          sliver: SliverToBoxAdapter(
-            child: MasonryGridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 6,
-              itemBuilder: (context, index) => const GridShopItemShimmer(),
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              padding: EdgeInsets.zero,
-              gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-              ),
-            ),
+          sliver: SliverAlignedGrid.count(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            itemCount: 6,
+            itemBuilder: (context, index) => const GridShopItemShimmer(),
           ),
         ),
       ],
     );
+  }
+
+  int _resolveCrossAxisCount(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+
+    if (width > 600) {
+      return 3;
+    }
+
+    return 2;
   }
 }
 

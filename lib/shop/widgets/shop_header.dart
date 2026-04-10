@@ -78,8 +78,9 @@ class _SettingsButton extends StatelessWidget {
         ),
       ],
       child: IconButtonWidget(
-        icon: Icons.settings,
+        svgAsset: AppAssets.actionSettings,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
+        tooltip: AppLocalizations.of(context).settings,
         onPressed: onPressed,
         colorScheme: Theme.of(context).colorScheme,
       ),
@@ -157,11 +158,13 @@ class _SearchBar extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           IconButtonWidget(
-            icon: hasFilter
-                ? Icons.filter_alt_rounded
-                : Icons.filter_alt_outlined,
-            color:
-                hasFilter ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            svgAsset: AppAssets.actionFilter,
+            color: hasFilter
+                ? colorScheme.onPrimaryContainer
+                : colorScheme.onSurfaceVariant,
+            backgroundColor: hasFilter
+                ? colorScheme.primaryContainer
+                : colorScheme.surfaceContainerHigh,
             tooltip: l10n.filterItems,
             onPressed: onFilterPressed,
             colorScheme: colorScheme,
