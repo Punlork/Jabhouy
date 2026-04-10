@@ -23,26 +23,19 @@ class _ShopTabView extends StatefulWidget {
 
 class _ShopTabState extends State<_ShopTabView>
     with AutomaticKeepAliveClientMixin {
-  bool _shouldRebuild(ShopState previous, ShopState current) {
-    if (previous.runtimeType != current.runtimeType) return true;
-    if (previous is ShopLoaded && current is ShopLoaded) {
-      return previous.items.length != current.items.length ||
-          previous.searchQuery != current.searchQuery ||
-          previous.itemCategories != current.itemCategories ||
-          previous.isOffline != current.isOffline ||
-          previous.syncMessage != current.syncMessage ||
-          previous.isFiltering != current.isFiltering;
-    }
-    return true;
-  }
+  bool _shouldRebuild(ShopState previous, ShopState current) =>
+      previous != current;
 
   Future<void> _refreshItems() async {
     if (!mounted) return;
+    final currentState = context.read<ShopBloc>().state.asLoaded;
     context.read<ShopBloc>().add(
           ShopGetItemsEvent(
             forceRefresh: true,
             page: 1,
-            limit: 100,
+            limit: currentState?.pagination.limit ?? 100,
+            searchQuery: currentState?.searchQuery,
+            categoryFilter: currentState?.categoryFilter,
           ),
         );
     context.read<CategoryBloc>().add(CategoryGetEvent());
@@ -77,15 +70,26 @@ class _ShopTabState extends State<_ShopTabView>
                     Expanded(
                       child: Builder(
                         builder: (context) {
-                          if (isFiltering != null && isFiltering) {
+                          if ((isFiltering ?? false) && items.isEmpty) {
                             return const ShopGridLoading();
                           }
                           if (items.isEmpty) {
                             return const EmptyView();
                           }
-                          return ShopGridBuilder(
-                            items: items,
-                            pagination: pagination,
+                          return Stack(
+                            children: [
+                              ShopGridBuilder(
+                                items: items,
+                                pagination: pagination,
+                              ),
+                              if (isFiltering ?? false)
+                                const Positioned(
+                                  top: 52,
+                                  left: 16,
+                                  right: 16,
+                                  child: LinearProgressIndicator(),
+                                ),
+                            ],
                           );
                         },
                       ),

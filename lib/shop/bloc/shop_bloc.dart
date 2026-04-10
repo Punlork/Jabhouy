@@ -17,7 +17,8 @@ extension ShopStateExtension on ShopState {
 }
 
 class ShopBloc extends Bloc<ShopEvent, ShopState> {
-  ShopBloc(this._service, this.upload, this._connectivityService) : super(const ShopInitial()) {
+  ShopBloc(this._service, this.upload, this._connectivityService)
+      : super(const ShopInitial()) {
     _filtersController = StreamController<_ShopFilters>.broadcast(sync: true)
       ..add(
         const _ShopFilters(),
@@ -62,12 +63,15 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     on<ShopGetItemsEvent>(
       _onGetItems,
       transformer: (events, mapper) {
-        final searchEvents = events.where((e) => e.isSearch).debounce(throttleDuration);
-        final scrollEvents = events.where((e) => !e.isSearch).throttle(throttleDuration);
-        return droppable<ShopGetItemsEvent>().call(
-          searchEvents.merge(scrollEvents),
+        final searchEvents = restartable<ShopGetItemsEvent>().call(
+          events.where((e) => e.isSearchChange).debounce(throttleDuration),
           mapper,
         );
+        final scrollEvents = droppable<ShopGetItemsEvent>().call(
+          events.where((e) => !e.isSearchChange).throttle(throttleDuration),
+          mapper,
+        );
+        return searchEvents.merge(scrollEvents);
       },
     );
     on<ShopCreateItemEvent>(_onCreateItem);
@@ -157,7 +161,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     final currentState = state.asLoaded;
 
     final newSearchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
-    final newCategoryFilter = event.categoryFilter;
+    final newCategoryFilter = event.clearCategoryFilter
+        ? null
+        : event.categoryFilter ?? currentState?.categoryFilter;
     final newPage = event.page ?? (currentState?.pagination.page ?? 1);
     final newPageSize = event.limit ?? (currentState?.pagination.limit ?? 100);
 
@@ -172,16 +178,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 
     final isOnline = await _connectivityService.isOnline;
 
-    if (isFilterChange || isCategoryChange) {
-      _filtersController.add(
-        _ShopFilters(
-          searchQuery: newSearchQuery,
-          categoryFilter: newCategoryFilter,
-        ),
-      );
-    }
-
-    final showFilterLoading = !hasCachedItems && effectivePage == 1 && (isFilterChange || isCategoryChange);
+    final showFilterLoading = event.forceRefresh &&
+        !hasCachedItems &&
+        effectivePage == 1 &&
+        currentState == null;
 
     if (isCategoryChange || event.forceRefresh || isFilterChange) {
       if (currentState != null) {
@@ -197,8 +197,18 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       } else if (!hasCachedItems) {
         emit(const ShopLoading());
       }
-    } else if ((state is ShopInitial || effectivePage == 1) && !hasCachedItems) {
+    } else if ((state is ShopInitial || effectivePage == 1) &&
+        !hasCachedItems) {
       emit(const ShopLoading());
+    }
+
+    if (isFilterChange || isCategoryChange) {
+      _filtersController.add(
+        _ShopFilters(
+          searchQuery: newSearchQuery,
+          categoryFilter: newCategoryFilter,
+        ),
+      );
     }
 
     if (!isOnline) {
@@ -332,7 +342,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       latestState.copyWith(
         isFiltering: false,
         isOffline: false,
-        syncMessage: response.message == null ? null : 'Back online, but refresh failed.',
+        syncMessage: response.message == null
+            ? null
+            : 'Back online, but refresh failed.',
       ),
     );
   }

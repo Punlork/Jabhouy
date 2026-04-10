@@ -7,18 +7,20 @@ class ShopGetItemsEvent extends ShopEvent {
   ShopGetItemsEvent({
     this.searchQuery,
     this.categoryFilter,
+    this.clearCategoryFilter = false,
     this.forceRefresh = false,
     this.limit,
     this.page,
-  }) : isSearch = searchQuery != null && searchQuery.isNotEmpty;
+  }) : isSearchChange = searchQuery != null;
 
   final String? searchQuery;
   final CategoryItemModel? categoryFilter;
+  final bool clearCategoryFilter;
 
   final bool forceRefresh;
   final int? limit;
   final int? page;
-  final bool isSearch;
+  final bool isSearchChange;
 }
 
 class ShopCreateItemEvent extends ShopEvent {

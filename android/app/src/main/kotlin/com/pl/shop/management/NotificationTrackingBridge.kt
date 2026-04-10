@@ -141,11 +141,16 @@ object NotificationTrackingBridge {
         receivedAt: Long,
         source: String = "native"
     ): JSONObject {
-        val normalizedText = listOfNotNull(title, message).joinToString(" ").lowercase()
+        val normalizedTitle = title?.trim().orEmpty().lowercase()
+        val normalizedMessage = message.trim().lowercase()
+        val normalizedText = listOfNotNull(
+            normalizedTitle.takeIf { it.isNotEmpty() },
+            normalizedMessage.takeIf { it.isNotEmpty() },
+        ).joinToString(" ")
         val bankKey = detectBank(packageName, normalizedText)
         val currency = detectCurrency(normalizedText)
         val amount = parseAmount(normalizedText)
-        val isIncome = detectIncome(normalizedText)
+        val isIncome = detectIncome(normalizedMessage)
         val payload = JSONObject()
         payload.put("fingerprint", listOf(packageName, title ?: "", message, receivedAt).joinToString("|"))
         payload.put("packageName", packageName)
@@ -162,6 +167,20 @@ object NotificationTrackingBridge {
     }
 
     fun queueNotification(context: Context, payload: JSONObject) {
+        val fingerprint = payload.optString("fingerprint")
+        if (fingerprint.isNotBlank() && isFingerprintQueuedOrUploaded(context, fingerprint)) {
+            appendDiagnosticLog(
+                context = context,
+                source = "android.bridge",
+                message = "Skipped duplicate notification payload on native side because the fingerprint is already pending or uploaded.",
+                metadata = mapOf(
+                    "fingerprint" to fingerprint,
+                    "packageName" to payload.optString("packageName"),
+                )
+            )
+            return
+        }
+
         synchronized(lock) {
             val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
             val raw = prefs.getString(pendingKey, "[]") ?: "[]"
@@ -187,6 +206,38 @@ object NotificationTrackingBridge {
             eventSink?.success(event)
         }
         BankNotificationSyncWorker.enqueue(context)
+    }
+
+    fun isFingerprintQueuedOrUploaded(context: Context, fingerprint: String): Boolean {
+        if (fingerprint.isBlank()) return false
+
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            val uploaded = prefs.getStringSet(uploadedKey, emptySet()) ?: emptySet()
+            if (uploaded.contains(fingerprint)) {
+                return true
+            }
+
+            val pending = JSONArray(prefs.getString(pendingKey, "[]") ?: "[]")
+            for (index in 0 until pending.length()) {
+                val item = pending.optJSONObject(index) ?: continue
+                if (item.optString("fingerprint") == fingerprint) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    fun isFingerprintUploaded(context: Context, fingerprint: String): Boolean {
+        if (fingerprint.isBlank()) return false
+
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
+            val uploaded = prefs.getStringSet(uploadedKey, emptySet()) ?: emptySet()
+            return uploaded.contains(fingerprint)
+        }
     }
 
     fun pendingUploads(context: Context): List<JSONObject> {

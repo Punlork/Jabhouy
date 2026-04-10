@@ -15,11 +15,13 @@ class ShopItemFormPage extends StatelessWidget {
     required this.onSaved,
     required this.shop,
     required this.category,
+    this.activeCategory,
     this.existingItem,
     super.key,
   });
 
   final ShopItemModel? existingItem;
+  final CategoryItemModel? activeCategory;
   final void Function(ShopItemModel) onSaved;
   final ShopBloc shop;
   final CategoryBloc category;
@@ -33,6 +35,7 @@ class ShopItemFormPage extends StatelessWidget {
       ],
       child: _ShopItemFormPageContent(
         onSaved: onSaved,
+        activeCategory: activeCategory,
         existingItem: existingItem,
       ),
     );
@@ -42,10 +45,12 @@ class ShopItemFormPage extends StatelessWidget {
 class _ShopItemFormPageContent extends StatefulWidget {
   const _ShopItemFormPageContent({
     required this.onSaved,
+    this.activeCategory,
     this.existingItem,
   });
 
   final ShopItemModel? existingItem;
+  final CategoryItemModel? activeCategory;
   final void Function(ShopItemModel) onSaved;
 
   @override
@@ -57,10 +62,12 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
   CategoryItemModel? _categoryFilter;
+  String? _imageUrl;
   bool _hasChanges = false;
 
   late Map<String, String> _initialTextValues;
   late CategoryItemModel? _initialCategory;
+  late String? _initialImageUrl;
 
   @override
   void initState() {
@@ -78,6 +85,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
 
     _initialTextValues = {};
     _initialCategory = null;
+    _initialImageUrl = widget.existingItem?.imageUrl;
+    _imageUrl = widget.existingItem?.imageUrl;
 
     context.read<ShopBloc>().upload.add(ClearImageEvent());
 
@@ -114,6 +123,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
       _initialTextValues['customerPrice'] = '';
       _initialTextValues['sellerPrice'] = '';
       _initialTextValues['note'] = '';
+      _categoryFilter = widget.activeCategory;
+      _initialCategory = widget.activeCategory;
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -143,13 +154,48 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
   }
 
   void _detectChanges() {
+    final uploadState = context.read<ShopBloc>().upload.state;
     final hasTextChanges = _controllers.entries.any(
       (entry) => entry.value.text != _initialTextValues[entry.key],
     );
     final hasCategoryChanges = _categoryFilter != _initialCategory;
+    final hasImageChanges =
+        context.read<ShopBloc>().upload.selectedImage != null ||
+            _imageUrl != _initialImageUrl ||
+            uploadState is UploadSuccess;
 
-    _hasChanges = hasTextChanges || hasCategoryChanges;
+    _hasChanges = hasTextChanges || hasCategoryChanges || hasImageChanges;
     setState(() {});
+  }
+
+  ShopItemModel _buildItem({String? imageUrl}) {
+    return ShopItemModel(
+      id: widget.existingItem?.id ?? 0,
+      name: _controllers['name']!.text.trim(),
+      defaultPrice: _controllers['defaultPrice']!.text.isNotEmpty
+          ? int.tryParse(_controllers['defaultPrice']!.text)
+          : null,
+      customerPrice: _controllers['customerPrice']!.text.isNotEmpty
+          ? int.tryParse(_controllers['customerPrice']!.text)
+          : null,
+      sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
+          ? int.tryParse(_controllers['sellerPrice']!.text)
+          : null,
+      note: _controllers['note']!.text.trim().isEmpty
+          ? null
+          : _controllers['note']!.text.trim(),
+      imageUrl: imageUrl ?? _imageUrl,
+      category: _categoryFilter,
+    );
+  }
+
+  void _saveItem(ShopItemModel item) {
+    final shopBloc = context.read<ShopBloc>();
+    if (widget.existingItem != null) {
+      shopBloc.add(ShopEditItemEvent(body: item));
+    } else {
+      shopBloc.add(ShopCreateItemEvent(body: item));
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -185,33 +231,11 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
 
     final shopBloc = context.read<ShopBloc>();
     final uploadBloc = shopBloc.upload;
-    final item = ShopItemModel(
-      id: widget.existingItem?.id ?? 0,
-      name: _controllers['name']!.text,
-      defaultPrice: _controllers['defaultPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['defaultPrice']!.text)
-          : null,
-      customerPrice: _controllers['customerPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['customerPrice']!.text)
-          : null,
-      sellerPrice: _controllers['sellerPrice']!.text.isNotEmpty
-          ? int.tryParse(_controllers['sellerPrice']!.text)
-          : null,
-      note: _controllers['note']!.text.isEmpty
-          ? null
-          : _controllers['note']!.text,
-      imageUrl: uploadBloc.selectedImage?.path,
-      category: _categoryFilter,
-    );
 
     if (uploadBloc.selectedImage != null) {
       uploadBloc.add(UploadImageEvent(uploadBloc.selectedImage!));
     } else {
-      if (widget.existingItem != null) {
-        shopBloc.add(ShopEditItemEvent(body: item));
-      } else {
-        shopBloc.add(ShopCreateItemEvent(body: item));
-      }
+      _saveItem(_buildItem());
     }
   }
 
@@ -294,34 +318,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                   bloc: context.read<ShopBloc>().upload,
                   listener: (context, state) {
                     if (state is UploadSuccess) {
-                      final shopBloc = context.read<ShopBloc>();
-                      final item = ShopItemModel(
-                        id: widget.existingItem?.id ?? 0,
-                        name: _controllers['name']!.text,
-                        defaultPrice:
-                            int.tryParse(_controllers['defaultPrice']!.text) ??
-                                0,
-                        customerPrice: _controllers['customerPrice']!
-                                .text
-                                .isNotEmpty
-                            ? int.tryParse(_controllers['customerPrice']!.text)
-                            : null,
-                        sellerPrice: _controllers['sellerPrice']!
-                                .text
-                                .isNotEmpty
-                            ? int.tryParse(_controllers['sellerPrice']!.text)
-                            : null,
-                        note: _controllers['note']!.text.isEmpty
-                            ? null
-                            : _controllers['note']!.text,
-                        imageUrl: state.imageUrl, // Use uploaded URL
-                        category: _categoryFilter,
-                      );
-                      if (widget.existingItem != null) {
-                        shopBloc.add(ShopEditItemEvent(body: item));
-                      } else {
-                        shopBloc.add(ShopCreateItemEvent(body: item));
-                      }
+                      _imageUrl = state.imageUrl;
+                      _saveItem(_buildItem(imageUrl: state.imageUrl));
                     } else if (state is UploadFailure) {
                       showErrorSnackBar(
                         context,
@@ -475,6 +473,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                   onTap: () {
                                                     uploadBloc
                                                         .add(ClearImageEvent());
+                                                    _imageUrl = null;
                                                     _detectChanges();
                                                   },
                                                   child: const Icon(
@@ -520,6 +519,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                                                   onTap: () {
                                                     uploadBloc
                                                         .add(ClearImageEvent());
+                                                    _imageUrl = null;
                                                     _detectChanges();
                                                   },
                                                   child: const Icon(

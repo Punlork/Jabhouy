@@ -33,12 +33,18 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
 
   File? get selectedImage => _selectedImage;
 
-  Future<void> _onLoadExistingImage(LoadExistingImageEvent event, Emitter<UploadState> emit) async {
+  Future<void> _onLoadExistingImage(
+    LoadExistingImageEvent event,
+    Emitter<UploadState> emit,
+  ) async {
     if (event.imageUrl != null && event.imageUrl!.isNotEmpty) {}
     emit(UploadImageUrlLoaded(event.imageUrl!));
   }
 
-  Future<void> _onSelectImage(SelectImageEvent event, Emitter<UploadState> emit) async {
+  Future<void> _onSelectImage(
+    SelectImageEvent event,
+    Emitter<UploadState> emit,
+  ) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: event.source);
     if (pickedFile != null) {
@@ -47,12 +53,16 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     }
   }
 
-  Future<void> _onUploadImage(UploadImageEvent event, Emitter<UploadState> emit) async {
+  Future<void> _onUploadImage(
+    UploadImageEvent event,
+    Emitter<UploadState> emit,
+  ) async {
     LoadingOverlay.show();
+    emit(const UploadInProgress());
     try {
       final response = await _service.upload(
         file: event.image,
-        fileName: 'image ',
+        fileName: 'image',
       );
       if (response.success) {
         emit(UploadSuccess(response.data!));
@@ -62,7 +72,10 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     }
   }
 
-  Future<void> _onClearImage(ClearImageEvent event, Emitter<UploadState> emit) async {
+  Future<void> _onClearImage(
+    ClearImageEvent event,
+    Emitter<UploadState> emit,
+  ) async {
     _selectedImage = null;
     emit(const UploadInitial());
   }

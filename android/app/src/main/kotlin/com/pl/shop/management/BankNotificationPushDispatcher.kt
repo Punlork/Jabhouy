@@ -31,6 +31,21 @@ object BankNotificationPushDispatcher {
         }
 
         executor.execute {
+            val fingerprint = payload.optString("fingerprint")
+            if (fingerprint.isNotBlank() &&
+                NotificationTrackingBridge.isFingerprintUploaded(context, fingerprint)
+            ) {
+                NotificationTrackingBridge.appendDiagnosticLog(
+                    context = context,
+                    source = "android.push_dispatcher",
+                    message = "Skipped immediate native push because this fingerprint was already uploaded.",
+                    metadata = mapOf(
+                        "fingerprint" to fingerprint,
+                    ),
+                )
+                return@execute
+            }
+
             if (!NotificationTrackingBridge.isMainDevice(context)) {
                 NotificationTrackingBridge.appendDiagnosticLog(
                     context = context,

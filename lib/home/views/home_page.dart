@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
@@ -39,8 +40,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
@@ -74,8 +74,7 @@ class _HomePageState extends State<HomePage>
         context.read<ShopBloc>().add(
               ShopGetItemsEvent(
                 searchQuery: value,
-                categoryFilter:
-                    context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+                categoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               ),
             );
       case 1:
@@ -100,10 +99,12 @@ class _HomePageState extends State<HomePage>
               BlocProvider.value(value: context.read<ShopBloc>()),
             ],
             child: FilterSheet(
-              initialCategoryFilter:
-                  context.read<ShopBloc>().state.asLoaded?.categoryFilter,
+              initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               onApply: (category) => context.read<ShopBloc>().add(
-                    ShopGetItemsEvent(categoryFilter: category),
+                    ShopGetItemsEvent(
+                      categoryFilter: category,
+                      clearCategoryFilter: category == null,
+                    ),
                   ),
             ),
           ),
@@ -125,20 +126,16 @@ class _HomePageState extends State<HomePage>
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: LoanerFilterSheet(
-                initialFromDate:
-                    context.read<LoanerBloc>().state.asLoaded?.fromDate,
-                initialToDate:
-                    context.read<LoanerBloc>().state.asLoaded?.toDate,
-                initialLoanerFilter:
-                    context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
-                onApply: (fromDate, toDate, loanerFilter) =>
-                    context.read<LoanerBloc>().add(
-                          LoadLoaners(
-                            fromDate: fromDate,
-                            toDate: toDate,
-                            loanerFilter: loanerFilter,
-                          ),
-                        ),
+                initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
+                initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
+                initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
+                onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
+                      LoadLoaners(
+                        fromDate: fromDate,
+                        toDate: toDate,
+                        loanerFilter: loanerFilter,
+                      ),
+                    ),
               ),
             ),
           ),
@@ -157,24 +154,19 @@ class _HomePageState extends State<HomePage>
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: IncomeFilterSheet(
-                initialFromDate:
-                    context.read<IncomeBloc>().state.asLoaded?.fromDate,
-                initialToDate:
-                    context.read<IncomeBloc>().state.asLoaded?.toDate,
-                initialBankFilter:
-                    context.read<IncomeBloc>().state.asLoaded?.bankFilter,
+                initialFromDate: context.read<IncomeBloc>().state.asLoaded?.fromDate,
+                initialToDate: context.read<IncomeBloc>().state.asLoaded?.toDate,
+                initialBankFilter: context.read<IncomeBloc>().state.asLoaded?.bankFilter,
                 initialRecordFilter:
-                    context.read<IncomeBloc>().state.asLoaded?.recordFilter ??
-                        NotificationRecordFilter.all,
-                onApply: (fromDate, toDate, bankFilter, recordFilter) =>
-                    context.read<IncomeBloc>().add(
-                          LoadIncomeDashboard(
-                            fromDate: fromDate,
-                            toDate: toDate,
-                            bankFilter: bankFilter,
-                            recordFilter: recordFilter,
-                          ),
-                        ),
+                    context.read<IncomeBloc>().state.asLoaded?.recordFilter ?? NotificationRecordFilter.all,
+                onApply: (fromDate, toDate, bankFilter, recordFilter) => context.read<IncomeBloc>().add(
+                      LoadIncomeDashboard(
+                        fromDate: fromDate,
+                        toDate: toDate,
+                        bankFilter: bankFilter,
+                        recordFilter: recordFilter,
+                      ),
+                    ),
               ),
             ),
           ),
@@ -196,11 +188,13 @@ class _HomePageState extends State<HomePage>
   }
 
   void _openShopForm() {
+    final activeCategory = context.read<ShopBloc>().state.asLoaded?.categoryFilter;
     context.pushNamed(
       AppRoutes.formShop,
       extra: {
         'shop': context.read<ShopBloc>(),
         'category': context.read<CategoryBloc>(),
+        'activeCategory': activeCategory,
         'onAdd': (ShopItemModel item) {},
       },
     );
@@ -222,8 +216,7 @@ class _HomePageState extends State<HomePage>
       return;
     }
 
-    final trackingStatus =
-        context.read<IncomeBloc>().state.asLoaded?.trackingStatus;
+    final trackingStatus = context.read<IncomeBloc>().state.asLoaded?.trackingStatus;
     if (trackingStatus?.isBlockedByAnotherMainDevice ?? false) {
       showErrorSnackBar(null, context.l10n.anotherMainDeviceActive);
       return;
@@ -242,20 +235,20 @@ class _HomePageState extends State<HomePage>
       case 0:
         return _BottomActionConfig(
           tooltip: context.l10n.addItem,
-          icon: Icons.add_business_rounded,
+          iconAsset: AppAssets.actionAddShop,
           onPressed: _openShopForm,
         );
       case 1:
         return _BottomActionConfig(
           tooltip: context.l10n.addLoaner,
-          icon: Icons.person_add_alt_1_rounded,
+          iconAsset: AppAssets.actionAddLoaner,
           onPressed: _openLoanerForm,
         );
       case 2:
         if (kReleaseMode) {
           return _BottomActionConfig(
             tooltip: context.l10n.refreshStatus,
-            icon: Icons.refresh_rounded,
+            iconAsset: AppAssets.actionRefresh,
             onPressed: () => context.read<IncomeBloc>().add(
                   const RefreshIncomeTrackingStatus(),
                 ),
@@ -263,22 +256,13 @@ class _HomePageState extends State<HomePage>
         }
 
         final isMainDevice = appState.deviceRole.isMain;
-        final isBlocked = context
-                .read<IncomeBloc>()
-                .state
-                .asLoaded
-                ?.trackingStatus
-                ?.isBlockedByAnotherMainDevice ??
-            false;
+        final isBlocked =
+            context.read<IncomeBloc>().state.asLoaded?.trackingStatus?.isBlockedByAnotherMainDevice ?? false;
 
         return _BottomActionConfig(
-          tooltip: isMainDevice
-              ? context.l10n.addDemoData
-              : context.l10n.mainDeviceOnly,
-          icon: Icons.bolt_rounded,
-          onPressed: isMainDevice && !isBlocked
-              ? () => _seedIncomeDemoData(appState)
-              : null,
+          tooltip: isMainDevice ? context.l10n.addDemoData : context.l10n.mainDeviceOnly,
+          iconAsset: AppAssets.actionDemo,
+          onPressed: isMainDevice && !isBlocked ? () => _seedIncomeDemoData(appState) : null,
         );
     }
 
@@ -327,8 +311,7 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (previous, current) =>
-          previous.runtimeType != current.runtimeType,
+      listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
       listener: (context, authState) {
         if (authState is Authenticated) {
           _loadProtectedData();
@@ -358,25 +341,22 @@ class _HomePageState extends State<HomePage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final appState = context.watch<AppBloc>().state;
     final bottomAction = _buildBottomActionConfig(appState);
-    final bottomBarBackground =
-        isDark ? colorScheme.surfaceContainerLow : colorScheme.surface;
-    final bottomBarIndicator =
-        isDark ? colorScheme.primary : colorScheme.primaryContainer;
-    final bottomBarSelectedForeground =
-        isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
+    final bottomBarBackground = isDark ? colorScheme.surfaceContainerLow : colorScheme.surface;
+    final bottomBarIndicator = isDark ? colorScheme.primary : colorScheme.primaryContainer;
+    final bottomBarSelectedForeground = isDark ? colorScheme.onPrimary : colorScheme.onPrimaryContainer;
     final bottomBarUnselectedForeground = colorScheme.onSurfaceVariant;
 
-    final bottomBars = [
+    final bottomBars = <Map<String, String>>[
       {
         'name': context.l10n.shop,
-        'icon': Icons.store_rounded,
+        'icon': AppAssets.tabShop,
       },
       {
-        'icon': Icons.handshake_rounded,
+        'icon': AppAssets.tabLoaner,
         'name': context.l10n.loaner,
       },
       {
-        'icon': Icons.pie_chart_rounded,
+        'icon': AppAssets.tabIncome,
         'name': context.l10n.income,
       },
     ];
@@ -454,27 +434,28 @@ class _HomePageState extends State<HomePage>
               ],
             ),
           ),
-          barColor: bottomBarBackground,
+          barColor: Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           width: double.infinity,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: bottomBarBackground,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: colorScheme.outlineVariant),
-              boxShadow: [
-                if (!isDark)
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.08),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.zero,
+                  decoration: BoxDecoration(
+                    color: bottomBarBackground,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: colorScheme.outlineVariant),
+                    boxShadow: [
+                      if (!isDark)
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(alpha: 0.08),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                    ],
                   ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
                   child: TabBar(
                     dividerColor: Colors.transparent,
                     indicatorSize: TabBarIndicatorSize.tab,
@@ -494,8 +475,8 @@ class _HomePageState extends State<HomePage>
                       (index) => Tab(
                         height: 42,
                         child: _BottomBarTab(
-                          icon: bottomBars[index]['icon']! as IconData,
-                          label: bottomBars[index]['name']! as String,
+                          iconAsset: bottomBars[index]['icon']!,
+                          label: bottomBars[index]['name']!,
                           isSelected: _selectedIndex == index,
                           selectedColor: bottomBarSelectedForeground,
                           unselectedColor: bottomBarUnselectedForeground,
@@ -504,15 +485,15 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                 ),
-                if (bottomAction != null) ...[
-                  const SizedBox(width: 8),
-                  _BottomBarActionButton(
-                    config: bottomAction,
-                    isDark: isDark,
-                  ),
-                ],
+              ),
+              if (bottomAction != null) ...[
+                const SizedBox(width: 8),
+                _BottomBarActionButton(
+                  config: bottomAction,
+                  isDark: isDark,
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -523,25 +504,25 @@ class _HomePageState extends State<HomePage>
 class _BottomActionConfig {
   const _BottomActionConfig({
     required this.tooltip,
-    required this.icon,
+    required this.iconAsset,
     this.onPressed,
   });
 
   final String tooltip;
-  final IconData icon;
+  final String iconAsset;
   final VoidCallback? onPressed;
 }
 
 class _BottomBarTab extends StatelessWidget {
   const _BottomBarTab({
-    required this.icon,
+    required this.iconAsset,
     required this.label,
     required this.isSelected,
     required this.selectedColor,
     required this.unselectedColor,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final String label;
   final bool isSelected;
   final Color selectedColor;
@@ -558,7 +539,15 @@ class _BottomBarTab extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 24, color: foregroundColor),
+          SvgPicture.asset(
+            iconAsset,
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(
+              foregroundColor,
+              BlendMode.srcIn,
+            ),
+          ),
           const SizedBox(width: 8),
           Center(
             child: isSelected
@@ -601,9 +590,14 @@ class _BottomBarActionButton extends StatelessWidget {
         opacity: config.onPressed == null ? 0.6 : 1,
         child: IconButton.filled(
           onPressed: config.onPressed,
-          icon: Icon(
-            config.icon,
-            size: 22,
+          icon: SvgPicture.asset(
+            config.iconAsset,
+            width: 22,
+            height: 22,
+            colorFilter: ColorFilter.mode(
+              config.onPressed == null ? colorScheme.onSurfaceVariant : colorScheme.onPrimary,
+              BlendMode.srcIn,
+            ),
           ),
           style: IconButton.styleFrom(
             backgroundColor: colorScheme.primary,
@@ -612,8 +606,8 @@ class _BottomBarActionButton extends StatelessWidget {
             disabledForegroundColor: colorScheme.onSurfaceVariant,
             elevation: isDark ? 0 : 1,
             shape: const CircleBorder(),
-            minimumSize: const Size(62, 52),
-            maximumSize: const Size(62, 52),
+            minimumSize: const Size(62, 62),
+            maximumSize: const Size(62, 62),
           ),
         ),
       ),

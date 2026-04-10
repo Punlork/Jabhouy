@@ -42,6 +42,9 @@ class FirebaseIncomeSyncService {
   final FcmService _fcmService;
   final NotificationDiagnosticsService _diagnostics;
   final _deviceRoleController = StreamController<DeviceRole>.broadcast();
+  final _inFlightNotificationSyncs = <String, Future<bool>>{};
+  final _recentlySyncedFingerprints = <String>{};
+  final _recentlySyncedOrder = <String>[];
 
   StreamSubscription<bool>? _connectivitySubscription;
   LocalNotificationsLoader? _loadLocalNotifications;
@@ -93,6 +96,54 @@ class FirebaseIncomeSyncService {
       return false;
     }
 
+    final fingerprint = model.fingerprint.trim();
+    if (fingerprint.isNotEmpty) {
+      if (_recentlySyncedFingerprints.contains(fingerprint)) {
+        await _diagnostics.log(
+          source: 'flutter.firebase_sync',
+          message:
+              'Skipped duplicate notification sync because this fingerprint already synced successfully in this app session.',
+          metadata: {
+            'fingerprint': fingerprint,
+          },
+        );
+        return true;
+      }
+
+      final inFlightSync = _inFlightNotificationSyncs[fingerprint];
+      if (inFlightSync != null) {
+        await _diagnostics.log(
+          source: 'flutter.firebase_sync',
+          message:
+              'Coalesced duplicate notification sync request while the same fingerprint is already syncing.',
+          metadata: {
+            'fingerprint': fingerprint,
+          },
+        );
+        return inFlightSync;
+      }
+    }
+
+    final syncFuture = _performNotificationSync(model);
+    if (fingerprint.isNotEmpty) {
+      _inFlightNotificationSyncs[fingerprint] = syncFuture;
+    }
+
+    try {
+      final didSync = await syncFuture;
+      if (didSync && fingerprint.isNotEmpty) {
+        _rememberSyncedFingerprint(fingerprint);
+      }
+      return didSync;
+    } finally {
+      if (fingerprint.isNotEmpty &&
+          identical(_inFlightNotificationSyncs[fingerprint], syncFuture)) {
+        final _ = _inFlightNotificationSyncs.remove(fingerprint);
+      }
+    }
+  }
+
+  Future<bool> _performNotificationSync(BankNotificationModel model) async {
     await _prepareSync();
     final didSync =
         await sendTestNotification(_notificationPayloadFromModel(model));
@@ -109,6 +160,16 @@ class FirebaseIncomeSyncService {
     return didSync;
   }
 
+  void _rememberSyncedFingerprint(String fingerprint) {
+    if (_recentlySyncedFingerprints.add(fingerprint)) {
+      _recentlySyncedOrder.add(fingerprint);
+      if (_recentlySyncedOrder.length > 200) {
+        final removed = _recentlySyncedOrder.removeAt(0);
+        _recentlySyncedFingerprints.remove(removed);
+      }
+    }
+  }
+
   Future<void> dispose() async {
     await _connectivitySubscription?.cancel();
     _connectivitySubscription = null;
@@ -117,6 +178,9 @@ class FirebaseIncomeSyncService {
     _scopeId = null;
     _initialized = false;
     _isSyncingLocalBacklog = false;
+    _inFlightNotificationSyncs.clear();
+    _recentlySyncedFingerprints.clear();
+    _recentlySyncedOrder.clear();
   }
 
   Future<void> clearPersistedSessionState() async {
@@ -297,6 +361,9 @@ class FirebaseIncomeSyncService {
   }
 
   String? _readEnv(String key) {
+    if (!dotenv.isInitialized) {
+      return null;
+    }
     final value = dotenv.maybeGet(key)?.trim();
     if (value == null || value.isEmpty) {
       return null;

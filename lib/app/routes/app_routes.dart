@@ -134,6 +134,8 @@ class AppRoutes {
               final extra = state.extra! as Map<String, dynamic>;
               final onAdd = extra['onAdd'] as void Function(ShopItemModel)?;
               final existingItem = extra['existingItem'] as ShopItemModel?;
+              final activeCategory =
+                  extra['activeCategory'] as CategoryItemModel?;
               final shop = extra['shop'] as ShopBloc;
               final category = extra['category'] as CategoryBloc;
               return CustomTransitionPage(
@@ -141,6 +143,7 @@ class AppRoutes {
                 child: ShopItemFormPage(
                   onSaved: onAdd ?? (_) {},
                   existingItem: existingItem,
+                  activeCategory: activeCategory,
                   shop: shop,
                   category: category,
                 ),

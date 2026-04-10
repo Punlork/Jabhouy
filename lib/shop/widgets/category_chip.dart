@@ -28,8 +28,9 @@ class CategoryChips extends StatelessWidget {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () =>
-                      context.read<ShopBloc>().add(ShopGetItemsEvent()),
+                  onTap: () => context.read<ShopBloc>().add(
+                        ShopGetItemsEvent(clearCategoryFilter: true),
+                      ),
                   child: _buildChip(
                     context,
                     label: context.l10n.all,
