@@ -85,4 +85,13 @@ awk -v replacement="version: $next_version" '
 mv "$tmp_file" "$pubspec_path"
 trap - EXIT
 
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git add -- "$pubspec_path"
+  git commit \
+    --message "chore: bump pubspec version to $next_version
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" \
+    -- "$pubspec_path"
+fi
+
 echo "Updated $pubspec_path: $current_version -> $next_version"
