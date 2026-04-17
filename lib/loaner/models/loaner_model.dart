@@ -5,10 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/customer/customer.dart';
 
-String _formatToRFC3339Date(DateTime date) {
-  return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-}
-
 class LoanerModel extends Equatable {
   LoanerModel({
     required this.id,
@@ -48,6 +44,11 @@ class LoanerModel extends Equatable {
     return dateFormat.format(createdAt);
   }
 
+  String get displayDateTime {
+    final dateTimeFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    return dateTimeFormat.format(createdAt);
+  }
+
   final int id;
   final int? customerId;
   final int amount;
@@ -63,7 +64,7 @@ class LoanerModel extends Equatable {
         'customerId': customerId,
         'amount': amount,
         'note': note,
-        'createdAt': _formatToRFC3339Date(createdAt),
+        'createdAt': createdAt.toIso8601String(),
         'paid': isPaid,
       };
 
@@ -76,6 +77,7 @@ class LoanerModel extends Equatable {
         updatedAt,
         customer,
         customerId,
+        isPaid,
         syncStatus,
         isDeleted,
       ];

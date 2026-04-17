@@ -16,6 +16,7 @@ class CustomerAutocompleteField extends StatelessWidget {
     this.onSelected,
     this.validator,
     this.direction,
+    this.suffixIcon,
   });
   final TextEditingController controller;
   final String label;
@@ -25,6 +26,7 @@ class CustomerAutocompleteField extends StatelessWidget {
   final void Function(CustomerModel)? onSelected;
   final String? Function(String?)? validator;
   final VerticalDirection? direction;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +53,12 @@ class CustomerAutocompleteField extends StatelessWidget {
               contentPadding:
                   EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               labelStyle: AppTextTheme.body,
+            ).copyWith(
+              suffixIcon: suffixIcon,
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 48,
+                minHeight: 48,
+              ),
             ),
             onCleared: controller.clear,
           ),

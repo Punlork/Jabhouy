@@ -386,7 +386,7 @@ class ShopService extends BaseService {
       );
     }
 
-    final response = await delete<ShopItemModel?>('/${body.id}');
+    final response = await delete<dynamic>('/${body.id}');
 
     if (response.success) {
       await (_db.delete(_db.shopItems)..where((t) => t.id.equals(body.id)))

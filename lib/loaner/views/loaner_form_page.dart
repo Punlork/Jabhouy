@@ -53,6 +53,9 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
   CustomerModel? _selectedCustomer;
   DateTime _selectedDate = DateTime.now();
 
+  String _formatSelectedDateTime(DateTime value) =>
+      DateFormat('dd MMM yyyy, hh:mm a').format(value);
+
   @override
   void initState() {
     super.initState();
@@ -71,21 +74,23 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       _controllers['name']!.text = loaner.customer?.name ?? '';
       _controllers['amount']!.text = loaner.amount.toString();
       _controllers['note']!.text = loaner.note ?? '';
-      _controllers['date']!.text = loaner.displayDate;
+      _controllers['date']!.text = loaner.displayDateTime;
 
       _initialTextValues['name'] = loaner.customer?.name ?? '';
       _initialTextValues['amount'] = loaner.amount.toString();
       _initialTextValues['note'] = loaner.note ?? '';
-      _initialTextValues['date'] = loaner.displayDate;
+      _initialTextValues['date'] = loaner.displayDateTime;
 
       _selectedCustomer = loaner.customer;
       _selectedDate = loaner.createdAt;
     } else {
+      final now = DateTime.now();
+      _selectedDate = now;
       _initialTextValues['name'] = '';
       _initialTextValues['amount'] = '';
       _initialTextValues['note'] = '';
-      _initialTextValues['date'] = DateFormat('dd MMM yyyy').format(DateTime.now());
-      _controllers['date']!.text = DateFormat('dd MMM yyyy').format(DateTime.now());
+      _initialTextValues['date'] = _formatSelectedDateTime(now);
+      _controllers['date']!.text = _formatSelectedDateTime(now);
     }
 
     _controllers.forEach((key, controller) {
@@ -95,13 +100,27 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
 
   void _submitLoanerWithCustomer(CustomerModel customer) {
     final loanerBloc = context.read<LoanerBloc>();
+    final createdAt = widget.existingLoaner == null
+        ? DateTime(
+            _selectedDate.year,
+            _selectedDate.month,
+            _selectedDate.day,
+            DateTime.now().hour,
+            DateTime.now().minute,
+            DateTime.now().second,
+            DateTime.now().millisecond,
+            DateTime.now().microsecond,
+          )
+        : _selectedDate;
     final loaner = LoanerModel(
       id: widget.existingLoaner?.id ?? -1,
       customerId: customer.id,
       customer: customer,
       amount: int.tryParse(_controllers['amount']!.text) ?? 0,
-      note: _controllers['note']!.text.isEmpty ? null : _controllers['note']!.text,
-      createdAt: _selectedDate,
+      note: _controllers['note']!.text.isEmpty
+          ? null
+          : _controllers['note']!.text,
+      createdAt: createdAt,
       updatedAt: widget.existingLoaner?.updatedAt,
       isPaid: widget.existingLoaner?.isPaid ?? false,
       syncStatus: widget.existingLoaner?.syncStatus ?? 0,
@@ -124,10 +143,36 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       lastDate: DateTime.now(),
       helpText: l10n.toDate,
     );
-    if (picked != null && picked != _selectedDate) {
+    final isSameCalendarDate = picked != null &&
+        picked.year == _selectedDate.year &&
+        picked.month == _selectedDate.month &&
+        picked.day == _selectedDate.day;
+
+    if (picked != null && !isSameCalendarDate) {
+      final nextDate = widget.existingLoaner == null
+          ? DateTime(
+              picked.year,
+              picked.month,
+              picked.day,
+              DateTime.now().hour,
+              DateTime.now().minute,
+              DateTime.now().second,
+              DateTime.now().millisecond,
+              DateTime.now().microsecond,
+            )
+          : DateTime(
+              picked.year,
+              picked.month,
+              picked.day,
+              _selectedDate.hour,
+              _selectedDate.minute,
+              _selectedDate.second,
+              _selectedDate.millisecond,
+              _selectedDate.microsecond,
+            );
       setState(() {
-        _selectedDate = picked;
-        _controllers['date']!.text = DateFormat('dd MMM yyyy').format(picked);
+        _selectedDate = nextDate;
+        _controllers['date']!.text = _formatSelectedDateTime(nextDate);
         _hasChanges = true;
       });
     }
@@ -216,13 +261,18 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
         hintText: '',
         textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
-        keyboardType: maxLines != null ? TextInputType.multiline : (isAmount ? TextInputType.number : keyboardType),
+        keyboardType: maxLines != null
+            ? TextInputType.multiline
+            : (isAmount ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
         onTapOutside: (_) {},
-        validator: required ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null : null,
+        validator: required
+            ? (value) => value!.isEmpty ? l10n.nameRequired(label) : null
+            : null,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           labelStyle: AppTextTheme.body,
           suffixText: isAmount ? 'រៀល' : null,
           suffixStyle: isAmount ? AppTextTheme.caption : null,
@@ -281,26 +331,43 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomerAutocompleteField(
-                        controller: _controllers['name']!,
-                        label: l10n.name,
-                        required: true,
-                        onSelected: (customer) {
-                          _selectedCustomer = customer;
-                          _controllers['name']?.text = customer.name;
-                          FocusManager.instance.primaryFocus?.unfocus();
-                          setState(() {});
-                        },
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: _openCustomerPage,
-                          icon: const Icon(Icons.person_add_alt_1_rounded),
-                          label: Text(l10n.addCustomer),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: CustomerAutocompleteField(
+                                controller: _controllers['name']!,
+                                label: l10n.name,
+                                required: true,
+                                padding: EdgeInsets.zero,
+                                onSelected: (customer) {
+                                  _selectedCustomer = customer;
+                                  _controllers['name']?.text = customer.name;
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              height: 64,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                onPressed: _openCustomerPage,
+                                icon:
+                                    const Icon(Icons.person_add_alt_1_rounded),
+                                label: Text(l10n.addCustomer),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
                       _buildTextField(
                         key: 'amount',
                         label: l10n.amount,
@@ -314,7 +381,8 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                           controller: _controllers['date'],
                           readOnly: true,
                           onTap: () => _selectDate(context),
-                          onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                          onTapOutside: (event) =>
+                              FocusManager.instance.primaryFocus?.unfocus(),
                           decoration: InputDecoration(
                             labelText: l10n.toDate,
                             labelStyle: AppTextTheme.body,
@@ -323,13 +391,16 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                             border: inputTheme.border,
                             enabledBorder: inputTheme.enabledBorder,
                             focusedBorder: inputTheme.focusedBorder,
-                            suffixIcon: const Icon(Icons.calendar_today, size: 20),
+                            suffixIcon:
+                                const Icon(Icons.calendar_today, size: 20),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 20,
                             ),
                           ),
-                          validator: (value) => value!.isEmpty ? l10n.nameRequired(l10n.toDate) : null,
+                          validator: (value) => value!.isEmpty
+                              ? l10n.nameRequired(l10n.toDate)
+                              : null,
                         ),
                       ),
                       _buildTextField(
@@ -360,7 +431,9 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                         foregroundColor: colorScheme.onPrimary,
                       ),
                       child: Text(
-                        widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
+                        widget.existingLoaner != null
+                            ? l10n.saveChanges
+                            : l10n.addLoaner,
                         style: AppTextTheme.body,
                       ),
                     ),
@@ -374,7 +447,9 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                       label: Text(
-                        widget.existingLoaner != null ? l10n.saveChanges : l10n.addLoaner,
+                        widget.existingLoaner != null
+                            ? l10n.saveChanges
+                            : l10n.addLoaner,
                         style: AppTextTheme.body,
                       ),
                       icon: const Icon(Icons.save),

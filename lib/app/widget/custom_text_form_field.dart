@@ -139,6 +139,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       suffixIcon: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (widget.decoration?.suffixIcon != null)
+            widget.decoration!.suffixIcon!,
           if (widget.showClearButton && _hasText)
             IconButton(
               icon: Icon(
@@ -183,6 +185,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             filled: widget.decoration!.filled,
             fillColor: widget.decoration!.fillColor,
             hintStyle: widget.decoration!.hintStyle,
+            suffixIconConstraints: widget.decoration!.suffixIconConstraints,
             suffixText: widget.decoration!.suffixText,
             suffixStyle: widget.decoration!.suffixStyle,
             enabled: widget.decoration!.enabled,

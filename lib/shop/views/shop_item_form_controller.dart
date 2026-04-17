@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/shop/shop.dart';
 
-enum ShopItemKind { single, pack }
-
 class ShopItemVariantDraft {
   ShopItemVariantDraft({
     String label = '',
@@ -20,11 +18,13 @@ class ShopItemVariantDraft {
         sellerPriceController = TextEditingController(text: sellerPrice),
         packAmountController = TextEditingController(text: packAmount);
 
-  factory ShopItemVariantDraft.single() => ShopItemVariantDraft(packAmount: '1');
+  factory ShopItemVariantDraft.single() =>
+      ShopItemVariantDraft(packAmount: '1');
 
   factory ShopItemVariantDraft.pack() => ShopItemVariantDraft(packAmount: '12');
 
-  factory ShopItemVariantDraft.named(String label) => ShopItemVariantDraft(label: label);
+  factory ShopItemVariantDraft.named(String label) =>
+      ShopItemVariantDraft(label: label);
 
   final Key key;
   final TextEditingController labelController;
@@ -67,37 +67,25 @@ class ShopItemFormController {
   final CategoryItemModel? activeCategory;
 
   final nameController = TextEditingController();
-  final packAmountController = TextEditingController();
-  final defaultPriceController = TextEditingController();
-  final customerPriceController = TextEditingController();
-  final sellerPriceController = TextEditingController();
   final noteController = TextEditingController();
 
   final List<ShopItemVariantDraft> variantDrafts = <ShopItemVariantDraft>[];
 
   CategoryItemModel? categoryFilter;
   String? imageUrl;
-  ShopItemKind itemKind = ShopItemKind.single;
 
   late final Map<String, String> _initialTextValues;
   late final CategoryItemModel? _initialCategory;
   late final String? _initialImageUrl;
-  late final ShopItemKind _initialItemKind;
   late final String _initialVariantSnapshot;
 
   bool get isEditing => existingItem != null;
 
-  String get variantSnapshot => variantDrafts.map((draft) => draft.snapshot()).join('||');
+  String get variantSnapshot =>
+      variantDrafts.map((draft) => draft.snapshot()).join('||');
 
   void _registerBaseListeners() {
-    for (final controller in [
-      nameController,
-      packAmountController,
-      defaultPriceController,
-      customerPriceController,
-      sellerPriceController,
-      noteController,
-    ]) {
+    for (final controller in [nameController, noteController]) {
       controller.addListener(onChanged);
     }
   }
@@ -107,22 +95,24 @@ class ShopItemFormController {
     imageUrl = existingItem?.imageUrl;
 
     if (existingItem case final item?) {
-      nameController.text = item.baseName;
-      packAmountController.text = item.packAmount?.toString() ?? '';
-      defaultPriceController.text = item.defaultPrice?.toString() ?? '';
-      customerPriceController.text = item.customerPrice?.toString() ?? '';
-      sellerPriceController.text = item.sellerPrice?.toString() ?? '';
-      noteController.text = item.note ?? '';
+      final editableName = _splitEditableName(item);
+      final initialDraft = ShopItemVariantDraft(
+        label: editableName.label,
+        customerPrice: item.customerPrice?.toString() ?? '',
+        defaultPrice: item.defaultPrice?.toString() ?? '',
+        sellerPrice: item.sellerPrice?.toString() ?? '',
+        packAmount: item.packAmount?.toString() ?? '1',
+      );
 
+      nameController.text = editableName.baseName;
+      noteController.text = item.note ?? '';
       categoryFilter = item.category;
-      itemKind = item.isPack ? ShopItemKind.pack : ShopItemKind.single;
+
+      _registerVariantDraftListeners(initialDraft);
+      variantDrafts.add(initialDraft);
 
       _initialTextValues.addAll({
-        'name': item.baseName,
-        'packAmount': item.packAmount?.toString() ?? '',
-        'defaultPrice': item.defaultPrice?.toString() ?? '',
-        'customerPrice': item.customerPrice?.toString() ?? '',
-        'sellerPrice': item.sellerPrice?.toString() ?? '',
+        'name': editableName.baseName,
         'note': item.note ?? '',
       });
     } else {
@@ -133,18 +123,27 @@ class ShopItemFormController {
 
       _initialTextValues.addAll({
         'name': '',
-        'packAmount': '',
-        'defaultPrice': '',
-        'customerPrice': '',
-        'sellerPrice': '',
         'note': '',
       });
     }
 
     _initialCategory = categoryFilter;
     _initialImageUrl = imageUrl;
-    _initialItemKind = itemKind;
     _initialVariantSnapshot = variantSnapshot;
+  }
+
+  ({String baseName, String label}) _splitEditableName(ShopItemModel item) {
+    final rawName = item.baseName;
+    final separatorIndex = rawName.lastIndexOf(' - ');
+
+    if (separatorIndex <= 0 || separatorIndex >= rawName.length - 3) {
+      return (baseName: rawName, label: '');
+    }
+
+    return (
+      baseName: rawName.substring(0, separatorIndex).trim(),
+      label: rawName.substring(separatorIndex + 3).trim(),
+    );
   }
 
   void _registerVariantDraftListeners(ShopItemVariantDraft draft) {
@@ -172,14 +171,6 @@ class ShopItemFormController {
     onChanged();
   }
 
-  void setItemKind(ShopItemKind nextKind) {
-    itemKind = nextKind;
-    if (nextKind == ShopItemKind.single) {
-      packAmountController.clear();
-    }
-    onChanged();
-  }
-
   void setImageUrl(String? nextImageUrl) {
     imageUrl = nextImageUrl;
     onChanged();
@@ -191,30 +182,17 @@ class ShopItemFormController {
   }) {
     final hasTextChanges = <String, String>{
       'name': nameController.text,
-      'packAmount': packAmountController.text,
-      'defaultPrice': defaultPriceController.text,
-      'customerPrice': customerPriceController.text,
-      'sellerPrice': sellerPriceController.text,
       'note': noteController.text,
     }.entries.any((entry) => entry.value != _initialTextValues[entry.key]);
 
-    final hasVariantChanges = !isEditing && variantSnapshot != _initialVariantSnapshot;
+    final hasVariantChanges = variantSnapshot != _initialVariantSnapshot;
 
     return hasTextChanges ||
         categoryFilter != _initialCategory ||
-        itemKind != _initialItemKind ||
         hasVariantChanges ||
         selectedImage != null ||
         imageUrl != _initialImageUrl ||
         uploadState is UploadSuccess;
-  }
-
-  int? get parsedPackAmount {
-    final raw = packAmountController.text.trim();
-    if (raw.isEmpty) {
-      return null;
-    }
-    return int.tryParse(raw);
   }
 
   String? get sharedNote {
@@ -242,20 +220,20 @@ class ShopItemFormController {
     final label = draft.labelController.text.trim();
     final packAmount = parseDraftPackAmount(draft);
     final labelSuffix = label.isEmpty ? '' : ' - $label';
-    final packSuffix = packAmount != null && packAmount > 1 ? ' x$packAmount' : '';
+    final packSuffix =
+        packAmount != null && packAmount > 1 ? ' x$packAmount' : '';
     return '$baseName$labelSuffix$packSuffix';
   }
 
   ShopItemModel buildEditedItem({String? imageUrlOverride}) {
+    final draft = variantDrafts.first;
+
     return ShopItemModel(
       id: existingItem?.id ?? 0,
-      name: ShopItemModel.buildDisplayName(
-        nameController.text.trim(),
-        packAmount: itemKind == ShopItemKind.pack ? parsedPackAmount : null,
-      ),
-      defaultPrice: parseControllerPrice(defaultPriceController),
-      customerPrice: parseControllerPrice(customerPriceController),
-      sellerPrice: parseControllerPrice(sellerPriceController),
+      name: buildVariantName(nameController.text.trim(), draft),
+      defaultPrice: parseControllerPrice(draft.defaultPriceController),
+      customerPrice: parseControllerPrice(draft.customerPriceController),
+      sellerPrice: parseControllerPrice(draft.sellerPriceController),
       note: sharedNote,
       imageUrl: imageUrlOverride ?? imageUrl,
       category: categoryFilter,
@@ -284,10 +262,6 @@ class ShopItemFormController {
 
   void dispose() {
     nameController.dispose();
-    packAmountController.dispose();
-    defaultPriceController.dispose();
-    customerPriceController.dispose();
-    sellerPriceController.dispose();
     noteController.dispose();
     for (final draft in variantDrafts) {
       draft.dispose();

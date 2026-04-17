@@ -10,6 +10,7 @@ class ShopItemVariantBuilder extends StatelessWidget {
     required this.onAddPack,
     required this.onAddCustom,
     required this.onRemove,
+    this.allowMultiple = true,
     super.key,
   });
 
@@ -18,6 +19,7 @@ class ShopItemVariantBuilder extends StatelessWidget {
   final VoidCallback onAddPack;
   final VoidCallback onAddCustom;
   final ValueChanged<ShopItemVariantDraft> onRemove;
+  final bool allowMultiple;
 
   @override
   Widget build(BuildContext context) {
@@ -31,25 +33,27 @@ class ShopItemVariantBuilder extends StatelessWidget {
           style: AppTextTheme.body,
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _PresetChip(label: l10n.singleItem, onPressed: onAddSingle),
-            _PresetChip(label: l10n.packItem, onPressed: onAddPack),
-            _PresetChip(
-              label: l10n.addVariant,
-              icon: Icons.add_rounded,
-              onPressed: onAddCustom,
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+        if (allowMultiple) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _PresetChip(label: l10n.singleItem, onPressed: onAddSingle),
+              _PresetChip(label: l10n.packItem, onPressed: onAddPack),
+              _PresetChip(
+                label: l10n.addVariant,
+                icon: Icons.add_rounded,
+                onPressed: onAddCustom,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
         ...variants.map(
           (draft) => _VariantDraftCard(
             key: draft.key,
             draft: draft,
-            onRemove: () => onRemove(draft),
+            onRemove: allowMultiple ? () => onRemove(draft) : null,
           ),
         ),
       ],
@@ -87,12 +91,12 @@ class _PresetChip extends StatelessWidget {
 class _VariantDraftCard extends StatelessWidget {
   const _VariantDraftCard({
     required this.draft,
-    required this.onRemove,
+    this.onRemove,
     super.key,
   });
 
   final ShopItemVariantDraft draft;
-  final VoidCallback onRemove;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -128,17 +132,18 @@ class _VariantDraftCard extends StatelessWidget {
                   ),
                 ),
               ),
-              IconButton(
-                onPressed: onRemove,
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: Icon(
-                  Icons.close_rounded,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant,
+              if (onRemove != null)
+                IconButton(
+                  onPressed: onRemove,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 8),

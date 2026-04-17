@@ -241,7 +241,9 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
         hintText: '',
         textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
-        keyboardType: maxLines != null ? TextInputType.multiline : (isPrice ? TextInputType.number : keyboardType),
+        keyboardType: maxLines != null
+            ? TextInputType.multiline
+            : (isPrice ? TextInputType.number : keyboardType),
         action: textInputAction,
         useCustomBorder: false,
         validator: (value) {
@@ -265,95 +267,14 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
     );
   }
 
-  Widget _buildEditOnlyVariantType() {
-    final l10n = AppLocalizations.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.itemType,
-          style: AppTextTheme.body,
-        ),
-        const SizedBox(height: 8),
-        SegmentedButton<ShopItemKind>(
-          segments: [
-            ButtonSegment(
-              value: ShopItemKind.single,
-              label: Text(l10n.singleItem),
-              icon: const Icon(Icons.sell_outlined),
-            ),
-            ButtonSegment(
-              value: ShopItemKind.pack,
-              label: Text(l10n.packItem),
-              icon: const Icon(Icons.inventory_2_outlined),
-            ),
-          ],
-          selected: {_formController.itemKind},
-          onSelectionChanged: (selection) {
-            final nextKind = selection.first;
-            if (_formController.itemKind != nextKind) {
-              _formController.setItemKind(nextKind);
-            }
-          },
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildEditOnlyPricingFields() {
-    final l10n = AppLocalizations.of(context);
-
-    return Column(
-      children: [
-        if (_formController.itemKind == ShopItemKind.pack)
-          _buildTextField(
-            controller: _formController.packAmountController,
-            label: l10n.packSize,
-            helperText: l10n.packSizeHint,
-            suffixText: l10n.itemsSuffix,
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return l10n.packSizeRequired;
-              }
-              final parsed = int.tryParse(value);
-              if (parsed == null || parsed <= 1) {
-                return l10n.packSizeValidation;
-              }
-              return null;
-            },
-          ),
-        _buildTextField(
-          controller: _formController.customerPriceController,
-          label: l10n.customerPrice,
-          isPrice: true,
-          required: true,
-          keyboardType: TextInputType.number,
-        ),
-        _buildTextField(
-          controller: _formController.defaultPriceController,
-          label: l10n.defaultPrice,
-          isPrice: true,
-          keyboardType: TextInputType.number,
-        ),
-        _buildTextField(
-          controller: _formController.sellerPriceController,
-          label: l10n.sellerPrice,
-          isPrice: true,
-          keyboardType: TextInputType.number,
-        ),
-      ],
-    );
-  }
-
   Widget _buildSubmitButton(bool isKeyboardVisible) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
     final label = _formController.isEditing
         ? l10n.saveChanges
-        : (_formController.variantDrafts.length > 1 ? l10n.addItems : l10n.addItem);
+        : (_formController.variantDrafts.length > 1
+            ? l10n.addItems
+            : l10n.addItem);
 
     if (!isKeyboardVisible) {
       return Positioned(
@@ -452,25 +373,21 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                         required: true,
                         textCapitalization: TextCapitalization.sentences,
                       ),
-                      if (_formController.isEditing)
-                        _buildEditOnlyVariantType()
-                      else ...[
-                        ShopItemVariantBuilder(
-                          variants: _formController.variantDrafts,
-                          onAddSingle: () => _formController.addVariantDraft(
-                            ShopItemVariantDraft.single(),
-                          ),
-                          onAddPack: () => _formController.addVariantDraft(
-                            ShopItemVariantDraft.pack(),
-                          ),
-                          onAddCustom: () => _formController.addVariantDraft(
-                            ShopItemVariantDraft.single(),
-                          ),
-                          onRemove: _formController.removeVariantDraft,
+                      ShopItemVariantBuilder(
+                        variants: _formController.variantDrafts,
+                        allowMultiple: !_formController.isEditing,
+                        onAddSingle: () => _formController.addVariantDraft(
+                          ShopItemVariantDraft.single(),
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                      if (_formController.isEditing) _buildEditOnlyPricingFields(),
+                        onAddPack: () => _formController.addVariantDraft(
+                          ShopItemVariantDraft.pack(),
+                        ),
+                        onAddCustom: () => _formController.addVariantDraft(
+                          ShopItemVariantDraft.single(),
+                        ),
+                        onRemove: _formController.removeVariantDraft,
+                      ),
+                      const SizedBox(height: 16),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Row(

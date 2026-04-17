@@ -33,6 +33,8 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
   late DateTime? _toDate = widget.initialToDate;
   late CustomerModel? _loanerFilter;
   final TextEditingController _loanerController = TextEditingController();
+  final TextEditingController _fromDateController = TextEditingController();
+  final TextEditingController _toDateController = TextEditingController();
 
   bool get isDisabled =>
       _fromDate == null && _toDate == null && _loanerFilter == null;
@@ -42,11 +44,14 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
     super.initState();
     _loanerFilter = widget.initialLoanerFilter;
     _loanerController.text = _loanerFilter?.name ?? '';
+    _syncDateControllers();
   }
 
   @override
   void dispose() {
     _loanerController.dispose();
+    _fromDateController.dispose();
+    _toDateController.dispose();
     super.dispose();
   }
 
@@ -69,6 +74,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
         } else {
           _toDate = picked;
         }
+        _syncDateControllers();
       });
     }
   }
@@ -78,7 +84,13 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
       final temp = _fromDate;
       _fromDate = _toDate;
       _toDate = temp;
+      _syncDateControllers();
     }
+  }
+
+  void _syncDateControllers() {
+    _fromDateController.text = _formatToRFC3339Date(_fromDate);
+    _toDateController.text = _formatToRFC3339Date(_toDate);
   }
 
   String _formatToRFC3339Date(DateTime? date) {
@@ -108,6 +120,7 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: _fromDateController,
               readOnly: true,
               onTap: () => _selectDate(context, true),
               decoration: InputDecoration(
@@ -122,12 +135,10 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
               ),
-              controller: TextEditingController(
-                text: _formatToRFC3339Date(_fromDate),
-              )..addListener(() {}),
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: _toDateController,
               readOnly: true,
               onTap: () => _selectDate(context, false),
               decoration: InputDecoration(
@@ -142,15 +153,11 @@ class _LoanerFilterSheetState extends State<LoanerFilterSheet> {
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
               ),
-              controller: TextEditingController(
-                text: _formatToRFC3339Date(_toDate),
-              ),
             ),
             const SizedBox(height: 16),
             CustomerAutocompleteField(
               controller: _loanerController,
               label: l10n.name,
-              required: true,
               direction: VerticalDirection.up,
               onSelected: (customer) {
                 _loanerFilter = customer;
