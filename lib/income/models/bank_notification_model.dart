@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:my_app/app/app.dart';
@@ -14,14 +16,24 @@ enum BankApp {
   final String label;
 
   static BankApp fromKey(String? key) {
-    switch (key) {
+    final normalized = key?.trim().toLowerCase().replaceAll(RegExp(r'[\s-]+'), '_');
+    switch (normalized) {
       case 'aba':
+      case 'aba_bank':
+      case 'aba_bank_mobile':
         return BankApp.aba;
       case 'chip_mong':
+      case 'chipmong':
+      case 'chip_mong_bank':
         return BankApp.chipMong;
       case 'acleda':
+      case 'acleda_bank':
         return BankApp.acleda;
       default:
+        final raw = key?.toLowerCase() ?? '';
+        if (raw.contains('aba')) return BankApp.aba;
+        if (raw.contains('chip') && raw.contains('mong')) return BankApp.chipMong;
+        if (raw.contains('acleda')) return BankApp.acleda;
         return BankApp.unknown;
     }
   }
@@ -62,21 +74,32 @@ class BankNotificationModel extends Equatable {
     this.source = 'native',
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
-
   factory BankNotificationModel.fromNativeMap(Map<String, dynamic> json) {
-    final receivedAtRaw = tryCast<int>(json['receivedAt']) ??
-        tryCast<int>(json['received_at']) ??
-        DateTime.now().millisecondsSinceEpoch;
-    final packageName = tryCast<String>(json['packageName']) ??
-        tryCast<String>(json['package_name']) ??
-        '';
+    final receivedAtRaw =
+        tryCast<int>(json['receivedAt']) ?? tryCast<int>(json['received_at']) ?? DateTime.now().millisecondsSinceEpoch;
+    final packageName = tryCast<String>(json['packageName']) ?? tryCast<String>(json['package_name']) ?? '';
     final title = tryCast<String>(json['title']);
     final message =
-        tryCast<String>(json['message']) ?? tryCast<String>(json['text']) ?? '';
+        tryCast<String>(json['message']) ?? tryCast<String>(json['text']) ?? tryCast<String>(json['body']) ?? '';
+    final rawBankKey = tryCast<String>(json['bankKey']) ?? tryCast<String>(json['bank_key']);
     final packageBankApp = BankApp.fromPackageName(packageName);
-    final payloadBankApp = BankApp.fromKey(tryCast<String>(json['bankKey']));
-    final bankApp =
-        packageBankApp == BankApp.unknown ? payloadBankApp : packageBankApp;
+    final payloadBankApp = BankApp.fromKey(rawBankKey);
+    final inferredBankApp = _inferBankFromText(
+      [
+        title,
+        message,
+        tryCast<String>(json['body']),
+      ].whereType<String>().join(' '),
+    );
+    final bankApp = packageBankApp != BankApp.unknown
+        ? packageBankApp
+        : payloadBankApp != BankApp.unknown
+            ? payloadBankApp
+            : inferredBankApp;
+    final amount = _parseDouble(json['amount']) ?? _extractAmountFromText(message);
+    final currency = tryCast<String>(json['currency']) ??
+        _extractCurrencyFromText(message) ??
+        tryCast<String>(json['currency'], fallback: 'USD')!;
 
     return BankNotificationModel(
       fingerprint: tryCast<String>(json['fingerprint']) ??
@@ -90,13 +113,10 @@ class BankNotificationModel extends Equatable {
       bankApp: bankApp,
       title: title,
       message: message,
-      rawPayload: tryCast<String>(json['rawPayload']) ??
-          tryCast<String>(json['raw_payload']),
-      amount: _parseDouble(json['amount']),
-      currency: tryCast<String>(json['currency'], fallback: 'USD')!,
-      isIncome: tryCast<bool>(json['isIncome']) ??
-          tryCast<bool>(json['is_income']) ??
-          true,
+      rawPayload: tryCast<String>(json['rawPayload']) ?? tryCast<String>(json['raw_payload']),
+      amount: amount,
+      currency: currency,
+      isIncome: tryCast<bool>(json['isIncome']) ?? tryCast<bool>(json['is_income']) ?? true,
       receivedAt: DateTime.fromMillisecondsSinceEpoch(receivedAtRaw).toLocal(),
       source: tryCast<String>(json['source'], fallback: 'native')!,
       createdAt: tryCast<int>(json['createdAt'])?.let(
@@ -106,13 +126,126 @@ class BankNotificationModel extends Equatable {
     );
   }
 
+  static Map<String, dynamic> _parsePayloadMap(dynamic payload) {
+    if (payload is Map<String, dynamic>) {
+      return payload;
+    }
+    if (payload is Map) {
+      return Map<String, dynamic>.from(payload);
+    }
+    if (payload is String && payload.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(payload);
+        if (decoded is Map<String, dynamic>) {
+          return decoded;
+        }
+        if (decoded is Map) {
+          return Map<String, dynamic>.from(decoded);
+        }
+      } catch (_) {
+        return const <String, dynamic>{};
+      }
+    }
+    return const <String, dynamic>{};
+  }
+
+  static Map<String, dynamic> fromJSON(
+    Map<String, dynamic> entry,
+  ) {
+    final payloadMap = _parsePayloadMap(entry['payload']);
+    final dataMap = _parsePayloadMap(entry['data']);
+    final mergedMap = <String, dynamic>{
+      ...payloadMap,
+      ...dataMap,
+    };
+
+    final bankKey = mergedMap['bankKey'] ?? mergedMap['bank_key'] ?? entry['bankKey'] ?? entry['bank_key'];
+    final amount = mergedMap['amount'] ?? entry['amount'];
+
+    final currency = mergedMap['currency'] ?? entry['currency'];
+    final isIncome = mergedMap['isIncome'] ?? mergedMap['is_income'] ?? entry['isIncome'] ?? entry['is_income'];
+    final message = mergedMap['message'] ?? mergedMap['text'] ?? entry['message'] ?? entry['text'] ?? entry['body'];
+    final title = mergedMap['title'] ?? entry['title'];
+    final packageName =
+        mergedMap['packageName'] ?? mergedMap['package_name'] ?? entry['packageName'] ?? entry['package_name'];
+
+    final createdAtRaw = entry['createdAt'] ?? entry['created_at'];
+    final receivedAtRaw = mergedMap['receivedAt'] ?? mergedMap['received_at'] ?? createdAtRaw;
+
+    final normalized = <String, dynamic>{
+      ...mergedMap,
+      'id': entry['id'],
+      if (packageName != null) 'packageName': packageName,
+      if (bankKey != null) 'bankKey': bankKey,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (isIncome != null) 'isIncome': isIncome,
+      if (message != null) 'message': message,
+      if (title != null) 'title': title,
+      if (entry['fingerprint'] != null) 'fingerprint': entry['fingerprint'],
+      if (entry['source'] != null) 'source': entry['source'],
+      if (entry['status'] != null) 'status': entry['status'],
+      if (!mergedMap.containsKey('createdAt') && createdAtRaw != null) 'createdAt': createdAtRaw,
+      if (!mergedMap.containsKey('receivedAt') && receivedAtRaw != null) 'receivedAt': receivedAtRaw,
+    };
+
+    normalized['source'] = (normalized['source']?.toString().isNotEmpty ?? false) ? normalized['source'] : 'remote';
+
+    if (normalized['fingerprint'] == null || normalized['fingerprint'].toString().isEmpty) {
+      normalized['fingerprint'] = [
+        normalized['packageName'] ?? normalized['package_name'] ?? '',
+        normalized['title'] ?? '',
+        normalized['message'] ?? normalized['text'] ?? '',
+        normalized['receivedAt'] ?? normalized['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
+      ].join('|');
+    }
+
+    return normalized;
+  }
+
   static double? _parseDouble(dynamic value) {
     if (value == null) return null;
     if (value is num) return value.toDouble();
+    if (value is Map) {
+      final decimal = value[r'$numberDecimal'] ?? value['numberDecimal'] ?? value['value'];
+      return _parseDouble(decimal);
+    }
     if (value is String) {
-      return double.tryParse(value.replaceAll(',', '').trim());
+      final cleaned = value.replaceAll(',', '').trim();
+      final direct = double.tryParse(cleaned);
+      if (direct != null) {
+        return direct;
+      }
+      final matched = RegExp(r'(-?\d+(?:\.\d+)?)').firstMatch(cleaned)?.group(1);
+      if (matched != null) {
+        return double.tryParse(matched);
+      }
     }
     return null;
+  }
+
+  static double? _extractAmountFromText(String text) {
+    final normalized = text.replaceAll(',', '');
+    final match = RegExp(r'(?:USD|KHR|\$|៛)?\s*(-?\d+(?:\.\d+)?)', caseSensitive: false).firstMatch(normalized);
+    if (match == null) return null;
+    return double.tryParse(match.group(1)!);
+  }
+
+  static String? _extractCurrencyFromText(String text) {
+    final upper = text.toUpperCase();
+    if (upper.contains('KHR') || upper.contains('៛')) return 'KHR';
+    if (upper.contains('USD') || upper.contains(r'$')) return 'USD';
+    return null;
+  }
+
+  static BankApp _inferBankFromText(String text) {
+    final normalized = text.toLowerCase();
+    if (normalized.contains('aba')) return BankApp.aba;
+    if (normalized.contains('chip') && normalized.contains('mong')) {
+      return BankApp.chipMong;
+    }
+    if (normalized.contains('acleda')) return BankApp.acleda;
+    return BankApp.unknown;
   }
 
   final int id;
@@ -209,9 +342,7 @@ class IncomeSummary extends Equatable {
           (value) => value + amount,
           ifAbsent: () => amount,
         );
-        incomeByBankByCurrency
-            .putIfAbsent(currency, () => <BankApp, double>{})
-            .update(
+        incomeByBankByCurrency.putIfAbsent(currency, () => <BankApp, double>{}).update(
               item.bankApp,
               (value) => value + amount,
               ifAbsent: () => amount,
@@ -260,15 +391,9 @@ class IncomeSummary extends Equatable {
         totalIncome,
         totalExpense,
         totalCount,
-        incomeByBank.entries
-            .map((entry) => '${entry.key.key}:${entry.value}')
-            .toList(growable: false),
-        totalIncomeByCurrency.entries
-            .map((entry) => '${entry.key}:${entry.value}')
-            .toList(growable: false),
-        totalExpenseByCurrency.entries
-            .map((entry) => '${entry.key}:${entry.value}')
-            .toList(growable: false),
+        incomeByBank.entries.map((entry) => '${entry.key.key}:${entry.value}').toList(growable: false),
+        totalIncomeByCurrency.entries.map((entry) => '${entry.key}:${entry.value}').toList(growable: false),
+        totalExpenseByCurrency.entries.map((entry) => '${entry.key}:${entry.value}').toList(growable: false),
         incomeByBankByCurrency.entries
             .map(
               (entry) =>

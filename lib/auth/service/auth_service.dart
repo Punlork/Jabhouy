@@ -35,7 +35,7 @@ class AuthService extends BaseService {
   String get basePath => '/auth';
 
   Future<ApiResponse<User?>> getSession() async {
-    return get(
+    final res = await get(
       '/get-session',
       showSnackBar: false,
       parser: (value) => value != null
@@ -44,6 +44,13 @@ class AuthService extends BaseService {
             )
           : null,
     );
+    if (res.success && res.data == null) {
+      return ApiResponse(
+        success: false,
+        message: 'Session is missing or expired.',
+      );
+    }
+    return res;
   }
 
   Future<User?> getCachedUser() async {
@@ -113,7 +120,7 @@ class AuthService extends BaseService {
       );
     }
 
-    if (cachedUser != null) {
+    if (cachedUser != null && _isRecoverableSessionFailure(response.message)) {
       return AuthBootstrapResult(
         response: ApiResponse(
           success: true,
@@ -128,6 +135,15 @@ class AuthService extends BaseService {
       response: response,
       usedCachedSession: false,
     );
+  }
+
+  bool _isRecoverableSessionFailure(String? message) {
+    if (message == null) return false;
+    final normalized = message.toLowerCase();
+    return normalized.contains('network error') ||
+        normalized.contains('socket') ||
+        normalized.contains('timeout') ||
+        normalized.contains('failed host lookup');
   }
 
   Future<ApiResponse<User>> signup({

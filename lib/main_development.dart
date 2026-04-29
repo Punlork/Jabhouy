@@ -7,11 +7,7 @@ Future<void> main() async {
   await bootstrap(
     () => const Directionality(
       textDirection: TextDirection.ltr,
-      child: Banner(
-        message: 'Dev',
-        location: BannerLocation.topEnd,
-        child: App(),
-      ),
+      child: App(),
     ),
     initialize: () => dotenv.load(fileName: '.env.dev'),
   );

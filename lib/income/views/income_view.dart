@@ -364,6 +364,18 @@ class _NotificationCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // ...[
+              //   const SizedBox(width: 8),
+              //   Text(
+              //     'ID: ${item.id}',
+              //     style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              //           color: colorScheme.onSurfaceVariant,
+              //           fontSize: 11,
+              //           fontWeight: FontWeight.w400,
+              //         ),
+              //   ),
+              //   const SizedBox(width: 8),
+              // ],
               if (item.amount != null)
                 Text(
                   item.amountLabel,

@@ -15,12 +15,11 @@ const _incomeRecordUnset = Object();
 const _incomeStatusUnset = Object();
 
 extension IncomeStateExtension on IncomeState {
-  IncomeLoaded? get asLoaded =>
-      this is IncomeLoaded ? this as IncomeLoaded : null;
+  IncomeLoaded? get asLoaded => this is IncomeLoaded ? this as IncomeLoaded : null;
 }
 
 class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
-  IncomeBloc(this._service) : super(const IncomeLoading()) {
+  IncomeBloc(this._service, this._fcmService) : super(const IncomeLoading()) {
     _filtersController = StreamController<_IncomeFilters>.broadcast(sync: true);
 
     _incomeSubscription = _filtersController.stream
@@ -40,6 +39,11 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
       }
     });
     _filtersController.add(const _IncomeFilters());
+    _foregroundNotificationSubscription = _fcmService.foregroundIncomeMessageStream.listen((_) {
+      if (!isClosed) {
+        add(const RefreshIncomeTrackingStatus());
+      }
+    });
 
     on<LoadIncomeDashboard>(_onLoadIncomeDashboard);
     on<_IncomeUpdated>(_onIncomeUpdated);
@@ -52,13 +56,15 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
   }
 
   final IncomeService _service;
+  final FcmService _fcmService;
   late final StreamController<_IncomeFilters> _filtersController;
-  late final StreamSubscription<List<BankNotificationModel>>
-      _incomeSubscription;
+  late final StreamSubscription<List<BankNotificationModel>> _incomeSubscription;
+  late final StreamSubscription<Map<String, dynamic>> _foregroundNotificationSubscription;
 
   @override
   Future<void> close() async {
     await _incomeSubscription.cancel();
+    await _foregroundNotificationSubscription.cancel();
     await _filtersController.close();
     await _service.dispose();
     return super.close();
@@ -66,6 +72,7 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
 
   Future<void> _bootstrap() async {
     await _service.initialize();
+    await _service.pullRemoteNotifications(force: true);
     final status = await _service.getTrackingStatus();
     if (!isClosed) {
       add(_IncomeBootstrapCompleted(status));
@@ -82,19 +89,13 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
 
     final currentState = state.asLoaded;
     final searchQuery = event.searchQuery ?? currentState?.searchQuery ?? '';
-    final fromDate = identical(event.fromDate, _incomeDateUnset)
-        ? currentState?.fromDate
-        : event.fromDate as DateTime?;
-    final toDate = identical(event.toDate, _incomeDateUnset)
-        ? currentState?.toDate
-        : event.toDate as DateTime?;
-    final bankFilter = identical(event.bankFilter, _incomeBankUnset)
-        ? currentState?.bankFilter
-        : event.bankFilter as BankApp?;
+    final fromDate = identical(event.fromDate, _incomeDateUnset) ? currentState?.fromDate : event.fromDate as DateTime?;
+    final toDate = identical(event.toDate, _incomeDateUnset) ? currentState?.toDate : event.toDate as DateTime?;
+    final bankFilter =
+        identical(event.bankFilter, _incomeBankUnset) ? currentState?.bankFilter : event.bankFilter as BankApp?;
     final recordFilter = identical(event.recordFilter, _incomeRecordUnset)
         ? currentState?.recordFilter ?? NotificationRecordFilter.all
-        : event.recordFilter as NotificationRecordFilter? ??
-            NotificationRecordFilter.all;
+        : event.recordFilter as NotificationRecordFilter? ?? NotificationRecordFilter.all;
 
     if (!_filtersController.isClosed) {
       _filtersController.add(
@@ -136,8 +137,7 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
         fromDate: currentState?.fromDate,
         toDate: currentState?.toDate,
         bankFilter: currentState?.bankFilter,
-        recordFilter:
-            currentState?.recordFilter ?? NotificationRecordFilter.all,
+        recordFilter: currentState?.recordFilter ?? NotificationRecordFilter.all,
         trackingStatus: currentState?.trackingStatus,
       ),
     );
@@ -155,8 +155,7 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
         fromDate: currentState?.fromDate,
         toDate: currentState?.toDate,
         bankFilter: currentState?.bankFilter,
-        recordFilter:
-            currentState?.recordFilter ?? NotificationRecordFilter.all,
+        recordFilter: currentState?.recordFilter ?? NotificationRecordFilter.all,
         trackingStatus: event.status,
       ),
     );
@@ -166,6 +165,7 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
     RefreshIncomeTrackingStatus event,
     Emitter<IncomeState> emit,
   ) async {
+    await _service.pullRemoteNotifications();
     await _service.importPendingTrackedNotifications();
     final status = await _service.getTrackingStatus();
     if (!isClosed) {

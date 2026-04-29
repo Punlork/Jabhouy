@@ -28,18 +28,22 @@ class ApiCookies {
   void updateCookies(Uri uri, http.Response response) {
     final setCookieHeaders = response.headers['set-cookie'];
     if (setCookieHeaders != null) {
-      final cookies =
-          setCookieHeaders.split(',').map((str) => str.trim()).toList();
+      final cookies = _splitSetCookieHeader(setCookieHeaders);
       final domain = uri.host;
 
       _cookies[domain] ??= {};
       for (final cookie in cookies) {
-        final parts = cookie.split(';');
-        final nameValue = parts[0].split('=');
-        if (nameValue.length >= 2) {
-          final name = nameValue[0].trim();
-          final value = nameValue[1].trim();
-          _cookies[domain]![name] = value;
+        try {
+          final parsed = Cookie.fromSetCookieValue(cookie);
+          _cookies[domain]![parsed.name] = parsed.value;
+        } catch (_) {
+          final parts = cookie.split(';');
+          final nameValue = parts.first.split('=');
+          if (nameValue.length >= 2) {
+            final name = nameValue[0].trim();
+            final value = nameValue.sublist(1).join('=').trim();
+            _cookies[domain]![name] = value;
+          }
         }
       }
       _saveCookies();
@@ -81,5 +85,24 @@ class ApiCookies {
     final domainCookies = _cookies[uri.host];
     if (domainCookies == null || domainCookies.isEmpty) return null;
     return domainCookies.entries.map((e) => '${e.key}=${e.value}').join('; ');
+  }
+
+  List<String> _splitSetCookieHeader(String header) {
+    final parts = <String>[];
+    var start = 0;
+    for (var index = 0; index < header.length; index++) {
+      if (header[index] != ',') {
+        continue;
+      }
+
+      final next = header.substring(index + 1).trimLeft();
+      if (RegExp(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+=").hasMatch(next)) {
+        parts.add(header.substring(start, index).trim());
+        start = index + 1;
+      }
+    }
+
+    parts.add(header.substring(start).trim());
+    return parts.where((part) => part.isNotEmpty).toList(growable: false);
   }
 }

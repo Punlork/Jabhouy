@@ -11,8 +11,7 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 extension AuthStateExtension on AuthState {
-  Authenticated? get asAuthenticated =>
-      this is Authenticated ? this as Authenticated : null;
+  Authenticated? get asAuthenticated => this is Authenticated ? this as Authenticated : null;
 }
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {

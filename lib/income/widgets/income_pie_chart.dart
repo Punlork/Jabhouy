@@ -180,35 +180,57 @@ class _CurrencyPieChartSection extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: CustomPaint(
-              painter: _IncomePieChartPainter(
-                segments: section.segments,
-                emptyColor: colorScheme.secondaryContainer,
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${context.l10n.totalIncome} (${section.currency})',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: CustomPaint(
+                painter: _IncomePieChartPainter(
+                  segments: section.segments,
+                  emptyColor: colorScheme.secondaryContainer,
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '${context.l10n.totalIncome} • ${section.currency}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.2,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: 110,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            BankNotificationModel.formatAmount(
+                              amount: section.total,
+                              currency: section.currency,
+                            ),
+                            maxLines: 1,
+                            style: AppTextTheme.title.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      BankNotificationModel.formatAmount(
-                        amount: section.total,
-                        currency: section.currency,
+                        ),
                       ),
-                      style: AppTextTheme.title.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -224,50 +246,48 @@ class _CurrencyPieChartSection extends StatelessWidget {
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: section.segments
-                        .map(
-                          (segment) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                // Expanded(
-                                //   child: Text(
-                                //     segment.label
-                                //         .replaceAll(
-                                //           RegExp(
-                                //             r'\bbank\b',
-                                //             caseSensitive: false,
-                                //           ),
-                                //           '',
-                                //         )
-                                //         .trim(),
-                                //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                //           color: colorScheme.onSurface,
-                                //           fontWeight: FontWeight.w600,
-                                //         ),
-                                //   ),
-                                // ),
-                                Text(
-                                  BankNotificationModel.formatAmount(
-                                    amount: segment.value,
-                                    currency: section.currency,
-                                  ),
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.onSurface,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                                const SizedBox(width: 8),
-                                BankLogoBadge(
-                                  branding: segment.branding,
-                                  size: 20,
-                                ),
-                              ],
+                    children: List.generate(section.segments.length, (index) {
+                      final segment = section.segments[index];
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: index == section.segments.length - 1 ? 0 : 10),
+                        child: Row(
+                          children: [
+                            BankLogoBadge(
+                              branding: segment.branding,
+                              size: 20,
                             ),
-                          ),
-                        )
-                        .toList(growable: false),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                segment.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurface,
+                                    ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(minWidth: 84, maxWidth: 120),
+                              child: Text(
+                                BankNotificationModel.formatAmount(
+                                  amount: segment.value,
+                                  currency: section.currency,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                   ),
           ),
         ],
@@ -299,18 +319,25 @@ class _IncomePieChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = size.width * 0.05;
-    final rect = Offset.zero & size;
+    final shortestSide = math.min(size.width, size.height);
+    final strokeWidth = (shortestSide * 0.10).clamp(8.0, 16.0);
+    final center = Offset(size.width / 2, size.height / 2);
+    final squareRect = Rect.fromCenter(
+      center: center,
+      width: shortestSide,
+      height: shortestSide,
+    );
+    final arcRect = squareRect.deflate(strokeWidth / 2);
     final total = segments.fold<double>(0, (sum, segment) => sum + segment.value);
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.butt;
 
     if (total <= 0) {
       paint.color = emptyColor;
       canvas.drawArc(
-        rect.deflate(strokeWidth / 2),
+        arcRect,
         -math.pi / 2,
         math.pi * 2,
         false,
@@ -324,7 +351,7 @@ class _IncomePieChartPainter extends CustomPainter {
       final sweepAngle = (segment.value / total) * math.pi * 2;
       paint.color = segment.branding.primary;
       canvas.drawArc(
-        rect.deflate(strokeWidth / 2),
+        arcRect,
         startAngle,
         sweepAngle,
         false,

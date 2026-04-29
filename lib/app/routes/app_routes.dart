@@ -117,7 +117,10 @@ class AppRoutes {
                   ),
                 ),
                 BlocProvider(
-                  create: (context) => IncomeBloc(getIt<IncomeService>()),
+                  create: (context) => IncomeBloc(
+                    getIt<IncomeService>(),
+                    getIt<FcmService>(),
+                  ),
                 ),
               ],
               child: const HomePage(),
@@ -134,8 +137,7 @@ class AppRoutes {
               final extra = state.extra! as Map<String, dynamic>;
               final onAdd = extra['onAdd'] as void Function(ShopItemModel)?;
               final existingItem = extra['existingItem'] as ShopItemModel?;
-              final activeCategory =
-                  extra['activeCategory'] as CategoryItemModel?;
+              final activeCategory = extra['activeCategory'] as CategoryItemModel?;
               final shop = extra['shop'] as ShopBloc;
               final category = extra['category'] as CategoryBloc;
               return CustomTransitionPage(
@@ -231,16 +233,11 @@ class AppRoutes {
             name: settings,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final categoryBloc = extra?['category'] as CategoryBloc? ??
-                  context.read<CategoryBloc>();
-              final shopBloc =
-                  extra?['shop'] as ShopBloc? ?? context.read<ShopBloc>();
-              final customerBloc = extra?['customerBloc'] as CustomerBloc? ??
-                  context.read<CustomerBloc>();
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
-                  context.read<IncomeBloc>();
-              final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ??
-                  context.read<SignoutBloc>();
+              final categoryBloc = extra?['category'] as CategoryBloc? ?? context.read<CategoryBloc>();
+              final shopBloc = extra?['shop'] as ShopBloc? ?? context.read<ShopBloc>();
+              final customerBloc = extra?['customerBloc'] as CustomerBloc? ?? context.read<CustomerBloc>();
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? context.read<IncomeBloc>();
+              final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ?? context.read<SignoutBloc>();
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(
@@ -291,8 +288,7 @@ class AppRoutes {
             name: incomeDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
-                  BlocProvider.of<IncomeBloc>(context);
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? BlocProvider.of<IncomeBloc>(context);
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(

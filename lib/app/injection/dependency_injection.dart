@@ -72,6 +72,7 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton(
       () => IncomeService(
+        getIt<ApiService>(),
         getIt<AppDatabase>(),
         getIt<NotificationTrackingBridge>(),
         getIt<FirebaseIncomeSyncService>(),
@@ -139,7 +140,12 @@ Future<void> setupDependencies() async {
         getIt<ConnectivityService>(),
       ),
     )
-    ..registerFactory(() => IncomeBloc(getIt<IncomeService>()));
+    ..registerFactory(
+      () => IncomeBloc(
+        getIt<IncomeService>(),
+        getIt<FcmService>(),
+      ),
+    );
 
   logger.i('Dependencies setup successfully');
 }

@@ -98,9 +98,9 @@ object BankNotificationPushDispatcher {
 
         val host = baseUrl.trim().trimEnd('/')
         val endpoint = if (host.startsWith("http://") || host.startsWith("https://")) {
-            "$host/notifications/test"
+            "$host/notifications"
         } else {
-            "https://$host/notifications/test"
+            "https://$host/notifications"
         }
 
         val cookieHeader = resolveCookieHeader(prefs, endpoint)

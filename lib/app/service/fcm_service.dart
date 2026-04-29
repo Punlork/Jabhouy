@@ -41,6 +41,7 @@ class FcmService extends BaseService {
 
   final NotificationDiagnosticsService _diagnostics;
   final _localNotifications = FlutterLocalNotificationsPlugin();
+  final _foregroundIncomeMessageController = StreamController<Map<String, dynamic>>.broadcast(sync: true);
   final _recentNotificationKeys = <String>{};
   final _recentNotificationOrder = <String>[];
   bool _initialized = false;
@@ -48,6 +49,7 @@ class FcmService extends BaseService {
   String? _registeredDeviceRole;
 
   bool get _isFirebaseAvailable => Firebase.apps.isNotEmpty;
+  Stream<Map<String, dynamic>> get foregroundIncomeMessageStream => _foregroundIncomeMessageController.stream;
 
   @override
   String get basePath => '/notifications';
@@ -101,8 +103,7 @@ class FcmService extends BaseService {
       if (token == null || token.isEmpty) {
         await _diagnostics.log(
           source: 'flutter.fcm',
-          message:
-              'Skipped backend device registration because no FCM token is available.',
+          message: 'Skipped backend device registration because no FCM token is available.',
           level: 'warning',
           metadata: {
             'deviceId': deviceId,
@@ -185,7 +186,7 @@ class FcmService extends BaseService {
     Map<String, dynamic>? data,
   }) {
     return post<Map<String, dynamic>>(
-      '/test',
+      '',
       showSnackBar: false,
       body: {
         'title': title,
@@ -215,8 +216,7 @@ class FcmService extends BaseService {
   // ---------------------------------------------------------------------------
 
   Future<void> _setupLocalNotifications() async {
-    const androidSettings =
-        AndroidInitializationSettings(_androidNotificationIcon);
+    const androidSettings = AndroidInitializationSettings(_androidNotificationIcon);
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -232,14 +232,12 @@ class FcmService extends BaseService {
 
     // Create the Android notification channel once.
     await _localNotifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(
           const AndroidNotificationChannel(
             _channelId,
             _channelName,
-            description:
-                'Push notifications for income transactions from the main device.',
+            description: 'Push notifications for income transactions from the main device.',
             importance: Importance.high,
           ),
         );
@@ -249,6 +247,7 @@ class FcmService extends BaseService {
     final key = _notificationKeyFromRemoteMessage(message);
     if (!_rememberNotificationKey(key)) return;
     final content = buildNotificationContentFromRemoteMessage(message);
+    _foregroundIncomeMessageController.add(Map<String, dynamic>.from(message.data));
 
     unawaited(
       _showLocalNotification(
@@ -303,8 +302,7 @@ class FcmService extends BaseService {
     final amount = payload['amount'];
     final currency = payload['currency'] as String? ?? 'USD';
     final isIncome = _parseBool(payload['isIncome']) ?? true;
-    final fallbackMessage =
-        payload['message'] as String? ?? payload['title'] as String?;
+    final fallbackMessage = payload['message'] as String? ?? payload['title'] as String?;
     final bankLabel = bank == BankApp.unknown ? 'Bank update' : bank.label;
     final parsedAmount = _parseAmount(amount);
     final formattedAmount = parsedAmount == null
