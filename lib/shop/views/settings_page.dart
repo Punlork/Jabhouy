@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
@@ -138,13 +139,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Column(
                   children: [
                     _SettingsRow(
-                      icon: Icons.person_outline_rounded,
+                      svgAsset: AppAssets.actionProfile,
                       title: l10n.profile,
                       onTap: () => context.pushNamed(AppRoutes.profile),
                     ),
                     _SectionDivider(color: colorScheme.outlineVariant),
                     _SettingsRow(
-                      icon: Icons.category_outlined,
+                      svgAsset: AppAssets.actionCategory,
                       title: l10n.category,
                       onTap: () => context.pushNamed(
                         AppRoutes.category,
@@ -156,7 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     _SectionDivider(color: colorScheme.outlineVariant),
                     _SettingsRow(
-                      icon: Icons.people_outline_rounded,
+                      svgAsset: AppAssets.actionCustomers,
                       title: l10n.customers,
                       onTap: () => context.pushNamed(
                         AppRoutes.customer,
@@ -167,7 +168,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     _SectionDivider(color: colorScheme.outlineVariant),
                     _SettingsRow(
-                      icon: Icons.bug_report_outlined,
+                      svgAsset: AppAssets.actionDiagnostics,
                       title: l10n.diagnostics,
                       onTap: _openDiagnostics,
                     ),
@@ -187,10 +188,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                isMainDevice
-                                    ? Icons.phone_android_rounded
-                                    : Icons.devices_rounded,
+                              _SettingsSvgIcon(
+                                assetPath: isMainDevice
+                                    ? AppAssets.actionDeviceMain
+                                    : AppAssets.actionDeviceSub,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 12),
@@ -229,10 +230,12 @@ class _SettingsPageState extends State<SettingsPage> {
                               isMainDevice: isMainDevice,
                               l10n: l10n,
                             ),
-                            icon: Icon(
-                              isMainDevice
-                                  ? Icons.sync_alt_rounded
-                                  : Icons.security_update_good_rounded,
+                            icon: _SettingsSvgIcon(
+                              assetPath: isMainDevice
+                                  ? AppAssets.actionRefresh
+                                  : AppAssets.actionProtect,
+                              color: colorScheme.onPrimary,
+                              size: 20,
                             ),
                             label: Text(
                               isMainDevice
@@ -256,10 +259,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                           ),
-                          secondary: Icon(
-                            state.isDarkMode
-                                ? Icons.dark_mode_rounded
-                                : Icons.light_mode_rounded,
+                          secondary: _SettingsSvgIcon(
+                            assetPath: state.isDarkMode
+                                ? AppAssets.actionDarkMode
+                                : AppAssets.actionLightMode,
                             color: colorScheme.onSurfaceVariant,
                           ),
                           title: Text(
@@ -288,7 +291,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       builder: (context, state) {
                         final currentLocale = state.locale.languageCode;
                         return _SettingsRow(
-                          icon: Icons.language_rounded,
+                          svgAsset: AppAssets.actionLanguage,
                           title: l10n.switchLanguage,
                           subtitle: currentLocale == 'en'
                               ? l10n.languageEnglish
@@ -307,7 +310,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       builder: (context, snapshot) {
                         final version = snapshot.data ?? '--';
                         return _SettingsInfoRow(
-                          icon: Icons.info_outline_rounded,
+                          svgAsset: AppAssets.actionInfo,
                           title: l10n.appVersion(version),
                         );
                       },
@@ -323,7 +326,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   foregroundColor: colorScheme.onErrorContainer,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                icon: const Icon(Icons.logout_rounded),
+                icon: _SettingsSvgIcon(
+                  assetPath: AppAssets.actionLogout,
+                  color: colorScheme.onErrorContainer,
+                  size: 20,
+                ),
                 label: Text(l10n.signOut),
               ),
             ],
@@ -357,13 +364,13 @@ class _SettingsCard extends StatelessWidget {
 
 class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
-    required this.icon,
+    required this.svgAsset,
     required this.title,
     required this.onTap,
     this.subtitle,
   });
 
-  final IconData icon;
+  final String svgAsset;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -373,7 +380,10 @@ class _SettingsRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-      leading: Icon(icon, color: colorScheme.onSurfaceVariant),
+      leading: _SettingsSvgIcon(
+        assetPath: svgAsset,
+        color: colorScheme.onSurfaceVariant,
+      ),
       splashColor: Colors.transparent,
       title: Text(
         title,
@@ -387,22 +397,48 @@ class _SettingsRow extends StatelessWidget {
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
+      trailing: _SettingsSvgIcon(
+        assetPath: AppAssets.actionChevronRight,
         color: colorScheme.onSurfaceVariant,
+        size: 18,
       ),
       onTap: onTap,
     );
   }
 }
 
+class _SettingsSvgIcon extends StatelessWidget {
+  const _SettingsSvgIcon({
+    required this.assetPath,
+    required this.color,
+    this.size = 22,
+  });
+
+  final String assetPath;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      assetPath,
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(
+        color,
+        BlendMode.srcIn,
+      ),
+    );
+  }
+}
+
 class _SettingsInfoRow extends StatelessWidget {
   const _SettingsInfoRow({
-    required this.icon,
+    required this.svgAsset,
     required this.title,
   });
 
-  final IconData icon;
+  final String svgAsset;
   final String title;
 
   @override
@@ -410,7 +446,15 @@ class _SettingsInfoRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-      leading: Icon(icon, color: colorScheme.onSurfaceVariant),
+      leading: SvgPicture.asset(
+        svgAsset,
+        width: 22,
+        height: 22,
+        colorFilter: ColorFilter.mode(
+          colorScheme.onSurfaceVariant,
+          BlendMode.srcIn,
+        ),
+      ),
       title: Text(
         title,
         style: AppTextTheme.body,

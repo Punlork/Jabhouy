@@ -49,6 +49,19 @@ class BankNotificationListenerService : NotificationListenerService() {
     }
 
     companion object {
+        private val supportedPackages = setOf(
+            "com.paygo24.ibank",
+            "com.chipmongbank.mobileappproduction",
+            "com.domain.acledabankqr",
+        )
+
+        private val supportedBankMentions = listOf(
+            "aba",
+            "chip mong",
+            "chipmong",
+            "acleda",
+        )
+
         fun simulateNotificationPosted(
             context: android.content.Context,
             packageName: String,
@@ -143,7 +156,7 @@ class BankNotificationListenerService : NotificationListenerService() {
             title: String?,
             messageParts: List<String>,
         ): Boolean {
-            if (looksRelevantPackage(packageName)) {
+            if (isSupportedPackage(packageName)) {
                 return true
             }
 
@@ -155,67 +168,21 @@ class BankNotificationListenerService : NotificationListenerService() {
                 }
             }.lowercase()
 
-            if (looksRelevantText(normalizedText)) {
+            if (looksLikeSupportedBankText(normalizedText)) {
                 return true
             }
 
             return false
         }
 
-        private fun looksRelevantPackage(packageName: String): Boolean {
-            val normalized = packageName.lowercase()
-            return normalized.contains("aba") ||
-                normalized.contains("chip") ||
-                normalized.contains("mong") ||
-                normalized.contains("bank") ||
-                normalized.contains("acleda") ||
-                normalized.contains("wing") ||
-                normalized.contains("wallet") ||
-                normalized.contains("pay")
+        private fun isSupportedPackage(packageName: String): Boolean {
+            return supportedPackages.contains(packageName.lowercase())
         }
 
-        private fun looksRelevantText(normalizedText: String): Boolean {
+        private fun looksLikeSupportedBankText(normalizedText: String): Boolean {
             if (normalizedText.isBlank()) return false
 
-            val financialKeywords = listOf(
-                "received",
-                "incoming",
-                "credited",
-                "credit",
-                "deposit",
-                "transfer",
-                "payment",
-                "debit",
-                "debited",
-                "withdraw",
-                "cash in",
-                "cash out",
-                "received from",
-                "transfer in",
-                "transfer out",
-                "bank",
-                "account",
-                "wallet",
-                "khqr",
-                "usd",
-                "khr",
-                "៛",
-                "បានទទួល",
-                "ទទួលបាន",
-                "ផ្ទេរចូល",
-                "ផ្ទេរចេញ",
-                "វេរចូល",
-                "វេរចេញ",
-                "ប្រាក់ចូល",
-                "ប្រាក់ចេញ",
-                "ដាក់ប្រាក់",
-                "ដកប្រាក់",
-                "បញ្ចូលប្រាក់",
-                "ទូទាត់",
-                "បង់ប្រាក់",
-            )
-
-            return financialKeywords.any(normalizedText::contains)
+            return supportedBankMentions.any(normalizedText::contains)
         }
 
         private fun isRedactedPlaceholder(value: String): Boolean {

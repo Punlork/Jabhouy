@@ -49,6 +49,7 @@
         "--target",
         "lib/main_production.dart",
         "-v"
+        // "--release"
       ]
     }
   ]

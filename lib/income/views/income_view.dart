@@ -97,16 +97,24 @@ class _TrackingStatusCard extends StatelessWidget {
     final isSupported = status?.isSupported ?? false;
     final isEnabled = status?.isAccessEnabled ?? false;
     final isMainDevice = deviceRole.isMain;
+
     final isBlockedByAnotherMain = status?.isBlockedByAnotherMainDevice ?? false;
-    final statusMessage = !isMainDevice
-        ? context.l10n.subDeviceTrackingDisabled
-        : isBlockedByAnotherMain
-            ? context.l10n.anotherMainDeviceActive
-            : !isSupported
-                ? context.l10n.bankNotificationUnsupported
-                : isEnabled
-                    ? context.l10n.notificationTrackingEnabled
-                    : context.l10n.notificationTrackingDisabled;
+
+    String getStatusMessage(BuildContext context) {
+      if (!isMainDevice) {
+        return context.l10n.subDeviceTrackingDisabled;
+      } else if (isBlockedByAnotherMain) {
+        return context.l10n.anotherMainDeviceActive;
+      } else if (!isSupported) {
+        return context.l10n.bankNotificationUnsupported;
+      } else if (isEnabled) {
+        return context.l10n.notificationTrackingEnabled;
+      } else {
+        return context.l10n.notificationTrackingDisabled;
+      }
+    }
+
+    final statusMessage = getStatusMessage(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
