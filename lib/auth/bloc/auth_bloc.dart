@@ -46,28 +46,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
+    try {
+      final bootstrap = await authService.bootstrapSession();
+      final response = bootstrap.response;
+      final isOnline = await _connectivityService.isOnline;
 
-    final bootstrap = await authService.bootstrapSession();
-    final response = bootstrap.response;
-    final isOnline = await _connectivityService.isOnline;
-
-    if (response.success && response.data != null) {
-      emit(
-        Authenticated(
-          response.data!,
-          isOffline: !isOnline,
-          isSessionTrusted: isOnline && !bootstrap.usedCachedSession,
-        ),
-      );
-    } else {
+      if (response.success && response.data != null) {
+        emit(
+          Authenticated(
+            response.data!,
+            isOffline: !isOnline,
+            isSessionTrusted: isOnline && !bootstrap.usedCachedSession,
+          ),
+        );
+      } else {
+        await authService.clearCachedSession();
+        emit(Unauthenticated());
+      }
+    } catch (_) {
       await authService.clearCachedSession();
       emit(Unauthenticated());
+    } finally {
+      Future.delayed(
+        const Duration(milliseconds: 500),
+        FlutterNativeSplash.remove,
+      );
     }
-
-    Future.delayed(
-      const Duration(milliseconds: 500),
-      FlutterNativeSplash.remove,
-    );
   }
 
   Future<void> _onAuthSignedIn(
