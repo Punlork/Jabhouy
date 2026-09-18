@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/income/income.dart';
+import 'package:jabhouy/income/income.dart';
 
 class BankBranding {
   const BankBranding({

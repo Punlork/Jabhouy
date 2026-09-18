@@ -2,11 +2,11 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/app/service/database/app_database.dart';
+import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/income/income.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/app/service/database/app_database.dart';
-import 'package:my_app/auth/auth.dart';
-import 'package:my_app/income/income.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockApiService extends Mock implements ApiService {}

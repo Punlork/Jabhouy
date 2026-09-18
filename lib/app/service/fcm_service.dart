@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:my_app/app/service/api_service.dart';
-import 'package:my_app/app/service/base_service.dart';
-import 'package:my_app/app/utils/logger.dart';
-import 'package:my_app/income/models/bank_notification_model.dart';
-import 'package:my_app/income/services/notification_diagnostics_service.dart';
+import 'package:jabhouy/app/service/api_service.dart';
+import 'package:jabhouy/app/service/base_service.dart';
+import 'package:jabhouy/app/utils/logger.dart';
+import 'package:jabhouy/income/models/bank_notification_model.dart';
+import 'package:jabhouy/income/services/notification_diagnostics_service.dart';
 
 /// Top-level handler required by firebase_messaging for background/terminated
 /// state. Must be annotated with @pragma('vm:entry-point').

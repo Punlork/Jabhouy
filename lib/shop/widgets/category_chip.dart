@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:my_app/l10n/l10n.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy/shop/shop.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CategoryChips extends StatelessWidget {

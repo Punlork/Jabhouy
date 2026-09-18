@@ -22,7 +22,7 @@ class DriftStorageReader implements SqlStorageReader {
     final rows = await _db
         .customSelect(
           sql,
-          variables: args.map((a) => Variable<Object>(a)).toList(),
+          variables: args.map(Variable<Object>.new).toList(),
         )
         .get();
     return rows.map((row) => row.data).toList();

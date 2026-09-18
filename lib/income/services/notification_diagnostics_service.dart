@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:my_app/income/income.dart';
+import 'package:jabhouy/income/income.dart';
 
 class NotificationDiagnosticsService {
   NotificationDiagnosticsService(this._bridge);

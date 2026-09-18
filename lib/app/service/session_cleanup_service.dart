@@ -1,24 +1,19 @@
-import 'package:my_app/app/service/api_service.dart';
-import 'package:my_app/app/service/database/app_database.dart';
-import 'package:my_app/auth/service/auth_service.dart';
-import 'package:my_app/income/services/firebase_income_sync_service.dart';
-import 'package:my_app/income/services/notification_diagnostics_service.dart';
-import 'package:my_app/income/services/notification_tracking_bridge.dart';
+import 'package:jabhouy/app/service/api_service.dart';
+import 'package:jabhouy/app/service/database/app_database.dart';
+import 'package:jabhouy/auth/service/auth_service.dart';
+import 'package:jabhouy/income/services/firebase_income_sync_service.dart';
+import 'package:jabhouy/income/services/notification_diagnostics_service.dart';
+import 'package:jabhouy/income/services/notification_tracking_bridge.dart';
 
 class SessionCleanupService {
   SessionCleanupService({
-    required ApiService apiService,
-    required AuthService authService,
-    required AppDatabase database,
-    required FirebaseIncomeSyncService incomeSyncService,
-    required NotificationTrackingBridge notificationTrackingBridge,
-    required NotificationDiagnosticsService notificationDiagnosticsService,
-  })  : _apiService = apiService,
-        _authService = authService,
-        _database = database,
-        _incomeSyncService = incomeSyncService,
-        _notificationTrackingBridge = notificationTrackingBridge,
-        _notificationDiagnosticsService = notificationDiagnosticsService;
+    required this._apiService,
+    required this._authService,
+    required this._database,
+    required this._incomeSyncService,
+    required this._notificationTrackingBridge,
+    required this._notificationDiagnosticsService,
+  });
 
   final ApiService _apiService;
   final AuthService _authService;

@@ -5,9 +5,9 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/customer/customer.dart';
-import 'package:my_app/loaner/loaner.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/loaner/loaner.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'loaner_event.dart';

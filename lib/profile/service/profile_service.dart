@@ -1,4 +1,4 @@
-import 'package:my_app/app/app.dart';
+import 'package:jabhouy/app/app.dart';
 
 class ProfileService extends BaseService {
   ProfileService(super.apiService);

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/app/service/database/app_database.dart';
-import 'package:my_app/income/income.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/app/service/database/app_database.dart';
+import 'package:jabhouy/income/income.dart';
 
 class NotificationTrackingStatus {
   const NotificationTrackingStatus({

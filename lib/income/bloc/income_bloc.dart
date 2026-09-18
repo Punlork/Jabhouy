@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/income/income.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/income/income.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'income_event.dart';

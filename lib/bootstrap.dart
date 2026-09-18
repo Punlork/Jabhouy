@@ -7,8 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/app/service/firebase_runtime_options.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/app/service/firebase_runtime_options.dart';
 
 class AppBlocObserver extends BlocObserver {
   const AppBlocObserver();

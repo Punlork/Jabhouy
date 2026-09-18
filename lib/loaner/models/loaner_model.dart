@@ -2,8 +2,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 
-import 'package:my_app/app/app.dart';
-import 'package:my_app/customer/customer.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/customer/customer.dart';
 
 class LoanerModel extends Equatable {
   LoanerModel({

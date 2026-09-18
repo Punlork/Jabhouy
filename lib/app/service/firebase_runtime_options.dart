@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:my_app/app/utils/logger.dart';
+import 'package:jabhouy/app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseRuntimeOptions {

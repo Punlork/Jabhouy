@@ -42,7 +42,7 @@ flutter gen-l10n --arb-dir="lib/l10n/arb"
 
 ## Key conventions
 
-- Prefer feature barrel imports such as `package:my_app/app/app.dart`, `package:my_app/auth/auth.dart`, and `package:my_app/shop/shop.dart` instead of deep file imports when the barrel already exports what you need.
+- Prefer feature barrel imports such as `package:jabhouy/app/app.dart`, `package:jabhouy/auth/auth.dart`, and `package:jabhouy/shop/shop.dart` instead of deep file imports when the barrel already exports what you need.
 - Keep business logic in services and blocs, not widgets. Widgets mostly dispatch bloc events, read bloc state, and pass existing blocs through navigation.
 - Nested routes rely on `GoRouter` `extra` maps to receive the active bloc instances and selected models. Match the existing keys expected in `AppRoutes` (`shop`, `category`, `loanerBloc`, `customerBloc`, `existingItem`, `existingLoaner`) instead of recreating state in form pages.
 - For CRUD features backed by Drift, follow the existing offline-first pattern:

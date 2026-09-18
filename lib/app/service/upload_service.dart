@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:my_app/app/app.dart';
+import 'package:jabhouy/app/app.dart';
 
 class UploadService extends BaseService {
   UploadService(super.apiService);

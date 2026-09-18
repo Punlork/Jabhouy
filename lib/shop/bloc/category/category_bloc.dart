@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 part 'category_event.dart';
 part 'category_state.dart';

@@ -3,10 +3,10 @@ import 'dart:math';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/auth.dart';
-import 'package:my_app/income/models/bank_notification_model.dart';
-import 'package:my_app/income/services/notification_diagnostics_service.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/income/models/bank_notification_model.dart';
+import 'package:jabhouy/income/services/notification_diagnostics_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef LocalNotificationsLoader = Future<List<BankNotificationModel>> Function();

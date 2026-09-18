@@ -4,8 +4,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/income/income.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/income/income.dart';
 
 class IncomeDiagnosticsPage extends StatefulWidget {
   const IncomeDiagnosticsPage({super.key});
@@ -182,7 +182,6 @@ class _IncomeDiagnosticsPageState extends State<IncomeDiagnosticsPage> {
       message:
           'Manual native test push for ${selectedBank.bankApp.label} \$${amount.toStringAsFixed(2)}',
       amount: amount,
-      currency: 'USD',
       isIncome: true,
       receivedAt: now,
       source: latestItem == null ? 'manual_native_test' : latestItem.source,

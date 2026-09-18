@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/income/income.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy/l10n/l10n.dart';
 
 class IncomeFilterSheet extends StatefulWidget {
   const IncomeFilterSheet({

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/income/income.dart';
-import 'package:my_app/l10n/arb/app_localizations.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy/l10n/arb/app_localizations.dart';
 
 class AppDiagnosticsPage extends StatefulWidget {
   const AppDiagnosticsPage({super.key});

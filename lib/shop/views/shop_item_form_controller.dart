@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 class ShopItemVariantDraft {
   ShopItemVariantDraft({

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:my_app/app/app.dart';
+import 'package:jabhouy/app/app.dart';
 
 class CustomerModel extends Equatable {
   const CustomerModel({

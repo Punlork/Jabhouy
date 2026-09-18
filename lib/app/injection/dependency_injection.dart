@@ -1,12 +1,12 @@
 import 'package:get_it/get_it.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/app/service/database/app_database.dart';
-import 'package:my_app/auth/auth.dart';
-import 'package:my_app/customer/customer.dart';
-import 'package:my_app/income/income.dart';
-import 'package:my_app/loaner/loaner.dart';
-import 'package:my_app/profile/profile.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/app/service/database/app_database.dart';
+import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/profile/profile.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 final getIt = GetIt.instance;
 

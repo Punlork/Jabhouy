@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/auth.dart';
-import 'package:my_app/l10n/arb/app_localizations.dart';
-import 'package:my_app/l10n/l10n.dart';
-import 'package:my_app/profile/profile.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/l10n/arb/app_localizations.dart';
+import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy/profile/profile.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

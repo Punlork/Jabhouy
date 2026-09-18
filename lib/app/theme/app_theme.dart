@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/app/theme/color_theme.dart';
-import 'package:my_app/app/theme/text_theme.dart';
+import 'package:jabhouy/app/theme/color_theme.dart';
+import 'package:jabhouy/app/theme/text_theme.dart';
 
 class AppTheme {
   const AppTheme._();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/l10n/l10n.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/l10n/l10n.dart';
 
 class LoadingOverlay {
   static OverlayEntry? _overlayEntry;
@@ -64,7 +64,7 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
     return Stack(
       children: [
         ModalBarrier(
-          color: Colors.black.withOpacity(.4),
+          color: Colors.black.withValues(alpha: .4),
           dismissible: false,
         ),
         Center(
@@ -83,7 +83,7 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(.2),
+                      color: Colors.black.withValues(alpha: .2),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -106,7 +106,7 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                                 height: 8,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(.7),
+                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: .7),
                                 ),
                               ),
                             ),

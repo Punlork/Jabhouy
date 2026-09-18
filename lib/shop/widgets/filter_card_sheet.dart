@@ -1,9 +1,9 @@
 // New FilterSheet widget
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/l10n/l10n.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 class FilterSheet extends StatefulWidget {
   const FilterSheet({

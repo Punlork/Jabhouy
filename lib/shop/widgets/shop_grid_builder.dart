@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/home/home.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/home/home.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 class ShopGridBuilder extends StatefulWidget {
   const ShopGridBuilder({

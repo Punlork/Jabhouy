@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/customer/customer.dart';
-import 'package:my_app/l10n/arb/app_localizations.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/l10n/arb/app_localizations.dart';
 
 class CustomerAutocompleteField extends StatelessWidget {
   const CustomerAutocompleteField({

@@ -1,6 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
-import 'package:my_app/app/app.dart';
+import 'package:jabhouy/app/app.dart';
 
 class CategoryItemModel extends Equatable {
   const CategoryItemModel({

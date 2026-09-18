@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/app/app.dart';
+import 'package:jabhouy/app/app.dart';
 
 class AppLogo extends StatelessWidget {
   const AppLogo({
@@ -37,11 +37,11 @@ class AppLogo extends StatelessWidget {
       return Container(
         padding: EdgeInsets.all(size / 5), // Dynamic padding based on size
         decoration: BoxDecoration(
-          color: colorScheme.surface.withOpacity(.2),
+          color: colorScheme.surface.withValues(alpha: .2),
           shape: shape,
           boxShadow: [
             BoxShadow(
-              color: colorScheme.shadow.withOpacity(.1),
+              color: colorScheme.shadow.withValues(alpha: .1),
               blurRadius: size / 6.67, // Adjusted blur based on size
               offset: Offset(0, size / 20), // Adjusted offset based on size
             ),

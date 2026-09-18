@@ -1,6 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_app/app/service/fcm_service.dart';
+import 'package:jabhouy/app/service/fcm_service.dart';
 
 void main() {
   group('FcmService notification content', () {

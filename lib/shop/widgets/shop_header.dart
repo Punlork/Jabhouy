@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/bloc/auth_bloc.dart';
-import 'package:my_app/auth/bloc/signout/signout_bloc.dart';
-import 'package:my_app/l10n/arb/app_localizations.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/auth/bloc/auth_bloc.dart';
+import 'package:jabhouy/auth/bloc/signout/signout_bloc.dart';
+import 'package:jabhouy/l10n/arb/app_localizations.dart';
 
 class ShopHeader extends StatelessWidget {
   const ShopHeader({

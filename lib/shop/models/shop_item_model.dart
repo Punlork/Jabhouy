@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 class ShopItemModel extends Equatable {
   const ShopItemModel({

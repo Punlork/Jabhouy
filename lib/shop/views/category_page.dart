@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/l10n/arb/app_localizations.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/l10n/arb/app_localizations.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 class CategoryPage extends StatelessWidget {
   const CategoryPage({required this.category, required this.shop, super.key});

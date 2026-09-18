@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/l10n/l10n.dart';
-import 'package:my_app/loaner/loaner.dart';
+import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy/loaner/loaner.dart';
 import 'package:shimmer/shimmer.dart';
 
 class LoanerItem extends StatelessWidget {

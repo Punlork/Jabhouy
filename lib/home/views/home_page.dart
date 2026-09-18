@@ -4,13 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/auth.dart';
-import 'package:my_app/customer/customer.dart';
-import 'package:my_app/income/income.dart';
-import 'package:my_app/l10n/l10n.dart';
-import 'package:my_app/loaner/loaner.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 class TabScrollManager extends InheritedWidget {
   const TabScrollManager({

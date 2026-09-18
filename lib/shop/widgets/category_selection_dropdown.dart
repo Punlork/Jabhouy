@@ -2,9 +2,9 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/l10n/arb/app_localizations.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/l10n/arb/app_localizations.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 class CategoryDropdown extends StatefulWidget {
   const CategoryDropdown({

@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/auth.dart';
-import 'package:my_app/customer/customer.dart';
-import 'package:my_app/home/home.dart';
-import 'package:my_app/home/views/home_page.dart';
-import 'package:my_app/income/income.dart';
-import 'package:my_app/loaner/loaner.dart';
-import 'package:my_app/profile/profile.dart';
-import 'package:my_app/shop/shop.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/home/home.dart';
+import 'package:jabhouy/home/views/home_page.dart';
+import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/profile/profile.dart';
+import 'package:jabhouy/shop/shop.dart';
 
 extension StringExtension on String {
   String get toPath => '/$this';

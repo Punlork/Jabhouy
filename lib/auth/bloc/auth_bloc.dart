@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/auth/service/auth_service.dart';
 import 'package:meta/meta.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/auth/service/auth_service.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';

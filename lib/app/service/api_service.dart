@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_app/app/app.dart';
+import 'package:jabhouy/app/app.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
