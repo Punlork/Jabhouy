@@ -174,7 +174,7 @@ class IncomeService {
 
       var upsertCount = 0;
       for (final model in response.data!) {
-        if (await _upsertNotificationModel(model, triggerRemoteSync: false)) {
+        if (await _upsertNotificationModel(model)) {
           upsertCount++;
         }
       }
@@ -398,7 +398,6 @@ class IncomeService {
     final model = BankNotificationModel.fromNativeMap(payload);
     final upserted = await _upsertNotificationModel(
       model,
-      triggerRemoteSync: triggerRemoteSync && canAcceptLocal,
       rawPayloadOverride: model.rawPayload ?? jsonEncode(payload),
     );
 
@@ -436,13 +435,16 @@ class IncomeService {
 
   Future<bool> _upsertNotificationModel(
     BankNotificationModel model, {
-    required bool triggerRemoteSync,
     String? rawPayloadOverride,
   }) async {
     final existing = await (_db.select(_db.bankNotifications)
           ..where((tbl) => tbl.fingerprint.equals(model.fingerprint)))
         .getSingleOrNull();
-    final syncStatus = triggerRemoteSync ? _notificationSyncStatusPending : _notificationSyncStatusSynced;
+    // A row is pending until a push confirms otherwise. A caller that does
+    // push overwrites this with synced or error immediately after; a caller
+    // that does not never revisits it, so writing synced here would claim
+    // an upload that never happened.
+    const syncStatus = _notificationSyncStatusPending;
 
     if (existing == null) {
       await _db.into(_db.bankNotifications).insert(
@@ -458,7 +460,7 @@ class IncomeService {
               isIncome: Value(model.isIncome),
               receivedAt: model.receivedAt,
               source: Value(model.source),
-              syncStatus: Value(syncStatus),
+              syncStatus: const Value(syncStatus),
               createdAt: Value(model.createdAt),
             ),
           );
