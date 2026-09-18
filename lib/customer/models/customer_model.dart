@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class CustomerModel extends Equatable {
   const CustomerModel({
@@ -8,7 +9,7 @@ class CustomerModel extends Equatable {
     required this.name,
     this.createdAt,
     this.updatedAt,
-    this.syncStatus = 0,
+    this.syncStatus = SyncStatus.synced,
     this.isDeleted = false,
   });
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
@@ -18,7 +19,8 @@ class CustomerModel extends Equatable {
         name: tryCast<String>(json['name'])!,
         createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
         updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
-        syncStatus: tryCast<int>(json['syncStatus']) ?? 0,
+        syncStatus:
+            SyncStatus.fromWireValue(tryCast<int>(json['syncStatus']) ?? 0),
         isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
       );
     } catch (e) {
@@ -30,7 +32,7 @@ class CustomerModel extends Equatable {
   final String name;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   final bool isDeleted;
 
   Map<String, dynamic> toJson() => {
@@ -45,7 +47,7 @@ class CustomerModel extends Equatable {
     String? name,
     DateTime? createdAt,
     DateTime? updatedAt,
-    int? syncStatus,
+    SyncStatus? syncStatus,
     bool? isDeleted,
   }) {
     return CustomerModel(

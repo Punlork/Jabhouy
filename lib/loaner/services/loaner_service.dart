@@ -156,7 +156,7 @@ class LoanerService extends BaseService {
     }
 
     final pendingItems = await (_db.select(_db.loaners)
-          ..where((t) => t.syncStatus.equals(1)))
+          ..where((t) => t.syncStatus.equalsValue(SyncStatus.pending)))
         .get();
 
     for (final item in pendingItems) {
@@ -187,13 +187,13 @@ class LoanerService extends BaseService {
         if (!response.success) {
           await (_db.update(_db.loaners)..where((t) => t.id.equals(item.id)))
               .write(
-            const LoanersCompanion(syncStatus: Value(2)),
+            const LoanersCompanion(syncStatus: Value(SyncStatus.failed)),
           );
         }
       } catch (_) {
         await (_db.update(_db.loaners)..where((t) => t.id.equals(item.id)))
             .write(
-          const LoanersCompanion(syncStatus: Value(2)),
+          const LoanersCompanion(syncStatus: Value(SyncStatus.failed)),
         );
       }
     }
@@ -319,7 +319,7 @@ class LoanerService extends BaseService {
               isPaid: Value(l.isPaid),
               createdAt: l.createdAt,
               updatedAt: Value(l.updatedAt),
-              syncStatus: const Value(0),
+              syncStatus: const Value(SyncStatus.synced),
               isDeleted: const Value(false),
             ),
           ),
@@ -338,7 +338,7 @@ class LoanerService extends BaseService {
     final id = body.id == 0
         ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
         : body.id;
-    final localItem = body.copyWith(id: id, syncStatus: 1);
+    final localItem = body.copyWith(id: id, syncStatus: SyncStatus.pending);
 
     await _db.into(_db.loaners).insert(
           LoanersCompanion.insert(
@@ -350,7 +350,7 @@ class LoanerService extends BaseService {
             isPaid: Value(localItem.isPaid),
             createdAt: localItem.createdAt,
             updatedAt: Value(localItem.updatedAt),
-            syncStatus: const Value(1),
+            syncStatus: const Value(SyncStatus.pending),
           ),
           mode: InsertMode.insertOrReplace,
         );
@@ -393,7 +393,7 @@ class LoanerService extends BaseService {
               isPaid: Value(l.isPaid),
               createdAt: l.createdAt,
               updatedAt: Value(l.updatedAt),
-              syncStatus: const Value(0),
+              syncStatus: const Value(SyncStatus.synced),
             ),
             mode: InsertMode.insertOrReplace,
           );
@@ -418,7 +418,7 @@ class LoanerService extends BaseService {
             isPaid: body.isPaid,
             createdAt: body.createdAt,
             updatedAt: updatedAt,
-            syncStatus: 1,
+            syncStatus: SyncStatus.pending,
             isDeleted: false,
           ),
         );
@@ -431,7 +431,7 @@ class LoanerService extends BaseService {
 
       return ApiResponse(
         success: true,
-        data: body.copyWith(syncStatus: 1, updatedAt: updatedAt),
+        data: body.copyWith(syncStatus: SyncStatus.pending, updatedAt: updatedAt),
         message: 'Saved offline. It will sync when you are back online.',
       );
     }
@@ -459,7 +459,7 @@ class LoanerService extends BaseService {
               isPaid: l.isPaid,
               createdAt: l.createdAt,
               updatedAt: l.updatedAt,
-              syncStatus: 0,
+              syncStatus: SyncStatus.synced,
               isDeleted: false,
             ),
           );
@@ -475,7 +475,7 @@ class LoanerService extends BaseService {
     await (_db.update(_db.loaners)..where((t) => t.id.equals(body.id))).write(
       const LoanersCompanion(
         isDeleted: Value(true),
-        syncStatus: Value(1),
+        syncStatus: Value(SyncStatus.pending),
       ),
     );
 

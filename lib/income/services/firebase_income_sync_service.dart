@@ -7,12 +7,13 @@ import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/income/models/bank_notification_model.dart';
 import 'package:jabhouy/income/services/notification_diagnostics_service.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef LocalNotificationsLoader = Future<List<BankNotificationModel>> Function();
 typedef NotificationSyncStatusUpdater = Future<void> Function(
   String fingerprint,
-  int syncStatus,
+  SyncStatus syncStatus,
 );
 
 class MainDeviceClaimStatus {
@@ -245,7 +246,7 @@ class FirebaseIncomeSyncService {
         final didSync = await syncNotification(item);
         await updateNotificationSyncStatus(
           item.fingerprint,
-          didSync ? 0 : 2,
+          didSync ? SyncStatus.synced : SyncStatus.failed,
         );
       }
     } finally {

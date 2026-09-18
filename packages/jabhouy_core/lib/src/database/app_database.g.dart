@@ -64,18 +64,16 @@ class $CustomersTable extends Customers
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
   @override
-  late final GeneratedColumn<int> syncStatus = GeneratedColumn<int>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<SyncStatus>($CustomersTable.$convertersyncStatus);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -126,12 +124,6 @@ class $CustomersTable extends Customers
         isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
       );
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
-    }
     return context;
   }
 
@@ -161,10 +153,12 @@ class $CustomersTable extends Customers
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
       )!,
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sync_status'],
-      )!,
+      syncStatus: $CustomersTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
     );
   }
 
@@ -172,6 +166,9 @@ class $CustomersTable extends Customers
   $CustomersTable createAlias(String alias) {
     return $CustomersTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const SyncStatusConverter();
 }
 
 class Customer extends DataClass implements Insertable<Customer> {
@@ -180,7 +177,7 @@ class Customer extends DataClass implements Insertable<Customer> {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final bool isDeleted;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   const Customer({
     required this.id,
     required this.name,
@@ -201,7 +198,11 @@ class Customer extends DataClass implements Insertable<Customer> {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     map['is_deleted'] = Variable<bool>(isDeleted);
-    map['sync_status'] = Variable<int>(syncStatus);
+    {
+      map['sync_status'] = Variable<int>(
+        $CustomersTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
     return map;
   }
 
@@ -231,7 +232,9 @@ class Customer extends DataClass implements Insertable<Customer> {
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
-      syncStatus: serializer.fromJson<int>(json['syncStatus']),
+      syncStatus: $CustomersTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
     );
   }
   @override
@@ -243,7 +246,9 @@ class Customer extends DataClass implements Insertable<Customer> {
       'createdAt': serializer.toJson<DateTime?>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
-      'syncStatus': serializer.toJson<int>(syncStatus),
+      'syncStatus': serializer.toJson<int>(
+        $CustomersTable.$convertersyncStatus.toJson(syncStatus),
+      ),
     };
   }
 
@@ -253,7 +258,7 @@ class Customer extends DataClass implements Insertable<Customer> {
     Value<DateTime?> createdAt = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
     bool? isDeleted,
-    int? syncStatus,
+    SyncStatus? syncStatus,
   }) => Customer(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -309,7 +314,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
   final Value<DateTime?> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<bool> isDeleted;
-  final Value<int> syncStatus;
+  final Value<SyncStatus> syncStatus;
   const CustomersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -350,7 +355,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     Value<DateTime?>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<bool>? isDeleted,
-    Value<int>? syncStatus,
+    Value<SyncStatus>? syncStatus,
   }) {
     return CustomersCompanion(
       id: id ?? this.id,
@@ -381,7 +386,9 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
     if (syncStatus.present) {
-      map['sync_status'] = Variable<int>(syncStatus.value);
+      map['sync_status'] = Variable<int>(
+        $CustomersTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
     }
     return map;
   }
@@ -439,18 +446,16 @@ class $CategoriesTable extends Categories
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
   @override
-  late final GeneratedColumn<int> syncStatus = GeneratedColumn<int>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<SyncStatus>($CategoriesTable.$convertersyncStatus);
   @override
   List<GeneratedColumn> get $columns => [id, name, isDeleted, syncStatus];
   @override
@@ -482,12 +487,6 @@ class $CategoriesTable extends Categories
         isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
       );
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
-    }
     return context;
   }
 
@@ -509,10 +508,12 @@ class $CategoriesTable extends Categories
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
       )!,
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sync_status'],
-      )!,
+      syncStatus: $CategoriesTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
     );
   }
 
@@ -520,13 +521,16 @@ class $CategoriesTable extends Categories
   $CategoriesTable createAlias(String alias) {
     return $CategoriesTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const SyncStatusConverter();
 }
 
 class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
   final bool isDeleted;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   const Category({
     required this.id,
     required this.name,
@@ -539,7 +543,11 @@ class Category extends DataClass implements Insertable<Category> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['is_deleted'] = Variable<bool>(isDeleted);
-    map['sync_status'] = Variable<int>(syncStatus);
+    {
+      map['sync_status'] = Variable<int>(
+        $CategoriesTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
     return map;
   }
 
@@ -561,7 +569,9 @@ class Category extends DataClass implements Insertable<Category> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
-      syncStatus: serializer.fromJson<int>(json['syncStatus']),
+      syncStatus: $CategoriesTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
     );
   }
   @override
@@ -571,7 +581,9 @@ class Category extends DataClass implements Insertable<Category> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'isDeleted': serializer.toJson<bool>(isDeleted),
-      'syncStatus': serializer.toJson<int>(syncStatus),
+      'syncStatus': serializer.toJson<int>(
+        $CategoriesTable.$convertersyncStatus.toJson(syncStatus),
+      ),
     };
   }
 
@@ -579,7 +591,7 @@ class Category extends DataClass implements Insertable<Category> {
     int? id,
     String? name,
     bool? isDeleted,
-    int? syncStatus,
+    SyncStatus? syncStatus,
   }) => Category(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -624,7 +636,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> id;
   final Value<String> name;
   final Value<bool> isDeleted;
-  final Value<int> syncStatus;
+  final Value<SyncStatus> syncStatus;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -655,7 +667,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Value<int>? id,
     Value<String>? name,
     Value<bool>? isDeleted,
-    Value<int>? syncStatus,
+    Value<SyncStatus>? syncStatus,
   }) {
     return CategoriesCompanion(
       id: id ?? this.id,
@@ -678,7 +690,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
     if (syncStatus.present) {
-      map['sync_status'] = Variable<int>(syncStatus.value);
+      map['sync_status'] = Variable<int>(
+        $CategoriesTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
     }
     return map;
   }
@@ -823,18 +837,16 @@ class $ShopItemsTable extends ShopItems
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
   @override
-  late final GeneratedColumn<int> syncStatus = GeneratedColumn<int>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<SyncStatus>($ShopItemsTable.$convertersyncStatus);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -936,12 +948,6 @@ class $ShopItemsTable extends ShopItems
         isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
       );
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
-    }
     return context;
   }
 
@@ -995,10 +1001,12 @@ class $ShopItemsTable extends ShopItems
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
       )!,
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sync_status'],
-      )!,
+      syncStatus: $ShopItemsTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
     );
   }
 
@@ -1006,6 +1014,9 @@ class $ShopItemsTable extends ShopItems
   $ShopItemsTable createAlias(String alias) {
     return $ShopItemsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const SyncStatusConverter();
 }
 
 class ShopItem extends DataClass implements Insertable<ShopItem> {
@@ -1020,7 +1031,7 @@ class ShopItem extends DataClass implements Insertable<ShopItem> {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final bool isDeleted;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   const ShopItem({
     required this.id,
     required this.name,
@@ -1065,7 +1076,11 @@ class ShopItem extends DataClass implements Insertable<ShopItem> {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     map['is_deleted'] = Variable<bool>(isDeleted);
-    map['sync_status'] = Variable<int>(syncStatus);
+    {
+      map['sync_status'] = Variable<int>(
+        $ShopItemsTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
     return map;
   }
 
@@ -1117,7 +1132,9 @@ class ShopItem extends DataClass implements Insertable<ShopItem> {
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
-      syncStatus: serializer.fromJson<int>(json['syncStatus']),
+      syncStatus: $ShopItemsTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
     );
   }
   @override
@@ -1135,7 +1152,9 @@ class ShopItem extends DataClass implements Insertable<ShopItem> {
       'createdAt': serializer.toJson<DateTime?>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
-      'syncStatus': serializer.toJson<int>(syncStatus),
+      'syncStatus': serializer.toJson<int>(
+        $ShopItemsTable.$convertersyncStatus.toJson(syncStatus),
+      ),
     };
   }
 
@@ -1151,7 +1170,7 @@ class ShopItem extends DataClass implements Insertable<ShopItem> {
     Value<DateTime?> createdAt = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
     bool? isDeleted,
-    int? syncStatus,
+    SyncStatus? syncStatus,
   }) => ShopItem(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1259,7 +1278,7 @@ class ShopItemsCompanion extends UpdateCompanion<ShopItem> {
   final Value<DateTime?> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<bool> isDeleted;
-  final Value<int> syncStatus;
+  final Value<SyncStatus> syncStatus;
   const ShopItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1330,7 +1349,7 @@ class ShopItemsCompanion extends UpdateCompanion<ShopItem> {
     Value<DateTime?>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<bool>? isDeleted,
-    Value<int>? syncStatus,
+    Value<SyncStatus>? syncStatus,
   }) {
     return ShopItemsCompanion(
       id: id ?? this.id,
@@ -1385,7 +1404,9 @@ class ShopItemsCompanion extends UpdateCompanion<ShopItem> {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
     if (syncStatus.present) {
-      map['sync_status'] = Variable<int>(syncStatus.value);
+      map['sync_status'] = Variable<int>(
+        $ShopItemsTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
     }
     return map;
   }
@@ -1517,18 +1538,16 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
   @override
-  late final GeneratedColumn<int> syncStatus = GeneratedColumn<int>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<SyncStatus>($LoanersTable.$convertersyncStatus);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1609,12 +1628,6 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
         isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
       );
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
-    }
     return context;
   }
 
@@ -1660,10 +1673,12 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
       )!,
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sync_status'],
-      )!,
+      syncStatus: $LoanersTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
     );
   }
 
@@ -1671,6 +1686,9 @@ class $LoanersTable extends Loaners with TableInfo<$LoanersTable, Loaner> {
   $LoanersTable createAlias(String alias) {
     return $LoanersTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const SyncStatusConverter();
 }
 
 class Loaner extends DataClass implements Insertable<Loaner> {
@@ -1683,7 +1701,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final bool isDeleted;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   const Loaner({
     required this.id,
     required this.amount,
@@ -1716,7 +1734,11 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     map['is_deleted'] = Variable<bool>(isDeleted);
-    map['sync_status'] = Variable<int>(syncStatus);
+    {
+      map['sync_status'] = Variable<int>(
+        $LoanersTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
     return map;
   }
 
@@ -1756,7 +1778,9 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
-      syncStatus: serializer.fromJson<int>(json['syncStatus']),
+      syncStatus: $LoanersTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
     );
   }
   @override
@@ -1772,7 +1796,9 @@ class Loaner extends DataClass implements Insertable<Loaner> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
-      'syncStatus': serializer.toJson<int>(syncStatus),
+      'syncStatus': serializer.toJson<int>(
+        $LoanersTable.$convertersyncStatus.toJson(syncStatus),
+      ),
     };
   }
 
@@ -1786,7 +1812,7 @@ class Loaner extends DataClass implements Insertable<Loaner> {
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
     bool? isDeleted,
-    int? syncStatus,
+    SyncStatus? syncStatus,
   }) => Loaner(
     id: id ?? this.id,
     amount: amount ?? this.amount,
@@ -1874,7 +1900,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<bool> isDeleted;
-  final Value<int> syncStatus;
+  final Value<SyncStatus> syncStatus;
   const LoanersCompanion({
     this.id = const Value.absent(),
     this.amount = const Value.absent(),
@@ -1936,7 +1962,7 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<bool>? isDeleted,
-    Value<int>? syncStatus,
+    Value<SyncStatus>? syncStatus,
   }) {
     return LoanersCompanion(
       id: id ?? this.id,
@@ -1983,7 +2009,9 @@ class LoanersCompanion extends UpdateCompanion<Loaner> {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
     if (syncStatus.present) {
-      map['sync_status'] = Variable<int>(syncStatus.value);
+      map['sync_status'] = Variable<int>(
+        $LoanersTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
     }
     return map;
   }
@@ -2146,18 +2174,16 @@ class $BankNotificationsTable extends BankNotifications
     requiredDuringInsert: false,
     defaultValue: const Constant('native'),
   );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
   @override
-  late final GeneratedColumn<int> syncStatus = GeneratedColumn<int>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<SyncStatus>($BankNotificationsTable.$convertersyncStatus);
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2284,12 +2310,6 @@ class $BankNotificationsTable extends BankNotifications
         source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
       );
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -2357,10 +2377,12 @@ class $BankNotificationsTable extends BankNotifications
         DriftSqlType.string,
         data['${effectivePrefix}source'],
       )!,
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sync_status'],
-      )!,
+      syncStatus: $BankNotificationsTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -2372,6 +2394,9 @@ class $BankNotificationsTable extends BankNotifications
   $BankNotificationsTable createAlias(String alias) {
     return $BankNotificationsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const SyncStatusConverter();
 }
 
 class BankNotification extends DataClass
@@ -2388,7 +2413,7 @@ class BankNotification extends DataClass
   final bool isIncome;
   final DateTime receivedAt;
   final String source;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   final DateTime createdAt;
   const BankNotification({
     required this.id,
@@ -2427,7 +2452,11 @@ class BankNotification extends DataClass
     map['is_income'] = Variable<bool>(isIncome);
     map['received_at'] = Variable<DateTime>(receivedAt);
     map['source'] = Variable<String>(source);
-    map['sync_status'] = Variable<int>(syncStatus);
+    {
+      map['sync_status'] = Variable<int>(
+        $BankNotificationsTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -2475,7 +2504,9 @@ class BankNotification extends DataClass
       isIncome: serializer.fromJson<bool>(json['isIncome']),
       receivedAt: serializer.fromJson<DateTime>(json['receivedAt']),
       source: serializer.fromJson<String>(json['source']),
-      syncStatus: serializer.fromJson<int>(json['syncStatus']),
+      syncStatus: $BankNotificationsTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -2495,7 +2526,9 @@ class BankNotification extends DataClass
       'isIncome': serializer.toJson<bool>(isIncome),
       'receivedAt': serializer.toJson<DateTime>(receivedAt),
       'source': serializer.toJson<String>(source),
-      'syncStatus': serializer.toJson<int>(syncStatus),
+      'syncStatus': serializer.toJson<int>(
+        $BankNotificationsTable.$convertersyncStatus.toJson(syncStatus),
+      ),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -2513,7 +2546,7 @@ class BankNotification extends DataClass
     bool? isIncome,
     DateTime? receivedAt,
     String? source,
-    int? syncStatus,
+    SyncStatus? syncStatus,
     DateTime? createdAt,
   }) => BankNotification(
     id: id ?? this.id,
@@ -2631,7 +2664,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
   final Value<bool> isIncome;
   final Value<DateTime> receivedAt;
   final Value<String> source;
-  final Value<int> syncStatus;
+  final Value<SyncStatus> syncStatus;
   final Value<DateTime> createdAt;
   const BankNotificationsCompanion({
     this.id = const Value.absent(),
@@ -2716,7 +2749,7 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
     Value<bool>? isIncome,
     Value<DateTime>? receivedAt,
     Value<String>? source,
-    Value<int>? syncStatus,
+    Value<SyncStatus>? syncStatus,
     Value<DateTime>? createdAt,
   }) {
     return BankNotificationsCompanion(
@@ -2777,7 +2810,9 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
       map['source'] = Variable<String>(source.value);
     }
     if (syncStatus.present) {
-      map['sync_status'] = Variable<int>(syncStatus.value);
+      map['sync_status'] = Variable<int>(
+        $BankNotificationsTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -2836,7 +2871,7 @@ typedef $$CustomersTableCreateCompanionBuilder =
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 typedef $$CustomersTableUpdateCompanionBuilder =
     CustomersCompanion Function({
@@ -2845,7 +2880,7 @@ typedef $$CustomersTableUpdateCompanionBuilder =
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 
 final class $$CustomersTableReferences
@@ -2906,10 +2941,11 @@ class $$CustomersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   Expression<bool> loanersRefs(
     Expression<bool> Function($$LoanersTableFilterComposer f) f,
@@ -3001,10 +3037,11 @@ class $$CustomersTableAnnotationComposer
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
-  GeneratedColumn<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
 
   Expression<T> loanersRefs<T extends Object>(
     Expression<T> Function($$LoanersTableAnnotationComposer a) f,
@@ -3065,7 +3102,7 @@ class $$CustomersTableTableManager
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => CustomersCompanion(
                 id: id,
                 name: name,
@@ -3081,7 +3118,7 @@ class $$CustomersTableTableManager
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => CustomersCompanion.insert(
                 id: id,
                 name: name,
@@ -3147,14 +3184,14 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
     CategoriesCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 
 final class $$CategoriesTableReferences
@@ -3204,10 +3241,11 @@ class $$CategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   Expression<bool> shopItemsRefs(
     Expression<bool> Function($$ShopItemsTableFilterComposer f) f,
@@ -3283,10 +3321,11 @@ class $$CategoriesTableAnnotationComposer
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
-  GeneratedColumn<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
 
   Expression<T> shopItemsRefs<T extends Object>(
     Expression<T> Function($$ShopItemsTableAnnotationComposer a) f,
@@ -3345,7 +3384,7 @@ class $$CategoriesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
                 name: name,
@@ -3357,7 +3396,7 @@ class $$CategoriesTableTableManager
                 Value<int> id = const Value.absent(),
                 required String name,
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
                 name: name,
@@ -3433,7 +3472,7 @@ typedef $$ShopItemsTableCreateCompanionBuilder =
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 typedef $$ShopItemsTableUpdateCompanionBuilder =
     ShopItemsCompanion Function({
@@ -3448,7 +3487,7 @@ typedef $$ShopItemsTableUpdateCompanionBuilder =
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 
 final class $$ShopItemsTableReferences
@@ -3534,10 +3573,11 @@ class $$ShopItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   $$CategoriesTableFilterComposer get categoryId {
     final $$CategoriesTableFilterComposer composer = $composerBuilder(
@@ -3696,10 +3736,11 @@ class $$ShopItemsTableAnnotationComposer
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
-  GeneratedColumn<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
 
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -3764,7 +3805,7 @@ class $$ShopItemsTableTableManager
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => ShopItemsCompanion(
                 id: id,
                 name: name,
@@ -3792,7 +3833,7 @@ class $$ShopItemsTableTableManager
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => ShopItemsCompanion.insert(
                 id: id,
                 name: name,
@@ -3885,7 +3926,7 @@ typedef $$LoanersTableCreateCompanionBuilder =
       required DateTime createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 typedef $$LoanersTableUpdateCompanionBuilder =
     LoanersCompanion Function({
@@ -3898,7 +3939,7 @@ typedef $$LoanersTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
     });
 
 final class $$LoanersTableReferences
@@ -3974,10 +4015,11 @@ class $$LoanersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   $$CustomersTableFilterComposer get customerId {
     final $$CustomersTableFilterComposer composer = $composerBuilder(
@@ -4114,10 +4156,11 @@ class $$LoanersTableAnnotationComposer
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
-  GeneratedColumn<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
 
   $$CustomersTableAnnotationComposer get customerId {
     final $$CustomersTableAnnotationComposer composer = $composerBuilder(
@@ -4180,7 +4223,7 @@ class $$LoanersTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => LoanersCompanion(
                 id: id,
                 amount: amount,
@@ -4204,7 +4247,7 @@ class $$LoanersTableTableManager
                 required DateTime createdAt,
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
               }) => LoanersCompanion.insert(
                 id: id,
                 amount: amount,
@@ -4298,7 +4341,7 @@ typedef $$BankNotificationsTableCreateCompanionBuilder =
       Value<bool> isIncome,
       required DateTime receivedAt,
       Value<String> source,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
       Value<DateTime> createdAt,
     });
 typedef $$BankNotificationsTableUpdateCompanionBuilder =
@@ -4315,7 +4358,7 @@ typedef $$BankNotificationsTableUpdateCompanionBuilder =
       Value<bool> isIncome,
       Value<DateTime> receivedAt,
       Value<String> source,
-      Value<int> syncStatus,
+      Value<SyncStatus> syncStatus,
       Value<DateTime> createdAt,
     });
 
@@ -4388,10 +4431,11 @@ class $$BankNotificationsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
@@ -4532,10 +4576,11 @@ class $$BankNotificationsTableAnnotationComposer
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
 
-  GeneratedColumn<int> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -4593,7 +4638,7 @@ class $$BankNotificationsTableTableManager
                 Value<bool> isIncome = const Value.absent(),
                 Value<DateTime> receivedAt = const Value.absent(),
                 Value<String> source = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => BankNotificationsCompanion(
                 id: id,
@@ -4625,7 +4670,7 @@ class $$BankNotificationsTableTableManager
                 Value<bool> isIncome = const Value.absent(),
                 required DateTime receivedAt,
                 Value<String> source = const Value.absent(),
-                Value<int> syncStatus = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => BankNotificationsCompanion.insert(
                 id: id,

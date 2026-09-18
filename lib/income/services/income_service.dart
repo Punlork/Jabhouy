@@ -38,9 +38,6 @@ class IncomeService {
   bool _initialized = false;
   DateTime? _lastRemotePullAt;
 
-  static const _notificationSyncStatusSynced = 0;
-  static const _notificationSyncStatusPending = 1;
-  static const _notificationSyncStatusError = 2;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -363,8 +360,8 @@ class IncomeService {
     final rows = await (_db.select(_db.bankNotifications)
           ..where(
             (tbl) =>
-                tbl.syncStatus.equals(_notificationSyncStatusPending) |
-                tbl.syncStatus.equals(_notificationSyncStatusError),
+                tbl.syncStatus.equalsValue(SyncStatus.pending) |
+                tbl.syncStatus.equalsValue(SyncStatus.failed),
           )
           ..orderBy([
             (tbl) => OrderingTerm(
@@ -417,14 +414,14 @@ class IncomeService {
       final didSync = await _syncService.syncNotification(model);
       await _updateNotificationSyncStatus(
         model.fingerprint,
-        didSync ? _notificationSyncStatusSynced : _notificationSyncStatusError,
+        didSync ? SyncStatus.synced : SyncStatus.failed,
       );
     }
   }
 
   Future<void> _updateNotificationSyncStatus(
     String fingerprint,
-    int syncStatus,
+    SyncStatus syncStatus,
   ) async {
     await (_db.update(_db.bankNotifications)..where((tbl) => tbl.fingerprint.equals(fingerprint))).write(
       BankNotificationsCompanion(
@@ -444,7 +441,7 @@ class IncomeService {
     // push overwrites this with synced or error immediately after; a caller
     // that does not never revisits it, so writing synced here would claim
     // an upload that never happened.
-    const syncStatus = _notificationSyncStatusPending;
+    const syncStatus = SyncStatus.pending;
 
     if (existing == null) {
       await _db.into(_db.bankNotifications).insert(

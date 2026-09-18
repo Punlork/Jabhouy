@@ -37,7 +37,7 @@ class CustomerService extends BaseService {
     }
 
     final pendingItems = await (_db.select(_db.customers)
-          ..where((t) => t.syncStatus.equals(1)))
+          ..where((t) => t.syncStatus.equalsValue(SyncStatus.pending)))
         .get();
 
     for (final item in pendingItems) {
@@ -64,13 +64,13 @@ class CustomerService extends BaseService {
         if (!response.success) {
           await (_db.update(_db.customers)..where((t) => t.id.equals(item.id)))
               .write(
-            const CustomersCompanion(syncStatus: Value(2)),
+            const CustomersCompanion(syncStatus: Value(SyncStatus.failed)),
           );
         }
       } catch (_) {
         await (_db.update(_db.customers)..where((t) => t.id.equals(item.id)))
             .write(
-          const CustomersCompanion(syncStatus: Value(2)),
+          const CustomersCompanion(syncStatus: Value(SyncStatus.failed)),
         );
       }
     }
@@ -128,7 +128,7 @@ class CustomerService extends BaseService {
               name: c.name,
               createdAt: Value(c.createdAt),
               updatedAt: Value(c.updatedAt),
-              syncStatus: const Value(0),
+              syncStatus: const Value(SyncStatus.synced),
               isDeleted: const Value(false),
             ),
           ),
@@ -147,7 +147,7 @@ class CustomerService extends BaseService {
     final id = body.id == 0
         ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
         : body.id;
-    final localItem = body.copyWith(id: id, syncStatus: 1);
+    final localItem = body.copyWith(id: id, syncStatus: SyncStatus.pending);
 
     await _db.into(_db.customers).insert(
           CustomersCompanion.insert(
@@ -155,7 +155,7 @@ class CustomerService extends BaseService {
             name: localItem.name,
             createdAt: Value(localItem.createdAt ?? DateTime.now()),
             updatedAt: Value(localItem.updatedAt ?? DateTime.now()),
-            syncStatus: const Value(1),
+            syncStatus: const Value(SyncStatus.pending),
           ),
           mode: InsertMode.insertOrReplace,
         );
@@ -193,7 +193,7 @@ class CustomerService extends BaseService {
               name: c.name,
               createdAt: Value(c.createdAt),
               updatedAt: Value(c.updatedAt),
-              syncStatus: const Value(0),
+              syncStatus: const Value(SyncStatus.synced),
             ),
             mode: InsertMode.insertOrReplace,
           );
@@ -214,7 +214,7 @@ class CustomerService extends BaseService {
             name: body.name,
             createdAt: body.createdAt,
             updatedAt: updatedAt,
-            syncStatus: 1,
+            syncStatus: SyncStatus.pending,
             isDeleted: false,
           ),
         );
@@ -227,7 +227,7 @@ class CustomerService extends BaseService {
 
       return ApiResponse(
         success: true,
-        data: body.copyWith(syncStatus: 1, updatedAt: updatedAt),
+        data: body.copyWith(syncStatus: SyncStatus.pending, updatedAt: updatedAt),
         message: 'Saved offline. It will sync when you are back online.',
       );
     }
@@ -250,7 +250,7 @@ class CustomerService extends BaseService {
               name: c.name,
               createdAt: c.createdAt,
               updatedAt: c.updatedAt,
-              syncStatus: 0,
+              syncStatus: SyncStatus.synced,
               isDeleted: false,
             ),
           );
@@ -266,7 +266,7 @@ class CustomerService extends BaseService {
     await (_db.update(_db.customers)..where((t) => t.id.equals(body.id))).write(
       const CustomersCompanion(
         isDeleted: Value(true),
-        syncStatus: Value(1),
+        syncStatus: Value(SyncStatus.pending),
       ),
     );
 

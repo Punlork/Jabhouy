@@ -7,6 +7,7 @@ import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/l10n/arb/app_localizations.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class LoanerFormPage extends StatelessWidget {
   const LoanerFormPage({
@@ -123,7 +124,7 @@ class _LoanerFormPageState extends State<_LoanerFormPageContent> {
       createdAt: createdAt,
       updatedAt: widget.existingLoaner?.updatedAt,
       isPaid: widget.existingLoaner?.isPaid ?? false,
-      syncStatus: widget.existingLoaner?.syncStatus ?? 0,
+      syncStatus: widget.existingLoaner?.syncStatus ?? SyncStatus.synced,
       isDeleted: widget.existingLoaner?.isDeleted ?? false,
     );
 

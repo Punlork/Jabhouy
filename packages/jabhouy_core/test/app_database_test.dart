@@ -5,7 +5,6 @@
 // package shares one package_config. It cannot survive here: the plain
 // Dart VM has no `dart:ui`, so this suite fails to load. That failure is
 // the enforcement behind "jabhouy_core builds with no Flutter".
-import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:test/test.dart';
@@ -52,7 +51,7 @@ void main() {
     expect(item.categoryId, 7);
 
     // Defaults the sync engine will replace with a typed SyncStatus.
-    expect(item.syncStatus, 0);
+    expect(item.syncStatus, SyncStatus.synced);
     expect(item.isDeleted, isFalse);
   });
 

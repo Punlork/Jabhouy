@@ -85,7 +85,7 @@ void main() {
           ..where((tbl) => tbl.fingerprint.equals('income-1')))
         .getSingle();
 
-    expect(saved.syncStatus, 0);
+    expect(saved.syncStatus, SyncStatus.synced);
     verify(() => syncService.syncNotification(any())).called(1);
   });
 
@@ -107,7 +107,7 @@ void main() {
           ..where((tbl) => tbl.fingerprint.equals('income-2')))
         .getSingle();
 
-    expect(saved.syncStatus, 1);
+    expect(saved.syncStatus, SyncStatus.pending);
     verifyNever(() => syncService.syncNotification(any()));
   });
 }

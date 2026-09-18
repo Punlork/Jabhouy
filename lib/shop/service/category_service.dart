@@ -32,7 +32,7 @@ class CategoryService extends BaseService {
       return;
     }
 
-    final pendingItems = await (_db.select(_db.categories)..where((t) => t.syncStatus.equals(1))).get();
+    final pendingItems = await (_db.select(_db.categories)..where((t) => t.syncStatus.equalsValue(SyncStatus.pending))).get();
 
     for (final item in pendingItems) {
       try {
@@ -56,13 +56,13 @@ class CategoryService extends BaseService {
         if (!response.success) {
           await (_db.update(_db.categories)..where((t) => t.id.equals(item.id))).write(
             const CategoriesCompanion(
-              syncStatus: Value(2),
+              syncStatus: Value(SyncStatus.failed),
             ),
           );
         }
       } catch (_) {
         await (_db.update(_db.categories)..where((t) => t.id.equals(item.id))).write(
-          const CategoriesCompanion(syncStatus: Value(2)),
+          const CategoriesCompanion(syncStatus: Value(SyncStatus.failed)),
         );
       }
     }
@@ -101,7 +101,7 @@ class CategoryService extends BaseService {
             (c) => CategoriesCompanion.insert(
               id: Value(c.id),
               name: c.name,
-              syncStatus: const Value(0),
+              syncStatus: const Value(SyncStatus.synced),
               isDeleted: const Value(false),
             ),
           ),
@@ -118,13 +118,13 @@ class CategoryService extends BaseService {
     bool localOnly = true,
   }) async {
     final id = body.id == 0 ? -(DateTime.now().millisecondsSinceEpoch % 1000000) : body.id;
-    final localItem = body.copyWith(id: id, syncStatus: 1);
+    final localItem = body.copyWith(id: id, syncStatus: SyncStatus.pending);
 
     await _db.into(_db.categories).insert(
           CategoriesCompanion.insert(
             id: Value(localItem.id),
             name: localItem.name,
-            syncStatus: const Value(1),
+            syncStatus: const Value(SyncStatus.pending),
           ),
           mode: InsertMode.insertOrReplace,
         );
@@ -159,7 +159,7 @@ class CategoryService extends BaseService {
             CategoriesCompanion.insert(
               id: Value(c.id),
               name: c.name,
-              syncStatus: const Value(0),
+              syncStatus: const Value(SyncStatus.synced),
             ),
             mode: InsertMode.insertOrReplace,
           );
@@ -176,7 +176,7 @@ class CategoryService extends BaseService {
           Category(
             id: body.id,
             name: body.name,
-            syncStatus: 1,
+            syncStatus: SyncStatus.pending,
             isDeleted: false,
           ),
         );
@@ -189,7 +189,7 @@ class CategoryService extends BaseService {
 
       return ApiResponse(
         success: true,
-        data: body.copyWith(syncStatus: 1),
+        data: body.copyWith(syncStatus: SyncStatus.pending),
         message: 'Saved offline. It will sync when you are back online.',
       );
     }
@@ -210,7 +210,7 @@ class CategoryService extends BaseService {
             Category(
               id: c.id,
               name: c.name,
-              syncStatus: 0,
+              syncStatus: SyncStatus.synced,
               isDeleted: false,
             ),
           );
@@ -226,7 +226,7 @@ class CategoryService extends BaseService {
     await (_db.update(_db.categories)..where((t) => t.id.equals(body.id))).write(
       const CategoriesCompanion(
         isDeleted: Value(true),
-        syncStatus: Value(1),
+        syncStatus: Value(SyncStatus.pending),
       ),
     );
 

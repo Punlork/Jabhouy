@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class ShopItemModel extends Equatable {
   const ShopItemModel({
@@ -14,7 +15,7 @@ class ShopItemModel extends Equatable {
     this.category,
     this.createdAt,
     this.updatedAt,
-    this.syncStatus = 0,
+    this.syncStatus = SyncStatus.synced,
     this.isDeleted = false,
   });
 
@@ -36,7 +37,8 @@ class ShopItemModel extends Equatable {
       ),
       createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
       updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
-      syncStatus: tryCast<int>(json['syncStatus']) ?? 0,
+      syncStatus:
+            SyncStatus.fromWireValue(tryCast<int>(json['syncStatus']) ?? 0),
       isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }
@@ -53,7 +55,7 @@ class ShopItemModel extends Equatable {
   final CategoryItemModel? category;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   final bool isDeleted;
 
   String get baseName =>
@@ -130,7 +132,7 @@ class ShopItemModel extends Equatable {
     CategoryItemModel? category,
     DateTime? createdAt,
     DateTime? updatedAt,
-    int? syncStatus,
+    SyncStatus? syncStatus,
     bool? isDeleted,
   }) {
     return ShopItemModel(

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class LoanerModel extends Equatable {
   LoanerModel({
@@ -15,7 +16,7 @@ class LoanerModel extends Equatable {
     this.updatedAt,
     this.isPaid = false,
     DateTime? createdAt,
-    this.syncStatus = 0,
+    this.syncStatus = SyncStatus.synced,
     this.isDeleted = false,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -34,7 +35,8 @@ class LoanerModel extends Equatable {
       updatedAt: tryCast<String>(json['updatedAt'])
           ?.let((s) => DateTime.parse(s).toLocal()),
       isPaid: tryCast<bool>(json['paid'], fallback: false)!,
-      syncStatus: tryCast<int>(json['syncStatus']) ?? 0,
+      syncStatus:
+            SyncStatus.fromWireValue(tryCast<int>(json['syncStatus']) ?? 0),
       isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }
@@ -57,7 +59,7 @@ class LoanerModel extends Equatable {
   final DateTime? updatedAt;
   final CustomerModel? customer;
   final bool isPaid;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   final bool isDeleted;
 
   Map<String, dynamic> toJson() => {
@@ -91,7 +93,7 @@ class LoanerModel extends Equatable {
     DateTime? updatedAt,
     CustomerModel? customer,
     bool? isPaid,
-    int? syncStatus,
+    SyncStatus? syncStatus,
     bool? isDeleted,
   }) {
     return LoanerModel(

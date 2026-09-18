@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:jabhouy_core/src/sync/sync_status.dart';
 
 part 'app_database.g.dart';
 
@@ -9,7 +10,8 @@ class Customers extends Table {
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   IntColumn get syncStatus => integer()
-      .withDefault(const Constant(0))(); // 0: synced, 1: pending, 2: error
+      .map(const SyncStatusConverter())
+      .withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -19,7 +21,9 @@ class Categories extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
+  IntColumn get syncStatus => integer()
+      .map(const SyncStatusConverter())
+      .withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -38,7 +42,9 @@ class ShopItems extends Table {
   DateTimeColumn get createdAt => dateTime().nullable()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
+  IntColumn get syncStatus => integer()
+      .map(const SyncStatusConverter())
+      .withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -54,7 +60,9 @@ class Loaners extends Table {
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
+  IntColumn get syncStatus => integer()
+      .map(const SyncStatusConverter())
+      .withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -73,7 +81,9 @@ class BankNotifications extends Table {
   BoolColumn get isIncome => boolean().withDefault(const Constant(true))();
   DateTimeColumn get receivedAt => dateTime()();
   TextColumn get source => text().withDefault(const Constant('native'))();
-  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
+  IntColumn get syncStatus => integer()
+      .map(const SyncStatusConverter())
+      .withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

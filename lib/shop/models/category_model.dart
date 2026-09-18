@@ -1,12 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class CategoryItemModel extends Equatable {
   const CategoryItemModel({
     required this.id,
     required this.name,
-    this.syncStatus = 0,
+    this.syncStatus = SyncStatus.synced,
     this.isDeleted = false,
   });
 
@@ -14,14 +15,15 @@ class CategoryItemModel extends Equatable {
     return CategoryItemModel(
       id: tryCast<int>(json['id'], fallback: 0)!,
       name: tryCast<String>(json['name'], fallback: '')!,
-      syncStatus: tryCast<int>(json['syncStatus']) ?? 0,
+      syncStatus:
+            SyncStatus.fromWireValue(tryCast<int>(json['syncStatus']) ?? 0),
       isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }
 
   final int id;
   final String name;
-  final int syncStatus;
+  final SyncStatus syncStatus;
   final bool isDeleted;
 
   Map<String, dynamic> toJson() {
@@ -31,7 +33,7 @@ class CategoryItemModel extends Equatable {
   CategoryItemModel copyWith({
     int? id,
     String? name,
-    int? syncStatus,
+    SyncStatus? syncStatus,
     bool? isDeleted,
   }) {
     return CategoryItemModel(
