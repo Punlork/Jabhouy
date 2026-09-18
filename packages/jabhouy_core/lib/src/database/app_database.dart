@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:jabhouy_core/src/sync/outbox.dart';
 import 'package:jabhouy_core/src/sync/sync_status.dart';
 
 part 'app_database.g.dart';
@@ -93,7 +94,14 @@ class BankNotifications extends Table {
 }
 
 @DriftDatabase(
-  tables: [Customers, Categories, ShopItems, Loaners, BankNotifications],
+  tables: [
+    Customers,
+    Categories,
+    ShopItems,
+    Loaners,
+    BankNotifications,
+    OutboxEntries,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   /// Takes its executor rather than opening one, so this package stays
@@ -102,7 +110,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -129,6 +137,11 @@ class AppDatabase extends _$AppDatabase {
 
         if (from < 5) {
           await m.addColumn(bankNotifications, bankNotifications.syncStatus);
+        }
+
+        if (from < 6) {
+          await m.createTable(outboxEntries);
+          await m.createIndex(outboxDrainIdx);
         }
       },
     );

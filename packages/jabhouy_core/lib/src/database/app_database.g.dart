@@ -2842,6 +2842,668 @@ class BankNotificationsCompanion extends UpdateCompanion<BankNotification> {
   }
 }
 
+class $OutboxEntriesTable extends OutboxEntries
+    with TableInfo<$OutboxEntriesTable, OutboxEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OutboxEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncEntityType, String>
+  entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<SyncEntityType>($OutboxEntriesTable.$converterentityType);
+  static const VerificationMeta _entityLocalIdMeta = const VerificationMeta(
+    'entityLocalId',
+  );
+  @override
+  late final GeneratedColumn<String> entityLocalId = GeneratedColumn<String>(
+    'entity_local_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncOperation, String> operation =
+      GeneratedColumn<String>(
+        'operation',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<SyncOperation>($OutboxEntriesTable.$converteroperation);
+  static const VerificationMeta _fingerprintMeta = const VerificationMeta(
+    'fingerprint',
+  );
+  @override
+  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
+    'fingerprint',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _attemptCountMeta = const VerificationMeta(
+    'attemptCount',
+  );
+  @override
+  late final GeneratedColumn<int> attemptCount = GeneratedColumn<int>(
+    'attempt_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _nextAttemptAtMeta = const VerificationMeta(
+    'nextAttemptAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextAttemptAt =
+      GeneratedColumn<DateTime>(
+        'next_attempt_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
+    'lastError',
+  );
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+    'last_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dependsOnLocalIdMeta = const VerificationMeta(
+    'dependsOnLocalId',
+  );
+  @override
+  late final GeneratedColumn<String> dependsOnLocalId = GeneratedColumn<String>(
+    'depends_on_local_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    entityType,
+    entityLocalId,
+    operation,
+    fingerprint,
+    attemptCount,
+    nextAttemptAt,
+    lastError,
+    dependsOnLocalId,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'outbox_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OutboxEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('entity_local_id')) {
+      context.handle(
+        _entityLocalIdMeta,
+        entityLocalId.isAcceptableOrUnknown(
+          data['entity_local_id']!,
+          _entityLocalIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_entityLocalIdMeta);
+    }
+    if (data.containsKey('fingerprint')) {
+      context.handle(
+        _fingerprintMeta,
+        fingerprint.isAcceptableOrUnknown(
+          data['fingerprint']!,
+          _fingerprintMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fingerprintMeta);
+    }
+    if (data.containsKey('attempt_count')) {
+      context.handle(
+        _attemptCountMeta,
+        attemptCount.isAcceptableOrUnknown(
+          data['attempt_count']!,
+          _attemptCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_attempt_at')) {
+      context.handle(
+        _nextAttemptAtMeta,
+        nextAttemptAt.isAcceptableOrUnknown(
+          data['next_attempt_at']!,
+          _nextAttemptAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(
+        _lastErrorMeta,
+        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
+      );
+    }
+    if (data.containsKey('depends_on_local_id')) {
+      context.handle(
+        _dependsOnLocalIdMeta,
+        dependsOnLocalId.isAcceptableOrUnknown(
+          data['depends_on_local_id']!,
+          _dependsOnLocalIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {entityType, entityLocalId},
+  ];
+  @override
+  OutboxEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OutboxEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      entityType: $OutboxEntriesTable.$converterentityType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}entity_type'],
+        )!,
+      ),
+      entityLocalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_local_id'],
+      )!,
+      operation: $OutboxEntriesTable.$converteroperation.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}operation'],
+        )!,
+      ),
+      fingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fingerprint'],
+      )!,
+      attemptCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempt_count'],
+      )!,
+      nextAttemptAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_attempt_at'],
+      )!,
+      lastError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error'],
+      ),
+      dependsOnLocalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}depends_on_local_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OutboxEntriesTable createAlias(String alias) {
+    return $OutboxEntriesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SyncEntityType, String, String>
+  $converterentityType = const EnumNameConverter<SyncEntityType>(
+    SyncEntityType.values,
+  );
+  static JsonTypeConverter2<SyncOperation, String, String> $converteroperation =
+      const EnumNameConverter<SyncOperation>(SyncOperation.values);
+}
+
+class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
+  final int id;
+  final SyncEntityType entityType;
+
+  /// The local key of the row this job is about.
+  ///
+  /// Text rather than integer because entity tables are moving to UUID
+  /// primary keys; until then this holds the stringified integer id.
+  final String entityLocalId;
+  final SyncOperation operation;
+
+  /// The value that makes replaying this job safe.
+  ///
+  /// Generalises `BankNotifications.fingerprint`, which is the one
+  /// idempotency guarantee the app already relies on.
+  final String fingerprint;
+
+  /// How many pushes this job has survived. Drives the backoff schedule.
+  final int attemptCount;
+
+  /// The earliest time the drain loop may pick this job up again.
+  final DateTime nextAttemptAt;
+
+  /// Why the last attempt failed.
+  ///
+  /// Replaces the `catch (_)` blocks that collapsed every distinct failure
+  /// into one status integer.
+  final String? lastError;
+
+  /// The [entityLocalId] this job must wait for.
+  ///
+  /// Orders a shop item after the offline category it references.
+  final String? dependsOnLocalId;
+  final DateTime createdAt;
+  const OutboxEntry({
+    required this.id,
+    required this.entityType,
+    required this.entityLocalId,
+    required this.operation,
+    required this.fingerprint,
+    required this.attemptCount,
+    required this.nextAttemptAt,
+    this.lastError,
+    this.dependsOnLocalId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    {
+      map['entity_type'] = Variable<String>(
+        $OutboxEntriesTable.$converterentityType.toSql(entityType),
+      );
+    }
+    map['entity_local_id'] = Variable<String>(entityLocalId);
+    {
+      map['operation'] = Variable<String>(
+        $OutboxEntriesTable.$converteroperation.toSql(operation),
+      );
+    }
+    map['fingerprint'] = Variable<String>(fingerprint);
+    map['attempt_count'] = Variable<int>(attemptCount);
+    map['next_attempt_at'] = Variable<DateTime>(nextAttemptAt);
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
+    if (!nullToAbsent || dependsOnLocalId != null) {
+      map['depends_on_local_id'] = Variable<String>(dependsOnLocalId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  OutboxEntriesCompanion toCompanion(bool nullToAbsent) {
+    return OutboxEntriesCompanion(
+      id: Value(id),
+      entityType: Value(entityType),
+      entityLocalId: Value(entityLocalId),
+      operation: Value(operation),
+      fingerprint: Value(fingerprint),
+      attemptCount: Value(attemptCount),
+      nextAttemptAt: Value(nextAttemptAt),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
+      dependsOnLocalId: dependsOnLocalId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dependsOnLocalId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory OutboxEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OutboxEntry(
+      id: serializer.fromJson<int>(json['id']),
+      entityType: $OutboxEntriesTable.$converterentityType.fromJson(
+        serializer.fromJson<String>(json['entityType']),
+      ),
+      entityLocalId: serializer.fromJson<String>(json['entityLocalId']),
+      operation: $OutboxEntriesTable.$converteroperation.fromJson(
+        serializer.fromJson<String>(json['operation']),
+      ),
+      fingerprint: serializer.fromJson<String>(json['fingerprint']),
+      attemptCount: serializer.fromJson<int>(json['attemptCount']),
+      nextAttemptAt: serializer.fromJson<DateTime>(json['nextAttemptAt']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
+      dependsOnLocalId: serializer.fromJson<String?>(json['dependsOnLocalId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'entityType': serializer.toJson<String>(
+        $OutboxEntriesTable.$converterentityType.toJson(entityType),
+      ),
+      'entityLocalId': serializer.toJson<String>(entityLocalId),
+      'operation': serializer.toJson<String>(
+        $OutboxEntriesTable.$converteroperation.toJson(operation),
+      ),
+      'fingerprint': serializer.toJson<String>(fingerprint),
+      'attemptCount': serializer.toJson<int>(attemptCount),
+      'nextAttemptAt': serializer.toJson<DateTime>(nextAttemptAt),
+      'lastError': serializer.toJson<String?>(lastError),
+      'dependsOnLocalId': serializer.toJson<String?>(dependsOnLocalId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  OutboxEntry copyWith({
+    int? id,
+    SyncEntityType? entityType,
+    String? entityLocalId,
+    SyncOperation? operation,
+    String? fingerprint,
+    int? attemptCount,
+    DateTime? nextAttemptAt,
+    Value<String?> lastError = const Value.absent(),
+    Value<String?> dependsOnLocalId = const Value.absent(),
+    DateTime? createdAt,
+  }) => OutboxEntry(
+    id: id ?? this.id,
+    entityType: entityType ?? this.entityType,
+    entityLocalId: entityLocalId ?? this.entityLocalId,
+    operation: operation ?? this.operation,
+    fingerprint: fingerprint ?? this.fingerprint,
+    attemptCount: attemptCount ?? this.attemptCount,
+    nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
+    lastError: lastError.present ? lastError.value : this.lastError,
+    dependsOnLocalId: dependsOnLocalId.present
+        ? dependsOnLocalId.value
+        : this.dependsOnLocalId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  OutboxEntry copyWithCompanion(OutboxEntriesCompanion data) {
+    return OutboxEntry(
+      id: data.id.present ? data.id.value : this.id,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      entityLocalId: data.entityLocalId.present
+          ? data.entityLocalId.value
+          : this.entityLocalId,
+      operation: data.operation.present ? data.operation.value : this.operation,
+      fingerprint: data.fingerprint.present
+          ? data.fingerprint.value
+          : this.fingerprint,
+      attemptCount: data.attemptCount.present
+          ? data.attemptCount.value
+          : this.attemptCount,
+      nextAttemptAt: data.nextAttemptAt.present
+          ? data.nextAttemptAt.value
+          : this.nextAttemptAt,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+      dependsOnLocalId: data.dependsOnLocalId.present
+          ? data.dependsOnLocalId.value
+          : this.dependsOnLocalId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OutboxEntry(')
+          ..write('id: $id, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityLocalId: $entityLocalId, ')
+          ..write('operation: $operation, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('nextAttemptAt: $nextAttemptAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('dependsOnLocalId: $dependsOnLocalId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    entityType,
+    entityLocalId,
+    operation,
+    fingerprint,
+    attemptCount,
+    nextAttemptAt,
+    lastError,
+    dependsOnLocalId,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OutboxEntry &&
+          other.id == this.id &&
+          other.entityType == this.entityType &&
+          other.entityLocalId == this.entityLocalId &&
+          other.operation == this.operation &&
+          other.fingerprint == this.fingerprint &&
+          other.attemptCount == this.attemptCount &&
+          other.nextAttemptAt == this.nextAttemptAt &&
+          other.lastError == this.lastError &&
+          other.dependsOnLocalId == this.dependsOnLocalId &&
+          other.createdAt == this.createdAt);
+}
+
+class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
+  final Value<int> id;
+  final Value<SyncEntityType> entityType;
+  final Value<String> entityLocalId;
+  final Value<SyncOperation> operation;
+  final Value<String> fingerprint;
+  final Value<int> attemptCount;
+  final Value<DateTime> nextAttemptAt;
+  final Value<String?> lastError;
+  final Value<String?> dependsOnLocalId;
+  final Value<DateTime> createdAt;
+  const OutboxEntriesCompanion({
+    this.id = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.entityLocalId = const Value.absent(),
+    this.operation = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.attemptCount = const Value.absent(),
+    this.nextAttemptAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.dependsOnLocalId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  OutboxEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required SyncEntityType entityType,
+    required String entityLocalId,
+    required SyncOperation operation,
+    required String fingerprint,
+    this.attemptCount = const Value.absent(),
+    this.nextAttemptAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.dependsOnLocalId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : entityType = Value(entityType),
+       entityLocalId = Value(entityLocalId),
+       operation = Value(operation),
+       fingerprint = Value(fingerprint);
+  static Insertable<OutboxEntry> custom({
+    Expression<int>? id,
+    Expression<String>? entityType,
+    Expression<String>? entityLocalId,
+    Expression<String>? operation,
+    Expression<String>? fingerprint,
+    Expression<int>? attemptCount,
+    Expression<DateTime>? nextAttemptAt,
+    Expression<String>? lastError,
+    Expression<String>? dependsOnLocalId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (entityType != null) 'entity_type': entityType,
+      if (entityLocalId != null) 'entity_local_id': entityLocalId,
+      if (operation != null) 'operation': operation,
+      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (attemptCount != null) 'attempt_count': attemptCount,
+      if (nextAttemptAt != null) 'next_attempt_at': nextAttemptAt,
+      if (lastError != null) 'last_error': lastError,
+      if (dependsOnLocalId != null) 'depends_on_local_id': dependsOnLocalId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  OutboxEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<SyncEntityType>? entityType,
+    Value<String>? entityLocalId,
+    Value<SyncOperation>? operation,
+    Value<String>? fingerprint,
+    Value<int>? attemptCount,
+    Value<DateTime>? nextAttemptAt,
+    Value<String?>? lastError,
+    Value<String?>? dependsOnLocalId,
+    Value<DateTime>? createdAt,
+  }) {
+    return OutboxEntriesCompanion(
+      id: id ?? this.id,
+      entityType: entityType ?? this.entityType,
+      entityLocalId: entityLocalId ?? this.entityLocalId,
+      operation: operation ?? this.operation,
+      fingerprint: fingerprint ?? this.fingerprint,
+      attemptCount: attemptCount ?? this.attemptCount,
+      nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
+      lastError: lastError ?? this.lastError,
+      dependsOnLocalId: dependsOnLocalId ?? this.dependsOnLocalId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(
+        $OutboxEntriesTable.$converterentityType.toSql(entityType.value),
+      );
+    }
+    if (entityLocalId.present) {
+      map['entity_local_id'] = Variable<String>(entityLocalId.value);
+    }
+    if (operation.present) {
+      map['operation'] = Variable<String>(
+        $OutboxEntriesTable.$converteroperation.toSql(operation.value),
+      );
+    }
+    if (fingerprint.present) {
+      map['fingerprint'] = Variable<String>(fingerprint.value);
+    }
+    if (attemptCount.present) {
+      map['attempt_count'] = Variable<int>(attemptCount.value);
+    }
+    if (nextAttemptAt.present) {
+      map['next_attempt_at'] = Variable<DateTime>(nextAttemptAt.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
+    if (dependsOnLocalId.present) {
+      map['depends_on_local_id'] = Variable<String>(dependsOnLocalId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OutboxEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityLocalId: $entityLocalId, ')
+          ..write('operation: $operation, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('nextAttemptAt: $nextAttemptAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('dependsOnLocalId: $dependsOnLocalId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2851,6 +3513,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LoanersTable loaners = $LoanersTable(this);
   late final $BankNotificationsTable bankNotifications =
       $BankNotificationsTable(this);
+  late final $OutboxEntriesTable outboxEntries = $OutboxEntriesTable(this);
+  late final Index outboxDrainIdx = Index(
+    'outbox_drain_idx',
+    'CREATE INDEX outbox_drain_idx ON outbox_entries (entity_type, next_attempt_at)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2861,6 +3528,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     shopItems,
     loaners,
     bankNotifications,
+    outboxEntries,
+    outboxDrainIdx,
   ];
 }
 
@@ -4717,6 +5386,310 @@ typedef $$BankNotificationsTableProcessedTableManager =
       BankNotification,
       PrefetchHooks Function()
     >;
+typedef $$OutboxEntriesTableCreateCompanionBuilder =
+    OutboxEntriesCompanion Function({
+      Value<int> id,
+      required SyncEntityType entityType,
+      required String entityLocalId,
+      required SyncOperation operation,
+      required String fingerprint,
+      Value<int> attemptCount,
+      Value<DateTime> nextAttemptAt,
+      Value<String?> lastError,
+      Value<String?> dependsOnLocalId,
+      Value<DateTime> createdAt,
+    });
+typedef $$OutboxEntriesTableUpdateCompanionBuilder =
+    OutboxEntriesCompanion Function({
+      Value<int> id,
+      Value<SyncEntityType> entityType,
+      Value<String> entityLocalId,
+      Value<SyncOperation> operation,
+      Value<String> fingerprint,
+      Value<int> attemptCount,
+      Value<DateTime> nextAttemptAt,
+      Value<String?> lastError,
+      Value<String?> dependsOnLocalId,
+      Value<DateTime> createdAt,
+    });
+
+class $$OutboxEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $OutboxEntriesTable> {
+  $$OutboxEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SyncEntityType, SyncEntityType, String>
+  get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get entityLocalId => $composableBuilder(
+    column: $table.entityLocalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SyncOperation, SyncOperation, String>
+  get operation => $composableBuilder(
+    column: $table.operation,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dependsOnLocalId => $composableBuilder(
+    column: $table.dependsOnLocalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OutboxEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $OutboxEntriesTable> {
+  $$OutboxEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityLocalId => $composableBuilder(
+    column: $table.entityLocalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get operation => $composableBuilder(
+    column: $table.operation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dependsOnLocalId => $composableBuilder(
+    column: $table.dependsOnLocalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OutboxEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OutboxEntriesTable> {
+  $$OutboxEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SyncEntityType, String> get entityType =>
+      $composableBuilder(
+        column: $table.entityType,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get entityLocalId => $composableBuilder(
+    column: $table.entityLocalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SyncOperation, String> get operation =>
+      $composableBuilder(column: $table.operation, builder: (column) => column);
+
+  GeneratedColumn<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
+
+  GeneratedColumn<String> get dependsOnLocalId => $composableBuilder(
+    column: $table.dependsOnLocalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$OutboxEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OutboxEntriesTable,
+          OutboxEntry,
+          $$OutboxEntriesTableFilterComposer,
+          $$OutboxEntriesTableOrderingComposer,
+          $$OutboxEntriesTableAnnotationComposer,
+          $$OutboxEntriesTableCreateCompanionBuilder,
+          $$OutboxEntriesTableUpdateCompanionBuilder,
+          (
+            OutboxEntry,
+            BaseReferences<_$AppDatabase, $OutboxEntriesTable, OutboxEntry>,
+          ),
+          OutboxEntry,
+          PrefetchHooks Function()
+        > {
+  $$OutboxEntriesTableTableManager(_$AppDatabase db, $OutboxEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OutboxEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OutboxEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OutboxEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<SyncEntityType> entityType = const Value.absent(),
+                Value<String> entityLocalId = const Value.absent(),
+                Value<SyncOperation> operation = const Value.absent(),
+                Value<String> fingerprint = const Value.absent(),
+                Value<int> attemptCount = const Value.absent(),
+                Value<DateTime> nextAttemptAt = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<String?> dependsOnLocalId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => OutboxEntriesCompanion(
+                id: id,
+                entityType: entityType,
+                entityLocalId: entityLocalId,
+                operation: operation,
+                fingerprint: fingerprint,
+                attemptCount: attemptCount,
+                nextAttemptAt: nextAttemptAt,
+                lastError: lastError,
+                dependsOnLocalId: dependsOnLocalId,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required SyncEntityType entityType,
+                required String entityLocalId,
+                required SyncOperation operation,
+                required String fingerprint,
+                Value<int> attemptCount = const Value.absent(),
+                Value<DateTime> nextAttemptAt = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<String?> dependsOnLocalId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => OutboxEntriesCompanion.insert(
+                id: id,
+                entityType: entityType,
+                entityLocalId: entityLocalId,
+                operation: operation,
+                fingerprint: fingerprint,
+                attemptCount: attemptCount,
+                nextAttemptAt: nextAttemptAt,
+                lastError: lastError,
+                dependsOnLocalId: dependsOnLocalId,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OutboxEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OutboxEntriesTable,
+      OutboxEntry,
+      $$OutboxEntriesTableFilterComposer,
+      $$OutboxEntriesTableOrderingComposer,
+      $$OutboxEntriesTableAnnotationComposer,
+      $$OutboxEntriesTableCreateCompanionBuilder,
+      $$OutboxEntriesTableUpdateCompanionBuilder,
+      (
+        OutboxEntry,
+        BaseReferences<_$AppDatabase, $OutboxEntriesTable, OutboxEntry>,
+      ),
+      OutboxEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4731,4 +5704,6 @@ class $AppDatabaseManager {
       $$LoanersTableTableManager(_db, _db.loaners);
   $$BankNotificationsTableTableManager get bankNotifications =>
       $$BankNotificationsTableTableManager(_db, _db.bankNotifications);
+  $$OutboxEntriesTableTableManager get outboxEntries =>
+      $$OutboxEntriesTableTableManager(_db, _db.outboxEntries);
 }
