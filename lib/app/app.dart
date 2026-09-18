@@ -1,6 +1,7 @@
 export 'bloc/app_bloc.dart';
 export 'bloc/upload/upload_bloc.dart';
 export 'constant/app_assets.dart';
+export 'constant/app_flavor.dart';
 export 'extension/state_extension.dart';
 export 'injection/dependency_injection.dart';
 export 'mixin/img_clipboard_mixin.dart';
@@ -13,6 +14,7 @@ export 'service/api_service.dart';
 export 'service/app_log_service.dart';
 export 'service/base_service.dart';
 export 'service/connectivity_service.dart';
+export 'service/debug/app_debugger.dart';
 export 'service/fcm_service.dart';
 export 'service/network_inspector_service.dart';
 export 'service/session_cleanup_service.dart';

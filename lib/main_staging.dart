@@ -5,6 +5,7 @@ import 'package:my_app/bootstrap.dart';
 Future<void> main() async {
   await bootstrap(
     () => const App(),
+    flavor: AppFlavor.staging,
     initialize: dotenv.load,
   );
 }

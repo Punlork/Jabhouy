@@ -4,7 +4,7 @@ version: 1.0.20+25
 publish_to: none
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.13.0
 
 dependencies:
   animated_text_kit: ^4.2.3
@@ -30,6 +30,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: ^2.4.4
+  flutter_runtime_debugger: ^0.4.0
   flutter_slidable: ^3.1.2
   flutter_staggered_grid_view: ^0.7.0
   flutter_svg: ^2.2.0

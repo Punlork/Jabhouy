@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_app/app/app.dart';
 
@@ -19,8 +20,20 @@ class ApiService {
   factory ApiService() => _instance;
 
   ApiService._internal() : _client = http.Client() {
-    _baseUrl = dotenv.get('BASE_URL', fallback: '');
+    _baseUrl = _normalizeAuthority(dotenv.get('BASE_URL', fallback: ''));
     assert(_baseUrl.isNotEmpty, 'BASE_URL env must be provided');
+  }
+
+  /// [Uri.https] takes an *authority* (`host[:port]`), not a full URL.
+  /// A BASE_URL of `https://api.example.com` would otherwise be split on the
+  /// first `:`, leaving `//api.example.com` to be parsed as a port and
+  /// failing every request with `FormatException: Invalid radix-10 number`.
+  /// Accept either form.
+  static String _normalizeAuthority(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return '';
+    if (trimmed.contains('://')) return Uri.parse(trimmed).authority;
+    return trimmed.replaceAll(RegExp(r'/+$'), '');
   }
 
   final cookies = ApiCookies();

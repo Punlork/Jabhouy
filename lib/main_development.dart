@@ -9,6 +9,7 @@ Future<void> main() async {
       textDirection: TextDirection.ltr,
       child: App(),
     ),
+    flavor: AppFlavor.development,
     initialize: () => dotenv.load(fileName: '.env.dev'),
   );
 }

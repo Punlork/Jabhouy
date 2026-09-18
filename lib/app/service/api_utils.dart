@@ -59,6 +59,12 @@ Future<http.Response> interceptRequest(
   final pathWithQuery = uri.query.isNotEmpty ? '${uri.path}?${uri.query}' : uri.path;
   final startTime = DateTime.now();
   final normalizedMethod = method ?? 'REQUEST';
+  final debugRequestId = Debugger.startNetwork(
+    method: normalizedMethod,
+    url: uri.toString(),
+    headers: headers ?? const {},
+    body: requestBody,
+  );
 
   String? formattedBody;
   if (requestBody != null) {
@@ -95,6 +101,14 @@ Future<http.Response> interceptRequest(
       '${formattedResponseBody != null ? ' | Response body:\n$formattedResponseBody' : ''}',
     );
 
+    Debugger.finishNetwork(
+      debugRequestId,
+      statusCode: response.statusCode,
+      duration: endTime.difference(startTime),
+      responseHeaders: response.headers,
+      responseBody: formattedResponseBody,
+    );
+
     inspector.capture(
       timestamp: startTime,
       method: normalizedMethod,
@@ -114,6 +128,12 @@ Future<http.Response> interceptRequest(
       error: error,
       stackTrace: stackTrace,
     );
+    Debugger.finishNetwork(
+      debugRequestId,
+      duration: endTime.difference(startTime),
+      error: error,
+    );
+
     inspector.capture(
       timestamp: startTime,
       method: normalizedMethod,

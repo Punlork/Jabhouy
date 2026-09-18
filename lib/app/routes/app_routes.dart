@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
@@ -65,6 +66,7 @@ class AppRoutes {
 
   static final GoRouter router = GoRouter(
     initialLocation: home.toPath,
+    observers: [DebuggerRouteObserver()],
     redirect: (context, state) {
       final authState = BlocProvider.of<AuthBloc>(context).state;
       final currentPath = state.matchedLocation;

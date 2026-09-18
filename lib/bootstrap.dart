@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/app/service/firebase_runtime_options.dart';
 
@@ -28,6 +29,22 @@ class AppBlocObserver extends BlocObserver {
     );
   }
 
+  /// Feeds the debug overlay's State tab. Only fires for event-driven blocs,
+  /// which is what gives each entry its triggering event.
+  @override
+  void onTransition(
+    Bloc<dynamic, dynamic> bloc,
+    Transition<dynamic, dynamic> transition,
+  ) {
+    super.onTransition(bloc, transition);
+    StateRecorder.record(
+      manager: bloc.runtimeType.toString(),
+      trigger: transition.event.runtimeType.toString(),
+      from: transition.currentState.runtimeType.toString(),
+      to: transition.nextState.runtimeType.toString(),
+    );
+  }
+
   @override
   void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
     logger.e(
@@ -37,6 +54,11 @@ class AppBlocObserver extends BlocObserver {
       error: error,
       stackTrace: stackTrace,
     );
+    Debugger.error(
+      '$error',
+      tag: bloc.runtimeType.toString(),
+      stackTrace: stackTrace,
+    );
 
     super.onError(bloc, error, stackTrace);
   }
@@ -44,6 +66,7 @@ class AppBlocObserver extends BlocObserver {
 
 Future<void> bootstrap(
   FutureOr<Widget> Function() builder, {
+  required AppFlavor flavor,
   Future<void> Function()? initialize,
 }) async {
   final appLogService = AppLogService.instance;
@@ -80,6 +103,11 @@ Future<void> bootstrap(
         return true;
       };
 
+      // Must come after the handlers above: the debugger's crash handler
+      // wraps whatever is currently installed and delegates to it, so
+      // initializing earlier would let those assignments replace it.
+      await AppDebugger.initialize(flavor);
+
       Bloc.observer = const AppBlocObserver();
 
       FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -92,6 +120,10 @@ Future<void> bootstrap(
       }
       await FirebaseRuntimeOptions.persistNativeSyncConfig();
       await setupDependencies();
+
+      // Storage tab needs the DI container, so it attaches after setup.
+      AppDebugger.attachStorage();
+
       await getIt<FcmService>().initialize();
       runApp(await builder());
     },
@@ -101,11 +133,13 @@ Future<void> bootstrap(
         error: error,
         stackTrace: stackTrace,
       );
+      Debugger.error('$error', tag: 'zone', stackTrace: stackTrace);
     },
     zoneSpecification: ZoneSpecification(
       print: (self, parent, zone, line) {
         appLogService.capturePrint(line);
         parent.print(zone, line);
+        Debugger.log(line, tag: 'print', level: LogLevel.verbose);
       },
     ),
   );

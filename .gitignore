@@ -122,3 +122,5 @@ app.*.map.json
 
 # Patrol generated test bundle (do not commit)
 patrol_test/test_bundle.dart
+# Local dependency overrides (per-developer)
+pubspec_overrides.yaml

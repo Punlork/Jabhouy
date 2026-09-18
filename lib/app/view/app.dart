@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:my_app/app/app.dart';
 import 'package:my_app/auth/auth.dart';
 import 'package:my_app/l10n/arb/app_localizations.dart';
@@ -39,8 +40,9 @@ class _MyApp extends StatelessWidget {
           builder: (context, child) => Overlay(
             initialEntries: [
               OverlayEntry(
-                builder: (context) => AppUpgrader(
-                  child: child!,
+                builder: (context) => Debugger.builder(
+                  context,
+                  AppUpgrader(child: child!),
                 ),
               ),
             ],
