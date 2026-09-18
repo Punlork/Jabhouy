@@ -1,0 +1,13 @@
+analyzer:
+  errors:
+    lines_longer_than_80_chars: ignore
+include: package:very_good_analysis/analysis_options.6.0.0.yaml
+linter:
+  rules:
+    # Matches the app and jabhouy_core.
+    public_member_api_docs: false
+
+    # The engine's fields are private but its constructor parameters are
+    # named and public. An initializing formal would force callers to write
+    # SyncEngine(_transport: ...).
+    prefer_initializing_formals: false

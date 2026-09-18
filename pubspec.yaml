@@ -5,6 +5,7 @@ publish_to: none
 
 workspace:
   - packages/jabhouy_core
+  - packages/jabhouy_sync
 
 environment:
   sdk: ^3.13.0
