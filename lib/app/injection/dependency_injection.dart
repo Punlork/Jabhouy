@@ -1,12 +1,13 @@
 import 'package:get_it/get_it.dart';
 import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
+import 'package:jabhouy/app/service/database/database_connection.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 final getIt = GetIt.instance;
 
@@ -19,7 +20,7 @@ Future<void> setupDependencies() async {
     ..registerSingleton<NetworkInspectorService>(
       NetworkInspectorService.instance,
     )
-    ..registerSingleton<AppDatabase>(AppDatabase())
+    ..registerSingleton<AppDatabase>(AppDatabase(openAppDatabaseConnection()))
     ..registerSingleton(ConnectivityService())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))

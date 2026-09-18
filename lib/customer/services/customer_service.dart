@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
 import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class CustomerService extends BaseService {
   CustomerService(super.apiService, this._db, this._connectivityService);

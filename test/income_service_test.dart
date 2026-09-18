@@ -1,8 +1,8 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/app/service/api_service.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockApiService extends Mock implements ApiService {}
@@ -39,7 +39,7 @@ void main() {
 
   setUp(() {
     apiService = _MockApiService();
-    database = AppDatabase.forTesting(NativeDatabase.memory());
+    database = AppDatabase(NativeDatabase.memory());
     bridge = _MockNotificationTrackingBridge();
     syncService = _MockFirebaseIncomeSyncService();
     diagnostics = _MockNotificationDiagnosticsService();

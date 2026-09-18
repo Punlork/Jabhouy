@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class NotificationTrackingStatus {
   const NotificationTrackingStatus({

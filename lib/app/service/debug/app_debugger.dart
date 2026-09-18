@@ -1,8 +1,8 @@
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:jabhouy/app/constant/app_flavor.dart';
 import 'package:jabhouy/app/injection/dependency_injection.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
 import 'package:jabhouy/app/service/debug/debug_storage_readers.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Wires `flutter_runtime_debugger` into the app.

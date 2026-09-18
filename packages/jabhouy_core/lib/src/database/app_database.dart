@@ -1,10 +1,4 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:sqlite3/sqlite3.dart';
 
 part 'app_database.g.dart';
 
@@ -92,8 +86,10 @@ class BankNotifications extends Table {
   tables: [Customers, Categories, ShopItems, Loaners, BankNotifications],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
-  AppDatabase.forTesting(super.executor);
+  /// Takes its executor rather than opening one, so this package stays
+  /// free of `dart:io`, path_provider and sqlite3_flutter_libs. The app
+  /// passes a file-backed executor; tests pass `NativeDatabase.memory()`.
+  AppDatabase(super.executor);
 
   @override
   int get schemaVersion => 5;
@@ -137,16 +133,4 @@ class AppDatabase extends _$AppDatabase {
       await delete(customers).go();
     });
   }
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db.sqlite'));
-
-    final cacheDatabase = await getTemporaryDirectory();
-    sqlite3.tempDirectory = cacheDatabase.path;
-
-    return NativeDatabase.createInBackground(file);
-  });
 }

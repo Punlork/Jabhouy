@@ -1,9 +1,9 @@
 import 'package:jabhouy/app/service/api_service.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
 import 'package:jabhouy/auth/service/auth_service.dart';
 import 'package:jabhouy/income/services/firebase_income_sync_service.dart';
 import 'package:jabhouy/income/services/notification_diagnostics_service.dart';
 import 'package:jabhouy/income/services/notification_tracking_bridge.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class SessionCleanupService {
   SessionCleanupService({

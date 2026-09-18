@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class ShopService extends BaseService {
   ShopService(super.apiService, this._db, this._connectivityService);

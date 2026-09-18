@@ -1,11 +1,10 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/app/service/database/app_database.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,7 +51,7 @@ void main() {
       'income_sync_scope_id': 'scope-1',
     });
 
-    database = AppDatabase.forTesting(NativeDatabase.memory());
+    database = AppDatabase(NativeDatabase.memory());
     apiService = _MockApiService();
     apiCookies = _MockApiCookies();
     authService = AuthService(apiService, _MockConnectivityService());
