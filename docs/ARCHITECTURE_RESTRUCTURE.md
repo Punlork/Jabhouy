@@ -1,6 +1,6 @@
 # Architecture restructure
 
-**Status:** Draft
+**Status:** In progress
 **Author:** Punlork
 **Updated:** 2026-09-04
 
@@ -9,6 +9,50 @@
 Jabhouy moves from feature folders containing god-object services to layered features over a shared core, then extracts three packages in a pub workspace.
 The offline sync logic — currently cloned into four services with no retry path — consolidates into one engine that generalizes the idempotency and coalescing patterns already working in the income feature.
 Shop is layered first as the reference slice, and is the single feature promoted to its own package as a deliberate modularization experiment.
+
+## Progress
+
+Branch `refactor/architecture-restructure`. Three decisions changed once the
+code met the plan; each is recorded below rather than left as drift.
+
+| Phase | State | Commit |
+| ----- | ----- | ------ |
+| 0 — rename, unblock tests | done | `0a9508e` |
+| — income data-loss fix (found by phase 0) | done | `6bf59b2` |
+| 1 — `jabhouy_core` | done, as a package rather than a folder | `8c30b1f`, `caba4c5` |
+| — `SyncStatus` enum | done | `c391ebb` |
+| 3a — `OutboxEntries` table | done, schema 5 → 6 | `0dd2c1c` |
+| 3b — `jabhouy_sync` engine | done | `28a89ac` |
+| 2 — shop slice | not started | — |
+| 4 — loaner and income slices | not started | — |
+| 5 — `jabhouy_shop` | not started | — |
+| 6 — bloc 8→9, go_router 14→18 | not started | — |
+
+**Tables live in `jabhouy_core`, not in the app.** This doc scoped core to
+"db primitives". With drift's default generator, a table's generated
+companion lands in whichever package declares `@DriftDatabase`, so a table
+in a feature package and the database in core is a package cycle, which
+Dart forbids. Schema is also genuinely shared: `ShopItems.categoryId`
+references `Categories.id`. So core owns schema because schema is shared,
+and features own behaviour because behaviour is not. `jabhouy_shop` will
+own its ui, repository, api source and DAO, not its table.
+
+**Packaging came before layering.** This doc said the opposite. Core turned
+out to be mostly a move rather than a refactor, so the cost the ordering was
+protecting against did not materialise for it. The feature slices still
+follow layering-first.
+
+**Package boundaries are softer than this doc assumed.** Workspace members
+share one `package_config`, so a `package:flutter` import inside
+`jabhouy_core` resolves and the analyzer stays quiet. What actually enforces
+it is `dart test`: the plain VM has no `dart:ui`, so the suite fails to load.
+Both packages have tests for that reason, verified by adding a Flutter
+import and watching it break.
+
+**build_runner does not cross workspace members.** Regenerating drift now
+needs a run inside `packages/jabhouy_core` as well as at the root. This is
+the phase 5 codegen cost, arriving early.
+
 
 ## Context
 
