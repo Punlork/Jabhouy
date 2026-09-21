@@ -25,11 +25,6 @@ class DefaultShopRepository implements ShopRepository {
   final SyncEngine _engine;
   final ConnectivityService _connectivity;
 
-  static const _offlineWrite =
-      'Saved offline. It will sync when you are back online.';
-  static const _offlineDelete =
-      'Deleted offline. It will sync when you are back online.';
-
   @override
   Stream<List<ShopItemModel>> watchItems({
     String searchQuery = '',
@@ -53,36 +48,32 @@ class DefaultShopRepository implements ShopRepository {
   }
 
   @override
-  Future<ApiResponse<PaginatedResponse<ShopItemModel>>> refreshItems({
+  Future<Result<PaginatedResponse<ShopItemModel>>> refreshItems({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
     String categoryFilter = '',
   }) async {
     if (!await _connectivity.isOnline) {
-      return ApiResponse(
-        success: false,
-        message: 'Offline - showing cached data.',
-      );
+      return const Err(AppException('Offline - showing cached data.'));
     }
 
-    final response = await _api.fetchItems(
+    final result = await _api.fetchItems(
       page: page,
       limit: limit,
       searchQuery: searchQuery,
       categoryFilter: categoryFilter,
     );
 
-    final data = response.data;
-    if (response.success && data != null) {
-      await _dao.cacheServerItems(data.items);
+    if (result case Ok(:final value)) {
+      await _dao.cacheServerItems(value.items);
     }
 
-    return response;
+    return result;
   }
 
   @override
-  Future<ApiResponse<ShopItemModel?>> createItem(ShopItemModel body) async {
+  Future<Result<ShopItemModel>> createItem(ShopItemModel body) async {
     // Phase 3's UUID `localId` column replaces this. Until then a negative
     // id marks "the server has never seen this row", which is what the
     // shop adapter branches on.
@@ -94,11 +85,11 @@ class DefaultShopRepository implements ShopRepository {
     await _dao.insertPending(localItem);
     await _enqueue(localItem, SyncOperation.create, 'create');
 
-    return _afterLocalWrite(data: localItem, offlineMessage: _offlineWrite);
+    return _settle(localItem);
   }
 
   @override
-  Future<ApiResponse<ShopItemModel?>> updateItem(ShopItemModel body) async {
+  Future<Result<ShopItemModel>> updateItem(ShopItemModel body) async {
     final updatedAt = DateTime.now();
     final localItem = body.copyWith(
       updatedAt: updatedAt,
@@ -117,22 +108,16 @@ class DefaultShopRepository implements ShopRepository {
       'update:${updatedAt.microsecondsSinceEpoch}',
     );
 
-    return _afterLocalWrite(
-      data: body,
-      offlineData: localItem,
-      offlineMessage: _offlineWrite,
-    );
+    return _settle(localItem);
   }
 
   @override
-  Future<ApiResponse<dynamic>> deleteItem(ShopItemModel body) async {
+  Future<Result<void>> deleteItem(ShopItemModel body) async {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
-    return _afterLocalWrite<dynamic>(
-      data: null,
-      offlineMessage: _offlineDelete,
-    );
+    if (await _connectivity.isOnline) await _engine.drain();
+    return const Ok<void>(null);
   }
 
   @override
@@ -161,23 +146,19 @@ class DefaultShopRepository implements ShopRepository {
     );
   }
 
-  /// Every write takes the same shape after the local row and its job
-  /// land: drain if online, otherwise report the row as saved and leave
-  /// the job queued.
-  Future<ApiResponse<T>> _afterLocalWrite<T>({
-    required T data,
-    required String offlineMessage,
-    T? offlineData,
-  }) async {
-    if (await _connectivity.isOnline) {
-      await _engine.drain();
-      return ApiResponse(success: true, data: data);
-    }
+  /// Drains if there is a connection, then reports the row as it now
+  /// stands.
+  ///
+  /// The returned `syncStatus` is the honest answer to "did that reach the
+  /// server?", which is what the `ui` layer needs to pick a message — the
+  /// repository no longer ships one. A row missing from under its local id
+  /// was reconciled onto the server's, so it is synced; a row still there
+  /// is pending or failed, and says which.
+  Future<Result<ShopItemModel>> _settle(ShopItemModel local) async {
+    if (!await _connectivity.isOnline) return Ok(local);
 
-    return ApiResponse(
-      success: true,
-      data: offlineData ?? data,
-      message: offlineMessage,
-    );
+    await _engine.drain();
+    final after = await _dao.findById(local.id);
+    return Ok(after ?? local.copyWith(syncStatus: SyncStatus.synced));
   }
 }

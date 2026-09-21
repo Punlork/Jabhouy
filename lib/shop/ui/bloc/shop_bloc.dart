@@ -126,13 +126,17 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.createItem(event.body);
-      if (!response.success) return;
-      showSuccessSnackBar(
-        null,
-        response.message ?? 'Created ${response.data?.name}',
+      (await _repository.createItem(event.body)).fold(
+        ok: (item) {
+          showSuccessSnackBar(
+            null,
+            syncFeedback(item.syncStatus, done: 'Created ${item.name}'),
+          );
+          event.onSuccess?.call();
+        },
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to create item: ${e.message}'),
       );
-      event.onSuccess?.call();
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
@@ -146,13 +150,17 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.updateItem(event.body);
-      if (!response.success) return;
-      showSuccessSnackBar(
-        null,
-        response.message ?? 'Updated: ${response.data?.name}',
+      (await _repository.updateItem(event.body)).fold(
+        ok: (item) {
+          showSuccessSnackBar(
+            null,
+            syncFeedback(item.syncStatus, done: 'Updated: ${item.name}'),
+          );
+          event.onSuccess?.call();
+        },
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to update item: ${e.message}'),
       );
-      event.onSuccess?.call();
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
     } finally {
@@ -171,11 +179,11 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     LoadingOverlay.show();
     try {
       for (final item in event.items) {
-        final response = await _repository.createItem(item);
-        if (!response.success) {
+        final result = await _repository.createItem(item);
+        if (result case Err(:final error)) {
           showErrorSnackBar(
             null,
-            response.message ?? 'Failed to create ${item.name}',
+            'Failed to create ${item.name}: ${error.message}',
           );
           return;
         }
@@ -201,11 +209,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.deleteItem(event.body);
-      if (!response.success) return;
-      showSuccessSnackBar(
-        null,
-        response.message ?? 'Deleted ${event.body.name}',
+      (await _repository.deleteItem(event.body)).fold(
+        ok: (_) => showSuccessSnackBar(null, 'Deleted ${event.body.name}'),
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to delete item: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete item: $e');
@@ -311,7 +318,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    final response = await _repository.refreshItems(
+    final result = await _repository.refreshItems(
       page: effectivePage,
       limit: newPageSize,
       searchQuery: newSearchQuery,
@@ -322,13 +329,13 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    if (response.success && response.data != null) {
+    if (result case Ok(:final value)) {
       final loadedState = state.asLoaded;
       if (loadedState != null) {
         emit(
           loadedState.copyWith(
             paginatedItems: loadedState.paginatedItems.copyWith(
-              pagination: response.data!.pagination,
+              pagination: value.pagination,
             ),
             categoryFilter: newCategoryFilter,
             searchQuery: newSearchQuery,
@@ -340,7 +347,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       } else {
         emit(
           ShopLoaded(
-            paginatedItems: response.data!,
+            paginatedItems: value,
             searchQuery: newSearchQuery,
             categoryFilter: newCategoryFilter,
           ),
@@ -363,7 +370,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    emit(ShopError(response.message ?? 'Failed to load items.'));
+    emit(
+      ShopError(result.errorOrNull?.message ?? 'Failed to load items.'),
+    );
   }
 
   Future<void> _onConnectivityChanged(
@@ -399,7 +408,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 
     await _repository.syncPendingChanges();
 
-    final response = await _repository.refreshItems(
+    final result = await _repository.refreshItems(
       page: currentState?.pagination.page ?? 1,
       limit: currentState?.pagination.limit ?? 100,
       searchQuery: currentState?.searchQuery ?? '',
@@ -415,11 +424,11 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    if (response.success && response.data != null) {
+    if (result case Ok(:final value)) {
       emit(
         latestState.copyWith(
           paginatedItems: latestState.paginatedItems.copyWith(
-            pagination: response.data!.pagination,
+            pagination: value.pagination,
           ),
           isFiltering: false,
           isOffline: false,
@@ -433,9 +442,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       latestState.copyWith(
         isFiltering: false,
         isOffline: false,
-        syncMessage: response.message == null
-            ? null
-            : 'Back online, but refresh failed.',
+        syncMessage: 'Back online, but refresh failed.',
       ),
     );
   }

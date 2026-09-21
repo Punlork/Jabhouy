@@ -11,13 +11,13 @@ class ShopApi extends BaseService {
   @override
   String get basePath => '/items';
 
-  Future<ApiResponse<PaginatedResponse<ShopItemModel>>> fetchItems({
+  Future<Result<PaginatedResponse<ShopItemModel>>> fetchItems({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
     String categoryFilter = '',
-  }) {
-    return get(
+  }) async {
+    final response = await get<PaginatedResponse<ShopItemModel>>(
       '',
       queryParameters: {
         'page': page.toString(),
@@ -38,23 +38,30 @@ class ShopApi extends BaseService {
         );
       },
     );
+    return response.toResult();
   }
 
-  Future<ApiResponse<ShopItemModel?>> createItem(ShopItemModel body) {
-    return post('', bodyParser: body.toJson, parser: _parseItem);
+  Future<Result<ShopItemModel>> createItem(ShopItemModel body) async {
+    final response =
+        await post<ShopItemModel>('', bodyParser: body.toJson, parser: _parseItem);
+    return response.toResult();
   }
 
-  Future<ApiResponse<ShopItemModel?>> updateItem(ShopItemModel body) {
-    return put('/${body.id}', bodyParser: body.toJson, parser: _parseItem);
+  Future<Result<ShopItemModel>> updateItem(ShopItemModel body) async {
+    final response = await put<ShopItemModel>(
+      '/${body.id}',
+      bodyParser: body.toJson,
+      parser: _parseItem,
+    );
+    return response.toResult();
   }
 
-  Future<ApiResponse<dynamic>> deleteItem(int id) {
-    return delete<dynamic>('/$id');
+  Future<Result<void>> deleteItem(int id) async {
+    final response = await delete<dynamic>('/$id');
+    return response.toVoidResult();
   }
 
-  ShopItemModel? _parseItem(dynamic value) {
-    return value is Map
-        ? ShopItemModel.fromJson(value as Map<String, dynamic>)
-        : null;
+  ShopItemModel _parseItem(dynamic value) {
+    return ShopItemModel.fromJson(value as Map<String, dynamic>);
   }
 }

@@ -1,6 +1,7 @@
-import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/customer/customer.dart';
-import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/customer/data/customer_repository.dart';
+import 'package:jabhouy/customer/models/customer_model.dart';
+import 'package:jabhouy/loaner/data/loaner_repository.dart';
+import 'package:jabhouy/loaner/models/loaner_model.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// Pulls loaners and keeps the customer cache in step.
@@ -12,18 +13,18 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 /// `LoanerRepository` writing the `Customers` table directly is exactly
 /// the reach that made the old services impossible to test in isolation.
 ///
-/// Known gap: this file imports `app.dart` for `ApiResponse`, which pulls
-/// Flutter in transitively, so the doc's "no Flutter in `logic/`" rule is
-/// not yet enforced here. It becomes enforceable when `Result<T>` moves
-/// into `jabhouy_core` — the one core primitive from the doc's table that
-/// is still outstanding.
+/// Every import above is either `jabhouy_core` or a repository interface
+/// or model, and none of those touch Flutter. That is checked by
+/// `test/architecture/logic_layer_test.dart`, not left to review: the
+/// barrels are deliberately not imported here, because a barrel exports
+/// the feature's `ui` folder and would drag Flutter in with it.
 class RefreshLoanersUseCase {
   const RefreshLoanersUseCase(this._loaners, this._customers);
 
   final LoanerRepository _loaners;
   final CustomerRepository _customers;
 
-  Future<ApiResponse<PaginatedResponse<LoanerModel>>> call({
+  Future<Result<PaginatedResponse<LoanerModel>>> call({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
@@ -31,7 +32,7 @@ class RefreshLoanersUseCase {
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
-    final response = await _loaners.refreshLoaners(
+    final result = await _loaners.refreshLoaners(
       page: page,
       limit: limit,
       searchQuery: searchQuery,
@@ -40,20 +41,19 @@ class RefreshLoanersUseCase {
       toDate: toDate,
     );
 
-    final data = response.data;
-    if (!response.success || data == null) return response;
+    if (result case Ok(:final value)) {
+      // Last one wins per id, which is what the old batch insert did.
+      final embedded = <int, CustomerModel>{};
+      for (final loaner in value.items) {
+        final c = loaner.customer;
+        if (c != null) embedded[c.id] = c;
+      }
 
-    // Last one wins per id, which is what the old batch insert did.
-    final embedded = <int, CustomerModel>{};
-    for (final loaner in data.items) {
-      final c = loaner.customer;
-      if (c != null) embedded[c.id] = c;
+      if (embedded.isNotEmpty) {
+        await _customers.cacheCustomers(embedded.values.toList());
+      }
     }
 
-    if (embedded.isNotEmpty) {
-      await _customers.cacheCustomers(embedded.values.toList());
-    }
-
-    return response;
+    return result;
   }
 }

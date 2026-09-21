@@ -53,11 +53,10 @@ void main() {
   Future<List<Loaner>> loanerRows() => db.select(db.loaners).get();
   Future<List<OutboxEntry>> jobs() => db.select(db.outboxEntries).get();
 
-  ApiResponse<CustomerModel?> echo(Invocation invocation, {int? id}) {
+  Result<CustomerModel> echo(Invocation invocation, {int? id}) {
     final sent = invocation.positionalArguments.first as CustomerModel;
-    return ApiResponse(
-      success: true,
-      data: sent.copyWith(id: id ?? sent.id, syncStatus: SyncStatus.synced),
+    return Ok(
+      sent.copyWith(id: id ?? sent.id, syncStatus: SyncStatus.synced),
     );
   }
 
@@ -112,7 +111,7 @@ void main() {
     goOnline();
     await dao.cacheServerCustomers([const CustomerModel(id: 5, name: 'Dara')]);
     when(() => api.deleteCustomer(5)).thenAnswer(
-      (_) async => ApiResponse<dynamic>(success: false, statusCode: 404),
+      (_) async => const Err(AppException('gone', statusCode: 404)),
     );
 
     await repository.deleteCustomer(const CustomerModel(id: 5, name: 'Dara'));
@@ -125,10 +124,8 @@ void main() {
       () async {
     goOnline();
     when(() => api.createCustomer(any())).thenAnswer(
-      (_) async => ApiResponse(
-        success: false,
-        message: 'gateway timeout',
-        statusCode: 504,
+      (_) async => const Err(
+        AppException('gateway timeout', statusCode: 504),
       ),
     );
 
@@ -143,10 +140,8 @@ void main() {
   test('a 400 stops the job and marks the row failed', () async {
     goOnline();
     when(() => api.createCustomer(any())).thenAnswer(
-      (_) async => ApiResponse(
-        success: false,
-        message: 'name is required',
-        statusCode: 400,
+      (_) async => const Err(
+        AppException('name is required', statusCode: 400),
       ),
     );
 

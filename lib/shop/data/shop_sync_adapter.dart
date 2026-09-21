@@ -6,8 +6,8 @@ import 'package:jabhouy_sync/jabhouy_sync.dart';
 /// Sends shop outbox jobs, and applies whatever the server answers to the
 /// local row.
 ///
-/// The engine owns the queue — when to try, how long to wait, when to stop.
-/// This owns the one thing the engine cannot know: that a `shopItem`
+/// The engine owns the queue — when to try, how long to wait, when to
+/// stop. This owns the one thing the engine cannot know: that a `shopItem`
 /// create is `POST /items` and that its response carries the id the local
 /// negative id must be swapped for.
 class ShopSyncAdapter implements FeatureSyncAdapter {
@@ -41,16 +41,16 @@ class ShopSyncAdapter implements FeatureSyncAdapter {
       return const SyncPushSucceeded();
     }
 
-    final response = await _api.deleteItem(id);
+    final result = await _api.deleteItem(id);
 
     // A 404 means the row is already gone server-side, which is the state
     // this job was trying to reach.
-    if (response.success || response.statusCode == 404) {
+    if (result.isOk || result.errorOrNull?.statusCode == 404) {
       await _dao.purge(id);
       return const SyncPushSucceeded();
     }
 
-    return _fail(id, response.statusCode, response.message);
+    return _fail(id, result.errorOrNull!);
   }
 
   Future<SyncPushOutcome> _pushCreate(int id) async {
@@ -59,39 +59,33 @@ class ShopSyncAdapter implements FeatureSyncAdapter {
     // delete job behind this one will do the rest.
     if (item == null) return const SyncPushSucceeded();
 
-    final response = await _api.createItem(item);
-    final created = response.data;
-    if (response.success && created != null) {
-      await _dao.reconcileCreated(localId: id, serverItem: created);
-      return SyncPushSucceeded(serverId: '${created.id}');
-    }
-
-    return _fail(id, response.statusCode, response.message);
+    return switch (await _api.createItem(item)) {
+      Ok(:final value) => () async {
+          await _dao.reconcileCreated(localId: id, serverItem: value);
+          return SyncPushSucceeded(serverId: '${value.id}');
+        }(),
+      Err(:final error) => _fail(id, error),
+    };
   }
 
   Future<SyncPushOutcome> _pushUpdate(int id) async {
     final item = await _dao.findById(id);
     if (item == null) return const SyncPushSucceeded();
 
-    final response = await _api.updateItem(item);
-    final updated = response.data;
-    if (response.success && updated != null) {
-      await _dao.replace(updated, SyncStatus.synced);
-      return const SyncPushSucceeded();
-    }
-
-    return _fail(id, response.statusCode, response.message);
+    return switch (await _api.updateItem(item)) {
+      Ok(:final value) => () async {
+          await _dao.replace(value, SyncStatus.synced);
+          return const SyncPushSucceeded();
+        }(),
+      Err(:final error) => _fail(id, error),
+    };
   }
 
   /// A row stays `pending` while the engine still intends to retry it, and
   /// only becomes `failed` once the server has said no on the merits. The
   /// old code wrote `failed` on the first hiccup and never looked again.
-  Future<SyncPushOutcome> _fail(int id, int? statusCode, String? message) async {
-    final outcome = outcomeFor(
-      success: false,
-      statusCode: statusCode,
-      message: message,
-    );
+  Future<SyncPushOutcome> _fail(int id, AppException error) async {
+    final outcome = outcomeFor(error);
     if (outcome is SyncPushRejected) {
       await _dao.markFailed(id);
     }

@@ -40,9 +40,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onCreateItem(CategoryCreateEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.createCategory(event.body);
-      if (!response.success) return;
-      showSuccessSnackBar(null, 'Created: ${response.data?.name}');
+      (await _repository.createCategory(event.body)).fold(
+        ok: (c) => showSuccessSnackBar(
+          null,
+          syncFeedback(c.syncStatus, done: 'Created: ${c.name}'),
+        ),
+        err: (e) => showErrorSnackBar(null, 'Failed to create item: ${e.message}'),
+      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
@@ -53,9 +57,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onEditItem(CategoryEditEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.updateCategory(event.body);
-      if (!response.success) return;
-      showSuccessSnackBar(null, 'Updated: ${response.data?.name}');
+      (await _repository.updateCategory(event.body)).fold(
+        ok: (c) => showSuccessSnackBar(
+          null,
+          syncFeedback(c.syncStatus, done: 'Updated: ${c.name}'),
+        ),
+        err: (e) => showErrorSnackBar(null, 'Failed to update item: ${e.message}'),
+      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
     } finally {
@@ -66,9 +74,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onDeleteItem(CategoryDeleteEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.deleteCategory(event.body);
-      if (!response.success) return;
-      showSuccessSnackBar(null, 'Deleted ${event.body.name}');
+      (await _repository.deleteCategory(event.body)).fold(
+        ok: (_) => showSuccessSnackBar(null, 'Deleted ${event.body.name}'),
+        err: (e) => showErrorSnackBar(null, 'Failed to delete item: ${e.message}'),
+      );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete item: $e');
     } finally {

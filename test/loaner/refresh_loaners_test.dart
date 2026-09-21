@@ -3,7 +3,6 @@
 // decide what to hand to whom — the storage behaviour belongs to the DAO
 // tests either side of it.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
@@ -29,17 +28,16 @@ void main() {
     when(() => customers.cacheCustomers(any())).thenAnswer((_) async {});
   });
 
-  ApiResponse<PaginatedResponse<LoanerModel>> page(List<LoanerModel> items) {
-    return ApiResponse(
-      success: true,
-      data: PaginatedResponse<LoanerModel>(
+  Result<PaginatedResponse<LoanerModel>> page(List<LoanerModel> items) {
+    return Ok(
+      PaginatedResponse<LoanerModel>(
         items: items,
         pagination: Pagination(total: items.length, totalPage: 1),
       ),
     );
   }
 
-  void serverReturns(ApiResponse<PaginatedResponse<LoanerModel>> response) {
+  void serverReturns(Result<PaginatedResponse<LoanerModel>> response) {
     when(
       () => loaners.refreshLoaners(
         page: any(named: 'page'),
@@ -103,12 +101,12 @@ void main() {
 
   test('a refresh that failed caches nothing', () async {
     serverReturns(
-      ApiResponse(success: false, message: 'Offline - showing cached loaners.'),
+      const Err(AppException('Offline - showing cached loaners.')),
     );
 
-    final response = await refreshLoaners();
+    final result = await refreshLoaners();
 
-    expect(response.success, isFalse);
+    expect(result.isOk, isFalse);
     verifyNever(() => customers.cacheCustomers(any()));
   });
 

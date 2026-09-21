@@ -1,5 +1,5 @@
-import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy/shop/models/category_model.dart';
+import 'package:jabhouy/shop/models/shop_item_model.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// The seam the shop bloc talks to. Shop earns no `logic/` layer under the
@@ -7,11 +7,16 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 /// repository is the boundary, and it is an interface so tests can stand a
 /// double behind it.
 ///
-/// Note what is absent: the old `ShopService` took a `localOnly` flag on
-/// every write and called itself with `localOnly: false` from its own drain
-/// loop. Deciding "am I the user's write or the sync engine's push?" from a
-/// flag on a public method is the repository's business, not the caller's.
-/// Every method here is the user's write; pushing is [syncPendingChanges].
+/// Note what is absent. The old `ShopService` took a `localOnly` flag on
+/// every write and called itself with `localOnly: false` from its own
+/// drain loop; deciding "am I the user's write or the sync engine's push?"
+/// is the repository's business, not the caller's. And nothing here
+/// returns a message: an [Ok] says the write landed locally, the returned
+/// row says whether it is still pending, and what to put on screen is the
+/// `ui` layer's call.
+///
+/// This file imports no Flutter, which is what lets `logic/` import a
+/// repository without inheriting one.
 abstract class ShopRepository {
   Stream<List<ShopItemModel>> watchItems({
     String searchQuery = '',
@@ -23,23 +28,22 @@ abstract class ShopRepository {
     CategoryItemModel? categoryFilter,
   });
 
-  /// Pulls a page from the server and caches it. Returns the server's
-  /// pagination so the bloc can page; the items themselves reach the bloc
-  /// through [watchItems].
-  Future<ApiResponse<PaginatedResponse<ShopItemModel>>> refreshItems({
+  /// Pulls a page from the server and caches it. The items themselves
+  /// reach the bloc through [watchItems]; this returns the page so the
+  /// bloc can page.
+  Future<Result<PaginatedResponse<ShopItemModel>>> refreshItems({
     int page,
     int limit,
     String searchQuery,
     String categoryFilter,
   });
 
-  Future<ApiResponse<ShopItemModel?>> createItem(ShopItemModel body);
+  Future<Result<ShopItemModel>> createItem(ShopItemModel body);
 
-  Future<ApiResponse<ShopItemModel?>> updateItem(ShopItemModel body);
+  Future<Result<ShopItemModel>> updateItem(ShopItemModel body);
 
-  Future<ApiResponse<dynamic>> deleteItem(ShopItemModel body);
+  Future<Result<void>> deleteItem(ShopItemModel body);
 
-  /// Pushes every pending row. Phase 3 replaces this body with the
-  /// `jabhouy_sync` outbox drain; the signature is what survives.
+  /// Pushes every queued write. Delegates to `SyncEngine.drain()`.
   Future<void> syncPendingChanges();
 }

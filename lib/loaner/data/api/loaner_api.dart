@@ -9,15 +9,15 @@ class LoanerApi extends BaseService {
   @override
   String get basePath => '/loans';
 
-  Future<ApiResponse<PaginatedResponse<LoanerModel>>> fetchLoaners({
+  Future<Result<PaginatedResponse<LoanerModel>>> fetchLoaners({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
     String? customer,
     DateTime? fromDate,
     DateTime? toDate,
-  }) {
-    return get<PaginatedResponse<LoanerModel>>(
+  }) async {
+    final response = await get<PaginatedResponse<LoanerModel>>(
       '',
       queryParameters: {
         'page': page.toString(),
@@ -36,24 +36,34 @@ class LoanerApi extends BaseService {
             )
           : PaginatedResponse(items: [], pagination: Pagination()),
     );
+    return response.toResult();
   }
 
-  Future<ApiResponse<LoanerModel?>> createLoaner(LoanerModel body) {
-    return post('', bodyParser: body.toJson, parser: _parse);
+  Future<Result<LoanerModel>> createLoaner(LoanerModel body) async {
+    final response = await post<LoanerModel>(
+      '',
+      bodyParser: body.toJson,
+      parser: _parse,
+    );
+    return response.toResult();
   }
 
-  Future<ApiResponse<LoanerModel?>> updateLoaner(LoanerModel body) {
-    return put('/${body.id}', bodyParser: body.toJson, parser: _parse);
+  Future<Result<LoanerModel>> updateLoaner(LoanerModel body) async {
+    final response = await put<LoanerModel>(
+      '/${body.id}',
+      bodyParser: body.toJson,
+      parser: _parse,
+    );
+    return response.toResult();
   }
 
-  Future<ApiResponse<dynamic>> deleteLoaner(int id) {
-    return delete<dynamic>('/$id');
+  Future<Result<void>> deleteLoaner(int id) async {
+    final response = await delete<dynamic>('/$id');
+    return response.toVoidResult();
   }
 
-  LoanerModel? _parse(dynamic value) {
-    return value is Map
-        ? LoanerModel.fromJson(value as Map<String, dynamic>)
-        : null;
+  LoanerModel _parse(dynamic value) {
+    return LoanerModel.fromJson(value as Map<String, dynamic>);
   }
 
   String _rfc3339Date(DateTime date) {

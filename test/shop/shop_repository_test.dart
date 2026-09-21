@@ -62,11 +62,10 @@ void main() {
 
   /// Echoes back whatever was sent, with the id and status the server
   /// would have assigned.
-  ApiResponse<ShopItemModel?> echo(Invocation invocation, {int? id}) {
+  Result<ShopItemModel> echo(Invocation invocation, {int? id}) {
     final sent = invocation.positionalArguments.first as ShopItemModel;
-    return ApiResponse(
-      success: true,
-      data: sent.copyWith(id: id ?? sent.id, syncStatus: SyncStatus.synced),
+    return Ok(
+      sent.copyWith(id: id ?? sent.id, syncStatus: SyncStatus.synced),
     );
   }
 
@@ -74,11 +73,15 @@ void main() {
       () async {
     goOffline();
 
-    final response =
+    final result =
         await repository.createItem(const ShopItemModel(id: 0, name: 'Coffee'));
 
-    expect(response.success, isTrue);
-    expect(response.message, contains('offline'));
+    expect(result.isOk, isTrue);
+    expect(
+      result.valueOrNull?.syncStatus,
+      SyncStatus.pending,
+      reason: 'the ui reads this to say "saved offline"',
+    );
 
     final saved = (await rows()).single;
     expect(saved.name, 'Coffee');
@@ -109,10 +112,8 @@ void main() {
   test('a create the server rejects stays queued, not lost', () async {
     goOnline();
     when(() => api.createItem(any())).thenAnswer(
-      (_) async => ApiResponse(
-        success: false,
-        message: 'server said no',
-        statusCode: 400,
+      (_) async => const Err(
+        AppException('server said no', statusCode: 400),
       ),
     );
 
@@ -127,7 +128,7 @@ void main() {
     goOnline();
     await dao.cacheServerItems([const ShopItemModel(id: 7, name: 'Tea')]);
     when(() => api.deleteItem(7)).thenAnswer(
-      (_) async => ApiResponse<dynamic>(success: false, statusCode: 400),
+      (_) async => const Err(AppException('nope', statusCode: 400)),
     );
 
     await repository.deleteItem(const ShopItemModel(id: 7, name: 'Tea'));
@@ -144,8 +145,7 @@ void main() {
   test('a delete the server accepts removes the row', () async {
     goOnline();
     await dao.cacheServerItems([const ShopItemModel(id: 7, name: 'Tea')]);
-    when(() => api.deleteItem(7))
-        .thenAnswer((_) async => ApiResponse<dynamic>(success: true));
+    when(() => api.deleteItem(7)).thenAnswer((_) async => const Ok<void>(null));
 
     await repository.deleteItem(const ShopItemModel(id: 7, name: 'Tea'));
 
@@ -205,10 +205,8 @@ void main() {
       () async {
     goOnline();
     when(() => api.createItem(any())).thenAnswer(
-      (_) async => ApiResponse(
-        success: false,
-        message: 'upstream exploded',
-        statusCode: 500,
+      (_) async => const Err(
+        AppException('upstream exploded', statusCode: 500),
       ),
     );
 
@@ -230,10 +228,8 @@ void main() {
   test('a 400 stops the job and keeps its reason', () async {
     goOnline();
     when(() => api.createItem(any())).thenAnswer(
-      (_) async => ApiResponse(
-        success: false,
-        message: 'name is required',
-        statusCode: 400,
+      (_) async => const Err(
+        AppException('name is required', statusCode: 400),
       ),
     );
 
@@ -259,7 +255,7 @@ void main() {
     goOnline();
     await dao.cacheServerItems([const ShopItemModel(id: 7, name: 'Tea')]);
     when(() => api.deleteItem(7)).thenAnswer(
-      (_) async => ApiResponse<dynamic>(success: false, statusCode: 404),
+      (_) async => const Err(AppException('gone', statusCode: 404)),
     );
 
     await repository.deleteItem(const ShopItemModel(id: 7, name: 'Tea'));

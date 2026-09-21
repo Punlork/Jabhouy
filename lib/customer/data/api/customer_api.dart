@@ -9,13 +9,13 @@ class CustomerApi extends BaseService {
   @override
   String get basePath => '/customers';
 
-  Future<ApiResponse<PaginatedResponse<CustomerModel>>> fetchCustomers({
+  Future<Result<PaginatedResponse<CustomerModel>>> fetchCustomers({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
     String categoryFilter = '',
-  }) {
-    return get<PaginatedResponse<CustomerModel>>(
+  }) async {
+    final response = await get<PaginatedResponse<CustomerModel>>(
       '',
       queryParameters: {
         'page': page.toString(),
@@ -30,23 +30,33 @@ class CustomerApi extends BaseService {
             )
           : PaginatedResponse(items: [], pagination: Pagination()),
     );
+    return response.toResult();
   }
 
-  Future<ApiResponse<CustomerModel?>> createCustomer(CustomerModel body) {
-    return post('', bodyParser: body.toJson, parser: _parse);
+  Future<Result<CustomerModel>> createCustomer(CustomerModel body) async {
+    final response = await post<CustomerModel>(
+      '',
+      bodyParser: body.toJson,
+      parser: _parse,
+    );
+    return response.toResult();
   }
 
-  Future<ApiResponse<CustomerModel?>> updateCustomer(CustomerModel body) {
-    return put('/${body.id}', bodyParser: body.toJson, parser: _parse);
+  Future<Result<CustomerModel>> updateCustomer(CustomerModel body) async {
+    final response = await put<CustomerModel>(
+      '/${body.id}',
+      bodyParser: body.toJson,
+      parser: _parse,
+    );
+    return response.toResult();
   }
 
-  Future<ApiResponse<dynamic>> deleteCustomer(int id) {
-    return delete<dynamic>('/$id');
+  Future<Result<void>> deleteCustomer(int id) async {
+    final response = await delete<dynamic>('/$id');
+    return response.toVoidResult();
   }
 
-  CustomerModel? _parse(dynamic value) {
-    return value is Map
-        ? CustomerModel.fromJson(value as Map<String, dynamic>)
-        : null;
+  CustomerModel _parse(dynamic value) {
+    return CustomerModel.fromJson(value as Map<String, dynamic>);
   }
 }

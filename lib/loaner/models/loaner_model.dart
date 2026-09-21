@@ -2,7 +2,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 
-import 'package:jabhouy/customer/customer.dart';
+// The model file, not the barrel: the barrel exports customer's ui
+// folder, which would put Flutter in the import closure of every
+// file that touches a loan -- including logic/. Checked by
+// test/architecture/logic_layer_test.dart.
+import 'package:jabhouy/customer/models/customer_model.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
 class LoanerModel extends Equatable {

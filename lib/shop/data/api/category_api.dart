@@ -1,5 +1,6 @@
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// Every HTTP call the category feature makes, and nothing else.
 class CategoryApi extends BaseService {
@@ -8,8 +9,8 @@ class CategoryApi extends BaseService {
   @override
   String get basePath => '/categories';
 
-  Future<ApiResponse<List<CategoryItemModel>>> fetchCategories() {
-    return get<List<CategoryItemModel>>(
+  Future<Result<List<CategoryItemModel>>> fetchCategories() async {
+    final response = await get<List<CategoryItemModel>>(
       '',
       parser: (value) {
         if (value is List) {
@@ -20,27 +21,37 @@ class CategoryApi extends BaseService {
         return [];
       },
     );
+    return response.toResult();
   }
 
-  Future<ApiResponse<CategoryItemModel?>> createCategory(
+  Future<Result<CategoryItemModel>> createCategory(
     CategoryItemModel body,
-  ) {
-    return post('', bodyParser: body.toJson, parser: _parse);
+  ) async {
+    final response = await post<CategoryItemModel>(
+      '',
+      bodyParser: body.toJson,
+      parser: _parse,
+    );
+    return response.toResult();
   }
 
-  Future<ApiResponse<CategoryItemModel?>> updateCategory(
+  Future<Result<CategoryItemModel>> updateCategory(
     CategoryItemModel body,
-  ) {
-    return put('/${body.id}', bodyParser: body.toJson, parser: _parse);
+  ) async {
+    final response = await put<CategoryItemModel>(
+      '/${body.id}',
+      bodyParser: body.toJson,
+      parser: _parse,
+    );
+    return response.toResult();
   }
 
-  Future<ApiResponse<dynamic>> deleteCategory(int id) {
-    return delete<dynamic>('/$id');
+  Future<Result<void>> deleteCategory(int id) async {
+    final response = await delete<dynamic>('/$id');
+    return response.toVoidResult();
   }
 
-  CategoryItemModel? _parse(dynamic value) {
-    return value is Map
-        ? CategoryItemModel.fromJson(value as Map<String, dynamic>)
-        : null;
+  CategoryItemModel _parse(dynamic value) {
+    return CategoryItemModel.fromJson(value as Map<String, dynamic>);
   }
 }

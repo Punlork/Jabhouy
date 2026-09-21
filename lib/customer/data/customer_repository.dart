@@ -1,28 +1,28 @@
-import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/customer/models/customer_model.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// The seam the customer bloc talks to.
 ///
 /// Customer earns no `logic/` layer: it holds a name and nothing decides
-/// anything about it.
+/// anything about it. Imports no Flutter, because
+/// `RefreshLoanersUseCase` depends on this file and `logic/` may not.
 abstract class CustomerRepository {
   Stream<List<CustomerModel>> watchCustomers();
 
   Future<bool> hasCachedCustomers();
 
-  Future<ApiResponse<PaginatedResponse<CustomerModel>>> refreshCustomers({
+  Future<Result<PaginatedResponse<CustomerModel>>> refreshCustomers({
     int page,
     int limit,
     String searchQuery,
     String categoryFilter,
   });
 
-  Future<ApiResponse<CustomerModel?>> createCustomer(CustomerModel body);
+  Future<Result<CustomerModel>> createCustomer(CustomerModel body);
 
-  Future<ApiResponse<CustomerModel?>> updateCustomer(CustomerModel body);
+  Future<Result<CustomerModel>> updateCustomer(CustomerModel body);
 
-  Future<ApiResponse<dynamic>> deleteCustomer(CustomerModel body);
+  Future<Result<void>> deleteCustomer(CustomerModel body);
 
   /// Writes customers another feature already fetched into the cache.
   ///

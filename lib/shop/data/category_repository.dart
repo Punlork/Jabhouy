@@ -1,22 +1,19 @@
-import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy/shop/models/category_model.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// The seam the category bloc talks to.
 ///
 /// Category earns no `logic/` layer: it has one field and no rules.
+/// Imports no Flutter, so `logic/` elsewhere may depend on it.
 abstract class CategoryRepository {
   Stream<List<CategoryItemModel>> watchCategories();
 
   /// Pulls the category list from the server and caches it.
-  Future<ApiResponse<List<CategoryItemModel>>> refreshCategories();
+  Future<Result<List<CategoryItemModel>>> refreshCategories();
 
-  Future<ApiResponse<CategoryItemModel?>> createCategory(
-    CategoryItemModel body,
-  );
+  Future<Result<CategoryItemModel>> createCategory(CategoryItemModel body);
 
-  Future<ApiResponse<CategoryItemModel?>> updateCategory(
-    CategoryItemModel body,
-  );
+  Future<Result<CategoryItemModel>> updateCategory(CategoryItemModel body);
 
-  Future<ApiResponse<dynamic>> deleteCategory(CategoryItemModel body);
+  Future<Result<void>> deleteCategory(CategoryItemModel body);
 }

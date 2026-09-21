@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 part 'customer_event.dart';
 part 'customer_state.dart';
@@ -75,8 +76,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       return;
     }
 
-    final response = await _repository.refreshCustomers();
-    if (response.success) {
+    final result = await _repository.refreshCustomers();
+    if (result.isOk) {
       final latestState = state.asLoaded;
       if (latestState != null) {
         emit(latestState.copyWith(isOffline: false, syncMessage: null));
@@ -97,7 +98,11 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       return;
     }
 
-    emit(CustomerError(response.message ?? 'Failed to load customers.'));
+    emit(
+      CustomerError(
+        result.errorOrNull?.message ?? 'Failed to load customers.',
+      ),
+    );
   }
 
   void _onCustomerUpdatedFromLocal(
@@ -118,14 +123,23 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     CreateCustomerEvent event,
     Emitter<CustomerState> emit,
   ) async {
-    final response = await _repository.createCustomer(event.customer);
-    if (!response.success) {
-      emit(CustomerError(response.message ?? 'Failed to create customer.'));
+    final result = await _repository.createCustomer(event.customer);
+    if (result case Err(:final error)) {
+      emit(CustomerError(error.message));
       return;
     }
+
     final currentState = state.asLoaded;
-    if (currentState != null && response.message != null) {
-      emit(currentState.copyWith(syncMessage: response.message));
+    final customer = result.valueOrNull;
+    if (currentState != null && customer != null) {
+      emit(
+        currentState.copyWith(
+          syncMessage: syncFeedback(
+            customer.syncStatus,
+            done: 'Created ${customer.name}',
+          ),
+        ),
+      );
     }
   }
 
@@ -133,14 +147,23 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     UpdateCustomerEvent event,
     Emitter<CustomerState> emit,
   ) async {
-    final response = await _repository.updateCustomer(event.customer);
-    if (!response.success) {
-      emit(CustomerError(response.message ?? 'Failed to update customer.'));
+    final result = await _repository.updateCustomer(event.customer);
+    if (result case Err(:final error)) {
+      emit(CustomerError(error.message));
       return;
     }
+
     final currentState = state.asLoaded;
-    if (currentState != null && response.message != null) {
-      emit(currentState.copyWith(syncMessage: response.message));
+    final customer = result.valueOrNull;
+    if (currentState != null && customer != null) {
+      emit(
+        currentState.copyWith(
+          syncMessage: syncFeedback(
+            customer.syncStatus,
+            done: 'Updated ${customer.name}',
+          ),
+        ),
+      );
     }
   }
 
@@ -148,14 +171,10 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     DeleteCustomerEvent event,
     Emitter<CustomerState> emit,
   ) async {
-    final response = await _repository.deleteCustomer(event.customer);
-    if (!response.success) {
-      emit(CustomerError(response.message ?? 'Failed to delete customer.'));
+    final result = await _repository.deleteCustomer(event.customer);
+    if (result case Err(:final error)) {
+      emit(CustomerError(error.message));
       return;
-    }
-    final currentState = state.asLoaded;
-    if (currentState != null && response.message != null) {
-      emit(currentState.copyWith(syncMessage: response.message));
     }
   }
 
@@ -186,13 +205,13 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     );
 
     await _repository.syncPendingChanges();
-    final response = await _repository.refreshCustomers();
+    final result = await _repository.refreshCustomers();
     final latestState = state.asLoaded;
     if (latestState == null) {
       return;
     }
 
-    if (response.success) {
+    if (result.isOk) {
       emit(latestState.copyWith(isOffline: false, syncMessage: null));
       return;
     }

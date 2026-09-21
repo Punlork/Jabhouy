@@ -20,34 +20,25 @@ class DefaultCategoryRepository implements CategoryRepository {
   final SyncEngine _engine;
   final ConnectivityService _connectivity;
 
-  static const _offlineWrite =
-      'Saved offline. It will sync when you are back online.';
-  static const _offlineDelete =
-      'Deleted offline. It will sync when you are back online.';
-
   @override
   Stream<List<CategoryItemModel>> watchCategories() => _dao.watchCategories();
 
   @override
-  Future<ApiResponse<List<CategoryItemModel>>> refreshCategories() async {
+  Future<Result<List<CategoryItemModel>>> refreshCategories() async {
     if (!await _connectivity.isOnline) {
-      return ApiResponse(
-        success: false,
-        message: 'Offline - showing cached data.',
-      );
+      return const Err(AppException('Offline - showing cached data.'));
     }
 
-    final response = await _api.fetchCategories();
-    final data = response.data;
-    if (response.success && data != null) {
-      await _dao.cacheServerCategories(data);
+    final result = await _api.fetchCategories();
+    if (result case Ok(:final value)) {
+      await _dao.cacheServerCategories(value);
     }
 
-    return response;
+    return result;
   }
 
   @override
-  Future<ApiResponse<CategoryItemModel?>> createCategory(
+  Future<Result<CategoryItemModel>> createCategory(
     CategoryItemModel body,
   ) async {
     final id = body.id == 0
@@ -58,11 +49,11 @@ class DefaultCategoryRepository implements CategoryRepository {
     await _dao.insertPending(local);
     await _enqueue(local, SyncOperation.create, 'create');
 
-    return _afterLocalWrite(data: local, offlineMessage: _offlineWrite);
+    return _settle(local);
   }
 
   @override
-  Future<ApiResponse<CategoryItemModel?>> updateCategory(
+  Future<Result<CategoryItemModel>> updateCategory(
     CategoryItemModel body,
   ) async {
     final local = body.copyWith(
@@ -79,22 +70,16 @@ class DefaultCategoryRepository implements CategoryRepository {
       'update:${DateTime.now().microsecondsSinceEpoch}',
     );
 
-    return _afterLocalWrite(
-      data: body,
-      offlineData: local,
-      offlineMessage: _offlineWrite,
-    );
+    return _settle(local);
   }
 
   @override
-  Future<ApiResponse<dynamic>> deleteCategory(CategoryItemModel body) async {
+  Future<Result<void>> deleteCategory(CategoryItemModel body) async {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
-    return _afterLocalWrite<dynamic>(
-      data: null,
-      offlineMessage: _offlineDelete,
-    );
+    if (await _connectivity.isOnline) await _engine.drain();
+    return const Ok<void>(null);
   }
 
   Future<void> _enqueue(
@@ -110,20 +95,14 @@ class DefaultCategoryRepository implements CategoryRepository {
     );
   }
 
-  Future<ApiResponse<T>> _afterLocalWrite<T>({
-    required T data,
-    required String offlineMessage,
-    T? offlineData,
-  }) async {
-    if (await _connectivity.isOnline) {
-      await _engine.drain();
-      return ApiResponse(success: true, data: data);
-    }
+  /// See `DefaultShopRepository._settle`: the returned `syncStatus` is
+  /// the honest answer to "did that reach the server?", and the `ui`
+  /// layer picks its message from it.
+  Future<Result<CategoryItemModel>> _settle(CategoryItemModel local) async {
+    if (!await _connectivity.isOnline) return Ok(local);
 
-    return ApiResponse(
-      success: true,
-      data: offlineData ?? data,
-      message: offlineMessage,
-    );
+    await _engine.drain();
+    final after = await _dao.findById(local.id);
+    return Ok(after ?? local.copyWith(syncStatus: SyncStatus.synced));
   }
 }

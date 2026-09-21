@@ -179,7 +179,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       return;
     }
 
-    final response = await _refreshLoaners(
+    final result = await _refreshLoaners(
       limit: newLimit,
       page: effectivePage,
       searchQuery: newSearchQuery,
@@ -192,13 +192,13 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       return;
     }
 
-    if (response.success && response.data != null) {
+    if (result case Ok(:final value)) {
       final latestState = state.asLoaded;
       if (latestState != null) {
         emit(
           latestState.copyWith(
             response: latestState.response.copyWith(
-              pagination: response.data!.pagination,
+              pagination: value.pagination,
             ),
             searchQuery: newSearchQuery,
             fromDate: newFromDate,
@@ -211,7 +211,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       } else {
         emit(
           LoanerLoaded(
-            response.data!,
+            value,
             searchQuery: newSearchQuery,
             fromDate: newFromDate,
             toDate: newToDate,
@@ -239,17 +239,24 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       return;
     }
 
-    emit(LoanerError(response.message ?? 'Failed to load items.'));
+    emit(
+      LoanerError(result.errorOrNull?.message ?? 'Failed to load items.'),
+    );
   }
 
   Future<void> _onAddLoaner(AddLoaner event, Emitter<LoanerState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.createLoaner(event.loaner);
-      if (!response.success) return;
-      showSuccessSnackBar(
-        null,
-        response.message ?? 'Created ${event.loaner.customer?.name}',
+      (await _repository.createLoaner(event.loaner)).fold(
+        ok: (loan) => showSuccessSnackBar(
+          null,
+          syncFeedback(
+            loan.syncStatus,
+            done: 'Created ${loan.customer?.name}',
+          ),
+        ),
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to create loaner: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create loaner: $e');
@@ -264,11 +271,16 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.updateLoaner(event.loaner);
-      if (!response.success) return;
-      showSuccessSnackBar(
-        null,
-        response.message ?? 'Updated ${event.loaner.customer?.name}',
+      (await _repository.updateLoaner(event.loaner)).fold(
+        ok: (loan) => showSuccessSnackBar(
+          null,
+          syncFeedback(
+            loan.syncStatus,
+            done: 'Updated ${loan.customer?.name}',
+          ),
+        ),
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to update loaner: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update loaner: $e');
@@ -283,11 +295,13 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _repository.deleteLoaner(event.body);
-      if (!response.success) return;
-      showSuccessSnackBar(
-        null,
-        response.message ?? 'Deleted ${event.body.customer?.name}',
+      (await _repository.deleteLoaner(event.body)).fold(
+        ok: (_) => showSuccessSnackBar(
+          null,
+          'Deleted ${event.body.customer?.name}',
+        ),
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to delete loaner: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete loaner: $e');
@@ -327,7 +341,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     );
 
     await _repository.syncPendingChanges();
-    final response = await _refreshLoaners(
+    final result = await _refreshLoaners(
       limit: currentState.pagination.limit,
       page: currentState.pagination.page,
       searchQuery: currentState.searchQuery,
@@ -345,11 +359,11 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       return;
     }
 
-    if (response.success && response.data != null) {
+    if (result case Ok(:final value)) {
       emit(
         latestState.copyWith(
           response: latestState.response.copyWith(
-            pagination: response.data!.pagination,
+            pagination: value.pagination,
           ),
           isOffline: false,
           syncMessage: null,

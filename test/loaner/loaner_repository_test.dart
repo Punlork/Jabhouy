@@ -135,16 +135,12 @@ void main() {
     );
 
     when(() => customerApi.createCustomer(any())).thenAnswer(
-      (i) async => ApiResponse(
-        success: true,
-        data: (i.positionalArguments.first as CustomerModel).copyWith(id: 12),
-      ),
+      (i) async =>
+          Ok((i.positionalArguments.first as CustomerModel).copyWith(id: 12)),
     );
     when(() => api.createLoaner(any())).thenAnswer(
-      (i) async => ApiResponse(
-        success: true,
-        data: (i.positionalArguments.first as LoanerModel).copyWith(id: 88),
-      ),
+      (i) async =>
+          Ok((i.positionalArguments.first as LoanerModel).copyWith(id: 88)),
     );
 
     await engine.drain();
@@ -168,7 +164,7 @@ void main() {
     goOnline();
     await dao.cacheServerLoaners([LoanerModel(id: 6, amount: 500)]);
     when(() => api.deleteLoaner(6)).thenAnswer(
-      (_) async => ApiResponse<dynamic>(success: false, statusCode: 404),
+      (_) async => const Err(AppException('gone', statusCode: 404)),
     );
 
     await repository.deleteLoaner(LoanerModel(id: 6, amount: 500));
@@ -180,10 +176,8 @@ void main() {
   test('a 400 stops the job and marks the row failed', () async {
     goOnline();
     when(() => api.createLoaner(any())).thenAnswer(
-      (_) async => ApiResponse(
-        success: false,
-        message: 'amount must be positive',
-        statusCode: 400,
+      (_) async => const Err(
+        AppException('amount must be positive', statusCode: 400),
       ),
     );
 

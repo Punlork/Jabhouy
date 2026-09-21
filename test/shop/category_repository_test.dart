@@ -90,9 +90,8 @@ void main() {
       () async {
     goOnline();
     when(() => categoryApi.createCategory(any())).thenAnswer(
-      (i) async => ApiResponse(
-        success: true,
-        data: (i.positionalArguments.first as CategoryItemModel)
+      (i) async => Ok(
+        (i.positionalArguments.first as CategoryItemModel)
             .copyWith(id: 9, syncStatus: SyncStatus.synced),
       ),
     );
@@ -153,16 +152,12 @@ void main() {
     );
 
     when(() => categoryApi.createCategory(any())).thenAnswer(
-      (i) async => ApiResponse(
-        success: true,
-        data: (i.positionalArguments.first as CategoryItemModel).copyWith(id: 9),
-      ),
+      (i) async =>
+          Ok((i.positionalArguments.first as CategoryItemModel).copyWith(id: 9)),
     );
     when(() => shopApi.createItem(any())).thenAnswer(
-      (i) async => ApiResponse(
-        success: true,
-        data: (i.positionalArguments.first as ShopItemModel).copyWith(id: 70),
-      ),
+      (i) async =>
+          Ok((i.positionalArguments.first as ShopItemModel).copyWith(id: 70)),
     );
 
     await engine.drain();
@@ -188,7 +183,7 @@ void main() {
       [const CategoryItemModel(id: 4, name: 'Snacks')],
     );
     when(() => categoryApi.deleteCategory(4)).thenAnswer(
-      (_) async => ApiResponse<dynamic>(success: false, statusCode: 404),
+      (_) async => const Err(AppException('gone', statusCode: 404)),
     );
 
     await repository.deleteCategory(const CategoryItemModel(id: 4, name: 'Snacks'));
@@ -200,10 +195,8 @@ void main() {
   test('a 400 stops the job and marks the row failed', () async {
     goOnline();
     when(() => categoryApi.createCategory(any())).thenAnswer(
-      (_) async => ApiResponse(
-        success: false,
-        message: 'name already taken',
-        statusCode: 400,
+      (_) async => const Err(
+        AppException('name already taken', statusCode: 400),
       ),
     );
 

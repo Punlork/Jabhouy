@@ -13,29 +13,13 @@ abstract interface class FeatureSyncAdapter {
   Future<SyncPushOutcome> push(OutboxEntry entry);
 }
 
-/// Turns one HTTP result into the engine's three-way answer.
+/// Turns one failure into the engine's answer.
 ///
-/// The distinction only became possible once `ApiResponse` kept the status
-/// code `ApiException` had always carried: before this, every failure was
-/// indistinguishable and the old code marked them all `syncStatus = 2`.
-SyncPushOutcome outcomeFor({
-  required bool success,
-  required int? statusCode,
-  String? message,
-}) {
-  if (success) return const SyncPushSucceeded();
-
-  final error = message ?? 'HTTP ${statusCode ?? 'error'}';
-
-  // No status at all means the request never got an answer: a timeout, a
-  // dropped connection, DNS. Always worth another go.
-  if (statusCode == null) return SyncPushRetryable(error);
-
-  // 408 and 429 are the two 4xx the server is explicitly asking us to
-  // repeat.
-  if (statusCode >= 500 || statusCode == 408 || statusCode == 429) {
-    return SyncPushRetryable(error);
-  }
-
-  return SyncPushRejected(error);
+/// The judgement itself lives on [AppException.isRetryable], in
+/// `jabhouy_core`, so `jabhouy_sync` and the app agree on it by
+/// construction rather than by two copies staying in step.
+SyncPushOutcome outcomeFor(AppException error) {
+  return error.isRetryable
+      ? SyncPushRetryable(error.message)
+      : SyncPushRejected(error.message);
 }

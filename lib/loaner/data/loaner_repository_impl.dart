@@ -18,11 +18,6 @@ class DefaultLoanerRepository implements LoanerRepository {
   final SyncEngine _engine;
   final ConnectivityService _connectivity;
 
-  static const _offlineWrite =
-      'Saved offline. It will sync when you are back online.';
-  static const _offlineDelete =
-      'Deleted offline. It will sync when you are back online.';
-
   @override
   Stream<List<LoanerModel>> watchLoaners({
     String searchQuery = '',
@@ -54,7 +49,7 @@ class DefaultLoanerRepository implements LoanerRepository {
   }
 
   @override
-  Future<ApiResponse<PaginatedResponse<LoanerModel>>> refreshLoaners({
+  Future<Result<PaginatedResponse<LoanerModel>>> refreshLoaners({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
@@ -63,13 +58,10 @@ class DefaultLoanerRepository implements LoanerRepository {
     DateTime? toDate,
   }) async {
     if (!await _connectivity.isOnline) {
-      return ApiResponse(
-        success: false,
-        message: 'Offline - showing cached loaners.',
-      );
+      return const Err(AppException('Offline - showing cached loaners.'));
     }
 
-    final response = await _api.fetchLoaners(
+    final result = await _api.fetchLoaners(
       page: page,
       limit: limit,
       searchQuery: searchQuery,
@@ -78,16 +70,15 @@ class DefaultLoanerRepository implements LoanerRepository {
       toDate: toDate,
     );
 
-    final data = response.data;
-    if (response.success && data != null) {
-      await _dao.cacheServerLoaners(data.items);
+    if (result case Ok(:final value)) {
+      await _dao.cacheServerLoaners(value.items);
     }
 
-    return response;
+    return result;
   }
 
   @override
-  Future<ApiResponse<LoanerModel?>> createLoaner(LoanerModel body) async {
+  Future<Result<LoanerModel>> createLoaner(LoanerModel body) async {
     final id = body.id == 0
         ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
         : body.id;
@@ -96,11 +87,11 @@ class DefaultLoanerRepository implements LoanerRepository {
     await _dao.insertPending(local);
     await _enqueue(local, SyncOperation.create, 'create');
 
-    return _afterLocalWrite(data: local, offlineMessage: _offlineWrite);
+    return _settle(local);
   }
 
   @override
-  Future<ApiResponse<LoanerModel?>> updateLoaner(LoanerModel body) async {
+  Future<Result<LoanerModel>> updateLoaner(LoanerModel body) async {
     final updatedAt = DateTime.now();
     final local = body.copyWith(
       updatedAt: updatedAt,
@@ -115,22 +106,16 @@ class DefaultLoanerRepository implements LoanerRepository {
       'update:${updatedAt.microsecondsSinceEpoch}',
     );
 
-    return _afterLocalWrite(
-      data: body,
-      offlineData: local,
-      offlineMessage: _offlineWrite,
-    );
+    return _settle(local);
   }
 
   @override
-  Future<ApiResponse<dynamic>> deleteLoaner(LoanerModel body) async {
+  Future<Result<void>> deleteLoaner(LoanerModel body) async {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
-    return _afterLocalWrite<dynamic>(
-      data: null,
-      offlineMessage: _offlineDelete,
-    );
+    if (await _connectivity.isOnline) await _engine.drain();
+    return const Ok<void>(null);
   }
 
   @override
@@ -158,20 +143,12 @@ class DefaultLoanerRepository implements LoanerRepository {
     );
   }
 
-  Future<ApiResponse<T>> _afterLocalWrite<T>({
-    required T data,
-    required String offlineMessage,
-    T? offlineData,
-  }) async {
-    if (await _connectivity.isOnline) {
-      await _engine.drain();
-      return ApiResponse(success: true, data: data);
-    }
+  /// See `DefaultShopRepository._settle`.
+  Future<Result<LoanerModel>> _settle(LoanerModel local) async {
+    if (!await _connectivity.isOnline) return Ok(local);
 
-    return ApiResponse(
-      success: true,
-      data: offlineData ?? data,
-      message: offlineMessage,
-    );
+    await _engine.drain();
+    final after = await _dao.findById(local.id);
+    return Ok(after ?? local.copyWith(syncStatus: SyncStatus.synced));
   }
 }
