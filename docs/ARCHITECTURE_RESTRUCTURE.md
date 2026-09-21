@@ -61,11 +61,13 @@ the plan lost, the decision is recorded below rather than left as drift.
 | — loaner JSON crash fix (found by 3f) | done | `c7e04a4` |
 | 2 — shop slice | done | `574109e`, `0768f99` |
 | — core primitives: `Result`, `AppException` | done | `d3240be`, `75d9403`, `13fe4d2` |
-| 4 — income slice | not started | — |
+| 4 — income slice | done | `d202623`, `09b8a2a` |
 | 5 — `jabhouy_shop` | not started | — |
 | 6 — bloc 8→9, go_router 14→18 | not started | — |
 
-**Phase 3 is closed.** All four `syncPendingChanges()` clones are deleted.
+**All five features are layered and on the engine.** Phase 3 closed the
+four `syncPendingChanges()` clones; phase 4 brought income in behind the
+same seam.
 The name survives as a three-line repository method that calls
 `SyncEngine.drain()`; what is gone is forty lines of loop, four times
 over, each with its own `catch (_)`.
@@ -166,6 +168,34 @@ import and watching it break.
 needs a run inside `packages/jabhouy_core` as well as at the root. This is
 the phase 5 codegen cost, arriving early.
 
+
+### What the engine gave income
+
+Income was already the sync path that did not lose writes, so it is worth
+being precise about what changed. `_loadPendingNotifications` selected
+`pending | failed` — the one query in the app that ever read `failed`, and
+the reason income recovered where the other four gave up.
+
+What it lacked was restraint. `FirebaseIncomeSyncService` replayed the
+entire backlog on every connectivity change, with no attempt count and no
+delay, so a server that was down was hammered once per network blip.
+Uploads are now jobs with a backoff.
+
+Two judgements in `IncomeSyncAdapter` are worth arguing with:
+
+- **A device that is not the main device answers retryable, not rejected.**
+  Rejected would stop the job forever; the device role can change, so the
+  job waits, backing off, and goes out if this device is promoted.
+- **A Firebase upload that does not confirm is also retryable.** That path
+  answers with a `bool`, so unlike HTTP there is no status to read and
+  nothing separates "the network was down" from "the document was
+  refused". Retrying a refused document costs a bounded number of requests;
+  dropping a recorded sale costs the seller money.
+
+`IncomeDiagnostics` is a port rather than the service, because
+`NotificationDiagnosticsService` reaches the Android bridge through the
+income barrel and `logic/` may not carry Flutter. The service satisfies the
+interface unchanged — the seam cost one `implements`.
 
 ### What moved into `jabhouy_core`, and why each had to
 
@@ -523,7 +553,7 @@ The 13 features run at least four different shapes between them, which is the sa
 - **Cross-package Drift codegen is the likeliest source of lost time in Phase 5.** If tables live in `jabhouy_core` and DAOs in features, generated code crosses a package boundary. Decide where tables live before extracting.
 - **`sendTestNotification` is the production upload path** for real notifications, despite its name. Renaming it is in scope for Phase 4; it currently obscures which code path matters.
 - **`dio: ^5.8.0+1` is declared and never imported.** `grep "package:dio" lib/` returns nothing. Open: adopt Dio with interceptors as `lmsmobileapp` does, or drop the dependency and keep `http`. Deciding this changes the Phase 1 transport work.
-- **Open: does `OutboxEntries` supersede `BankNotifications.syncStatus`,** or does income keep its own column and register with the engine through an adapter? The first is cleaner; the second is a smaller Phase 4.
+- ~~**Open: does `OutboxEntries` supersede `BankNotifications.syncStatus`?**~~ **Answered in `09b8a2a`: neither.** Income registers an adapter and keeps the column, exactly as the other four features do — `syncStatus` is a display hint everywhere now, and `OutboxEntry` is the queue everywhere. The fingerprint serves as both `localId` and `idempotencyKey`, so nothing had to be invented: income is the feature the outbox was generalised *from*, and the `UNIQUE` constraint on `BankNotifications.fingerprint` is the guarantee the other four needed one written for them.
 - **Open: does shop's price rule belong in `logic/`?** Shop earns no `logic/` folder under the three conditions today. If the loaner flow reuses the default/customer/seller price selection, that makes it "reused by more than one bloc" and shop graduates. Check when Phase 4 layers loaner, not before.
 
 ## Testing
