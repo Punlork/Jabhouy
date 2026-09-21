@@ -10,6 +10,36 @@ Jabhouy moves from feature folders containing god-object services to layered fea
 The offline sync logic — currently cloned into four services with no retry path — consolidates into one engine that generalizes the idempotency and coalescing patterns already working in the income feature.
 Shop is layered first as the reference slice, and is the single feature promoted to its own package as a deliberate modularization experiment.
 
+## Vocabulary
+
+Four nouns in this repository describe "a write that has not reached the
+server". They are not synonyms, and three of them are scaffolding that
+phase 3 removes.
+
+**Outbox** is the [transactional outbox
+pattern](https://microservices.io/patterns/data/transactional-outbox.html):
+write the business row and a job row describing that write in the same
+transaction, then drain the jobs separately. The point is that the job
+survives the crash, the timeout and the process restart that the in-memory
+"push it now" call does not. Everything below follows from having a job
+table rather than a status column.
+
+| Noun | Describes | Lifetime |
+| ---- | --------- | -------- |
+| `syncStatus` (`int` 0/1/2) | a **row** | original code; still live in category, customer and loaner |
+| `SyncStatus` (enum) | a **row**, typed | phase 1; entity tables keep it as a display hint after phase 3 |
+| `OutboxEntry` | a **job**: one queued write, with its attempt count, schedule and dependency | phase 3a; the queue from here on |
+| `SyncPushOutcome` | one **attempt**: succeeded, retryable, or rejected | phase 3b |
+
+`OutboxEntries` is the Drift table; `OutboxEntry` is the row class Drift
+generates from it. That plural/singular pair is Drift's convention, not a
+distinction this design is making.
+
+The queue is `OutboxEntry`. `syncStatus` stops being a queue the moment a
+feature is wired to the engine, and survives only to tell the UI whether a
+row is still in flight. A feature that still reads `syncStatus` to decide
+what to push has not been migrated yet.
+
 ## Progress
 
 Branch `refactor/architecture-restructure`. Where the code met the plan and
