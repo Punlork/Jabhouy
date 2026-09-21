@@ -63,7 +63,7 @@ the plan lost, the decision is recorded below rather than left as drift.
 | — core primitives: `Result`, `AppException` | done | `d3240be`, `75d9403`, `13fe4d2` |
 | 4 — income slice | done | `d202623`, `09b8a2a` |
 | 5 — `jabhouy_shop` | not started | — |
-| 6 — bloc 8→9, go_router 14→18 | not started | — |
+| 6 — bloc 8→9, go_router 14→18 | done | `d886a78`, `d7b9fdc` |
 
 **All five features are layered and on the engine.** Phase 3 closed the
 four `syncPendingChanges()` clones; phase 4 brought income in behind the
@@ -549,7 +549,9 @@ The 13 features run at least four different shapes between them, which is the sa
 ## Risks and open questions
 
 - **Phase 0 touches every file.** The `my_app` → `jabhouy` rename rewrites imports across 145 files. It is mechanical and diff-reviewable, but it must land alone, not mixed with logic changes.
-- **Phase 6 is the largest behavioral risk.** go_router 14→18 is four majors against `lib/app/routes/app_routes.dart`, which uses `CustomTransitionPage`, a `redirect` reading `AuthBloc`, and a `GlobalContext.currentContext` assignment inside `pageBuilder`. `lmsmobileapp` already runs go_router 17, so a working reference exists.
+- ~~**Phase 6 is the largest behavioral risk.**~~ **Done in `d886a78` and `d7b9fdc`, with no source changes at all.** Both upgrades removed only APIs this codebase never used. The risk assessment was right about *where* to look and wrong about the cost: the three things named — `CustomTransitionPage`, the `redirect` reading `AuthBloc`, the `GlobalContext` assignment in `pageBuilder` — all still work, verified by running the app rather than by analysing it, because none of them is visible to the analyzer.
+
+  What the simulator run did **not** reach: `pushNamed` with `extra`, the nested routes under `/home`, and the authenticated branch of `redirect`. Those need a login this checkout has no credentials for. The router has no automated coverage either way — see Testing.
 - **Cross-package Drift codegen is the likeliest source of lost time in Phase 5.** If tables live in `jabhouy_core` and DAOs in features, generated code crosses a package boundary. Decide where tables live before extracting.
 - **`sendTestNotification` is the production upload path** for real notifications, despite its name. Renaming it is in scope for Phase 4; it currently obscures which code path matters.
 - **`dio: ^5.8.0+1` is declared and never imported.** `grep "package:dio" lib/` returns nothing. Open: adopt Dio with interceptors as `lmsmobileapp` does, or drop the dependency and keep `http`. Deciding this changes the Phase 1 transport work.
@@ -571,6 +573,8 @@ Conventions: tests mirror `lib/`, `mocktail` for mocking, `bloc_test` for blocs.
 | Blocs        | `bloc_test` on emit sequences                                                              |
 | Sync engine  | Pure Dart under `dart test`, no Flutter binding                                            |
 | Migrations   | Committed schema snapshots via `drift_dev schema dump`, then generated migration tests    |
+| Layering     | `test/architecture/logic_layer_test.dart` walks the import closure of every `logic/` file and fails on Flutter, Drift or `dart:ui` |
+| Routing      | **None.** The largest untested surface left: 351 lines in `app_routes.dart`, a `redirect` that decides every navigation, and zero tests. Phase 6 was verified by running the app, which does not survive into CI |
 
 Sync tests are named as scenarios, so the suite doubles as the description of the engine:
 
