@@ -50,10 +50,10 @@ Future<void> setupDependencies() async {
         getIt<NotificationDiagnosticsService>(),
       ),
     )
-    ..registerLazySingleton(
-      () => ShopService(
-        getIt<ApiService>(),
-        getIt<AppDatabase>(),
+    ..registerLazySingleton<ShopRepository>(
+      () => DefaultShopRepository(
+        ShopDao(getIt<AppDatabase>()),
+        ShopApi(getIt<ApiService>()),
         getIt<ConnectivityService>(),
       ),
     )
@@ -120,7 +120,7 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory(
       () => ShopBloc(
-        getIt<ShopService>(),
+        getIt<ShopRepository>(),
         getIt<UploadBloc>(),
         getIt<ConnectivityService>(),
       ),

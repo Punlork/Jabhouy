@@ -17,7 +17,7 @@ extension ShopStateExtension on ShopState {
 }
 
 class ShopBloc extends Bloc<ShopEvent, ShopState> {
-  ShopBloc(this._service, this.upload, this._connectivityService)
+  ShopBloc(this._repository, this.upload, this._connectivityService)
       : super(const ShopInitial()) {
     _filtersController = StreamController<_ShopFilters>.broadcast(sync: true)
       ..add(
@@ -26,7 +26,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 
     _itemsSubscription = _filtersController.stream
         .switchMap(
-      (filters) => _service.watchShopItems(
+      (filters) => _repository.watchItems(
         searchQuery: filters.searchQuery,
         categoryFilter: filters.categoryFilter,
       ),
@@ -104,7 +104,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 
   static const throttleDuration = Duration(milliseconds: 300);
 
-  final ShopService _service;
+  final ShopRepository _repository;
   final UploadBloc upload;
   final ConnectivityService _connectivityService;
   late StreamSubscription<List<ShopItemModel>> _itemsSubscription;
@@ -125,7 +125,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.createShopItem(event.body);
+      final response = await _repository.createItem(event.body);
       if (!response.success) return;
       showSuccessSnackBar(
         null,
@@ -145,7 +145,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.updateShopItem(event.body);
+      final response = await _repository.updateItem(event.body);
       if (!response.success) return;
       showSuccessSnackBar(
         null,
@@ -170,7 +170,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     LoadingOverlay.show();
     try {
       for (final item in event.items) {
-        final response = await _service.createShopItem(item);
+        final response = await _repository.createItem(item);
         if (!response.success) {
           showErrorSnackBar(
             null,
@@ -200,7 +200,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.deleteShopItem(event.body);
+      final response = await _repository.deleteItem(event.body);
       if (!response.success) return;
       showSuccessSnackBar(
         null,
@@ -254,7 +254,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       );
     }
 
-    final hasCachedItems = await _service.hasCachedShopItems(
+    final hasCachedItems = await _repository.hasCachedItems(
       searchQuery: newSearchQuery,
       categoryFilter: newCategoryFilter,
     );
@@ -310,7 +310,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    final response = await _service.getShopItems(
+    final response = await _repository.refreshItems(
       page: effectivePage,
       limit: newPageSize,
       searchQuery: newSearchQuery,
@@ -396,9 +396,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       );
     }
 
-    await _service.syncPendingChanges();
+    await _repository.syncPendingChanges();
 
-    final response = await _service.getShopItems(
+    final response = await _repository.refreshItems(
       page: currentState?.pagination.page ?? 1,
       limit: currentState?.pagination.limit ?? 100,
       searchQuery: currentState?.searchQuery ?? '',

@@ -95,7 +95,7 @@ class AppRoutes {
               providers: [
                 BlocProvider(
                   create: (context) => ShopBloc(
-                    getIt<ShopService>(),
+                    getIt<ShopRepository>(),
                     getIt<UploadBloc>(),
                     getIt<ConnectivityService>(),
                   ),
