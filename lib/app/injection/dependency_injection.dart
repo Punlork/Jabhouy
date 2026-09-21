@@ -59,6 +59,8 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => CustomerApi(getIt<ApiService>()))
     ..registerLazySingleton(() => LoanerDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => LoanerApi(getIt<ApiService>()))
+    ..registerLazySingleton(() => IncomeDao(getIt<AppDatabase>()))
+    ..registerLazySingleton(() => IncomeApi(getIt<ApiService>()))
     // One engine for the whole app: the outbox is one queue, and ordering
     // a shop item after its category only works if both drain together.
     ..registerLazySingleton(
@@ -69,7 +71,25 @@ Future<void> setupDependencies() async {
           CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>()),
           CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>()),
           LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>()),
+          IncomeSyncAdapter(
+            getIt<IncomeDao>(),
+            getIt<FirebaseIncomeSyncService>().syncNotification,
+            getIt<FirebaseIncomeSyncService>().canAcceptLocalCapture,
+          ),
         ]),
+      ),
+    )
+    ..registerLazySingleton<IncomeRepository>(
+      () => DefaultIncomeRepository(
+        getIt<IncomeDao>(),
+        getIt<IncomeApi>(),
+        getIt<SyncEngine>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => PullRemoteNotificationsUseCase(
+        getIt<IncomeRepository>(),
+        getIt<NotificationDiagnosticsService>(),
       ),
     )
     ..registerLazySingleton<ShopRepository>(
@@ -104,8 +124,8 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton(
       () => IncomeService(
-        getIt<ApiService>(),
-        getIt<AppDatabase>(),
+        getIt<IncomeRepository>(),
+        getIt<PullRemoteNotificationsUseCase>(),
         getIt<NotificationTrackingBridge>(),
         getIt<FirebaseIncomeSyncService>(),
         getIt<NotificationDiagnosticsService>(),

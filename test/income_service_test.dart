@@ -1,11 +1,12 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jabhouy/app/service/api_service.dart';
+import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockApiService extends Mock implements ApiService {}
+class _MockIncomeApi extends Mock implements IncomeApi {}
 
 class _MockNotificationTrackingBridge extends Mock
     implements NotificationTrackingBridge {}
@@ -17,8 +18,10 @@ class _MockNotificationDiagnosticsService extends Mock
     implements NotificationDiagnosticsService {}
 
 void main() {
-  late _MockApiService apiService;
+  late _MockIncomeApi api;
   late AppDatabase database;
+  late IncomeDao dao;
+  late SyncEngine engine;
   late _MockNotificationTrackingBridge bridge;
   late _MockFirebaseIncomeSyncService syncService;
   late _MockNotificationDiagnosticsService diagnostics;
@@ -38,14 +41,30 @@ void main() {
   });
 
   setUp(() {
-    apiService = _MockApiService();
+    api = _MockIncomeApi();
     database = AppDatabase(NativeDatabase.memory());
+    dao = IncomeDao(database);
     bridge = _MockNotificationTrackingBridge();
     syncService = _MockFirebaseIncomeSyncService();
     diagnostics = _MockNotificationDiagnosticsService();
+
+    // The whole chain, not a mocked repository: these two tests are the
+    // record of what income must keep doing across the slice, so they
+    // run through the real dao, engine and adapter.
+    engine = SyncEngine(
+      database: database,
+      transport: AppSyncTransport([
+        IncomeSyncAdapter(
+          dao,
+          syncService.syncNotification,
+          syncService.canAcceptLocalCapture,
+        ),
+      ]),
+    );
+    final repository = DefaultIncomeRepository(dao, api, engine);
     incomeService = IncomeService(
-      apiService,
-      database,
+      repository,
+      PullRemoteNotificationsUseCase(repository, diagnostics),
       bridge,
       syncService,
       diagnostics,

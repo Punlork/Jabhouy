@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:drift/drift.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
@@ -22,21 +20,24 @@ class NotificationTrackingStatus {
 
 class IncomeService {
   IncomeService(
-    this._apiService,
-    this._db,
+    this._repository,
+    this._pullRemote,
     this._bridge,
     this._syncService,
     this._diagnostics,
   );
 
-  final ApiService _apiService;
-  final AppDatabase _db;
+  /// What is left here after the slice: the Android bridge, the Firebase
+  /// session, device-role gating and the demo seed. Everything that was
+  /// a Drift statement or an HTTP call moved to `data/`, and the pull
+  /// policy moved to `logic/`.
+  final IncomeRepository _repository;
+  final PullRemoteNotificationsUseCase _pullRemote;
   final NotificationTrackingBridge _bridge;
   final FirebaseIncomeSyncService _syncService;
   final NotificationDiagnosticsService _diagnostics;
   StreamSubscription<Map<String, dynamic>>? _nativeSubscription;
   bool _initialized = false;
-  DateTime? _lastRemotePullAt;
 
 
   Future<void> initialize() async {
@@ -141,64 +142,8 @@ class IncomeService {
     }
   }
 
-  Future<int> pullRemoteNotifications({bool force = false}) async {
-    final now = DateTime.now();
-    if (!force && _lastRemotePullAt != null) {
-      final elapsed = now.difference(_lastRemotePullAt!);
-      if (elapsed < const Duration(seconds: 20)) {
-        return 0;
-      }
-    }
-    _lastRemotePullAt = now;
-
-    try {
-      final response = await _apiService.get<List<BankNotificationModel>>(
-        '/notifications',
-        showSnackBar: false,
-        parser: _parseNotificationsResponse,
-      );
-      if (!response.success || response.data == null) {
-        await _diagnostics.log(
-          source: 'flutter.income_service',
-          message: 'Failed to pull remote notifications list from backend.',
-          level: 'warning',
-          metadata: {
-            'message': response.message,
-          },
-        );
-        return 0;
-      }
-
-      var upsertCount = 0;
-      for (final model in response.data!) {
-        if (await _upsertNotificationModel(model)) {
-          upsertCount++;
-        }
-      }
-      final repairedCount = await _backfillStoredNotificationMetadata();
-
-      await _diagnostics.log(
-        source: 'flutter.income_service',
-        message: 'Pulled remote notifications from backend.',
-        metadata: {
-          'receivedCount': response.data!.length,
-          'upsertedCount': upsertCount,
-          'repairedCount': repairedCount,
-        },
-      );
-      return upsertCount + repairedCount;
-    } catch (error) {
-      await _diagnostics.log(
-        source: 'flutter.income_service',
-        message: 'Unhandled error while pulling remote notifications.',
-        level: 'error',
-        metadata: {
-          'error': error.toString(),
-        },
-      );
-      return 0;
-    }
-  }
+  Future<int> pullRemoteNotifications({bool force = false}) =>
+      _pullRemote(force: force);
 
   Future<bool> seedDemoNotifications() async {
     if (!await _syncService.canAcceptLocalCapture()) {
@@ -280,99 +225,17 @@ class IncomeService {
     BankApp? bankFilter,
     NotificationRecordFilter recordFilter = NotificationRecordFilter.all,
   }) {
-    final query = _db.select(_db.bankNotifications);
-
-    if (searchQuery.isNotEmpty) {
-      query.where(
-        (tbl) =>
-            tbl.message.contains(searchQuery) |
-            tbl.bankKey.contains(searchQuery) |
-            tbl.packageName.contains(searchQuery) |
-            tbl.title.contains(searchQuery),
-      );
-    }
-
-    if (fromDate != null) {
-      query.where((tbl) => tbl.receivedAt.isBiggerOrEqualValue(fromDate));
-    }
-
-    if (toDate != null) {
-      final endOfDay = DateTime(
-        toDate.year,
-        toDate.month,
-        toDate.day,
-        23,
-        59,
-        59,
-        999,
-      );
-      query.where((tbl) => tbl.receivedAt.isSmallerOrEqualValue(endOfDay));
-    }
-
-    if (bankFilter != null && bankFilter != BankApp.unknown) {
-      query.where((tbl) => tbl.bankKey.equals(bankFilter.key));
-    }
-
-    switch (recordFilter) {
-      case NotificationRecordFilter.income:
-        query.where((tbl) => tbl.isIncome.equals(true));
-      case NotificationRecordFilter.expense:
-        query.where((tbl) => tbl.isIncome.equals(false));
-      case NotificationRecordFilter.all:
-        break;
-    }
-
-    query.orderBy([
-      (tbl) => OrderingTerm(
-            expression: tbl.receivedAt,
-            mode: OrderingMode.desc,
-          ),
-      (tbl) => OrderingTerm(
-            expression: tbl.id,
-            mode: OrderingMode.desc,
-          ),
-    ]);
-
-    return query.watch().map(
-          (rows) => rows.map(_mapRow).toList(growable: false),
-        );
-  }
-
-  BankNotificationModel _mapRow(BankNotification row) {
-    return BankNotificationModel(
-      id: row.id,
-      fingerprint: row.fingerprint,
-      packageName: row.packageName,
-      bankApp: BankApp.fromKey(row.bankKey),
-      title: row.title,
-      message: row.message,
-      rawPayload: row.rawPayload,
-      amount: row.amount,
-      currency: row.currency,
-      isIncome: row.isIncome,
-      receivedAt: row.receivedAt,
-      source: row.source,
-      createdAt: row.createdAt,
+    return _repository.watchNotifications(
+      searchQuery: searchQuery,
+      fromDate: fromDate,
+      toDate: toDate,
+      bankFilter: bankFilter,
+      recordFilter: recordFilter,
     );
   }
 
-  Future<List<BankNotificationModel>> _loadPendingNotifications() async {
-    final rows = await (_db.select(_db.bankNotifications)
-          ..where(
-            (tbl) =>
-                tbl.syncStatus.equalsValue(SyncStatus.pending) |
-                tbl.syncStatus.equalsValue(SyncStatus.failed),
-          )
-          ..orderBy([
-            (tbl) => OrderingTerm(
-                  expression: tbl.receivedAt,
-                  mode: OrderingMode.desc,
-                ),
-          ]))
-        .get();
-
-    return rows.map(_mapRow).toList(growable: false);
-  }
+  Future<List<BankNotificationModel>> _loadPendingNotifications() =>
+      _repository.pendingNotifications();
 
   Future<void> saveTrackedNotificationMap(
     Map<String, dynamic> payload, {
@@ -393,7 +256,7 @@ class IncomeService {
     }
 
     final model = BankNotificationModel.fromNativeMap(payload);
-    final upserted = await _upsertNotificationModel(
+    final upserted = await _repository.store(
       model,
       rawPayloadOverride: model.rawPayload ?? jsonEncode(payload),
     );
@@ -411,150 +274,18 @@ class IncomeService {
     );
 
     if (triggerRemoteSync && canAcceptLocal && upserted) {
-      final didSync = await _syncService.syncNotification(model);
-      await _updateNotificationSyncStatus(
-        model.fingerprint,
-        didSync ? SyncStatus.synced : SyncStatus.failed,
-      );
+      // Queue, then drain. The upload used to happen inline here, so a
+      // notification that arrived while the network was down was pushed
+      // once, marked failed, and left for the next connectivity change to
+      // replay with no backoff. It is now a job like any other.
+      await _repository.enqueueUpload(model);
+      await _repository.drainUploads();
     }
   }
 
   Future<void> _updateNotificationSyncStatus(
     String fingerprint,
     SyncStatus syncStatus,
-  ) async {
-    await (_db.update(_db.bankNotifications)..where((tbl) => tbl.fingerprint.equals(fingerprint))).write(
-      BankNotificationsCompanion(
-        syncStatus: Value(syncStatus),
-      ),
-    );
-  }
-
-  Future<bool> _upsertNotificationModel(
-    BankNotificationModel model, {
-    String? rawPayloadOverride,
-  }) async {
-    final existing = await (_db.select(_db.bankNotifications)
-          ..where((tbl) => tbl.fingerprint.equals(model.fingerprint)))
-        .getSingleOrNull();
-    // A row is pending until a push confirms otherwise. A caller that does
-    // push overwrites this with synced or error immediately after; a caller
-    // that does not never revisits it, so writing synced here would claim
-    // an upload that never happened.
-    const syncStatus = SyncStatus.pending;
-
-    if (existing == null) {
-      await _db.into(_db.bankNotifications).insert(
-            BankNotificationsCompanion.insert(
-              fingerprint: model.fingerprint,
-              packageName: model.packageName,
-              bankKey: model.bankApp.key,
-              title: Value(model.title),
-              message: model.message,
-              rawPayload: Value(rawPayloadOverride ?? model.rawPayload),
-              amount: Value(model.amount),
-              currency: Value(model.currency),
-              isIncome: Value(model.isIncome),
-              receivedAt: model.receivedAt,
-              source: Value(model.source),
-              syncStatus: const Value(syncStatus),
-              createdAt: Value(model.createdAt),
-            ),
-          );
-      return true;
-    }
-
-    await (_db.update(_db.bankNotifications)..where((tbl) => tbl.id.equals(existing.id))).write(
-      BankNotificationsCompanion(
-        packageName: Value(model.packageName),
-        bankKey: Value(model.bankApp.key),
-        title: Value(model.title),
-        message: Value(model.message),
-        rawPayload: Value(rawPayloadOverride ?? model.rawPayload),
-        amount: Value(model.amount),
-        currency: Value(model.currency),
-        isIncome: Value(model.isIncome),
-        receivedAt: Value(model.receivedAt),
-        source: Value(model.source),
-        syncStatus: Value(existing.syncStatus),
-        createdAt: Value(model.createdAt),
-      ),
-    );
-    return false;
-  }
-
-  List<BankNotificationModel> _parseNotificationsResponse(dynamic payload) {
-    dynamic data = payload;
-
-    if (data is Map<String, dynamic>) {
-      data = data['data'] ?? data['notifications'] ?? data['items'] ?? data['results'];
-    }
-
-    if (data is! List) return const [];
-
-    return data
-        .whereType<Object?>()
-        .map((entry) {
-          Map<String, dynamic>? normalized;
-
-          if (entry is Map<String, dynamic>) {
-            normalized = BankNotificationModel.fromJSON(entry);
-          } else if (entry is Map) {
-            normalized = BankNotificationModel.fromJSON(
-              Map<String, dynamic>.from(entry),
-            );
-          }
-
-          if (normalized == null) return null;
-
-          return BankNotificationModel.fromNativeMap(normalized);
-        })
-        .whereType<BankNotificationModel>()
-        .toList(growable: false);
-  }
-
-  Future<int> _backfillStoredNotificationMetadata() async {
-    final rows = await (_db.select(_db.bankNotifications)
-          ..where(
-            (tbl) => tbl.bankKey.equals(BankApp.unknown.key) | tbl.amount.isNull(),
-          ))
-        .get();
-
-    if (rows.isEmpty) return 0;
-
-    var repaired = 0;
-    for (final row in rows) {
-      final candidate = BankNotificationModel.fromNativeMap({
-        'fingerprint': row.fingerprint,
-        'packageName': row.packageName,
-        'title': row.title,
-        'message': row.message,
-        'receivedAt': row.receivedAt.millisecondsSinceEpoch,
-        'source': row.source,
-        'createdAt': row.createdAt.toIso8601String(),
-      });
-
-      final shouldUpdateBank = row.bankKey == BankApp.unknown.key && candidate.bankApp != BankApp.unknown;
-      final shouldUpdateAmount = row.amount == null && candidate.amount != null;
-      final shouldUpdateCurrency = shouldUpdateAmount &&
-          row.currency == 'USD' &&
-          candidate.currency.isNotEmpty &&
-          candidate.currency != row.currency;
-
-      if (!shouldUpdateBank && !shouldUpdateAmount && !shouldUpdateCurrency) {
-        continue;
-      }
-
-      await (_db.update(_db.bankNotifications)..where((tbl) => tbl.id.equals(row.id))).write(
-        BankNotificationsCompanion(
-          bankKey: shouldUpdateBank ? Value(candidate.bankApp.key) : const Value.absent(),
-          amount: shouldUpdateAmount ? Value(candidate.amount) : const Value.absent(),
-          currency: shouldUpdateCurrency ? Value(candidate.currency) : const Value.absent(),
-        ),
-      );
-      repaired++;
-    }
-
-    return repaired;
-  }
+  ) =>
+      _repository.updateSyncStatus(fingerprint, syncStatus);
 }

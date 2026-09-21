@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:jabhouy/income/income.dart';
 
-class NotificationDiagnosticsService {
+/// Implements [IncomeDiagnostics] so `logic/` can log without
+/// importing the Android bridge this reaches through.
+class NotificationDiagnosticsService implements IncomeDiagnostics {
   NotificationDiagnosticsService(this._bridge);
 
   final NotificationTrackingBridge _bridge;
@@ -34,6 +36,7 @@ class NotificationDiagnosticsService {
     });
   }
 
+  @override
   Future<void> log({
     required String source,
     required String message,
