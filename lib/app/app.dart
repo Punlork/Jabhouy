@@ -6,7 +6,6 @@ export 'extension/state_extension.dart';
 export 'injection/dependency_injection.dart';
 export 'mixin/img_clipboard_mixin.dart';
 export 'mixin/infinite_scroll_mixin.dart';
-export 'models/pagination_model.dart';
 export 'models/user_model.dart';
 export 'pages/app_diagnostics_page.dart';
 export 'routes/app_routes.dart';

@@ -1,14 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-T? tryCast<T>(dynamic x, {T? fallback}) {
-  if (x is T) return x;
-
-  return fallback;
-}
-
-extension ObjectExtension<T> on T {
-  R? let<R>(R Function(T) transform) => this != null ? transform(this!) : null;
-}
+import 'package:jabhouy_core/src/models/casts.dart';
 
 class Pagination {
   Pagination({

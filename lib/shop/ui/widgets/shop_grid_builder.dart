@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/home/home.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class ShopGridBuilder extends StatefulWidget {
   const ShopGridBuilder({

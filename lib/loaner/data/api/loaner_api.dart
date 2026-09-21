@@ -1,5 +1,6 @@
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// Every HTTP call the loaner feature makes, and nothing else.
 class LoanerApi extends BaseService {

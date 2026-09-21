@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
-import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 enum BankApp {
   aba('aba', 'ABA Bank'),

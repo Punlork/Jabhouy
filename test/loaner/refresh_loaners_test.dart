@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockLoanerRepository extends Mock implements LoanerRepository {}

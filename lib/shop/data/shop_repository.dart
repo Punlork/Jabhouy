@@ -1,5 +1,6 @@
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// The seam the shop bloc talks to. Shop earns no `logic/` layer under the
 /// three conditions in `docs/ARCHITECTURE_RESTRUCTURE.md`, so the

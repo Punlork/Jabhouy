@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'shop_event.dart';

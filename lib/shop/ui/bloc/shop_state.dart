@@ -1,3 +1,4 @@
+
 part of 'shop_bloc.dart';
 
 const _shopCategoryFilterUnset = Object();

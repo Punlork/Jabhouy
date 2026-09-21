@@ -1,6 +1,7 @@
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// The seam the loaner bloc and [RefreshLoanersUseCase] talk to.
 abstract class LoanerRepository {

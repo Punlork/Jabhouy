@@ -1,5 +1,6 @@
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 /// The seam the customer bloc talks to.
 ///
