@@ -26,7 +26,7 @@ table rather than a status column.
 
 | Noun | Describes | Lifetime |
 | ---- | --------- | -------- |
-| `syncStatus` (`int` 0/1/2) | a **row** | original code; still live in category, customer and loaner |
+| `syncStatus` (`int` 0/1/2) | a **row** | original code; gone from `lib/` as of phase 3 |
 | `SyncStatus` (enum) | a **row**, typed | phase 1; entity tables keep it as a display hint after phase 3 |
 | `OutboxEntry` | a **job**: one queued write, with its attempt count, schedule and dependency | phase 3a; the queue from here on |
 | `SyncPushOutcome` | one **attempt**: succeeded, retryable, or rejected | phase 3b |
@@ -55,18 +55,31 @@ the plan lost, the decision is recorded below rather than left as drift.
 | 3b — `jabhouy_sync` engine | done | `28a89ac` |
 | 3c — shop drains through the engine | done | `071cbe1` |
 | 3d — category drains through the engine | done | `158c3ac` |
-| 3e — customer drains through the engine | done; 1 clone left | `b196cf1`, `82ac9e5` |
+| 3e — customer drains through the engine | done | `b196cf1`, `82ac9e5` |
+| 3f — loaner drains through the engine; **phase 3 closed** | done | `3e4eec6`, `c7e04a4` |
+| — loaner `logic/` (part of phase 4) | done | `c7e04a4` |
+| — loaner JSON crash fix (found by 3f) | done | `c7e04a4` |
 | 2 — shop slice | done | `574109e`, `0768f99` |
-| 4 — loaner and income slices | not started | — |
+| 4 — income slice | not started | — |
 | 5 — `jabhouy_shop` | not started | — |
 | 6 — bloc 8→9, go_router 14→18 | not started | — |
 
-**Phase 3 needs one more adapter.** Shop, category and customer drain
-through the engine. Only `loaner`'s `syncPendingChanges()` is left, and it
-is the one that also earns a `logic/` layer, so it closes phase 3 and
-starts phase 4 in the same slice. A feature can only be wired once it has
-a repository to wire, which is why these are one piece of work per feature
-rather than two phases.
+**Phase 3 is closed.** All four `syncPendingChanges()` clones are deleted.
+The name survives as a three-line repository method that calls
+`SyncEngine.drain()`; what is gone is forty lines of loop, four times
+over, each with its own `catch (_)`.
+
+Phase 3 turned out not to be a phase. A feature can only be wired to the
+engine once it has a repository to wire, so "extract the engine" and
+"layer the features" are one piece of work repeated four times, not two
+stages. The table records it as 3c–3f for that reason.
+
+**Order mattered, and not for the reason the plan gave.** The plan ordered
+phases by size. What actually ordered them is the dependency graph:
+`dependsOnLocalId` is inert with one adapter registered, because there is
+nothing to wait for. Category made it load-bearing for shop items, and
+customer made it load-bearing for loans. A feature's adapter is only worth
+as much as the adapter of whatever it references.
 
 **Sending a job is a `FeatureSyncAdapter`, one per feature.** The engine is
 generic over entities; knowing that a `shopItem` create is `POST /items` is
@@ -89,8 +102,7 @@ The DAO's job is to be the only place that touches Drift, and holding an
 `AppDatabase` does that identically. Phase 5 can take the question on
 deliberately.
 
-**Five of the seven defects are closed for shop and category,** and none
-of them for customer or loaner. A delete the server rejects stays queued
+**Five of the seven defects are closed, in all four features.** A delete the server rejects stays queued
 instead of being reported as a success; reconciling a created row runs in
 one transaction instead of two statements; a failed push retries with a
 backoff instead of stopping at `syncStatus = 2` forever; every failure
@@ -98,14 +110,24 @@ keeps its reason in `OutboxEntry.lastError` instead of being collapsed by
 a `catch (_)`; and an item filed under an offline category can no longer
 reach the server before the category exists.
 
-That last one is why category was worth doing before customer and loaner.
-`dependsOnLocalId` existed from `0dd2c1c` and shop had been setting it
-since `071cbe1`, but with no category jobs in the queue there was nothing
-to wait for — the column was inert until a second adapter existed.
-
 The two still open are colliding local ids, which needs the UUID `localId`
 column, and clock-skew conflicts, which needs a server-side ordering
 decision this doc has not made.
+
+**Two bugs the refactor found, neither of them in scope.** Phase 0 found
+income marking never-uploaded notifications as synced (`6bf59b2`). Phase
+3f found that `Loaners.customer`, a denormalised JSON blob, had been
+encoding the raw `syncStatus` — an `int` until `c391ebb` made it an enum,
+after which `jsonEncode` threw on every loan carrying a customer, and the
+`catch (_)` in `syncPendingChanges` turned the crash into `syncStatus = 2`.
+Both were found by rewriting a path rather than by reading it, which is
+the argument for rewriting the drain loops instead of moving them.
+
+**`logic/` is not yet Flutter-free.** `RefreshLoanersUseCase` imports
+`app.dart` for `ApiResponse`, which pulls Flutter in transitively, so the
+layering rule below is documented but unenforced. It becomes enforceable
+when `Result<T>` moves into `jabhouy_core` — the one row of the core
+primitives table still outstanding, and the reason to do it next.
 
 **Tables live in `jabhouy_core`, not in the app.** This doc scoped core to
 "db primitives". With drift's default generator, a table's generated
