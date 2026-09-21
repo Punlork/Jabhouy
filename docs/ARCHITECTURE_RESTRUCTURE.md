@@ -54,16 +54,19 @@ the plan lost, the decision is recorded below rather than left as drift.
 | 3a — `OutboxEntries` table | done, schema 5 → 6 | `0dd2c1c` |
 | 3b — `jabhouy_sync` engine | done | `28a89ac` |
 | 3c — shop drains through the engine | done | `071cbe1` |
-| 3d — category drains through the engine | done; 2 clones left | `158c3ac` |
+| 3d — category drains through the engine | done | `158c3ac` |
+| 3e — customer drains through the engine | done; 1 clone left | `b196cf1`, `82ac9e5` |
 | 2 — shop slice | done | `574109e`, `0768f99` |
 | 4 — loaner and income slices | not started | — |
 | 5 — `jabhouy_shop` | not started | — |
 | 6 — bloc 8→9, go_router 14→18 | not started | — |
 
-**Phase 3 needs two more adapters.** Shop and category drain through the
-engine; the clones in `customer` and `loaner` are still live. A feature
-can only be wired once it has a repository to wire, which makes phase 3
-and phase 4 one piece of work per feature rather than two phases.
+**Phase 3 needs one more adapter.** Shop, category and customer drain
+through the engine. Only `loaner`'s `syncPendingChanges()` is left, and it
+is the one that also earns a `logic/` layer, so it closes phase 3 and
+starts phase 4 in the same slice. A feature can only be wired once it has
+a repository to wire, which is why these are one piece of work per feature
+rather than two phases.
 
 **Sending a job is a `FeatureSyncAdapter`, one per feature.** The engine is
 generic over entities; knowing that a `shopItem` create is `POST /items` is
