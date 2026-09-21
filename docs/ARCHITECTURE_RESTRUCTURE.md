@@ -60,6 +60,7 @@ the plan lost, the decision is recorded below rather than left as drift.
 | — loaner `logic/` (part of phase 4) | done | `c7e04a4` |
 | — loaner JSON crash fix (found by 3f) | done | `c7e04a4` |
 | 2 — shop slice | done | `574109e`, `0768f99` |
+| — core primitives: `Result`, `AppException` | done | `d3240be`, `75d9403`, `13fe4d2` |
 | 4 — income slice | not started | — |
 | 5 — `jabhouy_shop` | not started | — |
 | 6 — bloc 8→9, go_router 14→18 | not started | — |
@@ -123,11 +124,22 @@ after which `jsonEncode` threw on every loan carrying a customer, and the
 Both were found by rewriting a path rather than by reading it, which is
 the argument for rewriting the drain loops instead of moving them.
 
-**`logic/` is not yet Flutter-free.** `RefreshLoanersUseCase` imports
-`app.dart` for `ApiResponse`, which pulls Flutter in transitively, so the
-layering rule below is documented but unenforced. It becomes enforceable
-when `Result<T>` moves into `jabhouy_core` — the one row of the core
-primitives table still outstanding, and the reason to do it next.
+**`logic/` is Flutter-free, and a test says so.**
+`test/architecture/logic_layer_test.dart` walks the transitive import
+closure of every file under a `logic/` folder and fails on
+`package:flutter`, `package:drift` or `dart:ui`. Dart cannot express "this
+folder may not import that", so the rule was decorative until this file.
+
+It failed on its first run. `loaner_model.dart` imported
+`package:jabhouy/customer/customer.dart` — the barrel — which exports
+customer's `ui` folder, which reaches `flutter/material`. Three hops from
+a file that looks like a plain data class. **Inside a feature, import the
+file, not the barrel:** a barrel is a convenience for callers outside the
+feature and a Flutter leak for anything that must stay pure.
+
+`jabhouy_core` and `jabhouy_sync` are trusted rather than walked. Both run
+under `dart test` on the plain Dart VM, which has no `dart:ui`, so their
+purity is already a failing build.
 
 **Tables live in `jabhouy_core`, not in the app.** This doc scoped core to
 "db primitives". With drift's default generator, a table's generated
@@ -154,6 +166,27 @@ import and watching it break.
 needs a run inside `packages/jabhouy_core` as well as at the root. This is
 the phase 5 codegen cost, arriving early.
 
+
+### What moved into `jabhouy_core`, and why each had to
+
+| Moved | Because |
+| ----- | ------- |
+| `Result<T>`, `AppException` | a use case cannot avoid `app.dart` while `ApiResponse` is the only way to say "this might have failed", and `app.dart` carries Flutter |
+| `tryCast`, `let` | every `fromJson` used them, and they lived in `lib/app/models/`, so no model could be read without importing the app package |
+| `Pagination`, `PaginatedResponse` | they sat in the same file, and repository signatures need them |
+
+None of the four had a Flutter dependency of its own. They were in the app
+package by accident of where they were first written, and that accident is
+what made the layering rule unenforceable.
+
+**Messages left the data layer with them.** "Saved offline. It will sync
+when you are back online." used to be chosen inside the repository, from a
+connectivity check taken *before* the push was attempted — so a write that
+went out and was rejected still said "saved offline". `_settle()` now
+re-reads the row after draining and returns what actually happened, and
+`syncFeedback()` in the `ui` layer turns that into words. This is the
+"transport returns `Result`; the `ui` layer decides what to show" row of
+the table above, arriving as a behaviour change rather than a rename.
 
 ## Context
 
@@ -377,7 +410,7 @@ Four replacements in `jabhouy_core`, each removing a defect named above:
 
 | Current                                         | Replacement                                                                             |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `ApiResponse{success: bool, data: T?}`          | sealed `Result<T>` with `Ok(value)` and `Err(AppException)` variants, removing `!` at call sites |
+| `ApiResponse{success: bool, data: T?}`          | **done** (`d3240be`, `13fe4d2`) — sealed `Result<T>` with `Ok(value)` and `Err(AppException)`. Live in the four layered features; auth, profile, upload, fcm and income still speak `ApiResponse` and convert at the edge of an `api/` class |
 | `int syncStatus` (`0`/`1`/`2`)                  | `enum SyncStatus { synced, pending, failed }` with a Drift converter                    |
 | `-(millis % 1000000)` local IDs                 | UUID v4 `localId` column; server ID stays nullable until reconciliation                 |
 | `BaseService.post(BuildContext?, showSnackBar)` | transport returns `Result`; the `ui` layer decides what to show                          |
