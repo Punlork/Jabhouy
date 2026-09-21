@@ -55,6 +55,8 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => ShopApi(getIt<ApiService>()))
     ..registerLazySingleton(() => CategoryDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => CategoryApi(getIt<ApiService>()))
+    ..registerLazySingleton(() => CustomerDao(getIt<AppDatabase>()))
+    ..registerLazySingleton(() => CustomerApi(getIt<ApiService>()))
     // One engine for the whole app: the outbox is one queue, and ordering
     // a shop item after its category only works if both drain together.
     ..registerLazySingleton(
@@ -63,6 +65,7 @@ Future<void> setupDependencies() async {
         transport: AppSyncTransport([
           ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>()),
           CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>()),
+          CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>()),
         ]),
       ),
     )
@@ -81,10 +84,11 @@ Future<void> setupDependencies() async {
         getIt<ConnectivityService>(),
       ),
     )
-    ..registerLazySingleton(
-      () => CustomerService(
-        getIt<ApiService>(),
-        getIt<AppDatabase>(),
+    ..registerLazySingleton<CustomerRepository>(
+      () => DefaultCustomerRepository(
+        getIt<CustomerDao>(),
+        getIt<CustomerApi>(),
+        getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
       ),
     )
@@ -155,7 +159,7 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory(
       () => CustomerBloc(
-        getIt<CustomerService>(),
+        getIt<CustomerRepository>(),
         getIt<ConnectivityService>(),
       ),
     )

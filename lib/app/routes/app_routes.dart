@@ -114,7 +114,7 @@ class AppRoutes {
                 ),
                 BlocProvider(
                   create: (context) => CustomerBloc(
-                    getIt<CustomerService>(),
+                    getIt<CustomerRepository>(),
                     getIt<ConnectivityService>(),
                   ),
                 ),

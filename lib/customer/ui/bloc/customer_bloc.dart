@@ -16,10 +16,10 @@ extension CustomerStateExtension on CustomerState {
 }
 
 class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
-  CustomerBloc(this.customerService, this._connectivityService)
+  CustomerBloc(this._repository, this._connectivityService)
       : super(CustomerInitial()) {
     _customerSubscription =
-        customerService.watchCustomers().listen((customers) {
+        _repository.watchCustomers().listen((customers) {
       if (!isClosed) {
         add(CustomerUpdatedFromLocal(customers));
       }
@@ -40,7 +40,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<_CustomerConnectivityChanged>(_onConnectivityChanged);
   }
 
-  final CustomerService customerService;
+  final CustomerRepository _repository;
   final ConnectivityService _connectivityService;
   late StreamSubscription<List<CustomerModel>> _customerSubscription;
   late StreamSubscription<bool> _connectivitySubscription;
@@ -50,7 +50,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     Emitter<CustomerState> emit,
   ) async {
     final currentState = state.asLoaded;
-    final hasCachedItems = await customerService.hasCachedCustomers();
+    final hasCachedItems = await _repository.hasCachedCustomers();
     final isOnline = await _connectivityService.isOnline;
 
     if (state is! CustomerLoaded && !hasCachedItems) {
@@ -75,7 +75,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       return;
     }
 
-    final response = await customerService.getCustomers();
+    final response = await _repository.refreshCustomers();
     if (response.success) {
       final latestState = state.asLoaded;
       if (latestState != null) {
@@ -118,7 +118,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     CreateCustomerEvent event,
     Emitter<CustomerState> emit,
   ) async {
-    final response = await customerService.createCustomer(event.customer);
+    final response = await _repository.createCustomer(event.customer);
     if (!response.success) {
       emit(CustomerError(response.message ?? 'Failed to create customer.'));
       return;
@@ -133,7 +133,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     UpdateCustomerEvent event,
     Emitter<CustomerState> emit,
   ) async {
-    final response = await customerService.updateCustomer(event.customer);
+    final response = await _repository.updateCustomer(event.customer);
     if (!response.success) {
       emit(CustomerError(response.message ?? 'Failed to update customer.'));
       return;
@@ -148,7 +148,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     DeleteCustomerEvent event,
     Emitter<CustomerState> emit,
   ) async {
-    final response = await customerService.deleteCustomer(event.customer);
+    final response = await _repository.deleteCustomer(event.customer);
     if (!response.success) {
       emit(CustomerError(response.message ?? 'Failed to delete customer.'));
       return;
@@ -185,8 +185,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       ),
     );
 
-    await customerService.syncPendingChanges();
-    final response = await customerService.getCustomers();
+    await _repository.syncPendingChanges();
+    final response = await _repository.refreshCustomers();
     final latestState = state.asLoaded;
     if (latestState == null) {
       return;
