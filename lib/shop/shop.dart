@@ -1,11 +1,15 @@
+export 'data/api/category_api.dart';
 export 'data/api/shop_api.dart';
+export 'data/category_repository.dart';
+export 'data/category_repository_impl.dart';
+export 'data/category_sync_adapter.dart';
+export 'data/db/category_dao.dart';
 export 'data/db/shop_dao.dart';
 export 'data/shop_repository.dart';
 export 'data/shop_repository_impl.dart';
 export 'data/shop_sync_adapter.dart';
 export 'models/category_model.dart';
 export 'models/shop_item_model.dart';
-export 'service/category_service.dart';
 export 'ui/bloc/category/category_bloc.dart';
 export 'ui/bloc/shop_bloc.dart';
 export 'ui/views/category_page.dart';

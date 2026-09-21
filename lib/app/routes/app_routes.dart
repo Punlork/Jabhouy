@@ -104,7 +104,7 @@ class AppRoutes {
                   create: (context) => SignoutBloc(getIt<AuthService>()),
                 ),
                 BlocProvider(
-                  create: (context) => CategoryBloc(getIt<CategoryService>()),
+                  create: (context) => CategoryBloc(getIt<CategoryRepository>()),
                 ),
                 BlocProvider(
                   create: (context) => LoanerBloc(

@@ -13,8 +13,8 @@ extension CategoryStateExtension on CategoryState {
 }
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  CategoryBloc(this._service) : super(const CategoryInitial()) {
-    _categorySubscription = _service.watchCategories().listen((items) {
+  CategoryBloc(this._repository) : super(const CategoryInitial()) {
+    _categorySubscription = _repository.watchCategories().listen((items) {
       add(_CategoryUpdatedFromLocal(items));
     });
 
@@ -28,7 +28,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CategoryDeleteEvent>(_onDeleteItem);
   }
 
-  final CategoryService _service;
+  final CategoryRepository _repository;
   late StreamSubscription<List<CategoryItemModel>> _categorySubscription;
 
   @override
@@ -40,7 +40,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onCreateItem(CategoryCreateEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.createCategory(event.body);
+      final response = await _repository.createCategory(event.body);
       if (!response.success) return;
       showSuccessSnackBar(null, 'Created: ${response.data?.name}');
     } catch (e) {
@@ -53,7 +53,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onEditItem(CategoryEditEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.updateCategory(event.body);
+      final response = await _repository.updateCategory(event.body);
       if (!response.success) return;
       showSuccessSnackBar(null, 'Updated: ${response.data?.name}');
     } catch (e) {
@@ -66,7 +66,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onDeleteItem(CategoryDeleteEvent event, Emitter<CategoryState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.deleteCategory(event.body);
+      final response = await _repository.deleteCategory(event.body);
       if (!response.success) return;
       showSuccessSnackBar(null, 'Deleted ${event.body.name}');
     } catch (e) {
@@ -81,7 +81,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(const CategoryLoading());
     }
     try {
-      await _service.getCategory();
+      await _repository.refreshCategories();
     } catch (e) {
       if (state is! CategoryLoaded) {
         // emit(CategoryError('Failed to load items: $e'));
