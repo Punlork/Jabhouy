@@ -19,14 +19,14 @@ extension ShopStateExtension on LoanerState {
 }
 
 class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
-  LoanerBloc(this._service, this._connectivityService)
+  LoanerBloc(this._repository, this._refreshLoaners, this._connectivityService)
       : super(LoanerInitial()) {
     _filtersController = StreamController<_LoanerFilters>.broadcast(sync: true)
       ..add(const _LoanerFilters());
 
     _loanerSubscription = _filtersController.stream
         .switchMap(
-      (filters) => _service.watchLoaners(
+      (filters) => _repository.watchLoaners(
         searchQuery: filters.searchQuery,
         customerFilter: filters.loanerFilter,
         fromDate: filters.fromDate,
@@ -86,7 +86,10 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   }
   static const throttleDuration = Duration(milliseconds: 300);
 
-  final LoanerService _service;
+  final LoanerRepository _repository;
+  // The one place loaner reaches past its own repository: a loan
+  // response carries its customer, and caching that is customer's job.
+  final RefreshLoanersUseCase _refreshLoaners;
   final ConnectivityService _connectivityService;
   late StreamSubscription<List<LoanerModel>> _loanerSubscription;
   late StreamSubscription<bool> _connectivitySubscription;
@@ -123,7 +126,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
         newLoanerFilter != currentState?.loanerFilter;
 
     final effectivePage = isFilterChange ? 1 : newPage;
-    final hasCachedItems = await _service.hasCachedLoaners(
+    final hasCachedItems = await _repository.hasCachedLoaners(
       searchQuery: newSearchQuery,
       customerFilter: newLoanerFilter,
       fromDate: newFromDate,
@@ -175,7 +178,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       return;
     }
 
-    final response = await _service.getLoaners(
+    final response = await _refreshLoaners(
       limit: newLimit,
       page: effectivePage,
       searchQuery: newSearchQuery,
@@ -241,7 +244,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   Future<void> _onAddLoaner(AddLoaner event, Emitter<LoanerState> emit) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.createLoaner(event.loaner);
+      final response = await _repository.createLoaner(event.loaner);
       if (!response.success) return;
       showSuccessSnackBar(
         null,
@@ -260,7 +263,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.updateLoaner(event.loaner);
+      final response = await _repository.updateLoaner(event.loaner);
       if (!response.success) return;
       showSuccessSnackBar(
         null,
@@ -279,7 +282,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   ) async {
     LoadingOverlay.show();
     try {
-      final response = await _service.deleteLoaner(event.body);
+      final response = await _repository.deleteLoaner(event.body);
       if (!response.success) return;
       showSuccessSnackBar(
         null,
@@ -322,8 +325,8 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       ),
     );
 
-    await _service.syncPendingChanges();
-    final response = await _service.getLoaners(
+    await _repository.syncPendingChanges();
+    final response = await _refreshLoaners(
       limit: currentState.pagination.limit,
       page: currentState.pagination.page,
       searchQuery: currentState.searchQuery,

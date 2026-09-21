@@ -1,19 +1,20 @@
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 
-/// Local-first customer writes, queued through the app's one outbox.
-class DefaultCustomerRepository implements CustomerRepository {
-  const DefaultCustomerRepository(
+/// Local-first loaner writes, queued through the app's one outbox.
+class DefaultLoanerRepository implements LoanerRepository {
+  const DefaultLoanerRepository(
     this._dao,
     this._api,
     this._engine,
     this._connectivity,
   );
 
-  final CustomerDao _dao;
-  final CustomerApi _api;
+  final LoanerDao _dao;
+  final LoanerApi _api;
   final SyncEngine _engine;
   final ConnectivityService _connectivity;
 
@@ -23,42 +24,70 @@ class DefaultCustomerRepository implements CustomerRepository {
       'Deleted offline. It will sync when you are back online.';
 
   @override
-  Stream<List<CustomerModel>> watchCustomers() => _dao.watchCustomers();
+  Stream<List<LoanerModel>> watchLoaners({
+    String searchQuery = '',
+    CustomerModel? customerFilter,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) {
+    return _dao.watchLoaners(
+      searchQuery: searchQuery,
+      customerFilter: customerFilter,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
+  }
 
   @override
-  Future<bool> hasCachedCustomers() => _dao.hasCachedCustomers();
+  Future<bool> hasCachedLoaners({
+    String searchQuery = '',
+    CustomerModel? customerFilter,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) {
+    return _dao.hasCachedLoaners(
+      searchQuery: searchQuery,
+      customerFilter: customerFilter,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
+  }
 
   @override
-  Future<ApiResponse<PaginatedResponse<CustomerModel>>> refreshCustomers({
+  Future<ApiResponse<PaginatedResponse<LoanerModel>>> refreshLoaners({
     int page = 1,
     int limit = 10,
     String searchQuery = '',
-    String categoryFilter = '',
+    String? customer,
+    DateTime? fromDate,
+    DateTime? toDate,
   }) async {
     if (!await _connectivity.isOnline) {
       return ApiResponse(
         success: false,
-        message: 'Offline - showing cached customers.',
+        message: 'Offline - showing cached loaners.',
       );
     }
 
-    final response = await _api.fetchCustomers(
+    final response = await _api.fetchLoaners(
       page: page,
       limit: limit,
       searchQuery: searchQuery,
-      categoryFilter: categoryFilter,
+      customer: customer,
+      fromDate: fromDate,
+      toDate: toDate,
     );
 
     final data = response.data;
     if (response.success && data != null) {
-      await _dao.cacheServerCustomers(data.items);
+      await _dao.cacheServerLoaners(data.items);
     }
 
     return response;
   }
 
   @override
-  Future<ApiResponse<CustomerModel?>> createCustomer(CustomerModel body) async {
+  Future<ApiResponse<LoanerModel?>> createLoaner(LoanerModel body) async {
     final id = body.id == 0
         ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
         : body.id;
@@ -71,7 +100,7 @@ class DefaultCustomerRepository implements CustomerRepository {
   }
 
   @override
-  Future<ApiResponse<CustomerModel?>> updateCustomer(CustomerModel body) async {
+  Future<ApiResponse<LoanerModel?>> updateLoaner(LoanerModel body) async {
     final updatedAt = DateTime.now();
     final local = body.copyWith(
       updatedAt: updatedAt,
@@ -94,7 +123,7 @@ class DefaultCustomerRepository implements CustomerRepository {
   }
 
   @override
-  Future<ApiResponse<dynamic>> deleteCustomer(CustomerModel body) async {
+  Future<ApiResponse<dynamic>> deleteLoaner(LoanerModel body) async {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
@@ -105,25 +134,27 @@ class DefaultCustomerRepository implements CustomerRepository {
   }
 
   @override
-  Future<void> cacheCustomers(List<CustomerModel> customers) =>
-      _dao.cacheServerCustomers(customers);
-
-  @override
   Future<void> syncPendingChanges() async {
     if (!await _connectivity.isOnline) return;
     await _engine.drain();
   }
 
   Future<void> _enqueue(
-    CustomerModel customer,
+    LoanerModel loaner,
     SyncOperation operation,
     String keySuffix,
   ) {
+    final customerId = loaner.customerId;
     return _engine.enqueue(
-      entityType: SyncEntityType.customer,
-      localId: '${customer.id}',
+      entityType: SyncEntityType.loaner,
+      localId: '${loaner.id}',
       operation: operation,
-      idempotencyKey: 'customer:${customer.id}:$keySuffix',
+      idempotencyKey: 'loaner:${loaner.id}:$keySuffix',
+      // A loan recorded against a customer created offline must not reach
+      // the server before that customer exists. Same rule as a shop item
+      // under an offline category.
+      dependsOnLocalId:
+          customerId != null && customerId < 0 ? '$customerId' : null,
     );
   }
 

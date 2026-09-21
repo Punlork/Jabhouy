@@ -108,7 +108,8 @@ class AppRoutes {
                 ),
                 BlocProvider(
                   create: (context) => LoanerBloc(
-                    getIt<LoanerService>(),
+                    getIt<LoanerRepository>(),
+                    getIt<RefreshLoanersUseCase>(),
                     getIt<ConnectivityService>(),
                   ),
                 ),

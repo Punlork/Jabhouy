@@ -57,6 +57,8 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => CategoryApi(getIt<ApiService>()))
     ..registerLazySingleton(() => CustomerDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => CustomerApi(getIt<ApiService>()))
+    ..registerLazySingleton(() => LoanerDao(getIt<AppDatabase>()))
+    ..registerLazySingleton(() => LoanerApi(getIt<ApiService>()))
     // One engine for the whole app: the outbox is one queue, and ordering
     // a shop item after its category only works if both drain together.
     ..registerLazySingleton(
@@ -66,6 +68,7 @@ Future<void> setupDependencies() async {
           ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>()),
           CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>()),
           CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>()),
+          LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>()),
         ]),
       ),
     )
@@ -77,11 +80,18 @@ Future<void> setupDependencies() async {
         getIt<ConnectivityService>(),
       ),
     )
-    ..registerLazySingleton(
-      () => LoanerService(
-        getIt<ApiService>(),
-        getIt<AppDatabase>(),
+    ..registerLazySingleton<LoanerRepository>(
+      () => DefaultLoanerRepository(
+        getIt<LoanerDao>(),
+        getIt<LoanerApi>(),
+        getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => RefreshLoanersUseCase(
+        getIt<LoanerRepository>(),
+        getIt<CustomerRepository>(),
       ),
     )
     ..registerLazySingleton<CustomerRepository>(
@@ -153,7 +163,8 @@ Future<void> setupDependencies() async {
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
     ..registerFactory(
       () => LoanerBloc(
-        getIt<LoanerService>(),
+        getIt<LoanerRepository>(),
+        getIt<RefreshLoanersUseCase>(),
         getIt<ConnectivityService>(),
       ),
     )

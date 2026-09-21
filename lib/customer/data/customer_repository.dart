@@ -23,5 +23,12 @@ abstract class CustomerRepository {
 
   Future<ApiResponse<dynamic>> deleteCustomer(CustomerModel body);
 
+  /// Writes customers another feature already fetched into the cache.
+  ///
+  /// A loan response carries its customer embedded. Caching it belongs to
+  /// customer, so `RefreshLoanersUseCase` comes through here rather than
+  /// letting the loaner repository write the `Customers` table.
+  Future<void> cacheCustomers(List<CustomerModel> customers);
+
   Future<void> syncPendingChanges();
 }

@@ -1,5 +1,10 @@
+export 'data/api/loaner_api.dart';
+export 'data/db/loaner_dao.dart';
+export 'data/loaner_repository.dart';
+export 'data/loaner_repository_impl.dart';
+export 'data/loaner_sync_adapter.dart';
+export 'logic/refresh_loaners.dart';
 export 'models/loaner_model.dart';
-export 'services/loaner_service.dart';
 export 'ui/bloc/loaner_bloc.dart';
 export 'ui/views/loaner_form_page.dart';
 export 'ui/views/loaner_view.dart';
