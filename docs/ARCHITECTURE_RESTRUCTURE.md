@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Author:** Punlork
-**Updated:** 2026-09-04
+**Updated:** 2026-09-21
 
 ## Summary
 
@@ -12,8 +12,8 @@ Shop is layered first as the reference slice, and is the single feature promoted
 
 ## Progress
 
-Branch `refactor/architecture-restructure`. Three decisions changed once the
-code met the plan; each is recorded below rather than left as drift.
+Branch `refactor/architecture-restructure`. Where the code met the plan and
+the plan lost, the decision is recorded below rather than left as drift.
 
 | Phase | State | Commit |
 | ----- | ----- | ------ |
@@ -22,11 +22,32 @@ code met the plan; each is recorded below rather than left as drift.
 | 1 — `jabhouy_core` | done, as a package rather than a folder | `8c30b1f`, `caba4c5` |
 | — `SyncStatus` enum | done | `c391ebb` |
 | 3a — `OutboxEntries` table | done, schema 5 → 6 | `0dd2c1c` |
-| 3b — `jabhouy_sync` engine | done | `28a89ac` |
-| 2 — shop slice | not started | — |
+| 3b — `jabhouy_sync` engine | built and tested, **not yet called from `lib/`** | `28a89ac` |
+| 2 — shop slice | done | `574109e`, `0768f99` |
 | 4 — loaner and income slices | not started | — |
 | 5 — `jabhouy_shop` | not started | — |
 | 6 — bloc 8→9, go_router 14→18 | not started | — |
+
+**Phase 3 is half done.** 3a and 3b built the outbox table and the drain
+engine, and `jabhouy_sync` passes 8 scenario tests under `dart test`. No
+line of `lib/` calls it yet, and all four `syncPendingChanges()` clones are
+still live. Phase 3's "done when" is the deletion of those four, so the
+engine is a library without callers until the remaining slices give it a
+repository to sit behind.
+
+**Shop's DAO is a plain class, not a `@DriftAccessor`.** The app package
+generates nothing today — `find lib -name '*.g.dart'` is empty — and a
+generated accessor mixin in the app referencing tables in `jabhouy_core`
+is exactly the cross-package codegen this doc lists as the phase 5 risk.
+The DAO's job is to be the only place that touches Drift, and holding an
+`AppDatabase` does that identically. Phase 5 can take the question on
+deliberately.
+
+**Two of the seven defects closed in phase 2,** because the drain loop was
+rewritten rather than moved: a delete the server rejects now stays queued
+instead of being reported as a success, and reconciling a created row runs
+in one transaction instead of two statements. Both fixes are shop-only —
+the same two defects are still live in category, customer and loaner.
 
 **Tables live in `jabhouy_core`, not in the app.** This doc scoped core to
 "db primitives". With drift's default generator, a table's generated
