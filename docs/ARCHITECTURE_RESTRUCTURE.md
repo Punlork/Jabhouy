@@ -52,18 +52,31 @@ the plan lost, the decision is recorded below rather than left as drift.
 | 1 — `jabhouy_core` | done, as a package rather than a folder | `8c30b1f`, `caba4c5` |
 | — `SyncStatus` enum | done | `c391ebb` |
 | 3a — `OutboxEntries` table | done, schema 5 → 6 | `0dd2c1c` |
-| 3b — `jabhouy_sync` engine | built and tested, **not yet called from `lib/`** | `28a89ac` |
+| 3b — `jabhouy_sync` engine | done | `28a89ac` |
+| 3c — shop drains through the engine | done; 3 clones left | `071cbe1` |
 | 2 — shop slice | done | `574109e`, `0768f99` |
 | 4 — loaner and income slices | not started | — |
 | 5 — `jabhouy_shop` | not started | — |
 | 6 — bloc 8→9, go_router 14→18 | not started | — |
 
-**Phase 3 is half done.** 3a and 3b built the outbox table and the drain
-engine, and `jabhouy_sync` passes 8 scenario tests under `dart test`. No
-line of `lib/` calls it yet, and all four `syncPendingChanges()` clones are
-still live. Phase 3's "done when" is the deletion of those four, so the
-engine is a library without callers until the remaining slices give it a
-repository to sit behind.
+**Phase 3 needs three more adapters.** Shop drains through the engine as
+of `071cbe1`, and its `syncPendingChanges()` clone is deleted. The clones
+in `category`, `customer` and `loaner` are still live, because a feature
+can only be wired once it has a repository to wire — which makes phase 3
+and phase 4 one piece of work per feature, not two phases.
+
+**Sending a job is a `FeatureSyncAdapter`, one per feature.** The engine is
+generic over entities; knowing that a `shopItem` create is `POST /items` is
+feature knowledge and lives with the feature. `AppSyncTransport` routes a
+job to the adapter for its entity type and is the only place in the app
+that implements the `SyncTransport` port, which is what keeps
+`jabhouy_sync` free of Flutter and of `http`.
+
+**`ApiResponse` now carries `statusCode`.** `ApiException` always had one
+and `ApiService` always discarded it, so no caller could tell a 500 from a
+400. The engine is the first that must: 5xx, 408, 429 and a missing status
+retry; everything else stops. This is a down payment on the `Result<T>` row
+of the core primitives table below, not a replacement for it.
 
 **Shop's DAO is a plain class, not a `@DriftAccessor`.** The app package
 generates nothing today — `find lib -name '*.g.dart'` is empty — and a
@@ -73,11 +86,15 @@ The DAO's job is to be the only place that touches Drift, and holding an
 `AppDatabase` does that identically. Phase 5 can take the question on
 deliberately.
 
-**Two of the seven defects closed in phase 2,** because the drain loop was
-rewritten rather than moved: a delete the server rejects now stays queued
-instead of being reported as a success, and reconciling a created row runs
-in one transaction instead of two statements. Both fixes are shop-only —
-the same two defects are still live in category, customer and loaner.
+**Four of the seven defects are closed for shop,** and none of them for
+category, customer or loaner. A delete the server rejects stays queued
+instead of being reported as a success; reconciling a created row runs in
+one transaction instead of two statements; a failed push now retries with
+a backoff instead of stopping at `syncStatus = 2` forever; and every
+failure keeps its reason in `OutboxEntry.lastError` instead of being
+collapsed by a `catch (_)`. The remaining three — colliding local ids,
+cross-table ordering, and clock-skew conflicts — need the UUID `localId`
+column and the category adapter.
 
 **Tables live in `jabhouy_core`, not in the app.** This doc scoped core to
 "db primitives". With drift's default generator, a table's generated
