@@ -53,17 +53,17 @@ the plan lost, the decision is recorded below rather than left as drift.
 | — `SyncStatus` enum | done | `c391ebb` |
 | 3a — `OutboxEntries` table | done, schema 5 → 6 | `0dd2c1c` |
 | 3b — `jabhouy_sync` engine | done | `28a89ac` |
-| 3c — shop drains through the engine | done; 3 clones left | `071cbe1` |
+| 3c — shop drains through the engine | done | `071cbe1` |
+| 3d — category drains through the engine | done; 2 clones left | `158c3ac` |
 | 2 — shop slice | done | `574109e`, `0768f99` |
 | 4 — loaner and income slices | not started | — |
 | 5 — `jabhouy_shop` | not started | — |
 | 6 — bloc 8→9, go_router 14→18 | not started | — |
 
-**Phase 3 needs three more adapters.** Shop drains through the engine as
-of `071cbe1`, and its `syncPendingChanges()` clone is deleted. The clones
-in `category`, `customer` and `loaner` are still live, because a feature
-can only be wired once it has a repository to wire — which makes phase 3
-and phase 4 one piece of work per feature, not two phases.
+**Phase 3 needs two more adapters.** Shop and category drain through the
+engine; the clones in `customer` and `loaner` are still live. A feature
+can only be wired once it has a repository to wire, which makes phase 3
+and phase 4 one piece of work per feature rather than two phases.
 
 **Sending a job is a `FeatureSyncAdapter`, one per feature.** The engine is
 generic over entities; knowing that a `shopItem` create is `POST /items` is
@@ -86,15 +86,23 @@ The DAO's job is to be the only place that touches Drift, and holding an
 `AppDatabase` does that identically. Phase 5 can take the question on
 deliberately.
 
-**Four of the seven defects are closed for shop,** and none of them for
-category, customer or loaner. A delete the server rejects stays queued
+**Five of the seven defects are closed for shop and category,** and none
+of them for customer or loaner. A delete the server rejects stays queued
 instead of being reported as a success; reconciling a created row runs in
-one transaction instead of two statements; a failed push now retries with
-a backoff instead of stopping at `syncStatus = 2` forever; and every
-failure keeps its reason in `OutboxEntry.lastError` instead of being
-collapsed by a `catch (_)`. The remaining three — colliding local ids,
-cross-table ordering, and clock-skew conflicts — need the UUID `localId`
-column and the category adapter.
+one transaction instead of two statements; a failed push retries with a
+backoff instead of stopping at `syncStatus = 2` forever; every failure
+keeps its reason in `OutboxEntry.lastError` instead of being collapsed by
+a `catch (_)`; and an item filed under an offline category can no longer
+reach the server before the category exists.
+
+That last one is why category was worth doing before customer and loaner.
+`dependsOnLocalId` existed from `0dd2c1c` and shop had been setting it
+since `071cbe1`, but with no category jobs in the queue there was nothing
+to wait for — the column was inert until a second adapter existed.
+
+The two still open are colliding local ids, which needs the UUID `localId`
+column, and clock-skew conflicts, which needs a server-side ordering
+decision this doc has not made.
 
 **Tables live in `jabhouy_core`, not in the app.** This doc scoped core to
 "db primitives". With drift's default generator, a table's generated
