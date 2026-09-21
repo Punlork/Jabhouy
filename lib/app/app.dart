@@ -18,6 +18,8 @@ export 'service/debug/app_debugger.dart';
 export 'service/fcm_service.dart';
 export 'service/network_inspector_service.dart';
 export 'service/session_cleanup_service.dart';
+export 'service/sync/app_sync_transport.dart';
+export 'service/sync/feature_sync_adapter.dart';
 export 'service/upload_service.dart';
 export 'theme/app_theme.dart';
 export 'theme/color_theme.dart';

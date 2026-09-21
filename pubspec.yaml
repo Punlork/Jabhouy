@@ -46,6 +46,8 @@ dependencies:
   intl: ^0.20.2
   jabhouy_core:
     path: packages/jabhouy_core
+  jabhouy_sync:
+    path: packages/jabhouy_sync
   logger: ^2.5.0
   meta: ^1.15.0
   package_info_plus: ^8.3.0

@@ -1,17 +1,31 @@
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_sync/jabhouy_sync.dart';
 
-/// Local-first shop writes: the database is written first and always, the
-/// server is told afterwards and only when there is a connection.
+/// Local-first shop writes: the database is written first and always, and
+/// a job describing the write goes into the outbox in the same breath.
+///
+/// What this no longer contains is a drain loop. Deciding when to retry,
+/// how long to wait and when to stop is [SyncEngine]'s job, and it is the
+/// same job for every feature — which is why four near-identical copies of
+/// it existed before.
 class DefaultShopRepository implements ShopRepository {
-  const DefaultShopRepository(this._dao, this._api, this._connectivity);
+  const DefaultShopRepository(
+    this._dao,
+    this._api,
+    this._engine,
+    this._connectivity,
+  );
 
   final ShopDao _dao;
+  // Reads still go straight out and back: a pull has nothing to queue, so
+  // it does not belong in the outbox.
   final ShopApi _api;
+  final SyncEngine _engine;
   final ConnectivityService _connectivity;
 
-  static const _offlineCreate =
+  static const _offlineWrite =
       'Saved offline. It will sync when you are back online.';
   static const _offlineDelete =
       'Deleted offline. It will sync when you are back online.';
@@ -69,20 +83,18 @@ class DefaultShopRepository implements ShopRepository {
 
   @override
   Future<ApiResponse<ShopItemModel?>> createItem(ShopItemModel body) async {
-    // Phase 3 replaces this with a UUID `localId` column. Until then a
-    // negative id marks "the server has never seen this row", which is what
-    // the drain loop below branches on.
+    // Phase 3's UUID `localId` column replaces this. Until then a negative
+    // id marks "the server has never seen this row", which is what the
+    // shop adapter branches on.
     final id = body.id == 0
         ? -(DateTime.now().millisecondsSinceEpoch % 1000000)
         : body.id;
     final localItem = body.copyWith(id: id, syncStatus: SyncStatus.pending);
 
     await _dao.insertPending(localItem);
+    await _enqueue(localItem, SyncOperation.create, 'create');
 
-    return _afterLocalWrite(
-      data: localItem,
-      offlineMessage: _offlineCreate,
-    );
+    return _afterLocalWrite(data: localItem, offlineMessage: _offlineWrite);
   }
 
   @override
@@ -95,17 +107,27 @@ class DefaultShopRepository implements ShopRepository {
     );
 
     await _dao.replace(localItem, SyncStatus.pending);
+    // The key varies per edit. Two edits before the first is sent still
+    // collapse to one job — the outbox's unique key does that — but an
+    // edit made after a push succeeded is a genuinely new write and must
+    // not be mistaken for a replay of the one already delivered.
+    await _enqueue(
+      localItem,
+      SyncOperation.update,
+      'update:${updatedAt.microsecondsSinceEpoch}',
+    );
 
     return _afterLocalWrite(
       data: body,
       offlineData: localItem,
-      offlineMessage: _offlineCreate,
+      offlineMessage: _offlineWrite,
     );
   }
 
   @override
   Future<ApiResponse<dynamic>> deleteItem(ShopItemModel body) async {
     await _dao.markDeletedPending(body.id);
+    await _enqueue(body, SyncOperation.delete, 'delete');
 
     return _afterLocalWrite<dynamic>(
       data: null,
@@ -116,25 +138,39 @@ class DefaultShopRepository implements ShopRepository {
   @override
   Future<void> syncPendingChanges() async {
     if (!await _connectivity.isOnline) return;
-
-    for (final item in await _dao.pendingItems()) {
-      try {
-        await _push(item);
-      } catch (_) {
-        await _dao.markFailed(item.id);
-      }
-    }
+    await _engine.drain();
   }
 
-  /// Every write takes the same shape after the local row lands: drain if
-  /// online, otherwise report the row as saved and leave it queued.
+  Future<void> _enqueue(
+    ShopItemModel item,
+    SyncOperation operation,
+    String keySuffix,
+  ) {
+    final categoryId = item.category?.id;
+    return _engine.enqueue(
+      entityType: SyncEntityType.shopItem,
+      localId: '${item.id}',
+      operation: operation,
+      idempotencyKey: 'shopItem:${item.id}:$keySuffix',
+      // An item filed under a category created offline must not reach the
+      // server first. Category has no adapter yet, so nothing is queued
+      // under that id and this is inert; it becomes load-bearing the day
+      // category is layered, with no change here.
+      dependsOnLocalId:
+          categoryId != null && categoryId < 0 ? '$categoryId' : null,
+    );
+  }
+
+  /// Every write takes the same shape after the local row and its job
+  /// land: drain if online, otherwise report the row as saved and leave
+  /// the job queued.
   Future<ApiResponse<T>> _afterLocalWrite<T>({
     required T data,
     required String offlineMessage,
     T? offlineData,
   }) async {
     if (await _connectivity.isOnline) {
-      await syncPendingChanges();
+      await _engine.drain();
       return ApiResponse(success: true, data: data);
     }
 
@@ -143,46 +179,5 @@ class DefaultShopRepository implements ShopRepository {
       data: offlineData ?? data,
       message: offlineMessage,
     );
-  }
-
-  Future<void> _push(ShopItemModel item) async {
-    if (item.isDeleted) {
-      // A row the server never saw needs no DELETE; it only has to stop
-      // existing here.
-      if (item.id < 0) {
-        await _dao.purge(item.id);
-        return;
-      }
-
-      // The old drain loop discarded this response and reported success
-      // unconditionally, so a delete the server rejected was forgotten and
-      // the item reappeared on the next pull.
-      final response = await _api.deleteItem(item.id);
-      if (response.success) {
-        await _dao.purge(item.id);
-      } else {
-        await _dao.markFailed(item.id);
-      }
-      return;
-    }
-
-    if (item.id < 0) {
-      final response = await _api.createItem(item);
-      final created = response.data;
-      if (response.success && created != null) {
-        await _dao.reconcileCreated(localId: item.id, serverItem: created);
-      } else {
-        await _dao.markFailed(item.id);
-      }
-      return;
-    }
-
-    final response = await _api.updateItem(item);
-    final updated = response.data;
-    if (response.success && updated != null) {
-      await _dao.replace(updated, SyncStatus.synced);
-    } else {
-      await _dao.markFailed(item.id);
-    }
   }
 }

@@ -8,6 +8,7 @@ import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 final getIt = GetIt.instance;
 
@@ -50,10 +51,23 @@ Future<void> setupDependencies() async {
         getIt<NotificationDiagnosticsService>(),
       ),
     )
+    ..registerLazySingleton(() => ShopDao(getIt<AppDatabase>()))
+    ..registerLazySingleton(() => ShopApi(getIt<ApiService>()))
+    // One engine for the whole app: the outbox is one queue, and ordering
+    // a shop item after its category only works if both drain together.
+    ..registerLazySingleton(
+      () => SyncEngine(
+        database: getIt<AppDatabase>(),
+        transport: AppSyncTransport([
+          ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>()),
+        ]),
+      ),
+    )
     ..registerLazySingleton<ShopRepository>(
       () => DefaultShopRepository(
-        ShopDao(getIt<AppDatabase>()),
-        ShopApi(getIt<ApiService>()),
+        getIt<ShopDao>(),
+        getIt<ShopApi>(),
+        getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
       ),
     )

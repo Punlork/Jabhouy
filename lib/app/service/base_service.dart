@@ -25,6 +25,7 @@ abstract class BaseService {
       success: response.success,
       data: response.data,
       message: response.message,
+      statusCode: response.statusCode,
     );
   }
 
@@ -52,6 +53,7 @@ abstract class BaseService {
       success: response.success,
       data: response.data,
       message: response.message,
+      statusCode: response.statusCode,
     );
   }
 
@@ -71,6 +73,7 @@ abstract class BaseService {
       success: response.success,
       data: response.data,
       message: response.message,
+      statusCode: response.statusCode,
     );
   }
 
@@ -86,6 +89,7 @@ abstract class BaseService {
       success: response.success,
       data: response.data,
       message: response.message,
+      statusCode: response.statusCode,
     );
   }
 }

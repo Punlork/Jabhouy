@@ -24,7 +24,10 @@ ApiResponse<T> handleResponse<T>(
       return ApiResponse<T>(
         success: true,
         data: responseBody != null ? parser(responseBody) : null,
-        message: responseBody is Map<String, dynamic> ? responseBody['message']?.toString() : null,
+        message: responseBody is Map<String, dynamic>
+            ? responseBody['message']?.toString()
+            : null,
+        statusCode: statusCode,
       );
     } catch (e, stackTrace) {
       throw ApiException(

@@ -87,7 +87,11 @@ class ApiService {
       );
       final errorMessage = e is ApiException ? e.message : 'Network error: $e';
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
-      return ApiResponse<T>(success: false, message: errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
     } finally {
       LoadingOverlay.hide();
     }
@@ -184,7 +188,11 @@ class ApiService {
         stackTrace: stackTrace,
       );
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
-      return ApiResponse<T>(success: false, message: errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
     } finally {
       LoadingOverlay.hide();
     }
@@ -239,7 +247,11 @@ class ApiService {
         stackTrace: stackTrace,
       );
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
-      return ApiResponse<T>(success: false, message: errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
     } finally {
       LoadingOverlay.hide();
     }
@@ -276,7 +288,11 @@ class ApiService {
         stackTrace: stackTrace,
       );
       if (showSnackBar) showErrorSnackBar(context, errorMessage);
-      return ApiResponse<T>(success: false, message: errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
     } finally {
       LoadingOverlay.hide();
     }

@@ -2,6 +2,7 @@ export 'data/api/shop_api.dart';
 export 'data/db/shop_dao.dart';
 export 'data/shop_repository.dart';
 export 'data/shop_repository_impl.dart';
+export 'data/shop_sync_adapter.dart';
 export 'models/category_model.dart';
 export 'models/shop_item_model.dart';
 export 'service/category_service.dart';

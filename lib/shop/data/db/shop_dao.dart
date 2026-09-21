@@ -87,13 +87,10 @@ class ShopDao {
     return (await query.get()).isNotEmpty;
   }
 
-  /// The drain queue: every row the server has not acknowledged.
-  Future<List<ShopItemModel>> pendingItems() async {
-    final rows = await (_db.select(_db.shopItems)
-          ..where((t) => t.syncStatus.equalsValue(SyncStatus.pending)))
-        .get();
-
-    return rows.map(_toModel).toList();
+  Future<ShopItemModel?> findById(int id) async {
+    final row = await (_db.select(_db.shopItems)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    return row == null ? null : _toModel(row);
   }
 
   /// Replaces the local cache for a page pulled from the server.
