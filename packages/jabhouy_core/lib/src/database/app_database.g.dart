@@ -2870,12 +2870,12 @@ class $OutboxEntriesTable extends OutboxEntries
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   ).withConverter<SyncEntityType>($OutboxEntriesTable.$converterentityType);
-  static const VerificationMeta _entityLocalIdMeta = const VerificationMeta(
-    'entityLocalId',
+  static const VerificationMeta _localIdMeta = const VerificationMeta(
+    'localId',
   );
   @override
-  late final GeneratedColumn<String> entityLocalId = GeneratedColumn<String>(
-    'entity_local_id',
+  late final GeneratedColumn<String> localId = GeneratedColumn<String>(
+    'local_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -2890,12 +2890,12 @@ class $OutboxEntriesTable extends OutboxEntries
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<SyncOperation>($OutboxEntriesTable.$converteroperation);
-  static const VerificationMeta _fingerprintMeta = const VerificationMeta(
-    'fingerprint',
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
   );
   @override
-  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
-    'fingerprint',
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -2964,9 +2964,9 @@ class $OutboxEntriesTable extends OutboxEntries
   List<GeneratedColumn> get $columns => [
     id,
     entityType,
-    entityLocalId,
+    localId,
     operation,
-    fingerprint,
+    idempotencyKey,
     attemptCount,
     nextAttemptAt,
     lastError,
@@ -2988,27 +2988,24 @@ class $OutboxEntriesTable extends OutboxEntries
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('entity_local_id')) {
+    if (data.containsKey('local_id')) {
       context.handle(
-        _entityLocalIdMeta,
-        entityLocalId.isAcceptableOrUnknown(
-          data['entity_local_id']!,
-          _entityLocalIdMeta,
-        ),
+        _localIdMeta,
+        localId.isAcceptableOrUnknown(data['local_id']!, _localIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_entityLocalIdMeta);
+      context.missing(_localIdMeta);
     }
-    if (data.containsKey('fingerprint')) {
+    if (data.containsKey('idempotency_key')) {
       context.handle(
-        _fingerprintMeta,
-        fingerprint.isAcceptableOrUnknown(
-          data['fingerprint']!,
-          _fingerprintMeta,
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
         ),
       );
     } else if (isInserting) {
-      context.missing(_fingerprintMeta);
+      context.missing(_idempotencyKeyMeta);
     }
     if (data.containsKey('attempt_count')) {
       context.handle(
@@ -3056,7 +3053,7 @@ class $OutboxEntriesTable extends OutboxEntries
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   List<Set<GeneratedColumn>> get uniqueKeys => [
-    {entityType, entityLocalId},
+    {entityType, localId},
   ];
   @override
   OutboxEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
@@ -3072,9 +3069,9 @@ class $OutboxEntriesTable extends OutboxEntries
           data['${effectivePrefix}entity_type'],
         )!,
       ),
-      entityLocalId: attachedDatabase.typeMapping.read(
+      localId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}entity_local_id'],
+        data['${effectivePrefix}local_id'],
       )!,
       operation: $OutboxEntriesTable.$converteroperation.fromSql(
         attachedDatabase.typeMapping.read(
@@ -3082,9 +3079,9 @@ class $OutboxEntriesTable extends OutboxEntries
           data['${effectivePrefix}operation'],
         )!,
       ),
-      fingerprint: attachedDatabase.typeMapping.read(
+      idempotencyKey: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}fingerprint'],
+        data['${effectivePrefix}idempotency_key'],
       )!,
       attemptCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -3130,14 +3127,18 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
   ///
   /// Text rather than integer because entity tables are moving to UUID
   /// primary keys; until then this holds the stringified integer id.
-  final String entityLocalId;
+  final String localId;
   final SyncOperation operation;
 
-  /// The value that makes replaying this job safe.
+  /// The value that makes replaying this job safe: push it twice under the
+  /// same key and the server is expected to admit it once.
   ///
   /// Generalises `BankNotifications.fingerprint`, which is the one
-  /// idempotency guarantee the app already relies on.
-  final String fingerprint;
+  /// idempotency guarantee the app already relies on. Named for the job it
+  /// does rather than for its shape -- a fingerprint of the notification
+  /// text is what income happens to use as its key, not what the column
+  /// means here.
+  final String idempotencyKey;
 
   /// How many pushes this job has survived. Drives the backoff schedule.
   final int attemptCount;
@@ -3151,7 +3152,7 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
   /// into one status integer.
   final String? lastError;
 
-  /// The [entityLocalId] this job must wait for.
+  /// The [localId] this job must wait for.
   ///
   /// Orders a shop item after the offline category it references.
   final String? dependsOnLocalId;
@@ -3159,9 +3160,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
   const OutboxEntry({
     required this.id,
     required this.entityType,
-    required this.entityLocalId,
+    required this.localId,
     required this.operation,
-    required this.fingerprint,
+    required this.idempotencyKey,
     required this.attemptCount,
     required this.nextAttemptAt,
     this.lastError,
@@ -3177,13 +3178,13 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
         $OutboxEntriesTable.$converterentityType.toSql(entityType),
       );
     }
-    map['entity_local_id'] = Variable<String>(entityLocalId);
+    map['local_id'] = Variable<String>(localId);
     {
       map['operation'] = Variable<String>(
         $OutboxEntriesTable.$converteroperation.toSql(operation),
       );
     }
-    map['fingerprint'] = Variable<String>(fingerprint);
+    map['idempotency_key'] = Variable<String>(idempotencyKey);
     map['attempt_count'] = Variable<int>(attemptCount);
     map['next_attempt_at'] = Variable<DateTime>(nextAttemptAt);
     if (!nullToAbsent || lastError != null) {
@@ -3200,9 +3201,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
     return OutboxEntriesCompanion(
       id: Value(id),
       entityType: Value(entityType),
-      entityLocalId: Value(entityLocalId),
+      localId: Value(localId),
       operation: Value(operation),
-      fingerprint: Value(fingerprint),
+      idempotencyKey: Value(idempotencyKey),
       attemptCount: Value(attemptCount),
       nextAttemptAt: Value(nextAttemptAt),
       lastError: lastError == null && nullToAbsent
@@ -3225,11 +3226,11 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
       entityType: $OutboxEntriesTable.$converterentityType.fromJson(
         serializer.fromJson<String>(json['entityType']),
       ),
-      entityLocalId: serializer.fromJson<String>(json['entityLocalId']),
+      localId: serializer.fromJson<String>(json['localId']),
       operation: $OutboxEntriesTable.$converteroperation.fromJson(
         serializer.fromJson<String>(json['operation']),
       ),
-      fingerprint: serializer.fromJson<String>(json['fingerprint']),
+      idempotencyKey: serializer.fromJson<String>(json['idempotencyKey']),
       attemptCount: serializer.fromJson<int>(json['attemptCount']),
       nextAttemptAt: serializer.fromJson<DateTime>(json['nextAttemptAt']),
       lastError: serializer.fromJson<String?>(json['lastError']),
@@ -3245,11 +3246,11 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
       'entityType': serializer.toJson<String>(
         $OutboxEntriesTable.$converterentityType.toJson(entityType),
       ),
-      'entityLocalId': serializer.toJson<String>(entityLocalId),
+      'localId': serializer.toJson<String>(localId),
       'operation': serializer.toJson<String>(
         $OutboxEntriesTable.$converteroperation.toJson(operation),
       ),
-      'fingerprint': serializer.toJson<String>(fingerprint),
+      'idempotencyKey': serializer.toJson<String>(idempotencyKey),
       'attemptCount': serializer.toJson<int>(attemptCount),
       'nextAttemptAt': serializer.toJson<DateTime>(nextAttemptAt),
       'lastError': serializer.toJson<String?>(lastError),
@@ -3261,9 +3262,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
   OutboxEntry copyWith({
     int? id,
     SyncEntityType? entityType,
-    String? entityLocalId,
+    String? localId,
     SyncOperation? operation,
-    String? fingerprint,
+    String? idempotencyKey,
     int? attemptCount,
     DateTime? nextAttemptAt,
     Value<String?> lastError = const Value.absent(),
@@ -3272,9 +3273,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
   }) => OutboxEntry(
     id: id ?? this.id,
     entityType: entityType ?? this.entityType,
-    entityLocalId: entityLocalId ?? this.entityLocalId,
+    localId: localId ?? this.localId,
     operation: operation ?? this.operation,
-    fingerprint: fingerprint ?? this.fingerprint,
+    idempotencyKey: idempotencyKey ?? this.idempotencyKey,
     attemptCount: attemptCount ?? this.attemptCount,
     nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
     lastError: lastError.present ? lastError.value : this.lastError,
@@ -3289,13 +3290,11 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
       entityType: data.entityType.present
           ? data.entityType.value
           : this.entityType,
-      entityLocalId: data.entityLocalId.present
-          ? data.entityLocalId.value
-          : this.entityLocalId,
+      localId: data.localId.present ? data.localId.value : this.localId,
       operation: data.operation.present ? data.operation.value : this.operation,
-      fingerprint: data.fingerprint.present
-          ? data.fingerprint.value
-          : this.fingerprint,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
       attemptCount: data.attemptCount.present
           ? data.attemptCount.value
           : this.attemptCount,
@@ -3315,9 +3314,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
     return (StringBuffer('OutboxEntry(')
           ..write('id: $id, ')
           ..write('entityType: $entityType, ')
-          ..write('entityLocalId: $entityLocalId, ')
+          ..write('localId: $localId, ')
           ..write('operation: $operation, ')
-          ..write('fingerprint: $fingerprint, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
           ..write('attemptCount: $attemptCount, ')
           ..write('nextAttemptAt: $nextAttemptAt, ')
           ..write('lastError: $lastError, ')
@@ -3331,9 +3330,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
   int get hashCode => Object.hash(
     id,
     entityType,
-    entityLocalId,
+    localId,
     operation,
-    fingerprint,
+    idempotencyKey,
     attemptCount,
     nextAttemptAt,
     lastError,
@@ -3346,9 +3345,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
       (other is OutboxEntry &&
           other.id == this.id &&
           other.entityType == this.entityType &&
-          other.entityLocalId == this.entityLocalId &&
+          other.localId == this.localId &&
           other.operation == this.operation &&
-          other.fingerprint == this.fingerprint &&
+          other.idempotencyKey == this.idempotencyKey &&
           other.attemptCount == this.attemptCount &&
           other.nextAttemptAt == this.nextAttemptAt &&
           other.lastError == this.lastError &&
@@ -3359,9 +3358,9 @@ class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
 class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
   final Value<int> id;
   final Value<SyncEntityType> entityType;
-  final Value<String> entityLocalId;
+  final Value<String> localId;
   final Value<SyncOperation> operation;
-  final Value<String> fingerprint;
+  final Value<String> idempotencyKey;
   final Value<int> attemptCount;
   final Value<DateTime> nextAttemptAt;
   final Value<String?> lastError;
@@ -3370,9 +3369,9 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
   const OutboxEntriesCompanion({
     this.id = const Value.absent(),
     this.entityType = const Value.absent(),
-    this.entityLocalId = const Value.absent(),
+    this.localId = const Value.absent(),
     this.operation = const Value.absent(),
-    this.fingerprint = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
     this.attemptCount = const Value.absent(),
     this.nextAttemptAt = const Value.absent(),
     this.lastError = const Value.absent(),
@@ -3382,24 +3381,24 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
   OutboxEntriesCompanion.insert({
     this.id = const Value.absent(),
     required SyncEntityType entityType,
-    required String entityLocalId,
+    required String localId,
     required SyncOperation operation,
-    required String fingerprint,
+    required String idempotencyKey,
     this.attemptCount = const Value.absent(),
     this.nextAttemptAt = const Value.absent(),
     this.lastError = const Value.absent(),
     this.dependsOnLocalId = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : entityType = Value(entityType),
-       entityLocalId = Value(entityLocalId),
+       localId = Value(localId),
        operation = Value(operation),
-       fingerprint = Value(fingerprint);
+       idempotencyKey = Value(idempotencyKey);
   static Insertable<OutboxEntry> custom({
     Expression<int>? id,
     Expression<String>? entityType,
-    Expression<String>? entityLocalId,
+    Expression<String>? localId,
     Expression<String>? operation,
-    Expression<String>? fingerprint,
+    Expression<String>? idempotencyKey,
     Expression<int>? attemptCount,
     Expression<DateTime>? nextAttemptAt,
     Expression<String>? lastError,
@@ -3409,9 +3408,9 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (entityType != null) 'entity_type': entityType,
-      if (entityLocalId != null) 'entity_local_id': entityLocalId,
+      if (localId != null) 'local_id': localId,
       if (operation != null) 'operation': operation,
-      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
       if (attemptCount != null) 'attempt_count': attemptCount,
       if (nextAttemptAt != null) 'next_attempt_at': nextAttemptAt,
       if (lastError != null) 'last_error': lastError,
@@ -3423,9 +3422,9 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
   OutboxEntriesCompanion copyWith({
     Value<int>? id,
     Value<SyncEntityType>? entityType,
-    Value<String>? entityLocalId,
+    Value<String>? localId,
     Value<SyncOperation>? operation,
-    Value<String>? fingerprint,
+    Value<String>? idempotencyKey,
     Value<int>? attemptCount,
     Value<DateTime>? nextAttemptAt,
     Value<String?>? lastError,
@@ -3435,9 +3434,9 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
     return OutboxEntriesCompanion(
       id: id ?? this.id,
       entityType: entityType ?? this.entityType,
-      entityLocalId: entityLocalId ?? this.entityLocalId,
+      localId: localId ?? this.localId,
       operation: operation ?? this.operation,
-      fingerprint: fingerprint ?? this.fingerprint,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
       attemptCount: attemptCount ?? this.attemptCount,
       nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
       lastError: lastError ?? this.lastError,
@@ -3457,16 +3456,16 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
         $OutboxEntriesTable.$converterentityType.toSql(entityType.value),
       );
     }
-    if (entityLocalId.present) {
-      map['entity_local_id'] = Variable<String>(entityLocalId.value);
+    if (localId.present) {
+      map['local_id'] = Variable<String>(localId.value);
     }
     if (operation.present) {
       map['operation'] = Variable<String>(
         $OutboxEntriesTable.$converteroperation.toSql(operation.value),
       );
     }
-    if (fingerprint.present) {
-      map['fingerprint'] = Variable<String>(fingerprint.value);
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
     }
     if (attemptCount.present) {
       map['attempt_count'] = Variable<int>(attemptCount.value);
@@ -3491,9 +3490,9 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
     return (StringBuffer('OutboxEntriesCompanion(')
           ..write('id: $id, ')
           ..write('entityType: $entityType, ')
-          ..write('entityLocalId: $entityLocalId, ')
+          ..write('localId: $localId, ')
           ..write('operation: $operation, ')
-          ..write('fingerprint: $fingerprint, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
           ..write('attemptCount: $attemptCount, ')
           ..write('nextAttemptAt: $nextAttemptAt, ')
           ..write('lastError: $lastError, ')
@@ -5390,9 +5389,9 @@ typedef $$OutboxEntriesTableCreateCompanionBuilder =
     OutboxEntriesCompanion Function({
       Value<int> id,
       required SyncEntityType entityType,
-      required String entityLocalId,
+      required String localId,
       required SyncOperation operation,
-      required String fingerprint,
+      required String idempotencyKey,
       Value<int> attemptCount,
       Value<DateTime> nextAttemptAt,
       Value<String?> lastError,
@@ -5403,9 +5402,9 @@ typedef $$OutboxEntriesTableUpdateCompanionBuilder =
     OutboxEntriesCompanion Function({
       Value<int> id,
       Value<SyncEntityType> entityType,
-      Value<String> entityLocalId,
+      Value<String> localId,
       Value<SyncOperation> operation,
-      Value<String> fingerprint,
+      Value<String> idempotencyKey,
       Value<int> attemptCount,
       Value<DateTime> nextAttemptAt,
       Value<String?> lastError,
@@ -5433,8 +5432,8 @@ class $$OutboxEntriesTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<String> get entityLocalId => $composableBuilder(
-    column: $table.entityLocalId,
+  ColumnFilters<String> get localId => $composableBuilder(
+    column: $table.localId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5444,8 +5443,8 @@ class $$OutboxEntriesTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<String> get fingerprint => $composableBuilder(
-    column: $table.fingerprint,
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5494,8 +5493,8 @@ class $$OutboxEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get entityLocalId => $composableBuilder(
-    column: $table.entityLocalId,
+  ColumnOrderings<String> get localId => $composableBuilder(
+    column: $table.localId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5504,8 +5503,8 @@ class $$OutboxEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get fingerprint => $composableBuilder(
-    column: $table.fingerprint,
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5553,16 +5552,14 @@ class $$OutboxEntriesTableAnnotationComposer
         builder: (column) => column,
       );
 
-  GeneratedColumn<String> get entityLocalId => $composableBuilder(
-    column: $table.entityLocalId,
-    builder: (column) => column,
-  );
+  GeneratedColumn<String> get localId =>
+      $composableBuilder(column: $table.localId, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<SyncOperation, String> get operation =>
       $composableBuilder(column: $table.operation, builder: (column) => column);
 
-  GeneratedColumn<String> get fingerprint => $composableBuilder(
-    column: $table.fingerprint,
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
     builder: (column) => column,
   );
 
@@ -5621,9 +5618,9 @@ class $$OutboxEntriesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<SyncEntityType> entityType = const Value.absent(),
-                Value<String> entityLocalId = const Value.absent(),
+                Value<String> localId = const Value.absent(),
                 Value<SyncOperation> operation = const Value.absent(),
-                Value<String> fingerprint = const Value.absent(),
+                Value<String> idempotencyKey = const Value.absent(),
                 Value<int> attemptCount = const Value.absent(),
                 Value<DateTime> nextAttemptAt = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
@@ -5632,9 +5629,9 @@ class $$OutboxEntriesTableTableManager
               }) => OutboxEntriesCompanion(
                 id: id,
                 entityType: entityType,
-                entityLocalId: entityLocalId,
+                localId: localId,
                 operation: operation,
-                fingerprint: fingerprint,
+                idempotencyKey: idempotencyKey,
                 attemptCount: attemptCount,
                 nextAttemptAt: nextAttemptAt,
                 lastError: lastError,
@@ -5645,9 +5642,9 @@ class $$OutboxEntriesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required SyncEntityType entityType,
-                required String entityLocalId,
+                required String localId,
                 required SyncOperation operation,
-                required String fingerprint,
+                required String idempotencyKey,
                 Value<int> attemptCount = const Value.absent(),
                 Value<DateTime> nextAttemptAt = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
@@ -5656,9 +5653,9 @@ class $$OutboxEntriesTableTableManager
               }) => OutboxEntriesCompanion.insert(
                 id: id,
                 entityType: entityType,
-                entityLocalId: entityLocalId,
+                localId: localId,
                 operation: operation,
-                fingerprint: fingerprint,
+                idempotencyKey: idempotencyKey,
                 attemptCount: attemptCount,
                 nextAttemptAt: nextAttemptAt,
                 lastError: lastError,

@@ -21,7 +21,7 @@ void main() {
   });
 
   test('opens on a plain Dart VM and creates every declared table', () async {
-    expect(db.schemaVersion, 6);
+    expect(db.schemaVersion, 7);
 
     // Each select proves the table exists; a missing one throws here.
     expect(await db.select(db.customers).get(), isEmpty);

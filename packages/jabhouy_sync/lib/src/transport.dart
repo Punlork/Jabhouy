@@ -19,8 +19,8 @@ final class SyncPushSucceeded extends SyncPushOutcome {
 
 /// The push failed in a way that may succeed later: a timeout, a 500, no
 /// connectivity. The job stays queued and its backoff advances.
-final class SyncPushFailedTransiently extends SyncPushOutcome {
-  const SyncPushFailedTransiently(this.error);
+final class SyncPushRetryable extends SyncPushOutcome {
+  const SyncPushRetryable(this.error);
 
   final String error;
 }

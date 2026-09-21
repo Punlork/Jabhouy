@@ -54,9 +54,9 @@ void main() {
   }) =>
       engine.enqueue(
         entityType: type,
-        entityLocalId: localId,
+        localId: localId,
         operation: SyncOperation.create,
-        fingerprint: 'fp-$localId',
+        idempotencyKey: 'fp-$localId',
         dependsOnLocalId: dependsOn,
       );
 
@@ -75,8 +75,8 @@ void main() {
   test('a transient failure retries with backoff and succeeds on attempt 3',
       () async {
     final transport = _ScriptedTransport([
-      const SyncPushFailedTransiently('500'),
-      const SyncPushFailedTransiently('500'),
+      const SyncPushRetryable('500'),
+      const SyncPushRetryable('500'),
       const SyncPushSucceeded(),
     ]);
     const backoff = BackoffPolicy(base: Duration(seconds: 10));
@@ -114,10 +114,10 @@ void main() {
 
     // Only the category is eligible while its job is still queued.
     final due = await engine.dueEntries();
-    expect(due.map((e) => e.entityLocalId), ['cat-1']);
+    expect(due.map((e) => e.localId), ['cat-1']);
 
     await engine.drain();
-    expect(transport.pushed.map((e) => e.entityLocalId), ['cat-1', 'item-1']);
+    expect(transport.pushed.map((e) => e.localId), ['cat-1', 'item-1']);
   });
 
   test('a rejected push keeps the job and its reason instead of dropping it',
@@ -136,14 +136,14 @@ void main() {
 
   test('a delete that fails remotely stays queued', () async {
     final transport =
-        _ScriptedTransport([const SyncPushFailedTransiently('timeout')]);
+        _ScriptedTransport([const SyncPushRetryable('timeout')]);
     final engine = engineWith(transport);
 
     await engine.enqueue(
       entityType: SyncEntityType.shopItem,
-      entityLocalId: 'item-1',
+      localId: 'item-1',
       operation: SyncOperation.delete,
-      fingerprint: 'fp-delete-1',
+      idempotencyKey: 'fp-delete-1',
     );
 
     expect(await engine.drain(), 0);
@@ -159,9 +159,9 @@ void main() {
     await enqueueItem(engine, 'item-1');
     await engine.enqueue(
       entityType: SyncEntityType.shopItem,
-      entityLocalId: 'item-1',
+      localId: 'item-1',
       operation: SyncOperation.update,
-      fingerprint: 'fp-item-1-v2',
+      idempotencyKey: 'fp-item-1-v2',
     );
 
     expect(await db.select(db.outboxEntries).get(), hasLength(1));
@@ -170,7 +170,7 @@ void main() {
     expect(transport.pushed.single.operation, SyncOperation.update);
   });
 
-  test('concurrent drains of one fingerprint share a single push', () async {
+  test('concurrent drains of one idempotency key share a single push', () async {
     final transport = _ScriptedTransport([]);
     final engine = engineWith(transport);
     await enqueueItem(engine, 'item-1');

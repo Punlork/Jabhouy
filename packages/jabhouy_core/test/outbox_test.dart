@@ -21,9 +21,9 @@ void main() {
   }) =>
       OutboxEntriesCompanion.insert(
         entityType: type,
-        entityLocalId: localId,
+        localId: localId,
         operation: operation,
-        fingerprint: '$type:$localId:$operation',
+        idempotencyKey: '$type:$localId:$operation',
         dependsOnLocalId: Value(dependsOn),
       );
 
@@ -33,7 +33,7 @@ void main() {
     final entry = await db.select(db.outboxEntries).getSingle();
     expect(entry.entityType, SyncEntityType.shopItem);
     expect(entry.operation, SyncOperation.create);
-    expect(entry.entityLocalId, 'item-1');
+    expect(entry.localId, 'item-1');
 
     // A fresh job is due immediately and has survived nothing.
     expect(entry.attemptCount, 0);
@@ -64,7 +64,7 @@ void main() {
     await db.into(db.outboxEntries).insert(job('item-1', dependsOn: 'cat-1'));
 
     final item = await (db.select(db.outboxEntries)
-          ..where((t) => t.entityLocalId.equals('item-1')))
+          ..where((t) => t.localId.equals('item-1')))
         .getSingle();
     expect(item.dependsOnLocalId, 'cat-1');
   });
@@ -81,7 +81,9 @@ void main() {
   });
 
   test('the schema is at the version that introduced the outbox', () async {
-    expect(db.schemaVersion, 6);
+    // 6 created the table; 7 renamed two of its columns before anything
+    // had ever written to it.
+    expect(db.schemaVersion, 7);
     expect(await db.select(db.outboxEntries).get(), isEmpty);
   });
 }

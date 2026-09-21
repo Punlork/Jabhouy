@@ -26,15 +26,19 @@ class OutboxEntries extends Table {
   ///
   /// Text rather than integer because entity tables are moving to UUID
   /// primary keys; until then this holds the stringified integer id.
-  TextColumn get entityLocalId => text()();
+  TextColumn get localId => text()();
 
   TextColumn get operation => textEnum<SyncOperation>()();
 
-  /// The value that makes replaying this job safe.
+  /// The value that makes replaying this job safe: push it twice under the
+  /// same key and the server is expected to admit it once.
   ///
   /// Generalises `BankNotifications.fingerprint`, which is the one
-  /// idempotency guarantee the app already relies on.
-  TextColumn get fingerprint => text()();
+  /// idempotency guarantee the app already relies on. Named for the job it
+  /// does rather than for its shape -- a fingerprint of the notification
+  /// text is what income happens to use as its key, not what the column
+  /// means here.
+  TextColumn get idempotencyKey => text()();
 
   /// How many pushes this job has survived. Drives the backoff schedule.
   IntColumn get attemptCount => integer().withDefault(const Constant(0))();
@@ -49,7 +53,7 @@ class OutboxEntries extends Table {
   /// into one status integer.
   TextColumn get lastError => text().nullable()();
 
-  /// The [entityLocalId] this job must wait for.
+  /// The [localId] this job must wait for.
   ///
   /// Orders a shop item after the offline category it references.
   TextColumn get dependsOnLocalId => text().nullable()();
@@ -61,6 +65,6 @@ class OutboxEntries extends Table {
   /// the existing job rather than queueing a duplicate push.
   @override
   List<Set<Column>> get uniqueKeys => [
-        {entityType, entityLocalId},
+        {entityType, localId},
       ];
 }

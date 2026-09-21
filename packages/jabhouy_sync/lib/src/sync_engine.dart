@@ -17,12 +17,12 @@ class SyncEngine {
     this.backoff = const BackoffPolicy(),
     SyncDiagnostics diagnostics = const NoopSyncDiagnostics(),
     DateTime Function() clock = DateTime.now,
-    int recentFingerprintLimit = 200,
+    int recentKeyLimit = 200,
   })  : _db = database,
         _transport = transport,
         _diagnostics = diagnostics,
         _clock = clock,
-        _recentLimit = recentFingerprintLimit;
+        _recentLimit = recentKeyLimit;
 
   final AppDatabase _db;
   final SyncTransport _transport;
@@ -32,13 +32,13 @@ class SyncEngine {
 
   final BackoffPolicy backoff;
 
-  /// Pushes in flight, keyed by fingerprint.
+  /// Pushes in flight, keyed by idempotency key.
   ///
   /// Two drains racing on the same job join the same future instead of
   /// sending it twice, as `_inFlightNotificationSyncs` does for income.
   final Map<String, Future<SyncPushOutcome>> _inFlight = {};
 
-  /// Fingerprints that recently succeeded, oldest first.
+  /// Keys that recently succeeded, oldest first.
   ///
   /// Bounded, like income's `_rememberSyncedFingerprint` at 200 entries: an
   /// unbounded set would grow for the life of the process.
@@ -49,17 +49,17 @@ class SyncEngine {
   /// A second edit before the first reaches the server is still one push.
   Future<void> enqueue({
     required SyncEntityType entityType,
-    required String entityLocalId,
+    required String localId,
     required SyncOperation operation,
-    required String fingerprint,
+    required String idempotencyKey,
     String? dependsOnLocalId,
   }) async {
     await _db.into(_db.outboxEntries).insert(
           OutboxEntriesCompanion.insert(
             entityType: entityType,
-            entityLocalId: entityLocalId,
+            localId: localId,
             operation: operation,
-            fingerprint: fingerprint,
+            idempotencyKey: idempotencyKey,
             dependsOnLocalId: Value(dependsOnLocalId),
             nextAttemptAt: Value(_clock()),
           ),
@@ -69,7 +69,7 @@ class SyncEngine {
           onConflict: DoUpdate<$OutboxEntriesTable, OutboxEntry>(
             (_) => OutboxEntriesCompanion(
               operation: Value(operation),
-              fingerprint: Value(fingerprint),
+              idempotencyKey: Value(idempotencyKey),
               dependsOnLocalId: Value(dependsOnLocalId),
               // A fresh edit supersedes the old bytes, so the previous
               // failure and its schedule no longer apply.
@@ -79,7 +79,7 @@ class SyncEngine {
             ),
             target: [
               _db.outboxEntries.entityType,
-              _db.outboxEntries.entityLocalId,
+              _db.outboxEntries.localId,
             ],
           ),
         );
@@ -87,7 +87,7 @@ class SyncEngine {
       'enqueued',
       data: {
         'entityType': entityType.name,
-        'entityLocalId': entityLocalId,
+        'localId': localId,
         'operation': operation.name,
       },
     );
@@ -104,7 +104,7 @@ class SyncEngine {
     // A job whose dependency is still queued must not go first. This is the
     // defect where an item reached the server before its offline category.
     final queuedIds = (await _db.select(_db.outboxEntries).get())
-        .map((e) => e.entityLocalId)
+        .map((e) => e.localId)
         .toSet();
 
     return due
@@ -136,26 +136,26 @@ class SyncEngine {
 
   /// Returns true when the job left the queue.
   Future<bool> _push(OutboxEntry entry) async {
-    if (_recentlySynced.contains(entry.fingerprint)) {
-      // Already delivered under this fingerprint; replaying is pointless.
+    if (_recentlySynced.contains(entry.idempotencyKey)) {
+      // Already delivered under this key; replaying is pointless.
       await _delete(entry);
       _diagnostics.log('skipped duplicate', data: {'id': entry.id});
       return true;
     }
 
-    final outcome = await (_inFlight[entry.fingerprint] ??=
+    final outcome = await (_inFlight[entry.idempotencyKey] ??=
         _transport.push(entry).whenComplete(() {
-      _inFlight.remove(entry.fingerprint);
+      _inFlight.remove(entry.idempotencyKey);
     }));
 
     switch (outcome) {
       case SyncPushSucceeded():
-        _remember(entry.fingerprint);
+        _remember(entry.idempotencyKey);
         await _delete(entry);
         _diagnostics.log('pushed', data: {'id': entry.id});
         return true;
 
-      case SyncPushFailedTransiently(:final error):
+      case SyncPushRetryable(:final error):
         // The delete result is checked like any other. The old code
         // hardcoded ApiResponse(success: true) and lost the row.
         await _reschedule(entry, error);
@@ -200,10 +200,10 @@ class SyncEngine {
     _diagnostics.log('rejected', data: {'id': entry.id, 'error': error});
   }
 
-  void _remember(String fingerprint) {
+  void _remember(String key) {
     _recentlySynced
-      ..remove(fingerprint)
-      ..add(fingerprint);
+      ..remove(key)
+      ..add(key);
     while (_recentlySynced.length > _recentLimit) {
       _recentlySynced.removeAt(0);
     }

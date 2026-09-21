@@ -110,7 +110,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -140,6 +140,17 @@ class AppDatabase extends _$AppDatabase {
         }
 
         if (from < 6) {
+          await m.createTable(outboxEntries);
+          await m.createIndex(outboxDrainIdx);
+        }
+
+        // Two outbox columns were renamed before anything ever wrote to
+        // the table: `fingerprint` -> `idempotencyKey` and
+        // `entityLocalId` -> `localId`. Recreating is correct precisely
+        // because the queue is guaranteed empty -- schema 6 shipped on no
+        // device, and no code enqueued a job until phase 3.
+        if (from < 7) {
+          await m.deleteTable(outboxEntries.actualTableName);
           await m.createTable(outboxEntries);
           await m.createIndex(outboxDrainIdx);
         }
