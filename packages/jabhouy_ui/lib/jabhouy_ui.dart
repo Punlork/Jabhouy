@@ -1,7 +1,7 @@
 /// Shared presentation for Jabhouy: theme, assets, widgets and mixins.
 ///
 /// This package must not import the app package or any feature. What it
-/// needs from them arrives as a port — see `UiStrings`. That rule is what
+/// needs from them arrives as a port — see `ImageUploader`. That rule is what
 /// lets a feature become a package: the app's barrel exports the router,
 /// the router imports every feature, so any widget reached through the
 /// app barrel drags the whole feature graph behind it.
@@ -11,7 +11,6 @@ export 'src/constant/app_assets.dart';
 export 'src/context/global_context.dart';
 export 'src/mixin/img_clipboard_mixin.dart';
 export 'src/mixin/infinite_scroll_mixin.dart';
-export 'src/strings/ui_strings.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/color_theme.dart';
 export 'src/theme/text_theme.dart';

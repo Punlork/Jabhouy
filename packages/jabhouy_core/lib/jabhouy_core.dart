@@ -13,6 +13,7 @@ export 'src/models/casts.dart';
 export 'src/models/pagination.dart';
 export 'src/result/app_exception.dart';
 export 'src/result/result.dart';
+export 'src/routes/route_names.dart';
 export 'src/sync/outbox.dart';
 export 'src/sync/sync_feedback.dart';
 export 'src/sync/sync_status.dart';

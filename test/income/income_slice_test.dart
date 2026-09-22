@@ -4,7 +4,6 @@
 // allowed to upload.
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
@@ -63,7 +62,7 @@ void main() {
   }) {
     final engine = SyncEngine(
       database: db,
-      transport: AppSyncTransport([
+      transport: AdapterSyncTransport([
         IncomeSyncAdapter(dao, upload, () async => canCapture),
       ]),
     );

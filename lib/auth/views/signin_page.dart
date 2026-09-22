@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
-import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class SigninPage extends StatelessWidget {

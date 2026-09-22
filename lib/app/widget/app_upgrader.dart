@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/l10n/arb/app_localizations.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -120,7 +120,7 @@ class _AppUpgraderState extends State<AppUpgrader> {
     required String latestVersion,
     required Uri releaseUrl,
   }) async {
-    final overlayContext = AppRoutes
+    final overlayContext = AppRouter
         .router.routerDelegate.navigatorKey.currentState?.overlay?.context;
     if (overlayContext == null) return;
 

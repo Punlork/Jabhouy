@@ -62,7 +62,7 @@ the plan lost, the decision is recorded below rather than left as drift.
 | 2 — shop slice | done | `574109e`, `0768f99` |
 | — core primitives: `Result`, `AppException` | done | `d3240be`, `75d9403`, `13fe4d2` |
 | 4 — income slice | done | `d202623`, `09b8a2a` |
-| 5 — `jabhouy_shop` | not started | — |
+| 5 — `jabhouy_shop` | done, and it took three packages nobody planned | `22c5714`, `a3c7367` |
 | 6 — bloc 8→9, go_router 14→18 | done | `d886a78`, `d7b9fdc` |
 
 **All five features are layered and on the engine.** Phase 3 closed the
@@ -168,6 +168,73 @@ import and watching it break.
 needs a run inside `packages/jabhouy_core` as well as at the root. This is
 the phase 5 codegen cost, arriving early.
 
+
+### What extracting one feature actually cost
+
+The plan drew three packages and got six. None of the extra three was a
+design preference; each was the only way out of a cycle the app package
+had been hiding.
+
+**Extracting a feature is not a move, it is a cycle break.** Shop held 21
+files importing `package:jabhouy/app/app.dart`, and that barrel exports
+`app_routes.dart`, which imports every feature. So any widget reached
+through the app barrel drags the whole feature graph behind it. Nothing in
+shop was wrong; the barrel was load-bearing in a direction nobody chose.
+
+**Two of shop's dependencies were not shop's.** `settings_page.dart` was
+482 lines reading blocs from five features, filed under `lib/shop/` only
+because the settings button is in the shop header. `shop_header.dart`
+carried the signout listeners for a signout dispatched from the settings
+page, two features away — so the app's auth flow only completed while a
+shop widget happened to be mounted. Both were found by asking what shop
+imports, not by reading shop.
+
+**Three things were trapped rather than shared.** `GlobalContext` lived in
+`app_routes.dart` because the router's `pageBuilder` assigns it, which put
+a snack bar's dependency inside the file that wires every feature.
+`TabScrollManager` was declared inside `home_page.dart` and read by shop,
+loaner and income, so three features imported the home barrel for one
+`InheritedWidget`. The route *names* sat beside the `GoRouter` config, so
+reading one name cost the whole graph; names are shared vocabulary and
+wiring is the shell's, and only the first half has to be reachable.
+
+**`jabhouy_net` points at `jabhouy_ui`, which is backwards.** `ApiService`
+shows a snack bar and a loading overlay on failure — transport choosing
+words, which the layering rules put above it. Recorded rather than fixed:
+the alternative is a second port for one call site. There is no cycle,
+because `jabhouy_ui` imports nothing from `jabhouy_net`, and
+`package_independence_test.dart` is what keeps that true.
+
+That constraint, not taste, decided `UploadBloc`. It is shared
+presentation — shop and profile both drive it — so it belongs in
+`jabhouy_ui`, and `jabhouy_ui` cannot name `UploadService` without
+completing the cycle Dart forbids. So the bloc takes an `ImageUploader`
+port and the app joins the ends with `UploadImageAdapter`. Joining two
+packages that may not name each other is what an app shell is for.
+
+**`jabhouy_l10n` deleted a port built one commit earlier.** Four widgets
+in `jabhouy_ui` read `AppLocalizations`, which a package cannot reach, so
+they got a `UiStrings` port: an interface, an `InheritedWidget` scope and
+an app-side adapter, for four strings. Then shop turned out to need
+`AppLocalizations` in twelve places, and twelve is past where a port is
+cheaper than moving the thing. Once the ARB catalog was a package the port
+had nothing left to do, and it was removed. **A port is what you build
+when the dependency cannot move. Check that it cannot.**
+
+**The phase 5 risk was named correctly and priced wrong.** Cross-package
+Drift codegen was called the likeliest source of lost time. It cost
+nothing: tables live in `jabhouy_core`, shop's DAO is a plain class, and
+`build_runner` in core after the split rewrote no source at all. The lost
+time went to the app barrel instead, which this doc never mentioned.
+
+**What the boundary buys.** `logic_layer_test.dart` had to be written
+because Dart cannot say "this folder may not import that". A package can
+say it — but only under `dart test`, which is why `jabhouy_core` and
+`jabhouy_sync` need no such test and the four Flutter packages do:
+workspace members share one `package_config`, so `package:jabhouy/...`
+resolves inside a package and the analyzer stays quiet. So the boundary is
+still a test, not the language. What changed is that the test is four
+lines of configuration instead of an import-closure walk.
 
 ### What the engine gave income
 
@@ -374,7 +441,7 @@ It is gated by device role and retries its backlog on connectivity change.
 ## Non-goals
 
 - **Customer, auth, profile, and home keep their current shape.** Shop, loaner, and income are the app's three real features; the rest stay behind their existing services. Customer gains a DAO only where loaner needs one, because `Loaners.customerId` references `Customers.id`.
-- **No feature package beyond `jabhouy_shop`.** One is the experiment. Whether the others follow is decided after it, not before.
+- **No feature package beyond `jabhouy_shop`.** One is the experiment. Whether the others follow is decided after it, not before. *Held: shop is the only feature package. The three extra packages that phase 5 produced — `jabhouy_l10n`, `jabhouy_net`, `jabhouy_ui` — are shared infrastructure, not features.*
 - **No merge engine, CRDTs, or operational transforms.** One seller, one shop, usually one device: the conflict space does not justify them. Server-timestamp last-write-wins is the chosen policy.
 - **No migration of existing local data.** The app is in development with no external users, so schema changes may recreate the database.
 - **No database encryption.** `lmsmobileapp` uses SQLCipher because it holds customer lending data. Jabhouy does not need it yet.
@@ -394,10 +461,16 @@ jabhouy/
 ├── pubspec.yaml            # workspace root
 ├── lib/                    # app shell: features in folders
 └── packages/
-    ├── jabhouy_core/       # Result, AppException, SyncStatus, network, db primitives
+    ├── jabhouy_core/       # Result, AppException, SyncStatus, route names, db primitives
+    ├── jabhouy_l10n/       # the ARB catalog and context.l10n
+    ├── jabhouy_net/        # ApiService, BaseService, connectivity, request inspection
     ├── jabhouy_sync/       # sync engine — pure Dart, no Flutter
+    ├── jabhouy_ui/         # theme, assets, shared widgets, UploadBloc
     └── jabhouy_shop/       # one feature package (experiment)
 ```
+
+This is three more packages than the plan drew, and the reason is in
+[What extracting one feature actually cost](#what-extracting-one-feature-actually-cost).
 
 ### Layering rules
 
@@ -552,7 +625,7 @@ The 13 features run at least four different shapes between them, which is the sa
 - ~~**Phase 6 is the largest behavioral risk.**~~ **Done in `d886a78` and `d7b9fdc`, with no source changes at all.** Both upgrades removed only APIs this codebase never used. The risk assessment was right about *where* to look and wrong about the cost: the three things named — `CustomTransitionPage`, the `redirect` reading `AuthBloc`, the `GlobalContext` assignment in `pageBuilder` — all still work, verified by running the app rather than by analysing it, because none of them is visible to the analyzer.
 
   What the simulator run did **not** reach: `pushNamed` with `extra`, the nested routes under `/home`, and the authenticated branch of `redirect`. Those need a login this checkout has no credentials for. The router has no automated coverage either way — see Testing.
-- **Cross-package Drift codegen is the likeliest source of lost time in Phase 5.** If tables live in `jabhouy_core` and DAOs in features, generated code crosses a package boundary. Decide where tables live before extracting.
+- ~~**Cross-package Drift codegen is the likeliest source of lost time in Phase 5.**~~ **It cost nothing.** Tables live in `jabhouy_core`, shop's DAO is a plain class rather than a `@DriftAccessor`, and running `build_runner` in core after the split rewrote no source at all. The lost time went to the app barrel, which this list never mentioned — see [What extracting one feature actually cost](#what-extracting-one-feature-actually-cost).
 - **`sendTestNotification` is the production upload path** for real notifications, despite its name. Renaming it is in scope for Phase 4; it currently obscures which code path matters.
 - **`dio: ^5.8.0+1` is declared and never imported.** `grep "package:dio" lib/` returns nothing. Open: adopt Dio with interceptors as `lmsmobileapp` does, or drop the dependency and keep `http`. Deciding this changes the Phase 1 transport work.
 - ~~**Open: does `OutboxEntries` supersede `BankNotifications.syncStatus`?**~~ **Answered in `09b8a2a`: neither.** Income registers an adapter and keeps the column, exactly as the other four features do — `syncStatus` is a display hint everywhere now, and `OutboxEntry` is the queue everywhere. The fingerprint serves as both `localId` and `idempotencyKey`, so nothing had to be invented: income is the feature the outbox was generalised *from*, and the `UNIQUE` constraint on `BankNotifications.fingerprint` is the guarantee the other four needed one written for them.
@@ -574,6 +647,7 @@ Conventions: tests mirror `lib/`, `mocktail` for mocking, `bloc_test` for blocs.
 | Sync engine  | Pure Dart under `dart test`, no Flutter binding                                            |
 | Migrations   | Committed schema snapshots via `drift_dev schema dump`, then generated migration tests    |
 | Layering     | `test/architecture/logic_layer_test.dart` walks the import closure of every `logic/` file and fails on Flutter, Drift or `dart:ui` |
+| Packaging    | `test/architecture/package_independence_test.dart` fails if any package imports `package:jabhouy/`. Workspace members share one `package_config`, so the pubspec does not enforce this and the analyzer stays quiet |
 | Routing      | **None.** The largest untested surface left: 351 lines in `app_routes.dart`, a `redirect` that decides every navigation, and zero tests. Phase 6 was verified by running the app, which does not survive into CI |
 
 Sync tests are named as scenarios, so the suite doubles as the description of the engine:

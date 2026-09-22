@@ -6,9 +6,9 @@ import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/profile/profile.dart';
-import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
+import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
@@ -68,7 +68,7 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(
       () => SyncEngine(
         database: getIt<AppDatabase>(),
-        transport: AppSyncTransport([
+        transport: AdapterSyncTransport([
           ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>()),
           CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>()),
           CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>()),

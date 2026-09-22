@@ -4,6 +4,7 @@
 /// Flutter, which `dart test` enforces because the plain VM has no dart:ui.
 library jabhouy_sync;
 
+export 'src/adapter_sync_transport.dart';
 export 'src/backoff.dart';
 export 'src/feature_sync_adapter.dart';
 export 'src/sync_engine.dart';

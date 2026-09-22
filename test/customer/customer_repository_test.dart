@@ -3,7 +3,6 @@
 // Customers.id -- so a customer created offline has dependents too.
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
@@ -33,7 +32,7 @@ void main() {
     connectivity = MockConnectivityService();
     engine = SyncEngine(
       database: db,
-      transport: AppSyncTransport([CustomerSyncAdapter(dao, api)]),
+      transport: AdapterSyncTransport([CustomerSyncAdapter(dao, api)]),
     );
     repository = DefaultCustomerRepository(dao, api, engine, connectivity);
   });

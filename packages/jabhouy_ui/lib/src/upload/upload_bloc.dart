@@ -7,7 +7,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jabhouy_ui/src/strings/ui_strings.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/src/theme/text_theme.dart';
 import 'package:jabhouy_ui/src/upload/image_uploader.dart';
 import 'package:jabhouy_ui/src/utils/overlay_loading.dart';
@@ -87,17 +87,17 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     VoidCallback? onTakePhoto,
     VoidCallback? onChoseFromGallery,
   }) {
-    final strings = UiStringsScope.of(context);
+    final l10n = context.l10n;
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(strings.selectImageSource, style: AppTextTheme.title),
+        title: Text(l10n.selectImageSource, style: AppTextTheme.title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: Text(strings.takePhoto, style: AppTextTheme.body),
+              title: Text(l10n.takePhoto, style: AppTextTheme.body),
               onTap: () {
                 Navigator.pop(context);
                 onTakePhoto?.call();
@@ -105,7 +105,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: Text(strings.chooseFromGallery, style: AppTextTheme.body),
+              title: Text(l10n.chooseFromGallery, style: AppTextTheme.body),
               onTap: () {
                 Navigator.pop(context);
                 onChoseFromGallery?.call();

@@ -20,7 +20,9 @@ const _banned = 'package:jabhouy/';
 
 const _packages = [
   'jabhouy_core',
+  'jabhouy_l10n',
   'jabhouy_net',
+  'jabhouy_shop',
   'jabhouy_sync',
   'jabhouy_ui',
 ];
@@ -62,7 +64,7 @@ void main() {
         isEmpty,
         reason:
             '$package must not depend on the app. What it needs from the '
-            'app arrives as a port — see UiStrings and ImageUploader.'
+            'app arrives as a port — see ImageUploader.'
             '\n\n${violations.join('\n\n')}',
       );
     });

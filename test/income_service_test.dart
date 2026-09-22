@@ -1,6 +1,5 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
@@ -53,7 +52,7 @@ void main() {
     // run through the real dao, engine and adapter.
     engine = SyncEngine(
       database: database,
-      transport: AppSyncTransport([
+      transport: AdapterSyncTransport([
         IncomeSyncAdapter(
           dao,
           syncService.syncNotification,

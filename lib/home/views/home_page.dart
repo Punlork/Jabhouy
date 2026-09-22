@@ -8,9 +8,10 @@ import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/income/income.dart';
-import 'package:jabhouy/l10n/l10n.dart';
 import 'package:jabhouy/loaner/loaner.dart';
-import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
+import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 

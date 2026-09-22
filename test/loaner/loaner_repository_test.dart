@@ -3,7 +3,6 @@
 // way ShopItems.categoryId references Categories.id.
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
@@ -41,7 +40,7 @@ void main() {
     connectivity = MockConnectivityService();
     engine = SyncEngine(
       database: db,
-      transport: AppSyncTransport([
+      transport: AdapterSyncTransport([
         LoanerSyncAdapter(dao, api),
         CustomerSyncAdapter(customerDao, customerApi),
       ]),

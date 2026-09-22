@@ -13,46 +13,38 @@ import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/settings/settings.dart';
-import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
+import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-extension StringExtension on String {
-  String get toPath => '/$this';
-}
-
-class AppRoutes {
-  static const home = 'home';
-  static const signin = 'signin';
-  static const signup = 'signup';
-  static const formShop = 'form_shop';
-  static const formLoaner = 'form_loaner';
-  static const category = 'category';
-  static const customer = 'customer';
-  static const profile = 'profile';
-  static const settings = 'settings';
-  static const appDiagnostics = 'app_diagnostics';
-  static const incomeDiagnostics = 'income_diagnostics';
+/// The router itself, and the two sets its redirect consults.
+///
+/// The route *names* live in `jabhouy_core` as [AppRoutes], because a
+/// feature package needs them and this file imports every feature. What
+/// stays here is the wiring, which is the app shell's job by definition.
+class AppRouter {
+  const AppRouter._();
 
   static final allowedUnauthenticated = {
-    signin.toPath,
-    signup.toPath,
+    AppRoutes.signin.toPath,
+    AppRoutes.signup.toPath,
   };
 
   static final allowedAuthenticated = {
-    home.toPath,
-    '${home.toPath}${formShop.toPath}',
-    '${home.toPath}${formLoaner.toPath}',
-    '${home.toPath}${category.toPath}',
-    '${home.toPath}${profile.toPath}',
-    '${home.toPath}${settings.toPath}',
-    '${home.toPath}${appDiagnostics.toPath}',
-    '${home.toPath}${customer.toPath}',
-    '${home.toPath}${incomeDiagnostics.toPath}',
+    AppRoutes.home.toPath,
+    '${AppRoutes.home.toPath}${AppRoutes.formShop.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.formLoaner.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.profile.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.settings.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.customer.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.incomeDiagnostics.toPath}',
   };
 
   static final GoRouter router = GoRouter(
-    initialLocation: home.toPath,
+    initialLocation: AppRoutes.home.toPath,
     observers: [DebuggerRouteObserver()],
     redirect: (context, state) {
       final authState = BlocProvider.of<AuthBloc>(context).state;
@@ -60,20 +52,20 @@ class AppRoutes {
 
       if (authState is Unauthenticated) {
         if (!allowedUnauthenticated.contains(currentPath)) {
-          return signin.toPath;
+          return AppRoutes.signin.toPath;
         }
       }
       if (authState is Authenticated) {
         if (!allowedAuthenticated.contains(currentPath)) {
-          return home.toPath;
+          return AppRoutes.home.toPath;
         }
       }
       return null;
     },
     routes: [
       GoRoute(
-        path: home.toPath,
-        name: home,
+        path: AppRoutes.home.toPath,
+        name: AppRoutes.home,
         pageBuilder: (BuildContext context, GoRouterState state) {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(
@@ -120,8 +112,8 @@ class AppRoutes {
         },
         routes: [
           GoRoute(
-            path: formShop.toPath,
-            name: formShop,
+            path: AppRoutes.formShop.toPath,
+            name: AppRoutes.formShop,
             pageBuilder: (BuildContext context, GoRouterState state) {
               GlobalContext.currentContext = context;
               final extra = state.extra! as Map<String, dynamic>;
@@ -144,8 +136,8 @@ class AppRoutes {
             },
           ),
           GoRoute(
-            path: formLoaner.toPath,
-            name: formLoaner,
+            path: AppRoutes.formLoaner.toPath,
+            name: AppRoutes.formLoaner,
             pageBuilder: (BuildContext context, GoRouterState state) {
               GlobalContext.currentContext = context;
               final extra = state.extra! as Map<String, dynamic>;
@@ -164,8 +156,8 @@ class AppRoutes {
             },
           ),
           GoRoute(
-            path: category.toPath,
-            name: category,
+            path: AppRoutes.category.toPath,
+            name: AppRoutes.category,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra! as Map<String, dynamic>;
               GlobalContext.currentContext = context;
@@ -182,8 +174,8 @@ class AppRoutes {
             },
           ),
           GoRoute(
-            path: customer.toPath,
-            name: customer,
+            path: AppRoutes.customer.toPath,
+            name: AppRoutes.customer,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra! as Map<String, dynamic>;
               GlobalContext.currentContext = context;
@@ -196,8 +188,8 @@ class AppRoutes {
             },
           ),
           GoRoute(
-            path: profile.toPath,
-            name: profile,
+            path: AppRoutes.profile.toPath,
+            name: AppRoutes.profile,
             pageBuilder: (BuildContext context, GoRouterState state) {
               GlobalContext.currentContext = context;
 
@@ -219,8 +211,8 @@ class AppRoutes {
             },
           ),
           GoRoute(
-            path: settings.toPath,
-            name: settings,
+            path: AppRoutes.settings.toPath,
+            name: AppRoutes.settings,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
               final categoryBloc = extra?['category'] as CategoryBloc? ?? context.read<CategoryBloc>();
@@ -247,8 +239,8 @@ class AppRoutes {
             },
           ),
           GoRoute(
-            path: appDiagnostics.toPath,
-            name: appDiagnostics,
+            path: AppRoutes.appDiagnostics.toPath,
+            name: AppRoutes.appDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
               final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
@@ -274,8 +266,8 @@ class AppRoutes {
             },
           ),
           GoRoute(
-            path: incomeDiagnostics.toPath,
-            name: incomeDiagnostics,
+            path: AppRoutes.incomeDiagnostics.toPath,
+            name: AppRoutes.incomeDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
               final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? BlocProvider.of<IncomeBloc>(context);
@@ -294,8 +286,8 @@ class AppRoutes {
         ],
       ),
       GoRoute(
-        path: signin.toPath,
-        name: signin,
+        path: AppRoutes.signin.toPath,
+        name: AppRoutes.signin,
         pageBuilder: (BuildContext context, GoRouterState state) {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(
@@ -306,8 +298,8 @@ class AppRoutes {
         },
       ),
       GoRoute(
-        path: signup.toPath,
-        name: signup,
+        path: AppRoutes.signup.toPath,
+        name: AppRoutes.signup,
         pageBuilder: (BuildContext context, GoRouterState state) {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(

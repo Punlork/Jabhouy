@@ -9,7 +9,6 @@ export 'service/app_log_service.dart';
 export 'service/debug/app_debugger.dart';
 export 'service/fcm_service.dart';
 export 'service/session_cleanup_service.dart';
-export 'service/sync/app_sync_transport.dart';
 export 'service/upload_image_adapter.dart';
 export 'view/app.dart';
 export 'widget/app_upgrader.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
-import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class IncomeView extends StatefulWidget {
