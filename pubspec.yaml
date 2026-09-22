@@ -5,6 +5,7 @@ publish_to: none
 
 workspace:
   - packages/jabhouy_core
+  - packages/jabhouy_net
   - packages/jabhouy_sync
   - packages/jabhouy_ui
 
@@ -47,6 +48,8 @@ dependencies:
   intl: ^0.20.2
   jabhouy_core:
     path: packages/jabhouy_core
+  jabhouy_net:
+    path: packages/jabhouy_net
   jabhouy_sync:
     path: packages/jabhouy_sync
   jabhouy_ui:

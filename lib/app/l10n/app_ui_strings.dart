@@ -25,6 +25,15 @@ class AppUiStrings implements UiStrings {
   String get imgFound => _l10n.imgFound;
 
   @override
+  String get selectImageSource => _l10n.selectImageSource;
+
+  @override
+  String get takePhoto => _l10n.takePhoto;
+
+  @override
+  String get chooseFromGallery => _l10n.chooseFromGallery;
+
+  @override
   bool operator ==(Object other) =>
       other is AppUiStrings && other._l10n == _l10n;
 

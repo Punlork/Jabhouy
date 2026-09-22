@@ -1,4 +1,3 @@
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';

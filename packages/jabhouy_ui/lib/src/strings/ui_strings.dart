@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// The four strings this package's widgets put on screen.
+/// The strings this package's widgets put on screen.
 ///
 /// `LoadingOverlay`, `EmptyView` and `ImgClipboardMixin` each read one or
 /// two labels from `AppLocalizations`, which lives in the app package and
@@ -13,6 +13,9 @@ abstract class UiStrings {
   String get noItemFound;
   String get cancel;
   String get imgFound;
+  String get selectImageSource;
+  String get takePhoto;
+  String get chooseFromGallery;
 }
 
 /// Installs a [UiStrings] for the widgets below it.

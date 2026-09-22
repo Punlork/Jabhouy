@@ -1,5 +1,5 @@
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/src/api_service.dart';
 
 /// The one place `ApiResponse` becomes a [Result].
 ///

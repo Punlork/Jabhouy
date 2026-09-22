@@ -5,10 +5,10 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:stream_transform/stream_transform.dart';
 

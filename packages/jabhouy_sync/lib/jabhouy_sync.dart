@@ -5,5 +5,6 @@
 library jabhouy_sync;
 
 export 'src/backoff.dart';
+export 'src/feature_sync_adapter.dart';
 export 'src/sync_engine.dart';
 export 'src/transport.dart';

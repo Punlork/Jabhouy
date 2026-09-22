@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 
 part 'customer_event.dart';
 part 'customer_state.dart';

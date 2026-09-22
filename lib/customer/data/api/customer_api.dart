@@ -1,6 +1,6 @@
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 
 /// Every HTTP call the customer feature makes, and nothing else.
 class CustomerApi extends BaseService {

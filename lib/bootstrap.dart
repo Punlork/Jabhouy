@@ -9,6 +9,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/app/service/firebase_runtime_options.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 
 class AppBlocObserver extends BlocObserver {
   const AppBlocObserver();

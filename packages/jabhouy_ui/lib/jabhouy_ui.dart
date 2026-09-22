@@ -15,6 +15,8 @@ export 'src/strings/ui_strings.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/color_theme.dart';
 export 'src/theme/text_theme.dart';
+export 'src/upload/image_uploader.dart';
+export 'src/upload/upload_bloc.dart';
 export 'src/utils/overlay_loading.dart';
 export 'src/utils/snack_bar.dart';
 export 'src/widget/app_bottom_sheet.dart';

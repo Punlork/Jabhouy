@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_net/src/api_service.dart';
 
 abstract class BaseService {
   BaseService(this._apiService);

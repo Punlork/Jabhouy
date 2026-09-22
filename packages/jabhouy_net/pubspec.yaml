@@ -1,0 +1,26 @@
+name: jabhouy_net
+description: HTTP transport, connectivity and request inspection for Jabhouy.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  connectivity_plus: ^7.1.0
+  flutter:
+    sdk: flutter
+  flutter_dotenv: ^5.2.1
+  flutter_runtime_debugger: ^0.4.0
+  http: ^1.3.0
+  jabhouy_core:
+    path: ../jabhouy_core
+  jabhouy_ui:
+    path: ../jabhouy_ui
+  shared_preferences: ^2.5.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^6.0.0

@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/service/auth_service.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:meta/meta.dart';
 
 part 'auth_event.dart';

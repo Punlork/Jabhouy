@@ -1,4 +1,3 @@
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/data/db/income_dao.dart';
 import 'package:jabhouy/income/models/bank_notification_model.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';

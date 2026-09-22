@@ -8,9 +8,11 @@ library jabhouy_core;
 export 'package:drift/drift.dart' show Value;
 
 export 'src/database/app_database.dart';
+export 'src/logging/logger.dart';
 export 'src/models/casts.dart';
 export 'src/models/pagination.dart';
 export 'src/result/app_exception.dart';
 export 'src/result/result.dart';
 export 'src/sync/outbox.dart';
+export 'src/sync/sync_feedback.dart';
 export 'src/sync/sync_status.dart';

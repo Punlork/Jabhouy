@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:http/http.dart' as http;
-import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/src/network_inspector_service.dart';
 
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -7,9 +7,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/l10n/arb/app_localizations.dart';
-import 'package:jabhouy_ui/jabhouy_ui.dart';
+import 'package:jabhouy_ui/src/strings/ui_strings.dart';
+import 'package:jabhouy_ui/src/theme/text_theme.dart';
+import 'package:jabhouy_ui/src/upload/image_uploader.dart';
+import 'package:jabhouy_ui/src/utils/overlay_loading.dart';
 
 part 'upload_event.dart';
 part 'upload_state.dart';
@@ -28,7 +29,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     );
   }
 
-  final UploadService _service;
+  final ImageUploader _service;
 
   File? _selectedImage;
 
@@ -61,12 +62,12 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     LoadingOverlay.show();
     emit(const UploadInProgress());
     try {
-      final response = await _service.upload(
+      final url = await _service.upload(
         file: event.image,
         fileName: 'image',
       );
-      if (response.success) {
-        emit(UploadSuccess(response.data!));
+      if (url != null) {
+        emit(UploadSuccess(url));
       }
     } catch (e) {
       emit(UploadFailure(e.toString()));
@@ -86,17 +87,17 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     VoidCallback? onTakePhoto,
     VoidCallback? onChoseFromGallery,
   }) {
-    final l10n = AppLocalizations.of(context);
+    final strings = UiStringsScope.of(context);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.selectImageSource, style: AppTextTheme.title),
+        title: Text(strings.selectImageSource, style: AppTextTheme.title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: Text(l10n.takePhoto, style: AppTextTheme.body),
+              title: Text(strings.takePhoto, style: AppTextTheme.body),
               onTap: () {
                 Navigator.pop(context);
                 onTakePhoto?.call();
@@ -104,7 +105,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: Text(l10n.chooseFromGallery, style: AppTextTheme.body),
+              title: Text(strings.chooseFromGallery, style: AppTextTheme.body),
               onTap: () {
                 Navigator.pop(context);
                 onChoseFromGallery?.call();

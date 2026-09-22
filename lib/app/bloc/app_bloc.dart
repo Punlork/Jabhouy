@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'app_event.dart';

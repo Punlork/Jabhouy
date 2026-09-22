@@ -1,4 +1,4 @@
-import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_core/src/sync/sync_status.dart';
 
 /// The message a local-first write deserves, given where the row ended up.
 ///

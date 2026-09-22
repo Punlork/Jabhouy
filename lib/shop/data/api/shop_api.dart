@@ -1,6 +1,6 @@
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 
 /// Every HTTP call the shop feature makes, and nothing else. It does not
 /// touch the database and does not decide when a call happens — the

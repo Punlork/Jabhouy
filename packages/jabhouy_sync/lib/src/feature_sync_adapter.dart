@@ -1,5 +1,5 @@
 import 'package:jabhouy_core/jabhouy_core.dart';
-import 'package:jabhouy_sync/jabhouy_sync.dart';
+import 'package:jabhouy_sync/src/transport.dart';
 
 /// Pushes the outbox jobs belonging to one feature.
 ///

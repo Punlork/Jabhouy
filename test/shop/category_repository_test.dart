@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:mocktail/mocktail.dart';
 

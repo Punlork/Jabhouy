@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

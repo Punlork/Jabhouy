@@ -8,7 +8,9 @@ import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 final getIt = GetIt.instance;
 
@@ -156,7 +158,9 @@ Future<void> setupDependencies() async {
         getIt<NetworkInspectorService>(),
       ),
     )
-    ..registerFactory(() => UploadBloc(getIt<UploadService>()))
+    ..registerFactory(
+      () => UploadBloc(UploadImageAdapter(getIt<UploadService>())),
+    )
     ..registerFactory(
       () => AuthBloc(
         getIt<AuthService>(),

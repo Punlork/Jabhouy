@@ -1,6 +1,6 @@
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 /// Local-first customer writes, queued through the app's one outbox.

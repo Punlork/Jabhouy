@@ -14,6 +14,7 @@ import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/settings/settings.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 extension StringExtension on String {

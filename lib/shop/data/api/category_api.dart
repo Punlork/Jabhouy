@@ -1,6 +1,6 @@
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 
 /// Every HTTP call the category feature makes, and nothing else.
 class CategoryApi extends BaseService {
