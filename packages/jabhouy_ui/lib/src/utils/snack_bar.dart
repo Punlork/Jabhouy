@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_ui/src/context/global_context.dart';
 
 void showErrorSnackBar(BuildContext? context, String message) {
   final colorScheme =

@@ -6,6 +6,7 @@ publish_to: none
 workspace:
   - packages/jabhouy_core
   - packages/jabhouy_sync
+  - packages/jabhouy_ui
 
 environment:
   sdk: ^3.13.0
@@ -48,6 +49,8 @@ dependencies:
     path: packages/jabhouy_core
   jabhouy_sync:
     path: packages/jabhouy_sync
+  jabhouy_ui:
+    path: packages/jabhouy_ui
   logger: ^2.5.0
   meta: ^1.15.0
   package_info_plus: ^8.3.0

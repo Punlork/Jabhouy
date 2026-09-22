@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class CustomerPage extends StatelessWidget {
   const CustomerPage({required this.customerBloc, super.key});

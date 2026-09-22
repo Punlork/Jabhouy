@@ -9,6 +9,7 @@ import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:http/http.dart' as http;
 import 'package:jabhouy/app/app.dart';
 
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'api_exception.dart';

@@ -9,6 +9,7 @@ import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'loaner_event.dart';

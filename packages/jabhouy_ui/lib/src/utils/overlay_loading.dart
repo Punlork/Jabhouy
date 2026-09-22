@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy_ui/src/context/global_context.dart';
+import 'package:jabhouy_ui/src/strings/ui_strings.dart';
 
 class LoadingOverlay {
   static OverlayEntry? _overlayEntry;
@@ -116,7 +116,7 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '${context.l10n.loading}...',
+                      '${UiStringsScope.of(context).loading}...',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,

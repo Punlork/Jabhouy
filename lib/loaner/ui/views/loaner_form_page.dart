@@ -8,6 +8,7 @@ import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/l10n/arb/app_localizations.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class LoanerFormPage extends StatelessWidget {
   const LoanerFormPage({

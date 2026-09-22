@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'income_event.dart';

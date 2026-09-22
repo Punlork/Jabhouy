@@ -11,27 +11,8 @@ import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/l10n/l10n.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-class TabScrollManager extends InheritedWidget {
-  const TabScrollManager({
-    required this.controllers,
-    required super.child,
-    super.key,
-  });
-
-  final List<ScrollController> controllers;
-
-  static TabScrollManager? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<TabScrollManager>();
-  }
-
-  @override
-  bool updateShouldNotify(TabScrollManager oldWidget) {
-    return controllers != oldWidget.controllers;
-  }
-
-  ScrollController getController(int index) => controllers[index];
-}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -362,139 +343,158 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       },
     ];
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        extendBody: true,
-        body: BottomBar(
-          body: (context, controller) => SafeArea(
-            maintainBottomViewPadding: true,
-            child: Column(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SignoutBloc, SignoutState>(
+          listener: (context, state) {
+            if (state is SignoutSuccess) {
+              context.read<AuthBloc>().add(AuthSignedOut());
+            }
+          },
+        ),
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is Unauthenticated) {
+              showSuccessSnackBar(context, context.l10n.signoutSuccessful);
+              context.goNamed(AppRoutes.signin);
+            }
+          },
+        ),
+      ],
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          extendBody: true,
+          body: BottomBar(
+            body: (context, controller) => SafeArea(
+              maintainBottomViewPadding: true,
+              child: Column(
+                children: [
+                  Builder(
+                    builder: (context) {
+                      Widget buildShopHeader({
+                        bool hasFilter = false,
+                        String? searchHintText,
+                      }) {
+                        return ShopHeader(
+                          hasFilter: hasFilter,
+                          searchHintText: searchHintText,
+                          onSettingsPressed: _openSettingsPage,
+                          onSearchChanged: _onSearchChanged,
+                          onFilterPressed: _showFilterSheet,
+                          searchController: _searchController,
+                        );
+                      }
+
+                      final blocBuilders = {
+                        0: BlocBuilder<ShopBloc, ShopState>(
+                          builder: (context, state) {
+                            return buildShopHeader(
+                              hasFilter: state.asLoaded?.categoryFilter != null,
+                            );
+                          },
+                        ),
+                        1: BlocBuilder<LoanerBloc, LoanerState>(
+                          builder: (context, state) {
+                            return buildShopHeader(
+                              hasFilter: state.asLoaded?.hasFilter ?? false,
+                            );
+                          },
+                        ),
+                        2: BlocBuilder<IncomeBloc, IncomeState>(
+                          builder: (context, state) {
+                            final loaded = state.asLoaded;
+                            return buildShopHeader(
+                              hasFilter: loaded?.hasFilter ?? false,
+                              searchHintText: context.l10n.searchIncome,
+                            );
+                          },
+                        ),
+                      };
+
+                      return blocBuilders[_selectedIndex] ?? buildShopHeader();
+                    },
+                  ),
+                  Expanded(
+                    child: MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: context.read<LoanerBloc>()),
+                        BlocProvider.value(value: context.read<IncomeBloc>()),
+                      ],
+                      child: TabScrollManager(
+                        controllers: _scrollControllers,
+                        child: PageView(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: _pages,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            barColor: Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+            width: double.infinity,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Builder(
-                  builder: (context) {
-                    Widget buildShopHeader({
-                      bool hasFilter = false,
-                      String? searchHintText,
-                    }) {
-                      return ShopHeader(
-                        hasFilter: hasFilter,
-                        searchHintText: searchHintText,
-                        onSettingsPressed: _openSettingsPage,
-                        onSearchChanged: _onSearchChanged,
-                        onFilterPressed: _showFilterSheet,
-                        searchController: _searchController,
-                      );
-                    }
-
-                    final blocBuilders = {
-                      0: BlocBuilder<ShopBloc, ShopState>(
-                        builder: (context, state) {
-                          return buildShopHeader(
-                            hasFilter: state.asLoaded?.categoryFilter != null,
-                          );
-                        },
-                      ),
-                      1: BlocBuilder<LoanerBloc, LoanerState>(
-                        builder: (context, state) {
-                          return buildShopHeader(
-                            hasFilter: state.asLoaded?.hasFilter ?? false,
-                          );
-                        },
-                      ),
-                      2: BlocBuilder<IncomeBloc, IncomeState>(
-                        builder: (context, state) {
-                          final loaded = state.asLoaded;
-                          return buildShopHeader(
-                            hasFilter: loaded?.hasFilter ?? false,
-                            searchHintText: context.l10n.searchIncome,
-                          );
-                        },
-                      ),
-                    };
-
-                    return blocBuilders[_selectedIndex] ?? buildShopHeader();
-                  },
-                ),
                 Expanded(
-                  child: MultiBlocProvider(
-                    providers: [
-                      BlocProvider.value(value: context.read<LoanerBloc>()),
-                      BlocProvider.value(value: context.read<IncomeBloc>()),
-                    ],
-                    child: TabScrollManager(
-                      controllers: _scrollControllers,
-                      child: PageView(
-                        controller: _pageController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: _pages,
+                  child: Container(
+                    padding: EdgeInsets.zero,
+                    decoration: BoxDecoration(
+                      color: bottomBarBackground,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: colorScheme.outlineVariant),
+                      boxShadow: [
+                        if (!isDark)
+                          BoxShadow(
+                            color: colorScheme.shadow.withValues(alpha: 0.08),
+                            blurRadius: 18,
+                            offset: const Offset(0, 6),
+                          ),
+                      ],
+                    ),
+                    child: TabBar(
+                      dividerColor: Colors.transparent,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicator: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        color: bottomBarIndicator,
+                      ),
+                      labelPadding: EdgeInsets.zero,
+                      onTap: (index) {
+                        _pageController.jumpToPage(index);
+                        _onItemTapped(index);
+                        setState(() => _selectedIndex = index);
+                      },
+                      splashBorderRadius: BorderRadius.circular(18),
+                      tabs: List.generate(
+                        bottomBars.length,
+                        (index) => Tab(
+                          height: 42,
+                          child: _BottomBarTab(
+                            iconAsset: bottomBars[index]['icon']!,
+                            label: bottomBars[index]['name']!,
+                            isSelected: _selectedIndex == index,
+                            selectedColor: bottomBarSelectedForeground,
+                            unselectedColor: bottomBarUnselectedForeground,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
+                if (bottomAction != null) ...[
+                  const SizedBox(width: 8),
+                  _BottomBarActionButton(
+                    config: bottomAction,
+                    isDark: isDark,
+                  ),
+                ],
               ],
             ),
-          ),
-          barColor: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-          width: double.infinity,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.zero,
-                  decoration: BoxDecoration(
-                    color: bottomBarBackground,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: colorScheme.outlineVariant),
-                    boxShadow: [
-                      if (!isDark)
-                        BoxShadow(
-                          color: colorScheme.shadow.withValues(alpha: 0.08),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                    ],
-                  ),
-                  child: TabBar(
-                    dividerColor: Colors.transparent,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    indicator: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      color: bottomBarIndicator,
-                    ),
-                    labelPadding: EdgeInsets.zero,
-                    onTap: (index) {
-                      _pageController.jumpToPage(index);
-                      _onItemTapped(index);
-                      setState(() => _selectedIndex = index);
-                    },
-                    splashBorderRadius: BorderRadius.circular(18),
-                    tabs: List.generate(
-                      bottomBars.length,
-                      (index) => Tab(
-                        height: 42,
-                        child: _BottomBarTab(
-                          iconAsset: bottomBars[index]['icon']!,
-                          label: bottomBars[index]['name']!,
-                          isSelected: _selectedIndex == index,
-                          selectedColor: bottomBarSelectedForeground,
-                          unselectedColor: bottomBarUnselectedForeground,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              if (bottomAction != null) ...[
-                const SizedBox(width: 8),
-                _BottomBarActionButton(
-                  config: bottomAction,
-                  isDark: isDark,
-                ),
-              ],
-            ],
           ),
         ),
       ),

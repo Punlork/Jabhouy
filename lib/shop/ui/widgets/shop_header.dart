@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:jabhouy/app/app.dart';
-import 'package:jabhouy/auth/bloc/auth_bloc.dart';
-import 'package:jabhouy/auth/bloc/signout/signout_bloc.dart';
 import 'package:jabhouy/l10n/arb/app_localizations.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class ShopHeader extends StatelessWidget {
   const ShopHeader({
@@ -58,32 +54,12 @@ class _SettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<SignoutBloc, SignoutState>(
-          listener: (context, state) {
-            if (state is SignoutSuccess) {
-              context.read<AuthBloc>().add(AuthSignedOut());
-            }
-          },
-        ),
-        BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is Unauthenticated) {
-              final l10n = AppLocalizations.of(context);
-              showSuccessSnackBar(context, l10n.signoutSuccessful);
-              context.goNamed(AppRoutes.signin);
-            }
-          },
-        ),
-      ],
-      child: IconButtonWidget(
-        svgAsset: AppAssets.actionSettings,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        tooltip: AppLocalizations.of(context).settings,
-        onPressed: onPressed,
-        colorScheme: Theme.of(context).colorScheme,
-      ),
+    return IconButtonWidget(
+      svgAsset: AppAssets.actionSettings,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      tooltip: AppLocalizations.of(context).settings,
+      onPressed: onPressed,
+      colorScheme: Theme.of(context).colorScheme,
     );
   }
 }

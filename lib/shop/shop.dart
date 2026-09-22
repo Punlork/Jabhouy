@@ -13,7 +13,6 @@ export 'models/shop_item_model.dart';
 export 'ui/bloc/category/category_bloc.dart';
 export 'ui/bloc/shop_bloc.dart';
 export 'ui/views/category_page.dart';
-export 'ui/views/settings_page.dart';
 export 'ui/views/shop_item_form_controller.dart';
 export 'ui/views/shop_item_form_page.dart';
 export 'ui/widgets/category_chip.dart';

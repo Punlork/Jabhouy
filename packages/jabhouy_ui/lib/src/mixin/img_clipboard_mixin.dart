@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy_ui/src/strings/ui_strings.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -131,7 +131,7 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  context.l10n.imgFound,
+                  UiStringsScope.of(context).imgFound,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurface,
                       ),
@@ -142,7 +142,7 @@ mixin ClipboardImageMixin<T extends StatefulWidget> on State<T> {
         ),
       ),
       action: SnackBarAction(
-        label: context.l10n.cancel,
+        label: UiStringsScope.of(context).cancel,
         onPressed: () {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         },

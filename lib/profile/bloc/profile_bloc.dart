@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/profile/profile.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';

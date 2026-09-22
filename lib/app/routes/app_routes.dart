@@ -12,26 +12,12 @@ import 'package:jabhouy/home/views/home_page.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/profile/profile.dart';
+import 'package:jabhouy/settings/settings.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 extension StringExtension on String {
   String get toPath => '/$this';
-}
-
-class GlobalContext {
-  GlobalContext._();
-  static BuildContext? _currentContext;
-
-  static BuildContext get currentContext {
-    if (_currentContext == null) {
-      throw FlutterError('GlobalContext: _currentContext is null');
-    }
-    return _currentContext!;
-  }
-
-  static set currentContext(BuildContext context) {
-    _currentContext = context;
-  }
 }
 
 class AppRoutes {

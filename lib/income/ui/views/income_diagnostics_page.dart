@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class IncomeDiagnosticsPage extends StatefulWidget {
   const IncomeDiagnosticsPage({super.key});

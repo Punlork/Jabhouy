@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/app/l10n/app_ui_strings.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/l10n/arb/app_localizations.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -37,15 +39,18 @@ class _MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          builder: (context, child) => Overlay(
-            initialEntries: [
-              OverlayEntry(
-                builder: (context) => Debugger.builder(
-                  context,
-                  AppUpgrader(child: child!),
+          builder: (context, child) => UiStringsScope(
+            strings: AppUiStrings(AppLocalizations.of(context)),
+            child: Overlay(
+              initialEntries: [
+                OverlayEntry(
+                  builder: (context) => Debugger.builder(
+                    context,
+                    AppUpgrader(child: child!),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 part 'category_event.dart';
 part 'category_state.dart';

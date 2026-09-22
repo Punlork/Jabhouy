@@ -7,6 +7,7 @@ import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/l10n/arb/app_localizations.dart';
 import 'package:jabhouy/l10n/l10n.dart';
 import 'package:jabhouy/profile/profile.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

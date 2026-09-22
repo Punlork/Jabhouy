@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jabhouy/l10n/l10n.dart';
+import 'package:jabhouy_ui/src/strings/ui_strings.dart';
 
 class EmptyView extends StatelessWidget {
   const EmptyView({
@@ -18,7 +18,7 @@ class EmptyView extends StatelessWidget {
           const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
-            msg ?? context.l10n.noItemFound,
+            msg ?? UiStringsScope.of(context).noItemFound,
             style: const TextStyle(
               fontSize: 18,
               color: Colors.grey,

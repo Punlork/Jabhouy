@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/l10n/arb/app_localizations.dart';
 import 'package:jabhouy/shop/ui/views/shop_item_form_controller.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class ShopItemVariantBuilder extends StatelessWidget {
   const ShopItemVariantBuilder({

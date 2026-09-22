@@ -4,9 +4,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/customer/customer.dart';
-import 'package:jabhouy/home/home.dart';
 import 'package:jabhouy/l10n/l10n.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class LoanerView extends StatefulWidget {
   const LoanerView({super.key});

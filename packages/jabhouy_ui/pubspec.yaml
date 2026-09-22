@@ -1,0 +1,20 @@
+name: jabhouy_ui
+description: Shared Flutter presentation for Jabhouy — theme, assets, widgets and mixins with no feature or app dependency.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.2.0
+  path_provider: ^2.1.5
+  super_clipboard: ^0.8.24
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^6.0.0

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/l10n/arb/app_localizations.dart';
 import 'package:jabhouy/shop/shop.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class ShopItemFormPage extends StatelessWidget {
   const ShopItemFormPage({
