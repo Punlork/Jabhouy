@@ -197,7 +197,23 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
   }
 
   void _submitItem() {
-    if (!_formKey.currentState!.validate()) return;
+    // Collapsed cards still validate, since their fields stay mounted, but
+    // the seller has to see what is wrong: open them and scroll there.
+    final firstBroken = _formController.expandDraftsWithProblems();
+    if (!_formKey.currentState!.validate()) {
+      final target = firstBroken?.key.currentContext;
+      if (target != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (target.mounted) {
+            Scrollable.ensureVisible(
+              target,
+              duration: const Duration(milliseconds: 250),
+            );
+          }
+        });
+      }
+      return;
+    }
 
     if (!_formController.isEditing && _formController.variantDrafts.isEmpty) {
       showErrorSnackBar(
@@ -239,6 +255,7 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
       child: CustomTextFormField(
         onTapOutside: (_) {},
         controller: controller,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         hintText: '',
         textCapitalization: textCapitalization,
         labelText: required ? '$label *' : label,
@@ -383,10 +400,9 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
                         onAddPack: () => _formController.addVariantDraft(
                           ShopItemVariantDraft.pack(),
                         ),
-                        onAddCustom: () => _formController.addVariantDraft(
-                          ShopItemVariantDraft.single(),
-                        ),
                         onRemove: _formController.removeVariantDraft,
+                        onPackChanged: _formController.setPack,
+                        onExpandedChanged: _formController.setExpanded,
                       ),
                       const SizedBox(height: 16),
                       Padding(

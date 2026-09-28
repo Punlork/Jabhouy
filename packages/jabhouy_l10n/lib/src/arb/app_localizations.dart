@@ -521,13 +521,13 @@ abstract class AppLocalizations {
   /// Label for the default price input field
   ///
   /// In en, this message translates to:
-  /// **'Default Price (per unit)'**
+  /// **'Cost Price'**
   String get defaultPrice;
 
   /// Validation message when default price is empty
   ///
   /// In en, this message translates to:
-  /// **'Default Price is required'**
+  /// **'Cost Price is required'**
   String get defaultPriceRequired;
 
   /// Label for switching to seller mode
@@ -1243,6 +1243,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Another main device is already active for this income sync.'**
   String get anotherMainDeviceActive;
+
+  /// Error when a price or amount field holds something other than a whole number
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number'**
+  String get invalidPrice;
 }
 
 class _AppLocalizationsDelegate

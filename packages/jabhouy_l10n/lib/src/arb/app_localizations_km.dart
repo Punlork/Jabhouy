@@ -606,4 +606,7 @@ class AppLocalizationsKm extends AppLocalizations {
   @override
   String get anotherMainDeviceActive =>
       'មានឧបករណ៍មេមួយផ្សេងទៀតកំពុងសកម្មសម្រាប់ income sync នេះ។';
+
+  @override
+  String get invalidPrice => 'សូមបញ្ចូលចំនួនគត់';
 }

@@ -300,11 +300,11 @@
       }
     }
   },
-  "defaultPrice": "Default Price (per unit)",
+  "defaultPrice": "Cost Price",
   "@defaultPrice": {
     "description": "Label for the default price input field"
   },
-  "defaultPriceRequired": "Default Price is required",
+  "defaultPriceRequired": "Cost Price is required",
   "@defaultPriceRequired": {
     "description": "Validation message when default price is empty"
   },
@@ -796,5 +796,9 @@
   "anotherMainDeviceActive": "Another main device is already active for this income sync.",
   "@anotherMainDeviceActive": {
     "description": "Shown when another device already owns the main-device claim"
+  },
+  "invalidPrice": "Enter a whole number",
+  "@invalidPrice": {
+    "description": "Error when a price or amount field holds something other than a whole number"
   }
 }

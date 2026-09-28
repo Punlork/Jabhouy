@@ -796,5 +796,6 @@
   "anotherMainDeviceActive": "មានឧបករណ៍មេមួយផ្សេងទៀតកំពុងសកម្មសម្រាប់ income sync នេះ។",
   "@anotherMainDeviceActive": {
     "description": "បង្ហាញនៅពេលឧបករណ៍មួយផ្សេងទៀតកាន់ main-device claim រួចហើយ"
-  }
+  },
+  "invalidPrice": "សូមបញ្ចូលចំនួនគត់"
 }

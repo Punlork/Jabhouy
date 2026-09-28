@@ -11,6 +11,7 @@ class CustomTextFormField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
     this.validator,
+    this.autovalidateMode,
     this.onVisibilityToggle,
     this.action,
     this.showClearButton = false,
@@ -34,6 +35,9 @@ class CustomTextFormField extends StatefulWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
+
+  /// Null inherits the enclosing `Form`'s mode.
+  final AutovalidateMode? autovalidateMode;
   final void Function(String?)? onChanged;
   final VoidCallback? onVisibilityToggle;
   final bool showClearButton;
@@ -196,6 +200,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     return TextFormField(
       style: widget.style,
       controller: widget.controller,
+      autovalidateMode: widget.autovalidateMode,
       keyboardType: widget.keyboardType,
       obscureText: widget.obscureText,
       onTapOutside: widget.onTapOutside ??

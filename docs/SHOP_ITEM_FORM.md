@@ -1,6 +1,6 @@
 # Shop item form
 
-**Status:** Draft
+**Status:** Implemented
 **Author:** Punlork
 **Updated:** 2026-09-28
 
@@ -79,7 +79,7 @@ Every price is the price of the variant as sold: a pack's customer price is what
 - Customer price takes a full row; cost and seller share the next, where each label fits at half width.
 - The header carries a Single/Pack toggle instead of repeating the variant name. Pack reveals items-per-pack; switching to Single clears it.
 - Errors get `errorMaxLines: 2`.
-- The `Form` uses `AutovalidateMode.onUserInteraction`.
+- Each field, not the `Form`, uses `AutovalidateMode.onUserInteraction`. On the `Form` it validated every field as soon as any one changed, so typing a pack size turned the untouched customer price red; a render of the Khmer form caught it.
 
 ### Prices and pack size
 

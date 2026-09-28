@@ -229,10 +229,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get defaultPrice => 'Default Price (per unit)';
+  String get defaultPrice => 'Cost Price';
 
   @override
-  String get defaultPriceRequired => 'Default Price is required';
+  String get defaultPriceRequired => 'Cost Price is required';
 
   @override
   String get changeToSeller => 'Change to seller';
@@ -608,4 +608,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get anotherMainDeviceActive =>
       'Another main device is already active for this income sync.';
+
+  @override
+  String get invalidPrice => 'Enter a whole number';
 }
