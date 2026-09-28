@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
+import 'package:jabhouy_shop/src/ui/widgets/shop_item_parts.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -115,17 +116,17 @@ class ShopItemDetailSheet extends StatelessWidget {
             ),
           _buildDetailRow(
             l10n.defaultPrice,
-            item.defaultPrice != null ? '${item.defaultPrice!} រៀល' : l10n.na,
+            item.defaultPrice != null ? formatRiel(item.defaultPrice) : l10n.na,
             context,
           ),
           _buildDetailRow(
             l10n.customerPrice,
-            item.customerPrice != null ? '${item.customerPrice!} រៀល' : l10n.na,
+            item.customerPrice != null ? formatRiel(item.customerPrice) : l10n.na,
             context,
           ),
           _buildDetailRow(
             l10n.sellerPrice,
-            item.sellerPrice != null ? '${item.sellerPrice!} រៀល' : l10n.na,
+            item.sellerPrice != null ? formatRiel(item.sellerPrice) : l10n.na,
             context,
           ),
 

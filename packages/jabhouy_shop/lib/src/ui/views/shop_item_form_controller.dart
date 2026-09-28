@@ -128,9 +128,8 @@ class ShopItemFormController {
     imageUrl = existingItem?.imageUrl;
 
     if (existingItem case final item?) {
-      final editableName = _splitEditableName(item);
       final initialDraft = ShopItemVariantDraft(
-        label: editableName.label,
+        label: item.variantLabel,
         customerPrice: item.customerPrice?.toString() ?? '',
         defaultPrice: item.defaultPrice?.toString() ?? '',
         sellerPrice: item.sellerPrice?.toString() ?? '',
@@ -138,7 +137,7 @@ class ShopItemFormController {
         isPack: (item.packAmount ?? 0) > 1,
       );
 
-      nameController.text = editableName.baseName;
+      nameController.text = item.productName;
       noteController.text = item.note ?? '';
       categoryFilter = item.category;
 
@@ -146,7 +145,7 @@ class ShopItemFormController {
       variantDrafts.add(initialDraft);
 
       _initialTextValues.addAll({
-        'name': editableName.baseName,
+        'name': item.productName,
         'note': item.note ?? '',
       });
     } else {
@@ -164,20 +163,6 @@ class ShopItemFormController {
     _initialCategory = categoryFilter;
     _initialImageUrl = imageUrl;
     _initialVariantSnapshot = variantSnapshot;
-  }
-
-  ({String baseName, String label}) _splitEditableName(ShopItemModel item) {
-    final rawName = item.baseName;
-    final separatorIndex = rawName.lastIndexOf(' - ');
-
-    if (separatorIndex <= 0 || separatorIndex >= rawName.length - 3) {
-      return (baseName: rawName, label: '');
-    }
-
-    return (
-      baseName: rawName.substring(0, separatorIndex).trim(),
-      label: rawName.substring(separatorIndex + 3).trim(),
-    );
   }
 
   void _registerVariantDraftListeners(ShopItemVariantDraft draft) {

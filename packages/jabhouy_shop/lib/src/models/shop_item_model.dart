@@ -74,6 +74,26 @@ class ShopItemModel extends Equatable {
 
   bool get isPack => (packAmount ?? 0) > 1;
 
+  /// A variant is saved as `"<product> - <label> x<pack>"`; these read the
+  /// two names back. The form writes that shape and edits it, and the
+  /// listing shows the product and the label on separate lines.
+  String get productName => _splitName().product;
+
+  /// Empty when the item was saved without a variant label.
+  String get variantLabel => _splitName().label;
+
+  ({String product, String label}) _splitName() {
+    final raw = baseName;
+    final separator = raw.lastIndexOf(' - ');
+    if (separator <= 0 || separator >= raw.length - 3) {
+      return (product: raw, label: '');
+    }
+    return (
+      product: raw.substring(0, separator).trim(),
+      label: raw.substring(separator + 3).trim(),
+    );
+  }
+
   String get displayName => buildDisplayName(
         baseName,
         packAmount: packAmount,

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
-import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
+import 'package:jabhouy_shop/src/ui/widgets/shop_item_parts.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 class GridShopItemCard extends StatelessWidget {
   const GridShopItemCard({
@@ -20,13 +19,11 @@ class GridShopItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context);
     final titleStyle = textTheme.titleSmall?.copyWith(
       color: colorScheme.onSurface,
       fontWeight: FontWeight.w600,
       height: 1.1,
     );
-    // final titleHeight = (titleStyle?.fontSize ?? 14) * (titleStyle?.height ?? 1.2) * 2;
 
     return Card(
       elevation: 0,
@@ -43,48 +40,35 @@ class GridShopItemCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // One height for photos and letter tiles alike, so the cards
+            // in a row line up whether or not they have a photo.
             AspectRatio(
-              aspectRatio: 1,
+              aspectRatio: 4 / 3,
               child: Hero(
                 tag: 'shop_item_grid_${item.id}',
-                child: Container(
+                child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: ColoredBox(
-                      color: colorScheme.surfaceContainerHighest,
-                      child: FadeInImage.memoryNetwork(
-                        image: item.imageUrl ?? '',
-                        fit: BoxFit.cover,
-                        imageCacheHeight: 250,
-                        imageCacheWidth: 250,
-                        placeholder: kTransparentImage,
-                        imageErrorBuilder: (context, url, error) => const Center(
-                          child: AppLogo(
-                            shape: BoxShape.rectangle,
-                            useBg: false,
-                            size: 120,
-                          ),
-                        ),
-                      ),
-                    ),
+                    child: ShopItemThumbnail(item: item),
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4).copyWith(bottom: 12),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Text(
-                          item.displayName,
+                          item.productName,
                           style: titleStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.visible,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       SyncStateIcon(
@@ -93,35 +77,25 @@ class GridShopItemCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.isPack ? l10n.packItem : l10n.singleItem,
+                  const SizedBox(height: 2),
+                  ShopItemVariantLine(
+                    item: item,
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      child: Text(
-                        '${item.customerPrice} រៀល',
-                        style: textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onSecondaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  ShopItemPrice(
+                    item: item,
+                    style: textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (item.category?.name case final category?) ...[
+                    const SizedBox(height: 6),
+                    ShopItemCategoryChip(name: category),
+                  ],
                 ],
               ),
             ),
@@ -157,7 +131,7 @@ class GridShopItemShimmer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AspectRatio(
-                aspectRatio: 1,
+                aspectRatio: 4 / 3,
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: DecoratedBox(
