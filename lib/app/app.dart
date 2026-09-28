@@ -13,3 +13,4 @@ export 'service/sync_coordinator.dart';
 export 'service/upload_image_adapter.dart';
 export 'view/app.dart';
 export 'widget/app_upgrader.dart';
+export 'widget/sync_indicator.dart';

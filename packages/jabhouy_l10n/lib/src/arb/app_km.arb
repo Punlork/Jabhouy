@@ -797,5 +797,12 @@
   "@anotherMainDeviceActive": {
     "description": "បង្ហាញនៅពេលឧបករណ៍មួយផ្សេងទៀតកាន់ main-device claim រួចហើយ"
   },
-  "invalidPrice": "សូមបញ្ចូលចំនួនគត់"
+  "invalidPrice": "សូមបញ្ចូលចំនួនគត់",
+  "syncing": "កំពុងធ្វើសមកាលកម្ម…",
+  "synced": "បានធ្វើសមកាលកម្ម",
+  "changesWaiting": "{count} ការផ្លាស់ប្តូរកំពុងរង់ចាំ",
+  "changesFailed": "{count} ការផ្លាស់ប្តូរបរាជ័យ",
+  "failedChangesTitle": "ការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ",
+  "waitingToSync": "កំពុងរង់ចាំធ្វើសមកាលកម្ម",
+  "syncFailed": "មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ"
 }

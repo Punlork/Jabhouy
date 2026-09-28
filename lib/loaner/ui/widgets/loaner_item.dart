@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
 class LoanerItem extends StatelessWidget {
@@ -53,6 +55,10 @@ class LoanerItem extends StatelessWidget {
                       letterSpacing: -0.2,
                     ),
                   ),
+                ),
+                SyncStateIcon(
+                  isPending: loaner.syncStatus == SyncStatus.pending,
+                  isFailed: loaner.syncStatus == SyncStatus.failed,
                 ),
                 const SizedBox(width: 12),
                 Container(

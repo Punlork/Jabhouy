@@ -26,4 +26,5 @@ export 'src/widget/custom_text_form_field.dart';
 export 'src/widget/empty_view.dart';
 export 'src/widget/icon_button.dart';
 export 'src/widget/infinite_end_widget.dart';
+export 'src/widget/sync_state_icon.dart';
 export 'src/widget/tab_scroll_manager.dart';

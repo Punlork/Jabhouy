@@ -611,4 +611,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidPrice => 'Enter a whole number';
+
+  @override
+  String get syncing => 'Syncing…';
+
+  @override
+  String get synced => 'Synced';
+
+  @override
+  String changesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes waiting',
+      one: '1 change waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String changesFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes failed',
+      one: '1 change failed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failedChangesTitle => 'Changes not saved to the server';
+
+  @override
+  String get waitingToSync => 'Waiting to sync';
+
+  @override
+  String get syncFailed => 'Not saved to the server';
 }

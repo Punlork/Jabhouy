@@ -800,5 +800,43 @@
   "invalidPrice": "Enter a whole number",
   "@invalidPrice": {
     "description": "Error when a price or amount field holds something other than a whole number"
+  },
+  "syncing": "Syncing…",
+  "@syncing": {
+    "description": "Sync indicator while changes are being sent to the server"
+  },
+  "synced": "Synced",
+  "@synced": {
+    "description": "Sync indicator shown briefly after a sync finishes"
+  },
+  "changesWaiting": "{count, plural, =1{1 change waiting} other{{count} changes waiting}}",
+  "@changesWaiting": {
+    "description": "Sync indicator while offline with unsent changes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "changesFailed": "{count, plural, =1{1 change failed} other{{count} changes failed}}",
+  "@changesFailed": {
+    "description": "Sync indicator when the server refused or keeps failing changes; tap for details",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedChangesTitle": "Changes not saved to the server",
+  "@failedChangesTitle": {
+    "description": "Title of the sheet listing changes that failed to sync"
+  },
+  "waitingToSync": "Waiting to sync",
+  "@waitingToSync": {
+    "description": "Tooltip on a row saved on the phone but not yet on the server"
+  },
+  "syncFailed": "Not saved to the server",
+  "@syncFailed": {
+    "description": "Tooltip on a row the server refused or has not accepted yet"
   }
 }

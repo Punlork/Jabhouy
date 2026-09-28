@@ -12,7 +12,9 @@ import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
+import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 
@@ -449,62 +451,74 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             barColor: Colors.transparent,
             borderRadius: BorderRadius.circular(24),
             width: double.infinity,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            // The pill rides on the bar, whose background is transparent,
+            // so it always sits just above it, whatever the safe area.
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.zero,
-                    decoration: BoxDecoration(
-                      color: bottomBarBackground,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: colorScheme.outlineVariant),
-                      boxShadow: [
-                        if (!isDark)
-                          BoxShadow(
-                            color: colorScheme.shadow.withValues(alpha: 0.08),
-                            blurRadius: 18,
-                            offset: const Offset(0, 6),
+                if (_isBackgroundSyncEnabled)
+                  SyncIndicator(
+                    engine: getIt<SyncEngine>(),
+                    connectivity: getIt<ConnectivityService>(),
+                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.zero,
+                        decoration: BoxDecoration(
+                          color: bottomBarBackground,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: colorScheme.outlineVariant),
+                          boxShadow: [
+                            if (!isDark)
+                              BoxShadow(
+                                color: colorScheme.shadow.withValues(alpha: 0.08),
+                                blurRadius: 18,
+                                offset: const Offset(0, 6),
+                              ),
+                          ],
+                        ),
+                        child: TabBar(
+                          dividerColor: Colors.transparent,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicator: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            color: bottomBarIndicator,
                           ),
-                      ],
-                    ),
-                    child: TabBar(
-                      dividerColor: Colors.transparent,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicator: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        color: bottomBarIndicator,
-                      ),
-                      labelPadding: EdgeInsets.zero,
-                      onTap: (index) {
-                        _pageController.jumpToPage(index);
-                        _onItemTapped(index);
-                        setState(() => _selectedIndex = index);
-                      },
-                      splashBorderRadius: BorderRadius.circular(18),
-                      tabs: List.generate(
-                        bottomBars.length,
-                        (index) => Tab(
-                          height: 42,
-                          child: _BottomBarTab(
-                            iconAsset: bottomBars[index]['icon']!,
-                            label: bottomBars[index]['name']!,
-                            isSelected: _selectedIndex == index,
-                            selectedColor: bottomBarSelectedForeground,
-                            unselectedColor: bottomBarUnselectedForeground,
+                          labelPadding: EdgeInsets.zero,
+                          onTap: (index) {
+                            _pageController.jumpToPage(index);
+                            _onItemTapped(index);
+                            setState(() => _selectedIndex = index);
+                          },
+                          splashBorderRadius: BorderRadius.circular(18),
+                          tabs: List.generate(
+                            bottomBars.length,
+                            (index) => Tab(
+                              height: 42,
+                              child: _BottomBarTab(
+                                iconAsset: bottomBars[index]['icon']!,
+                                label: bottomBars[index]['name']!,
+                                isSelected: _selectedIndex == index,
+                                selectedColor: bottomBarSelectedForeground,
+                                unselectedColor: bottomBarUnselectedForeground,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                    if (bottomAction != null) ...[
+                      const SizedBox(width: 8),
+                      _BottomBarActionButton(
+                        config: bottomAction,
+                        isDark: isDark,
+                      ),
+                    ],
+                  ],
                 ),
-                if (bottomAction != null) ...[
-                  const SizedBox(width: 8),
-                  _BottomBarActionButton(
-                    config: bottomAction,
-                    isDark: isDark,
-                  ),
-                ],
               ],
             ),
           ),

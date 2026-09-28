@@ -200,7 +200,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       emit(
         currentState.copyWith(
           isOffline: true,
-          syncMessage: _offlineMessage(currentState.customers.isNotEmpty),
+          // The sync indicator says how many changes wait, in place of this.
+          syncMessage: _inBackground ? null : _offlineMessage(currentState.customers.isNotEmpty),
         ),
       );
       return;

@@ -306,6 +306,13 @@ class SyncEngine {
     return _clock().difference(cursor.lastPulledAt) >= pullInterval;
   }
 
+  /// Jobs whose last attempt failed, oldest first, for the sync indicator's
+  /// "failed" list: rejected ones and ones still retrying alike.
+  Future<List<OutboxEntry>> failedJobs() => (_db.select(_db.outboxEntries)
+        ..where((t) => t.lastError.isNotNull())
+        ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+      .get();
+
   /// Makes every job that is waiting out a backoff due now.
   ///
   /// The app calls this when the connection returns. Wifi without internet

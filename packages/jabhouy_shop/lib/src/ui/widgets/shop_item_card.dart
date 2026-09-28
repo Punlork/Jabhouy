@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ShopItemCard extends StatelessWidget {
@@ -126,15 +128,26 @@ class ShopItemCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Name
-                        Text(
-                          item.displayName,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.2,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.displayName,
+                                style: textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.2,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SyncStateIcon(
+                              isPending: item.syncStatus == SyncStatus.pending,
+                              isFailed: item.syncStatus == SyncStatus.failed,
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Wrap(

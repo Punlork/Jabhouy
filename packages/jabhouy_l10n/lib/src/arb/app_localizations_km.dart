@@ -609,4 +609,30 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get invalidPrice => 'សូមបញ្ចូលចំនួនគត់';
+
+  @override
+  String get syncing => 'កំពុងធ្វើសមកាលកម្ម…';
+
+  @override
+  String get synced => 'បានធ្វើសមកាលកម្ម';
+
+  @override
+  String changesWaiting(int count) {
+    return '$count ការផ្លាស់ប្តូរកំពុងរង់ចាំ';
+  }
+
+  @override
+  String changesFailed(int count) {
+    return '$count ការផ្លាស់ប្តូរបរាជ័យ';
+  }
+
+  @override
+  String get failedChangesTitle =>
+      'ការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ';
+
+  @override
+  String get waitingToSync => 'កំពុងរង់ចាំធ្វើសមកាលកម្ម';
+
+  @override
+  String get syncFailed => 'មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ';
 }

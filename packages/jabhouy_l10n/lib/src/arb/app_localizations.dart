@@ -1249,6 +1249,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a whole number'**
   String get invalidPrice;
+
+  /// Sync indicator while changes are being sent to the server
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncing;
+
+  /// Sync indicator shown briefly after a sync finishes
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get synced;
+
+  /// Sync indicator while offline with unsent changes
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change waiting} other{{count} changes waiting}}'**
+  String changesWaiting(int count);
+
+  /// Sync indicator when the server refused or keeps failing changes; tap for details
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change failed} other{{count} changes failed}}'**
+  String changesFailed(int count);
+
+  /// Title of the sheet listing changes that failed to sync
+  ///
+  /// In en, this message translates to:
+  /// **'Changes not saved to the server'**
+  String get failedChangesTitle;
+
+  /// Tooltip on a row saved on the phone but not yet on the server
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to sync'**
+  String get waitingToSync;
+
+  /// Tooltip on a row the server refused or has not accepted yet
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved to the server'**
+  String get syncFailed;
 }
 
 class _AppLocalizationsDelegate

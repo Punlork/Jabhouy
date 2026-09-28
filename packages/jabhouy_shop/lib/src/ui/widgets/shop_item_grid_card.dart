@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
@@ -76,14 +77,21 @@ class GridShopItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      item.displayName,
-                      style: titleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.visible,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.displayName,
+                          style: titleStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.visible,
+                        ),
+                      ),
+                      SyncStateIcon(
+                        isPending: item.syncStatus == SyncStatus.pending,
+                        isFailed: item.syncStatus == SyncStatus.failed,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(

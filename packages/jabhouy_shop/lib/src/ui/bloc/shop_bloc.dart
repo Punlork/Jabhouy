@@ -409,7 +409,8 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         emit(
           currentState.copyWith(
             isOffline: true,
-            syncMessage: _offlineMessage(currentState.items.isNotEmpty),
+            // The sync indicator says how many changes wait, in place of this.
+            syncMessage: _inBackground ? null : _offlineMessage(currentState.items.isNotEmpty),
           ),
         );
       }
