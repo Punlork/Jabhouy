@@ -98,7 +98,6 @@ android {
         // Patrol UI testing: https://patrol.leancode.pl/documentation/native/android-setup
         testInstrumentationRunner "pl.leancode.patrol.PatrolJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
-        manifestPlaceholders += [featureIncome: isFeatureEnabled('FEATURE_INCOME').toString()]
     }
 
     signingConfigs {
@@ -130,6 +129,18 @@ android {
                 "devStorePassword",
                 envOrProperty("ANDROID_KEYSTORE_PASSWORD", "storePassword"),
             )
+        }
+    }
+
+    // FEATURE_INCOME off: the notification listener leaves the manifest.
+    // Disabling it is not enough for Google Play, which reviews what is
+    // declared. The flavors keep no manifest of their own, so each takes
+    // the overlay that removes it.
+    if (!isFeatureEnabled('FEATURE_INCOME')) {
+        sourceSets.all { set ->
+            if (set.name in ['development', 'staging', 'production']) {
+                set.manifest.srcFile 'src/noIncome/AndroidManifest.xml'
+            }
         }
     }
 
