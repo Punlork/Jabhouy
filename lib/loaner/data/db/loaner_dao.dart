@@ -164,11 +164,14 @@ class LoanerDao {
   }
 
   LoanerModel _toModel(Loaner loaner, [Customer? joined]) {
+    final customer = decodeCustomer(loaner.customer) ?? _mapCustomer(joined);
     return LoanerModel(
       id: loaner.id,
       amount: loaner.amount,
       note: loaner.note,
-      customerId: loaner.customerId,
+      // Falls back to the blob for rows written before fromJson read the
+      // nested id, so their queued pushes stop failing with a 400.
+      customerId: loaner.customerId ?? customer?.id,
       isPaid: loaner.isPaid,
       createdAt: loaner.createdAt,
       updatedAt: loaner.updatedAt,
@@ -177,7 +180,7 @@ class LoanerDao {
       // The denormalised blob wins over the join: it is the customer as
       // the server described it on this loan, and it survives the
       // customer row being deleted.
-      customer: decodeCustomer(loaner.customer) ?? _mapCustomer(joined),
+      customer: customer,
     );
   }
 

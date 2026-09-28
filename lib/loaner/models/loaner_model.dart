@@ -24,15 +24,18 @@ class LoanerModel extends Equatable {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory LoanerModel.fromJson(Map<String, dynamic> json) {
+    final customerJson = tryCast<Map<String, dynamic>>(json['customer']);
     return LoanerModel(
       id: tryCast<int>(json['id'])!,
       amount: tryCast<int>(json['amount'])!,
       note: tryCast<String>(json['note']),
       customerId: tryCast<int>(json['customerId']) ??
           tryCast<int>(json['customer_id']) ??
-          tryCast<int>(json['customer']),
-      customer: tryCast<Map<String, dynamic>>(json['customer'])
-          ?.let(CustomerModel.fromJson),
+          tryCast<int>(json['customer']) ??
+          // The loans API nests the customer and sends no flat id. Missing
+          // this wrote null over every row a pull or push touched.
+          tryCast<int>(customerJson?['id']),
+      customer: customerJson?.let(CustomerModel.fromJson),
       createdAt: tryCast<String>(json['createdAt'])
           ?.let((s) => DateTime.parse(s).toLocal()),
       updatedAt: tryCast<String>(json['updatedAt'])

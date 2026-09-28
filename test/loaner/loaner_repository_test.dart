@@ -160,6 +160,21 @@ void main() {
     expect(await jobs(), isEmpty);
   });
 
+  test('a row stored without customerId reads it back from the customer blob',
+      () async {
+    // The shape every pulled loan had before fromJson read the nested id:
+    // the customer survived, its id did not, and each push was a 400.
+    await dao.cacheServerLoaners([
+      LoanerModel(
+        id: 37,
+        amount: 0,
+        customer: const CustomerModel(id: 24, name: 'Pa Ah Pnug'),
+      ),
+    ]);
+
+    expect((await dao.findById(37))!.customerId, 24);
+  });
+
   test('a delete the server has already forgotten counts as done', () async {
     goOnline();
     await dao.cacheServerLoaners([LoanerModel(id: 6, amount: 500)]);

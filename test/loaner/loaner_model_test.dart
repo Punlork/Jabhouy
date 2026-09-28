@@ -11,4 +11,16 @@ void main() {
 
     expect(loaner.toJson()['createdAt'], '2026-05-03');
   });
+
+  test('fromJson takes customerId from the nested customer the API sends', () {
+    final loaner = LoanerModel.fromJson(const {
+      'id': 37,
+      'amount': 0,
+      'createdAt': '2026-05-03T00:00:00.000Z',
+      'customer': {'id': 24, 'name': 'Pa Ah Pnug'},
+    });
+
+    expect(loaner.customerId, 24);
+    expect(loaner.customer?.name, 'Pa Ah Pnug');
+  });
 }
