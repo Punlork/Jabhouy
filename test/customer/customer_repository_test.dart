@@ -107,6 +107,19 @@ void main() {
     expect(await jobs(), isEmpty);
   });
 
+  test('a pull does not write over a customer whose rename is queued',
+      () async {
+    await dao.cacheServerCustomers([const CustomerModel(id: 7, name: 'Dara')]);
+    goOffline();
+    await repository.updateCustomer(
+      const CustomerModel(id: 7, name: 'Dara Sok'),
+    );
+
+    await dao.cacheServerCustomers([const CustomerModel(id: 7, name: 'Dara')]);
+
+    expect((await rows()).single.name, 'Dara Sok');
+  });
+
   test('a delete the server has already forgotten counts as done', () async {
     goOnline();
     await dao.cacheServerCustomers([const CustomerModel(id: 5, name: 'Dara')]);

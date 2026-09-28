@@ -1,6 +1,6 @@
 # Syncing in the background
 
-**Status:** Draft
+**Status:** In progress
 **Author:** Punlork
 **Updated:** 2026-09-28
 
@@ -245,7 +245,7 @@ What stays untested is the lifecycle wiring in `SyncCoordinator` and the pill's 
 
 ## Rollout
 
-1. Land the reconcile rule alone, with its tests. It changes no triggers and fixes the overwrite bug.
+1. Land the reconcile rule alone, with its tests. It changes no triggers and fixes the overwrite bug. **Done:** the skip half, in all four `cacheServer*` methods; the delete half needs a complete pull and lands with step 3.
 2. Land the engine queue, `requestSync()`, `SyncActivity` and the rejected-job rule. Nothing calls them yet except the existing `drain()` paths.
 3. Behind `Feature.backgroundSync` — on in development and staging, off in production — land non-blocking saves, the pull side with the cursor table (schema 8), `SyncCoordinator`, local-only list loads, the pill and the row icons.
 4. Run a development build on the seller's phone for a few days; read the pull logs for row counts and any unexpected deletes.

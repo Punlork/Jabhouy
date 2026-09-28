@@ -175,6 +175,75 @@ void main() {
     expect((await dao.findById(37))!.customerId, 24);
   });
 
+  group('a pull never writes over a row with a queued job', () {
+    // The server still has loan 38 unpaid: the seller's change has not
+    // reached it, because it is queued (offline here; a rejected or
+    // retrying push leaves the same state).
+    final serverCopy = LoanerModel(id: 38, amount: 500);
+
+    void serverReturns(List<LoanerModel> loans) {
+      when(
+        () => api.fetchLoaners(
+          page: any(named: 'page'),
+          limit: any(named: 'limit'),
+          searchQuery: any(named: 'searchQuery'),
+          customer: any(named: 'customer'),
+          fromDate: any(named: 'fromDate'),
+          toDate: any(named: 'toDate'),
+        ),
+      ).thenAnswer(
+        (_) async => Ok(
+          PaginatedResponse(items: loans, pagination: Pagination()),
+        ),
+      );
+    }
+
+    setUp(() async {
+      await dao.cacheServerLoaners([serverCopy]);
+    });
+
+    test('an unsent edit survives a refresh', () async {
+      goOffline();
+      await repository.updateLoaner(serverCopy.copyWith(isPaid: true));
+
+      goOnline();
+      serverReturns([serverCopy]);
+      when(() => api.updateLoaner(any())).thenAnswer(
+        (_) async => const Err(AppException('down', statusCode: 503)),
+      );
+      await repository.refreshLoaners();
+
+      final row = (await rows()).single;
+      expect(row.isPaid, isTrue, reason: 'the edit, not the server copy');
+      expect(row.syncStatus, SyncStatus.pending);
+      expect((await jobs()).single.operation, SyncOperation.update);
+    });
+
+    test('an unsent delete is not brought back by a refresh', () async {
+      goOffline();
+      await repository.deleteLoaner(serverCopy);
+
+      goOnline();
+      serverReturns([serverCopy]);
+      when(() => api.deleteLoaner(38)).thenAnswer(
+        (_) async => const Err(AppException('down', statusCode: 503)),
+      );
+      await repository.refreshLoaners();
+
+      expect((await rows()).single.isDeleted, isTrue);
+      expect((await jobs()).single.operation, SyncOperation.delete);
+    });
+
+    test('a row with no queued job still takes the server copy', () async {
+      goOnline();
+      serverReturns([serverCopy.copyWith(isPaid: true)]);
+
+      await repository.refreshLoaners();
+
+      expect((await rows()).single.isPaid, isTrue);
+    });
+  });
+
   test('a delete the server has already forgotten counts as done', () async {
     goOnline();
     await dao.cacheServerLoaners([LoanerModel(id: 6, amount: 500)]);

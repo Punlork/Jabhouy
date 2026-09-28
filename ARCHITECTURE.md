@@ -87,6 +87,7 @@ The seller edits a loan while offline, then walks back into coverage.
 Online, step 4 happens at once: each write drains straight after enqueueing when `isOnline` is true.
 
 Step 6 re-reads the row on every attempt, so a job carries no stale body: fix the code that builds it, and the queued job goes through on the next drain.
+The same fact makes pulls dangerous, so a pull skips any row with a job still queued (`AppDatabase.queuedLocalIds`): writing the server's older copy there would make the job send it.
 
 Each push ends in one of three outcomes:
 

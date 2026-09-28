@@ -86,6 +86,24 @@ void main() {
     verifyNever(() => categoryApi.createCategory(any()));
   });
 
+  test('a pull does not write over a category whose rename is queued',
+      () async {
+    await categoryDao.cacheServerCategories(
+      const [CategoryItemModel(id: 4, name: 'Drinks')],
+    );
+    goOffline();
+    await repository.updateCategory(
+      const CategoryItemModel(id: 4, name: 'Cold drinks'),
+    );
+
+    await categoryDao.cacheServerCategories(
+      const [CategoryItemModel(id: 4, name: 'Drinks')],
+    );
+
+    final row = await db.select(db.categories).getSingle();
+    expect(row.name, 'Cold drinks');
+  });
+
   test('reconciling a category repoints the items that referenced it',
       () async {
     goOnline();

@@ -112,6 +112,18 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 7;
 
+  /// The ids of [type] rows that still have a job in the outbox.
+  ///
+  /// Until that job clears, the phone's copy of the row is newer than the
+  /// server's, so a pull must leave it alone. A job leaves the outbox only
+  /// once the server confirms it, so a push in flight still counts.
+  Future<Set<String>> queuedLocalIds(SyncEntityType type) async {
+    final jobs = await (select(outboxEntries)
+          ..where((t) => t.entityType.equalsValue(type)))
+        .get();
+    return jobs.map((job) => job.localId).toSet();
+  }
+
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(

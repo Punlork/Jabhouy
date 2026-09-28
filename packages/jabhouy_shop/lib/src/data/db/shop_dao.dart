@@ -93,13 +93,25 @@ class ShopDao {
   }
 
   /// Replaces the local cache for a page pulled from the server.
+  /// Writes a page of server rows, skipping any row with a queued job.
+  ///
+  /// Writing over those would put the server's older copy where the
+  /// seller's unsent edit was, and the queued job, which re-reads the row,
+  /// would then send that older copy. A queued delete would come back.
   Future<void> cacheServerItems(List<ShopItemModel> items) {
-    return _db.batch((batch) {
-      batch.insertAll(
-        _db.shopItems,
-        items.map((i) => _companion(i, SyncStatus.synced)),
-        mode: InsertMode.insertOrReplace,
-      );
+    return _db.transaction(() async {
+      // Read inside the transaction, so an edit cannot land between the
+      // check and the write.
+      final queued = await _db.queuedLocalIds(SyncEntityType.shopItem);
+      await _db.batch((batch) {
+        batch.insertAll(
+          _db.shopItems,
+          items
+              .where((i) => !queued.contains('${i.id}'))
+              .map((i) => _companion(i, SyncStatus.synced)),
+          mode: InsertMode.insertOrReplace,
+        );
+      });
     });
   }
 

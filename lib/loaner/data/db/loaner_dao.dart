@@ -66,13 +66,25 @@ class LoanerDao {
     return row == null ? null : _toModel(row);
   }
 
+  /// Writes a page of server rows, skipping any row with a queued job.
+  ///
+  /// Writing over those would put the server's older copy where the
+  /// seller's unsent edit was, and the queued job, which re-reads the row,
+  /// would then send that older copy. A queued delete would come back.
   Future<void> cacheServerLoaners(List<LoanerModel> loaners) {
-    return _db.batch((batch) {
-      batch.insertAll(
-        _db.loaners,
-        loaners.map((l) => _companion(l, SyncStatus.synced)),
-        mode: InsertMode.insertOrReplace,
-      );
+    return _db.transaction(() async {
+      // Read inside the transaction, so an edit cannot land between the
+      // check and the write.
+      final queued = await _db.queuedLocalIds(SyncEntityType.loaner);
+      await _db.batch((batch) {
+        batch.insertAll(
+          _db.loaners,
+          loaners
+              .where((l) => !queued.contains('${l.id}'))
+              .map((l) => _companion(l, SyncStatus.synced)),
+          mode: InsertMode.insertOrReplace,
+        );
+      });
     });
   }
 

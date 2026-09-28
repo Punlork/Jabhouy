@@ -124,6 +124,18 @@ void main() {
     expect(saved.syncStatus, SyncStatus.failed);
   });
 
+  test('a pull does not write over an item whose price change is queued',
+      () async {
+    const serverCopy = ShopItemModel(id: 9, name: 'Coffee', customerPrice: 2000);
+    await dao.cacheServerItems([serverCopy]);
+    goOffline();
+    await repository.updateItem(serverCopy.copyWith(customerPrice: 2500));
+
+    await dao.cacheServerItems([serverCopy]);
+
+    expect((await rows()).single.customerPrice, 2500);
+  });
+
   test('a delete the server rejects stays on the device', () async {
     goOnline();
     await dao.cacheServerItems([const ShopItemModel(id: 7, name: 'Tea')]);
