@@ -37,7 +37,7 @@ Anything beyond those is new.
 - New code returns `Result<T>` (`Ok`/`Err`). `ApiResponse` remains only in auth, profile and one file in `lib/app`.
 - Date-only API fields use `DateTime.toIsoDate()` from `jabhouy_core`, which keeps the local day. Loans' `createdAt` is one.
 - Loan JSON nests the customer (`"customer": {"id": …}`) with no flat `customerId`.
-- Schema changes: edit `AppDatabase` in `jabhouy_core`, bump `schemaVersion` (7 now) with a migration, then `melos run gen`.
+- Schema changes: edit `AppDatabase` in `jabhouy_core`, bump `schemaVersion` (8 now) with a migration, then `melos run gen`.
 
 ## Generated code
 
