@@ -1,6 +1,6 @@
 # Architecture restructure
 
-**Status:** In progress
+**Status:** Implemented
 **Author:** Punlork
 **Updated:** 2026-09-28
 
@@ -64,6 +64,8 @@ the plan lost, the decision is recorded below rather than left as drift.
 | 4 — income slice | done | `d202623`, `6503310` |
 | 5 — `jabhouy_shop` | done, and it took three packages nobody planned | `22c5714`, `a3c7367`, `1550cfe` |
 | 6 — bloc 8→9, go_router 14→18 | done | `d886a78`, `d7b9fdc` |
+| — melos scripts, and a CI check job the release needs | done | `f1e635c` |
+| 7 — `ARCHITECTURE.md`, `CLAUDE.md`, README; **restructure closed** | done | the commit adding `ARCHITECTURE.md` |
 
 **All five features are layered and on the engine.** Phase 3 closed the
 four `syncPendingChanges()` clones; phase 4 brought income in behind the
@@ -454,7 +456,8 @@ The three decisions worth arguing about are all here — an outbox table instead
 
 ### Target layout
 
-The repository becomes a pub workspace. Dart is 3.13.1, so `workspace:` resolution is available natively and melos is not needed.
+The repository becomes a pub workspace. Dart is 3.13.1, so `workspace:` resolution is available natively and melos is not needed for it.
+Melos arrived later anyway (`f1e635c`), for a different reason: two packages must test under `dart test` and the rest under `flutter test`, and nothing ran both.
 
 ```text
 jabhouy/
