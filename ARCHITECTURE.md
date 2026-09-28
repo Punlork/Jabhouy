@@ -120,10 +120,10 @@ Drains and pulls run behind one lock in the engine, because a create landing mid
 The build-time implementation reads `--dart-define-from-file=config/features/<flavor>.json`, and a missing define reads as off.
 Every call site asks the interface, so a runtime source such as Remote Config is one new class registered in DI.
 
-Gradle decodes the same defines into a manifest placeholder, so one JSON file drives both Dart and the Android manifest.
+Gradle decodes the same defines, so one JSON file drives both Dart and the Android manifest.
 
 Income is off in production.
-With it off, home shows two tabs, `IncomeBloc` is never created (and it is the only caller of `IncomeService.initialize`, which starts capture), settings hides the device-role card, the income diagnostics route redirects home, and `BankNotificationListenerService` ships with `android:enabled="false"`.
+With it off, home shows two tabs, `IncomeBloc` is never created (and it is the only caller of `IncomeService.initialize`, which starts capture), settings hides the device-role card, the income diagnostics route redirects home, and `BankNotificationListenerService` is not in the manifest at all: Gradle merges `src/noIncome/AndroidManifest.xml`, which removes it. Disabling it was not enough, because Google Play reviews the declared manifest and blocked 1.0.21 for the listener.
 The income sync adapter stays registered, because the engine rejects a job with no adapter for good.
 
 Adding a flag is a `Feature` value, a case in `BuildTimeFeatureFlags.isEnabled` that the compiler demands, and a key in each flavor file.

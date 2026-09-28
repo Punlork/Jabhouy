@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Merged in by build.gradle when FEATURE_INCOME is off. Google Play reviews
+  the declared manifest, and rejects a notification listener that is merely
+  disabled, so the service has to leave the manifest, not just be off.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <service
+            android:name="com.pl.shop.management.BankNotificationListenerService"
+            tools:node="remove" />
+    </application>
+</manifest>
