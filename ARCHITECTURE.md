@@ -104,7 +104,7 @@ Adding a synced entity means a `SyncEntityType` value, a DAO, a `FeatureSyncAdap
 
 ## With background sync on
 
-`Feature.backgroundSync` is on in development and staging and off in production; [the plan](docs/OFFLINE_SYNC.md) has the rollout.
+`Feature.backgroundSync` is on in every flavor as of 1.0.21; [the plan](docs/OFFLINE_SYNC.md) has the rollout and the one-line rollback.
 With it on, the table above changes in three places:
 
 - **A save returns at step 2.** `_settle` calls `SyncEngine.requestSync()` and returns the local row; the list redraws from Drift when the push lands. No overlay shows.

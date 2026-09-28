@@ -67,6 +67,7 @@ fvm dart run melos run build:prod # release APK with production flags
 | staging | `lib/main_staging.dart` | [STG] Jabhouy | on |
 | production | `lib/main_production.dart` | Jabhouy | off |
 
+Background sync — saves that never wait for the server — is on in all three.
 Each flavor reads its flags from `config/features/<flavor>.json`.
 To ship or hold back a feature, change its value there; the melos scripts, fastlane lanes and VS Code launch configs already pass the file.
 [ARCHITECTURE.md](ARCHITECTURE.md#switching-a-feature-off-for-a-release) covers adding a flag.

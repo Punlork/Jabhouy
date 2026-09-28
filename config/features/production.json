@@ -1,4 +1,4 @@
 {
   "FEATURE_INCOME": false,
-  "FEATURE_BACKGROUND_SYNC": false
+  "FEATURE_BACKGROUND_SYNC": true
 }

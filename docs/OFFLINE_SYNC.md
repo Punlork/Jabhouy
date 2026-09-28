@@ -248,8 +248,8 @@ What stays untested is the lifecycle wiring in `SyncCoordinator` and the pill's 
 1. Land the reconcile rule alone, with its tests. It changes no triggers and fixes the overwrite bug. **Done:** the skip half, in all four `cacheServer*` methods; the delete half needs a complete pull and lands with step 3.
 2. Land the engine queue, `requestSync()`, `SyncActivity` and the rejected-job rule. Nothing calls them yet except the existing `drain()` paths. **Done;** `bootstrap()` releases rejected jobs at launch until `SyncCoordinator` exists.
 3. Behind `Feature.backgroundSync` — on in development and staging, off in production — land non-blocking saves, the pull side with the cursor table (schema 8), `SyncCoordinator`, local-only list loads, the pill and the row icons. **Done:** non-blocking saves (`4899612`), the pull side (`df2e54e`), `SyncCoordinator` with local-only loads (`9f3e457`), and the pill and row icons. Two departures: the pill lives in `lib/app/widget/`, not `jabhouy_ui`, because it reads `SyncEngine` and `jabhouy_ui` has no reason to depend on `jabhouy_sync`; and row icons show whatever the flag, because `syncStatus` is true in both modes. `SyncCoordinator` also calls `SyncEngine.retryNow()` on reconnect, which this plan did not name: pushes that failed on wifi without internet would otherwise sit out up to 30 minutes of backoff.
-4. Run a development build on the seller's phone for a few days; read the pull logs for row counts and any unexpected deletes.
-5. Turn the flag on in `config/features/production.json` and release.
+4. Run a development build on the seller's phone for a few days; read the pull logs for row counts and any unexpected deletes. **Done:** tested by the seller before release.
+5. Turn the flag on in `config/features/production.json` and release. **Done** in 1.0.21.
 6. One release later, delete the old save and fetch paths, the banners, and the flag.
 
 To roll back before step 6, set `FEATURE_BACKGROUND_SYNC` to `false` and rebuild.
