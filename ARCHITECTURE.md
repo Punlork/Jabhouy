@@ -95,7 +95,7 @@ Each push ends in one of three outcomes:
 | --- | --- | --- |
 | Succeeded | Deletes the job | `200` |
 | Retryable | Keeps it, records `lastError`, pushes `nextAttemptAt` back 10s, 20s, 40s … up to 30 minutes | `5xx`, `408`, `429`, no status |
-| Rejected | Keeps it with `lastError`, leaves `nextAttemptAt` alone | `400` validation error |
+| Rejected | Keeps it with `lastError` and parks it until the next launch, which calls `releaseRejected()` | `400` validation error |
 
 The backoff numbers are `BackoffPolicy`'s defaults (base 5s, cap 30 min) doubled from the first retry, because `_reschedule` passes `attemptCount + 1`.
 A job whose `dependsOnLocalId` is still queued waits, which is what stops a shop item reaching the server before the offline-created category it is filed under.
@@ -138,8 +138,6 @@ The analyzer reads the generated interface and calls `syncMessage: null` redunda
 
 - **Local ids can collide.** Four repositories mint offline ids as `-(millis % 1000000)`, which repeats every 16.7 minutes; the UUID `localId` column the plan called for is not built.
 - **Clock skew decides conflicts.** Server-timestamp last-write-wins needs a server-side ordering decision nobody has made.
-- **A rejected job is re-sent on every drain.** Its schedule never advances, so a job the server will never accept costs one request per drain, forever, until the row changes.
-- **`BackoffPolicy`'s comment says the first retry waits 5s;** the engine waits 10s.
 - **No routing tests.** `app_routes.dart` and its `redirect` are verified by running the app.
 - **No migration tests.** Schema 7 has no committed snapshots.
 - **`ApiResponse` survives** in auth, profile and one file in `lib/app`; the layered features speak `Result`.

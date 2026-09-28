@@ -246,7 +246,7 @@ What stays untested is the lifecycle wiring in `SyncCoordinator` and the pill's 
 ## Rollout
 
 1. Land the reconcile rule alone, with its tests. It changes no triggers and fixes the overwrite bug. **Done:** the skip half, in all four `cacheServer*` methods; the delete half needs a complete pull and lands with step 3.
-2. Land the engine queue, `requestSync()`, `SyncActivity` and the rejected-job rule. Nothing calls them yet except the existing `drain()` paths.
+2. Land the engine queue, `requestSync()`, `SyncActivity` and the rejected-job rule. Nothing calls them yet except the existing `drain()` paths. **Done;** `bootstrap()` releases rejected jobs at launch until `SyncCoordinator` exists.
 3. Behind `Feature.backgroundSync` — on in development and staging, off in production — land non-blocking saves, the pull side with the cursor table (schema 8), `SyncCoordinator`, local-only list loads, the pill and the row icons.
 4. Run a development build on the seller's phone for a few days; read the pull logs for row counts and any unexpected deletes.
 5. Turn the flag on in `config/features/production.json` and release.

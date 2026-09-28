@@ -5,6 +5,42 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/src/backoff.dart';
 import 'package:jabhouy_sync/src/transport.dart';
 
+/// What the engine is doing, for the sync indicator.
+///
+/// Whether the device is offline is the app's to know, not the engine's;
+/// the indicator combines the two.
+class SyncActivity {
+  const SyncActivity({
+    this.pushing = false,
+    this.waiting = 0,
+    this.failing = 0,
+  });
+
+  /// A drain is running.
+  final bool pushing;
+
+  /// Jobs still in the outbox, failing ones included.
+  final int waiting;
+
+  /// Jobs whose last attempt failed: retrying, or rejected until relaunch.
+  final int failing;
+
+  bool _sameAs(SyncActivity other) =>
+      other.pushing == pushing &&
+      other.waiting == waiting &&
+      other.failing == failing;
+
+  @override
+  String toString() =>
+      'SyncActivity(pushing: $pushing, waiting: $waiting, failing: $failing)';
+}
+
+/// When a rejected job is next due: never, until [SyncEngine.releaseRejected].
+///
+/// The server refused these bytes, so sending them again on every drain
+/// only repeats the refusal; a new build may fix what built them.
+final _parked = DateTime(9999);
+
 /// Drains the outbox.
 ///
 /// Generalises `firebase_income_sync_service.dart`, the one sync path in the
@@ -43,6 +79,34 @@ class SyncEngine {
   /// Bounded, like income's `_rememberSyncedFingerprint` at 200 entries: an
   /// unbounded set would grow for the life of the process.
   final _recentlySynced = <String>[];
+
+  /// The drain in progress, if any. Only one runs at a time.
+  Future<int>? _running;
+
+  /// Set when a drain is asked for while one runs; the running one loops
+  /// once more instead of a second starting beside it.
+  var _again = false;
+
+  final _activity = StreamController<SyncActivity>.broadcast();
+  var _lastActivity = const SyncActivity();
+
+  /// The current activity, then every change.
+  Stream<SyncActivity> get activity async* {
+    yield _lastActivity;
+    yield* _activity.stream;
+  }
+
+  Future<void> _publish() async {
+    final jobs = await _db.select(_db.outboxEntries).get();
+    final next = SyncActivity(
+      pushing: _running != null,
+      waiting: jobs.length,
+      failing: jobs.where((job) => job.lastError != null).length,
+    );
+    if (next._sameAs(_lastActivity)) return;
+    _lastActivity = next;
+    _activity.add(next);
+  }
 
   /// Queues a write, or folds it into the job already waiting for that row.
   ///
@@ -83,6 +147,7 @@ class SyncEngine {
             ],
           ),
         );
+    unawaited(_publish());
     _diagnostics.log(
       'enqueued',
       data: {
@@ -116,13 +181,45 @@ class SyncEngine {
         .toList();
   }
 
+  /// Starts a drain without waiting for it: what a save calls.
+  void requestSync() => unawaited(drain());
+
   /// Pushes due jobs until no further progress is possible.
   ///
+  /// A call while a drain runs joins it and makes it loop once more, so a
+  /// job queued mid-drain is not left behind and no job is pushed by two
+  /// drains at once.
+  Future<int> drain() {
+    final running = _running;
+    if (running != null) {
+      _again = true;
+      return running;
+    }
+    return _running = _run();
+  }
+
+  Future<int> _run() async {
+    var total = 0;
+    try {
+      unawaited(_publish());
+      do {
+        _again = false;
+        total += await _drainOnce();
+      } while (_again);
+    } finally {
+      // Cleared in the same step as the last `_again` check, so a call
+      // cannot slip between them and be dropped.
+      _running = null;
+    }
+    await _publish();
+    return total;
+  }
+
   /// Repeats because clearing a job makes anything that depended on it
   /// eligible: a category leaving the queue releases its shop items in the
   /// same drain rather than the next one. Each pass that clears nothing
   /// ends the loop, and jobs only ever leave the queue, so it terminates.
-  Future<int> drain() async {
+  Future<int> _drainOnce() async {
     var total = 0;
     while (true) {
       var cleared = 0;
@@ -131,6 +228,17 @@ class SyncEngine {
       }
       if (cleared == 0) return total;
       total += cleared;
+    }
+  }
+
+  /// Makes every rejected job due once more. The app calls this at launch,
+  /// so a build that fixes how a body is made gets to send it.
+  Future<void> releaseRejected() async {
+    final released = await (_db.update(_db.outboxEntries)
+          ..where((t) => t.nextAttemptAt.equals(_parked)))
+        .write(OutboxEntriesCompanion(nextAttemptAt: Value(_clock())));
+    if (released > 0) {
+      _diagnostics.log('rejected released', data: {'count': released});
     }
   }
 
@@ -148,6 +256,7 @@ class SyncEngine {
       _inFlight.remove(entry.idempotencyKey);
     }));
 
+    unawaited(_publish());
     switch (outcome) {
       case SyncPushSucceeded():
         _remember(entry.idempotencyKey);
@@ -162,8 +271,8 @@ class SyncEngine {
         return false;
 
       case SyncPushRejected(:final error):
-        // Retrying sends identical bytes, so stop advancing the schedule
-        // but keep the job and its reason rather than dropping it.
+        // Keep the job and its reason rather than dropping it, and park it:
+        // the same bytes would be refused again on every drain.
         await _recordRejection(entry, error);
         return false;
     }
@@ -195,6 +304,7 @@ class SyncEngine {
       OutboxEntriesCompanion(
         attemptCount: Value(entry.attemptCount + 1),
         lastError: Value(error),
+        nextAttemptAt: Value(_parked),
       ),
     );
     _diagnostics.log('rejected', data: {'id': entry.id, 'error': error});

@@ -1,5 +1,7 @@
 // Runs under `dart test`. A Flutter import anywhere in this package stops
 // the suite loading, which is what keeps the engine platform-free.
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
@@ -18,6 +20,26 @@ class _ScriptedTransport implements SyncTransport {
     return outcomes.isEmpty
         ? const SyncPushSucceeded()
         : outcomes.removeAt(0);
+  }
+}
+
+/// A transport that holds each push open until the test lets it go.
+class _HeldTransport implements SyncTransport {
+  final pushed = <String>[];
+  final _gates = <Completer<SyncPushOutcome>>[];
+
+  @override
+  Future<SyncPushOutcome> push(OutboxEntry entry) {
+    pushed.add(entry.localId);
+    final gate = Completer<SyncPushOutcome>();
+    _gates.add(gate);
+    return gate.future;
+  }
+
+  void releaseAll() {
+    for (final gate in _gates) {
+      if (!gate.isCompleted) gate.complete(const SyncPushSucceeded());
+    }
   }
 }
 
@@ -191,5 +213,127 @@ void main() {
     expect(policy.delayFor(2), const Duration(seconds: 40));
     expect(policy.delayFor(3), const Duration(minutes: 1));
     expect(policy.delayFor(99), const Duration(minutes: 1));
+  });
+
+  group('one drain at a time', () {
+    test('a second drain joins the first instead of pushing twice',
+        () async {
+      final transport = _HeldTransport();
+      final engine = SyncEngine(
+        database: db,
+        transport: transport,
+        clock: () => now,
+      );
+      await enqueueItem(engine, 'item-1');
+
+      final first = engine.drain();
+      await pumpEventQueue();
+      final second = engine.drain();
+      transport.releaseAll();
+      await Future.wait([first, second]);
+
+      expect(transport.pushed, ['item-1']);
+    });
+
+    test('a job queued mid-drain is pushed by that drain', () async {
+      final transport = _HeldTransport();
+      final engine = SyncEngine(
+        database: db,
+        transport: transport,
+        clock: () => now,
+      );
+      await enqueueItem(engine, 'item-1');
+      final drained = engine.drain();
+      await pumpEventQueue();
+
+      // A save while the first push is still on the wire.
+      await enqueueItem(engine, 'item-2');
+      engine.requestSync();
+      transport.releaseAll();
+      await pumpEventQueue();
+      transport.releaseAll();
+      await drained;
+
+      expect(transport.pushed, ['item-1', 'item-2']);
+      expect(await db.select(db.outboxEntries).get(), isEmpty);
+    });
+  });
+
+  group('a rejected job', () {
+    test('is not sent again on the next drain', () async {
+      final transport = _ScriptedTransport([
+        const SyncPushRejected('400 customerId required'),
+      ]);
+      final engine = engineWith(transport);
+      await enqueueItem(engine, 'loan-37');
+
+      await engine.drain();
+      await engine.drain();
+
+      expect(transport.pushed, hasLength(1));
+      expect(
+        (await db.select(db.outboxEntries).getSingle()).lastError,
+        '400 customerId required',
+      );
+    });
+
+    test('is sent once more after the next launch releases it', () async {
+      final transport = _ScriptedTransport([
+        const SyncPushRejected('400'),
+        const SyncPushSucceeded(),
+      ]);
+      final engine = engineWith(transport);
+      await enqueueItem(engine, 'loan-37');
+      await engine.drain();
+
+      await engine.releaseRejected();
+      await engine.drain();
+
+      expect(transport.pushed, hasLength(2));
+      expect(await db.select(db.outboxEntries).get(), isEmpty);
+    });
+
+    test('is due again as soon as its row is edited', () async {
+      final transport = _ScriptedTransport([
+        const SyncPushRejected('400'),
+        const SyncPushSucceeded(),
+      ]);
+      final engine = engineWith(transport);
+      await enqueueItem(engine, 'loan-37');
+      await engine.drain();
+
+      await engine.enqueue(
+        entityType: SyncEntityType.shopItem,
+        localId: 'loan-37',
+        operation: SyncOperation.update,
+        idempotencyKey: 'fp-loan-37-edit',
+      );
+      await engine.drain();
+
+      expect(transport.pushed, hasLength(2));
+    });
+  });
+
+  test('activity counts what is waiting and what is failing', () async {
+    final transport = _ScriptedTransport([
+      const SyncPushRejected('400'),
+      const SyncPushSucceeded(),
+    ]);
+    final engine = engineWith(transport);
+    final seen = <SyncActivity>[];
+    final subscription = engine.activity.listen(seen.add);
+
+    await enqueueItem(engine, 'item-1');
+    await enqueueItem(engine, 'item-2');
+    await engine.drain();
+    await pumpEventQueue();
+    await subscription.cancel();
+
+    expect(seen.first.waiting, 0, reason: 'starts from the current state');
+    expect(seen.any((a) => a.pushing), isTrue);
+    final last = seen.last;
+    expect(last.pushing, isFalse);
+    expect(last.waiting, 1);
+    expect(last.failing, 1);
   });
 }

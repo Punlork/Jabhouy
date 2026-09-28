@@ -12,7 +12,10 @@ class BackoffPolicy {
   final Duration base;
   final Duration max;
 
-  /// Delay after [attemptCount] failures. The first failure waits [base].
+  /// Delay after [attemptCount] failures: [base] doubled [attemptCount] times.
+  ///
+  /// The engine passes the count including the attempt that just failed, so
+  /// its first retry waits twice [base].
   Duration delayFor(int attemptCount) {
     if (attemptCount <= 0) return base;
     // Shifting past 62 overflows; the cap bites long before that anyway.
