@@ -3,6 +3,8 @@ analyzer:
     lines_longer_than_80_chars: ignore
   exclude:
     - build/**
+    # Generated; its lints are the generator's to fix, not ours.
+    - "**/*.g.dart"
     - android/**
     - ios/**
     - web/**

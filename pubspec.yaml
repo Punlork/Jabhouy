@@ -22,6 +22,7 @@ dependencies:
   cloud_firestore: ^6.2.0
   collection: ^1.19.1
   connectivity_plus: ^7.1.0
+  copy_with_extension: ^18.0.0
   dio: ^5.8.0+1
   drift: ^2.16.0
   dropdown_button2: ^2.3.9
@@ -79,6 +80,7 @@ dependencies:
 dev_dependencies:
   bloc_test: ^10.0.0
   build_runner: ^2.4.0
+  copy_with_extension_gen: ^18.0.0
   drift_dev: ^2.16.0
   flutter_test:
     sdk: flutter

@@ -11,6 +11,7 @@ class CustomerInitial extends CustomerState {}
 
 class CustomerLoading extends CustomerState {}
 
+@CopyWith()
 class CustomerLoaded extends CustomerState {
   const CustomerLoaded(
     this.customers, {
@@ -21,20 +22,6 @@ class CustomerLoaded extends CustomerState {
   final List<CustomerModel> customers;
   final bool isOffline;
   final String? syncMessage;
-
-  CustomerLoaded copyWith({
-    List<CustomerModel>? customers,
-    bool? isOffline,
-    Object? syncMessage = _customerSyncMessageUnset,
-  }) {
-    return CustomerLoaded(
-      customers ?? this.customers,
-      isOffline: isOffline ?? this.isOffline,
-      syncMessage: identical(syncMessage, _customerSyncMessageUnset)
-          ? this.syncMessage
-          : syncMessage as String?,
-    );
-  }
 
   @override
   List<Object?> get props => [customers, isOffline, syncMessage];

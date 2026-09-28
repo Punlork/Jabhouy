@@ -1,7 +1,11 @@
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 
+part 'shop_item_model.g.dart';
+
+@CopyWith()
 class ShopItemModel extends Equatable {
   const ShopItemModel({
     required this.id,
@@ -120,33 +124,4 @@ class ShopItemModel extends Equatable {
         isDeleted,
       ];
 
-  ShopItemModel copyWith({
-    int? id,
-    String? name,
-    int? defaultPrice,
-    int? customerPrice,
-    int? sellerPrice,
-    String? note,
-    String? imageUrl,
-    CategoryItemModel? category,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    SyncStatus? syncStatus,
-    bool? isDeleted,
-  }) {
-    return ShopItemModel(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      defaultPrice: defaultPrice ?? this.defaultPrice,
-      customerPrice: customerPrice ?? this.customerPrice,
-      sellerPrice: sellerPrice ?? this.sellerPrice,
-      note: note ?? this.note,
-      imageUrl: imageUrl ?? this.imageUrl,
-      category: category ?? this.category,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      syncStatus: syncStatus ?? this.syncStatus,
-      isDeleted: isDeleted ?? this.isDeleted,
-    );
-  }
 }

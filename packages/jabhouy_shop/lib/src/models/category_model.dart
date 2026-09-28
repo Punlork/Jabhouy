@@ -1,7 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
+part 'category_model.g.dart';
+
+@CopyWith()
 class CategoryItemModel extends Equatable {
   const CategoryItemModel({
     required this.id,
@@ -27,20 +31,6 @@ class CategoryItemModel extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {'name': name};
-  }
-
-  CategoryItemModel copyWith({
-    int? id,
-    String? name,
-    SyncStatus? syncStatus,
-    bool? isDeleted,
-  }) {
-    return CategoryItemModel(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      syncStatus: syncStatus ?? this.syncStatus,
-      isDeleted: isDeleted ?? this.isDeleted,
-    );
   }
 
   @override

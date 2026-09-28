@@ -1,8 +1,4 @@
-
 part of 'shop_bloc.dart';
-
-const _shopCategoryFilterUnset = Object();
-const _shopSyncMessageUnset = Object();
 
 sealed class ShopState extends Equatable {
   const ShopState();
@@ -19,6 +15,7 @@ class ShopLoading extends ShopState {
   const ShopLoading();
 }
 
+@CopyWith()
 class ShopLoaded extends ShopState {
   const ShopLoaded({
     required this.paginatedItems,
@@ -46,28 +43,6 @@ class ShopLoaded extends ShopState {
       .cast<CategoryItemModel>();
 
   Pagination get pagination => paginatedItems.pagination;
-
-  ShopLoaded copyWith({
-    PaginatedResponse<ShopItemModel>? paginatedItems,
-    String? searchQuery,
-    Object? categoryFilter = _shopCategoryFilterUnset,
-    bool? isFiltering,
-    bool? isOffline,
-    Object? syncMessage = _shopSyncMessageUnset,
-  }) {
-    return ShopLoaded(
-      paginatedItems: paginatedItems ?? this.paginatedItems,
-      searchQuery: searchQuery ?? this.searchQuery,
-      categoryFilter: identical(categoryFilter, _shopCategoryFilterUnset)
-          ? this.categoryFilter
-          : categoryFilter as CategoryItemModel?,
-      isFiltering: isFiltering ?? this.isFiltering,
-      isOffline: isOffline ?? this.isOffline,
-      syncMessage: identical(syncMessage, _shopSyncMessageUnset)
-          ? this.syncMessage
-          : syncMessage as String?,
-    );
-  }
 
   @override
   List<Object?> get props => [

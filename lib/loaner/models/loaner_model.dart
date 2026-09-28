@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 
@@ -9,6 +10,9 @@ import 'package:intl/intl.dart';
 import 'package:jabhouy/customer/models/customer_model.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
+part 'loaner_model.g.dart';
+
+@CopyWith()
 class LoanerModel extends Equatable {
   LoanerModel({
     required this.id,
@@ -92,29 +96,4 @@ class LoanerModel extends Equatable {
         isDeleted,
       ];
 
-  LoanerModel copyWith({
-    int? id,
-    int? customerId,
-    int? amount,
-    String? note,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    CustomerModel? customer,
-    bool? isPaid,
-    SyncStatus? syncStatus,
-    bool? isDeleted,
-  }) {
-    return LoanerModel(
-      id: id ?? this.id,
-      customerId: customerId ?? this.customerId,
-      amount: amount ?? this.amount,
-      note: note ?? this.note,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      customer: customer ?? this.customer,
-      isPaid: isPaid ?? this.isPaid,
-      syncStatus: syncStatus ?? this.syncStatus,
-      isDeleted: isDeleted ?? this.isDeleted,
-    );
-  }
 }

@@ -1,7 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:jabhouy_core/src/models/casts.dart';
 
+part 'pagination.g.dart';
+
+@CopyWith()
 class Pagination {
   Pagination({
     this.total,
@@ -34,21 +38,9 @@ class Pagination {
     };
   }
 
-  Pagination copyWith({
-    int? total,
-    int? page,
-    int? limit,
-    int? totalPage,
-  }) {
-    return Pagination(
-      total: total ?? this.total,
-      page: page ?? this.page,
-      limit: limit ?? this.limit,
-      totalPage: totalPage ?? this.totalPage,
-    );
-  }
 }
 
+@CopyWith()
 class PaginatedResponse<T> {
   PaginatedResponse({
     required this.items,
@@ -66,13 +58,4 @@ class PaginatedResponse<T> {
   final List<T> items;
   final Pagination pagination;
 
-  PaginatedResponse<T> copyWith({
-    List<T>? items,
-    Pagination? pagination,
-  }) {
-    return PaginatedResponse<T>(
-      items: items ?? this.items,
-      pagination: pagination ?? this.pagination,
-    );
-  }
 }

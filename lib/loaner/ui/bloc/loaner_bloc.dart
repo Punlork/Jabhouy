@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/loaner/loaner.dart';
@@ -14,6 +15,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 part 'loaner_event.dart';
 part 'loaner_state.dart';
+part 'loaner_bloc.g.dart';
 
 extension ShopStateExtension on LoanerState {
   LoanerLoaded? get asLoaded =>
@@ -206,6 +208,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
             toDate: newToDate,
             loanerFilter: newLoanerFilter,
             isOffline: false,
+            // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
             syncMessage: null,
           ),
         );
@@ -367,6 +370,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
             pagination: value.pagination,
           ),
           isOffline: false,
+          // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
           syncMessage: null,
         ),
       );

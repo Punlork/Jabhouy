@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
@@ -8,6 +9,7 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 part 'category_event.dart';
 part 'category_state.dart';
+part 'category_bloc.g.dart';
 
 extension CategoryStateExtension on CategoryState {
   CategoryLoaded? get asLoaded => this is CategoryLoaded ? this as CategoryLoaded : null;

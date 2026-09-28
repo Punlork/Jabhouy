@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/income/income.dart';
@@ -9,11 +10,11 @@ import 'package:stream_transform/stream_transform.dart';
 
 part 'income_event.dart';
 part 'income_state.dart';
+part 'income_bloc.g.dart';
 
 const _incomeDateUnset = Object();
 const _incomeBankUnset = Object();
 const _incomeRecordUnset = Object();
-const _incomeStatusUnset = Object();
 
 extension IncomeStateExtension on IncomeState {
   IncomeLoaded? get asLoaded => this is IncomeLoaded ? this as IncomeLoaded : null;

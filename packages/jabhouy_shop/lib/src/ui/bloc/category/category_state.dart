@@ -15,20 +15,13 @@ class CategoryLoading extends CategoryState {
   const CategoryLoading();
 }
 
+@CopyWith()
 class CategoryLoaded extends CategoryState {
   const CategoryLoaded({
     required this.items,
   });
 
   final List<CategoryItemModel> items;
-
-  CategoryLoaded copyWith({
-    List<CategoryItemModel>? items,
-  }) {
-    return CategoryLoaded(
-      items: items ?? this.items,
-    );
-  }
 
   @override
   List<Object?> get props => [

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
@@ -8,8 +9,7 @@ import 'package:jabhouy_net/jabhouy_net.dart';
 
 part 'customer_event.dart';
 part 'customer_state.dart';
-
-const _customerSyncMessageUnset = Object();
+part 'customer_bloc.g.dart';
 
 extension CustomerStateExtension on CustomerState {
   CustomerLoaded? get asLoaded =>
@@ -80,6 +80,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     if (result.isOk) {
       final latestState = state.asLoaded;
       if (latestState != null) {
+        // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
         emit(latestState.copyWith(isOffline: false, syncMessage: null));
       }
       return;
@@ -212,6 +213,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     }
 
     if (result.isOk) {
+      // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
       emit(latestState.copyWith(isOffline: false, syncMessage: null));
       return;
     }

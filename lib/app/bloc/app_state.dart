@@ -23,6 +23,7 @@ enum DeviceRole {
   }
 }
 
+@CopyWith()
 class AppState extends Equatable {
   const AppState({
     required this.locale,
@@ -38,26 +39,6 @@ class AppState extends Equatable {
   final bool isAppLogCaptureEnabled;
   final bool isNetworkLogCaptureEnabled;
   final DeviceRole deviceRole;
-
-  AppState copyWith({
-    Locale? locale,
-    bool? isGridView,
-    bool? isDarkMode,
-    bool? isAppLogCaptureEnabled,
-    bool? isNetworkLogCaptureEnabled,
-    DeviceRole? deviceRole,
-  }) {
-    return AppState(
-      locale: locale ?? this.locale,
-      isGridView: isGridView ?? this.isGridView,
-      isDarkMode: isDarkMode ?? this.isDarkMode,
-      isAppLogCaptureEnabled:
-          isAppLogCaptureEnabled ?? this.isAppLogCaptureEnabled,
-      isNetworkLogCaptureEnabled:
-          isNetworkLogCaptureEnabled ?? this.isNetworkLogCaptureEnabled,
-      deviceRole: deviceRole ?? this.deviceRole,
-    );
-  }
 
   @override
   List<Object?> get props => [

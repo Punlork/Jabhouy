@@ -11,6 +11,7 @@ class IncomeLoading extends IncomeState {
   const IncomeLoading();
 }
 
+@CopyWith()
 class IncomeLoaded extends IncomeState {
   const IncomeLoaded({
     required this.items,
@@ -39,37 +40,6 @@ class IncomeLoaded extends IncomeState {
   }
 
   IncomeSummary get summary => IncomeSummary.fromItems(items);
-
-  IncomeLoaded copyWith({
-    List<BankNotificationModel>? items,
-    String? searchQuery,
-    Object? fromDate = _incomeDateUnset,
-    Object? toDate = _incomeDateUnset,
-    Object? bankFilter = _incomeBankUnset,
-    Object? recordFilter = _incomeRecordUnset,
-    Object? trackingStatus = _incomeStatusUnset,
-  }) {
-    return IncomeLoaded(
-      items: items ?? this.items,
-      searchQuery: searchQuery ?? this.searchQuery,
-      fromDate: identical(fromDate, _incomeDateUnset)
-          ? this.fromDate
-          : fromDate as DateTime?,
-      toDate: identical(toDate, _incomeDateUnset)
-          ? this.toDate
-          : toDate as DateTime?,
-      bankFilter: identical(bankFilter, _incomeBankUnset)
-          ? this.bankFilter
-          : bankFilter as BankApp?,
-      recordFilter: identical(recordFilter, _incomeRecordUnset)
-          ? this.recordFilter
-          : recordFilter as NotificationRecordFilter? ??
-              NotificationRecordFilter.all,
-      trackingStatus: identical(trackingStatus, _incomeStatusUnset)
-          ? this.trackingStatus
-          : trackingStatus as NotificationTrackingStatus?,
-    );
-  }
 
   @override
   List<Object?> get props => [

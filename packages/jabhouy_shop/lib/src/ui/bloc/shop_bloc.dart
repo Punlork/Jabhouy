@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +14,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 part 'shop_event.dart';
 part 'shop_state.dart';
+part 'shop_bloc.g.dart';
 
 extension ShopStateExtension on ShopState {
   ShopLoaded? get asLoaded => this is ShopLoaded ? this as ShopLoaded : null;
@@ -342,6 +344,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
             searchQuery: newSearchQuery,
             isFiltering: false,
             isOffline: false,
+            // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
             syncMessage: null,
           ),
         );
@@ -433,6 +436,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
           ),
           isFiltering: false,
           isOffline: false,
+          // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
           syncMessage: null,
         ),
       );
