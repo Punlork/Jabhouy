@@ -18,6 +18,9 @@ Future<void> setupDependencies() async {
   final apiService = ApiService();
   await apiService.cookies.initCookies();
   getIt
+    // Read through the interface so a runtime source can replace this
+    // one line; see FeatureFlags.
+    ..registerSingleton<FeatureFlags>(const BuildTimeFeatureFlags())
     ..registerSingleton<ApiService>(apiService)
     ..registerSingleton<AppLogService>(AppLogService.instance)
     ..registerSingleton<NetworkInspectorService>(
@@ -73,6 +76,8 @@ Future<void> setupDependencies() async {
           CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>()),
           CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>()),
           LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>()),
+          // Registered even when Feature.income is off: a job queued
+          // before the flag flipped would otherwise be rejected for good.
           IncomeSyncAdapter(
             getIt<IncomeDao>(),
             getIt<FirebaseIncomeSyncService>().syncNotification,

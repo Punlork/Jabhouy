@@ -10,9 +10,9 @@ flutter test test/income_test.dart
 flutter test test/income_test.dart --plain-name "IncomeSummary groups income by bank and totals expenses"
 patrol test --flavor development
 patrol test -t patrol_test/example_test.dart --flavor development
-flutter build apk --flavor development --target lib/main_development.dart
-flutter build apk --flavor staging --target lib/main_staging.dart
-flutter build apk --flavor production --target lib/main_production.dart
+flutter build apk --flavor development --target lib/main_development.dart --dart-define-from-file=config/features/development.json
+flutter build apk --flavor staging --target lib/main_staging.dart --dart-define-from-file=config/features/staging.json
+flutter build apk --flavor production --target lib/main_production.dart --dart-define-from-file=config/features/production.json
 cd android && bundle exec fastlane build_dev
 cd android && bundle exec fastlane build_release
 cd ios && bundle exec fastlane build_dev

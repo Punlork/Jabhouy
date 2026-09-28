@@ -22,6 +22,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   int _diagnosticsTapCount = 0;
   late final Future<String> _appVersionFuture;
+  final _isIncomeEnabled = getIt<FeatureFlags>().isEnabled(Feature.income);
 
   @override
   void initState() {
@@ -43,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
     context.pushNamed(
       AppRoutes.appDiagnostics,
       extra: {
-        'incomeBloc': context.read<IncomeBloc>(),
+        if (_isIncomeEnabled) 'incomeBloc': context.read<IncomeBloc>(),
       },
     );
   }
@@ -177,80 +178,84 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              BlocBuilder<AppBloc, AppState>(
-                builder: (context, state) {
-                  final isMainDevice = state.deviceRole.isMain;
-                  return _SettingsCard(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _SettingsSvgIcon(
-                                assetPath: isMainDevice
-                                    ? AppAssets.actionDeviceMain
-                                    : AppAssets.actionDeviceSub,
+              // The main/sub device role only decides which phone captures
+              // bank notifications, so it goes with the income feature.
+              if (_isIncomeEnabled) ...[
+                const SizedBox(height: 16),
+                BlocBuilder<AppBloc, AppState>(
+                  builder: (context, state) {
+                    final isMainDevice = state.deviceRole.isMain;
+                    return _SettingsCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _SettingsSvgIcon(
+                                  assetPath: isMainDevice
+                                      ? AppAssets.actionDeviceMain
+                                      : AppAssets.actionDeviceSub,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.deviceRole,
+                                        style: AppTextTheme.body,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        isMainDevice
+                                            ? l10n.deviceRoleMainDescription
+                                            : l10n.deviceRoleSubDescription,
+                                        style: AppTextTheme.caption.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              l10n.singleMainDeviceHint,
+                              style: AppTextTheme.caption.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      l10n.deviceRole,
-                                      style: AppTextTheme.body,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      isMainDevice
-                                          ? l10n.deviceRoleMainDescription
-                                          : l10n.deviceRoleSubDescription,
-                                      style: AppTextTheme.caption.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                            ),
+                            const SizedBox(height: 16),
+                            FilledButton.icon(
+                              onPressed: () => _toggleDeviceRole(
+                                isMainDevice: isMainDevice,
+                                l10n: l10n,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            l10n.singleMainDeviceHint,
-                            style: AppTextTheme.caption.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                              icon: _SettingsSvgIcon(
+                                assetPath: isMainDevice
+                                    ? AppAssets.actionRefresh
+                                    : AppAssets.actionProtect,
+                                color: colorScheme.onPrimary,
+                                size: 20,
+                              ),
+                              label: Text(
+                                isMainDevice
+                                    ? l10n.releaseMainDevice
+                                    : l10n.setAsMainDevice,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: () => _toggleDeviceRole(
-                              isMainDevice: isMainDevice,
-                              l10n: l10n,
-                            ),
-                            icon: _SettingsSvgIcon(
-                              assetPath: isMainDevice
-                                  ? AppAssets.actionRefresh
-                                  : AppAssets.actionProtect,
-                              color: colorScheme.onPrimary,
-                              size: 20,
-                            ),
-                            label: Text(
-                              isMainDevice
-                                  ? l10n.releaseMainDevice
-                                  : l10n.setAsMainDevice,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
+              ],
               const SizedBox(height: 16),
               _SettingsCard(
                 child: Column(

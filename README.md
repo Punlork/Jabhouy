@@ -86,26 +86,26 @@ Make sure the backend base URL and any required runtime configuration are availa
 
 ```sh
 # Development
-flutter run --flavor development --target lib/main_development.dart
+flutter run --flavor development --target lib/main_development.dart --dart-define-from-file=config/features/development.json
 
 # Staging
-flutter run --flavor staging --target lib/main_staging.dart
+flutter run --flavor staging --target lib/main_staging.dart --dart-define-from-file=config/features/staging.json
 
 # Production
-flutter run --flavor production --target lib/main_production.dart
+flutter run --flavor production --target lib/main_production.dart --dart-define-from-file=config/features/production.json
 ```
 
 ### 4. Build a flavor
 
 ```sh
 # Development
-flutter build apk --flavor development --target lib/main_development.dart
+flutter build apk --flavor development --target lib/main_development.dart --dart-define-from-file=config/features/development.json
 
 # Staging
-flutter build apk --flavor staging --target lib/main_staging.dart
+flutter build apk --flavor staging --target lib/main_staging.dart --dart-define-from-file=config/features/staging.json
 
 # Production
-flutter build apk --flavor production --target lib/main_production.dart
+flutter build apk --flavor production --target lib/main_production.dart --dart-define-from-file=config/features/production.json
 ```
 
 ### 5. Bump app version

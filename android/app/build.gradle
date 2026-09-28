@@ -54,6 +54,22 @@ def resolveStoreFile = { envKey, propertyKey, fallbackPath = null ->
     return rawPath ? file(rawPath) : null
 }
 
+// Flutter hands `--dart-define`s to Gradle base64-encoded and comma-joined.
+// Decoding them here lets native code read the same feature flags as Dart,
+// from the same config/features/<flavor>.json, instead of a second copy.
+def dartDefines = [:]
+if (project.hasProperty('dart-defines')) {
+    project.property('dart-defines').split(',').each { encoded ->
+        def pair = new String(encoded.decodeBase64(), 'UTF-8').split('=', 2)
+        if (pair.length == 2) {
+            dartDefines[pair[0]] = pair[1]
+        }
+    }
+}
+
+// Missing means off, matching BuildTimeFeatureFlags.
+def isFeatureEnabled = { key -> dartDefines[key] == 'true' }
+
 android {
     namespace "com.pl.shop.management"
     compileSdkVersion flutter.compileSdkVersion
@@ -82,6 +98,7 @@ android {
         // Patrol UI testing: https://patrol.leancode.pl/documentation/native/android-setup
         testInstrumentationRunner "pl.leancode.patrol.PatrolJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
+        manifestPlaceholders += [featureIncome: isFeatureEnabled('FEATURE_INCOME').toString()]
     }
 
     signingConfigs {

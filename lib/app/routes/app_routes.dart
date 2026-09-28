@@ -40,8 +40,12 @@ class AppRouter {
     '${AppRoutes.home.toPath}${AppRoutes.settings.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.customer.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.incomeDiagnostics.toPath}',
+    // Left out when income is off, so the redirect below sends a stale
+    // link home instead of to a page with no bloc.
+    if (_isIncomeEnabled) '${AppRoutes.home.toPath}${AppRoutes.incomeDiagnostics.toPath}',
   };
+
+  static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
 
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.home.toPath,
@@ -98,12 +102,15 @@ class AppRouter {
                     getIt<ConnectivityService>(),
                   ),
                 ),
-                BlocProvider(
-                  create: (context) => IncomeBloc(
-                    getIt<IncomeService>(),
-                    getIt<FcmService>(),
+                // No bloc, no capture: IncomeBloc is the only caller of
+                // IncomeService.initialize, which starts the listener.
+                if (_isIncomeEnabled)
+                  BlocProvider(
+                    create: (context) => IncomeBloc(
+                      getIt<IncomeService>(),
+                      getIt<FcmService>(),
+                    ),
                   ),
-                ),
               ],
               child: const HomePage(),
             ),
@@ -218,7 +225,7 @@ class AppRouter {
               final categoryBloc = extra?['category'] as CategoryBloc? ?? context.read<CategoryBloc>();
               final shopBloc = extra?['shop'] as ShopBloc? ?? context.read<ShopBloc>();
               final customerBloc = extra?['customerBloc'] as CustomerBloc? ?? context.read<CustomerBloc>();
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? context.read<IncomeBloc>();
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
               final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ?? context.read<SignoutBloc>();
               GlobalContext.currentContext = context;
 
@@ -229,7 +236,7 @@ class AppRouter {
                     BlocProvider.value(value: categoryBloc),
                     BlocProvider.value(value: shopBloc),
                     BlocProvider.value(value: customerBloc),
-                    BlocProvider.value(value: incomeBloc),
+                    if (incomeBloc != null) BlocProvider.value(value: incomeBloc),
                     BlocProvider.value(value: signoutBloc),
                   ],
                   child: const SettingsPage(),
@@ -243,14 +250,7 @@ class AppRouter {
             name: AppRoutes.appDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ??
-                  (() {
-                    try {
-                      return context.read<IncomeBloc>();
-                    } on ProviderNotFoundException {
-                      return null;
-                    }
-                  })();
+              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(
@@ -311,6 +311,15 @@ class AppRouter {
       ),
     ],
   );
+
+  /// Null when income is off, or when a page is opened without it above.
+  static IncomeBloc? _maybeReadIncomeBloc(BuildContext context) {
+    try {
+      return context.read<IncomeBloc>();
+    } on ProviderNotFoundException {
+      return null;
+    }
+  }
 
   static Widget _rightToLeftTransition(
     BuildContext context,
