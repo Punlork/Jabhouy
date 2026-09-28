@@ -3,6 +3,8 @@ description: Shop management
 version: 1.0.20+25
 publish_to: none
 
+# Workspace members. Each package declares what it imports; list a
+# dependency here only when lib/ or test/ imports it.
 workspace:
   - packages/jabhouy_core
   - packages/jabhouy_l10n
@@ -15,42 +17,10 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
-  animated_text_kit: ^4.2.3
-  async: ^2.13.1
-  bloc: ^9.2.1
-  bloc_concurrency: ^0.3.0
-  cloud_firestore: ^6.2.0
-  collection: ^1.19.1
-  connectivity_plus: ^7.1.0
-  copy_with_extension: ^18.0.0
-  dio: ^5.8.0+1
-  drift: ^2.16.0
-  dropdown_button2: ^2.3.9
-  equatable: ^2.0.7
-  firebase_analytics: ^12.0.2
-  firebase_core: ^4.6.0
-  firebase_messaging: ^16.1.3
   flutter:
     sdk: flutter
-  flutter_bloc: ^9.1.1
-  flutter_dotenv: ^5.2.1
-  flutter_floating_bottom_bar: ^1.3.0
-  flutter_keyboard_visibility: ^6.0.0
-  flutter_launcher_icons: ^0.14.3
-  flutter_local_notifications: ^18.0.0
-  flutter_localizations:
-    sdk: flutter
-  flutter_native_splash: ^2.4.4
-  flutter_runtime_debugger: ^0.4.0
-  flutter_slidable: ^3.1.2
-  flutter_staggered_grid_view: ^0.7.0
-  flutter_svg: ^2.2.0
-  flutter_typeahead: ^5.2.0
-  get_it: ^8.0.3
-  go_router: ^18.0.1
-  http: ^1.3.0
-  image_picker: ^1.1.2
-  intl: ^0.20.2
+
+  # Workspace packages
   jabhouy_core:
     path: packages/jabhouy_core
   jabhouy_l10n:
@@ -63,34 +33,82 @@ dependencies:
     path: packages/jabhouy_sync
   jabhouy_ui:
     path: packages/jabhouy_ui
-  logger: ^2.5.0
-  meta: ^1.15.0
-  package_info_plus: ^8.3.0
+
+  # State management
+  bloc: ^9.2.1
+  bloc_concurrency: ^0.3.0
+  flutter_bloc: ^9.1.1
+  stream_transform: ^2.1.1
+
+  # Navigation and dependency injection
+  get_it: ^8.0.3
+  go_router: ^18.0.1
+
+  # Local storage and database
+  drift: ^2.16.0
   path: ^1.9.1
   path_provider: ^2.1.5
   shared_preferences: ^2.5.4
-  shimmer: ^3.0.0
   sqlite3: ^2.9.4
+  # No Dart import: bundles the native SQLite library Drift opens.
   sqlite3_flutter_libs: ^0.5.0
-  stream_transform: ^2.1.1
-  super_clipboard: ^0.8.24
-  transparent_image: ^2.0.1
+
+  # Networking
+  http: ^1.3.0
+
+  # Firebase and notifications
+  firebase_analytics: ^12.0.2
+  firebase_core: ^4.6.0
+  firebase_messaging: ^16.1.3
+  flutter_local_notifications: ^18.0.0
+
+  # UI components
+  flutter_floating_bottom_bar: ^1.3.0
+  flutter_keyboard_visibility: ^6.0.0
+  flutter_native_splash: ^2.4.4
+  flutter_slidable: ^3.1.2
+  flutter_svg: ^2.2.0
+  flutter_typeahead: ^5.2.0
+  shimmer: ^3.0.0
+
+  # Device and platform
+  image_picker: ^1.1.2
+  package_info_plus: ^8.3.0
   url_launcher: ^6.3.1
 
+  # Models and utilities
+  async: ^2.13.1
+  collection: ^1.19.1
+  copy_with_extension: ^18.0.0
+  equatable: ^2.0.7
+  flutter_dotenv: ^5.2.1
+  intl: ^0.20.2
+  logger: ^2.5.0
+  meta: ^1.15.0
+
+  # Debugging
+  flutter_runtime_debugger: ^0.4.0
+
 dev_dependencies:
+  # Testing
   bloc_test: ^10.0.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  patrol: ^4.1.1
+
+  # Code generation (`melos run gen`)
   build_runner: ^2.4.0
   copy_with_extension_gen: ^18.0.0
   drift_dev: ^2.16.0
-  flutter_test:
-    sdk: flutter
+
+  # Tooling
+  # Generates app icons from flutter_launcher_icons.yaml; never imported.
+  flutter_launcher_icons: ^0.14.3
   melos: ^7.8.1
-  mocktail: ^1.0.4
-  patrol: ^4.1.1
   very_good_analysis: ^6.0.0
 
 flutter:
-  generate: true
   uses-material-design: true
   fonts:
     - family: NotoSansKhmer
