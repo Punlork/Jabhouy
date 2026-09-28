@@ -11,6 +11,7 @@ export 'src/database/app_database.dart';
 export 'src/features/feature_flags.dart';
 export 'src/logging/logger.dart';
 export 'src/models/casts.dart';
+export 'src/models/dates.dart';
 export 'src/models/pagination.dart';
 export 'src/result/app_exception.dart';
 export 'src/result/result.dart';

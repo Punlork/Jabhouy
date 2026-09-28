@@ -24,8 +24,8 @@ class LoanerApi extends BaseService {
         'limit': limit.toString(),
         'name': searchQuery,
         'customer': customer,
-        'to': toDate?.let(_rfc3339Date),
-        'from': fromDate?.let(_rfc3339Date),
+        'to': toDate?.toIsoDate(),
+        'from': fromDate?.toIsoDate(),
       }..removeWhere(
           (key, value) => value == null || value.toString().isEmpty,
         ),
@@ -64,12 +64,5 @@ class LoanerApi extends BaseService {
 
   LoanerModel _parse(dynamic value) {
     return LoanerModel.fromJson(value as Map<String, dynamic>);
-  }
-
-  String _rfc3339Date(DateTime date) {
-    final y = date.year.toString().padLeft(4, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    final d = date.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
   }
 }

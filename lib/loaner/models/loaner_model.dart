@@ -69,7 +69,9 @@ class LoanerModel extends Equatable {
         'customerId': customerId,
         'amount': amount,
         'note': note,
-        'createdAt': createdAt.toIso8601String(),
+        // The server validates this as a date and stores midnight UTC, so
+        // a timestamp is rejected with a 400 and the time is lost anyway.
+        'createdAt': createdAt.toIsoDate(),
         'paid': isPaid,
       };
 
