@@ -80,6 +80,7 @@ dev_dependencies:
   drift_dev: ^2.16.0
   flutter_test:
     sdk: flutter
+  melos: ^7.8.1
   mocktail: ^1.0.4
   patrol: ^4.1.1
   very_good_analysis: ^6.0.0
@@ -124,3 +125,48 @@ patrol:
     package_name: com.pl.shop.management.dev
   ios:
     bundle_id: com.pl.shop_management.dev
+
+# One command per chore across the workspace: `dart run melos run <script>`,
+# or plain `melos run <script>` after `dart pub global activate melos`.
+melos:
+  # The app is the root package, not a folder under packages/.
+  useRootAsPackage: true
+  # The SDK FVM pins. CI has no .fvm/ and sets MELOS_SDK_PATH=auto, which
+  # means whichever SDK is on PATH.
+  sdkPath: .fvm/flutter_sdk
+
+  scripts:
+    analyze:
+      description: Analyze the whole workspace. Errors fail; the baseline is 3 non-error issues.
+      run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+    # Filters go on `melos exec`, not on the script: a script-level
+    # packageFilters prompts for a package, which hangs CI, and `steps`
+    # shells out to a `melos` that only exists after a global activate.
+    test:
+      description: Every suite, each under the runner its package allows.
+      run: dart run melos run test:dart && dart run melos run test:flutter
+
+    test:dart:
+      description: Pure-Dart packages, under dart test. No Flutter binding, by design.
+      run: dart run melos exec --no-flutter --dir-exists=test --fail-fast -- dart test
+
+    test:flutter:
+      description: The app and the Flutter packages, under flutter test.
+      run: dart run melos exec --flutter --dir-exists=test --fail-fast -- flutter test
+
+    gen:
+      description: build_runner in every package that depends on it.
+      run: dart run melos exec --depends-on=build_runner --fail-fast -- dart run build_runner build --delete-conflicting-outputs
+
+    # Each flavor with its feature flags baked in, so no one has to
+    # remember --dart-define-from-file.
+    run:dev:
+      run: flutter run --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json
+    run:stg:
+      run: flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=config/features/staging.json
+    run:prod:
+      run: flutter run --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json
+    build:prod:
+      description: Release APK, as fastlane builds it for CI.
+      run: flutter build apk --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json --release
