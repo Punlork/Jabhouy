@@ -1,4 +1,3 @@
-import 'package:my_app/shop/shop.dart';
 
 // final List<ShopItemModel> defaultShopList = [
 //   const ShopItemModel(

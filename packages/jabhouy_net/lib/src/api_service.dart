@@ -1,0 +1,302 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
+import 'package:http/http.dart' as http;
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/src/network_inspector_service.dart';
+
+import 'package:jabhouy_ui/jabhouy_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+part 'api_exception.dart';
+part 'api_response.dart';
+part 'api_utils.dart';
+part 'api_cookies.dart';
+
+class ApiService {
+  factory ApiService() => _instance;
+
+  ApiService._internal() : _client = http.Client() {
+    _baseUrl = _normalizeAuthority(dotenv.get('BASE_URL', fallback: ''));
+    assert(_baseUrl.isNotEmpty, 'BASE_URL env must be provided');
+  }
+
+  /// [Uri.https] takes an *authority* (`host[:port]`), not a full URL.
+  /// A BASE_URL of `https://api.example.com` would otherwise be split on the
+  /// first `:`, leaving `//api.example.com` to be parsed as a port and
+  /// failing every request with `FormatException: Invalid radix-10 number`.
+  /// Accept either form.
+  static String _normalizeAuthority(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return '';
+    if (trimmed.contains('://')) return Uri.parse(trimmed).authority;
+    return trimmed.replaceAll(RegExp(r'/+$'), '');
+  }
+
+  final cookies = ApiCookies();
+  static final _instance = ApiService._internal();
+
+  String _baseUrl = '';
+  static const _timeout = Duration(seconds: 30);
+  final http.Client _client;
+
+  String get baseUrl => _baseUrl;
+
+  Future<ApiResponse<T>> get<T>(
+    String endpoint, {
+    Map<String, String>? headers,
+    T Function(dynamic)? parser,
+    BuildContext? context,
+    Map<String, dynamic>? queryParameters,
+    bool showSnackBar = true,
+  }) async {
+    try {
+      var tempHeaders = getHeaders();
+      final uri = Uri.https(
+        _baseUrl,
+        endpoint,
+        queryParameters,
+      );
+
+      final cookieHeader = cookies.getCookieHeader(uri);
+      if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
+      if (headers != null) tempHeaders = {...tempHeaders, ...headers};
+
+      final response = await interceptRequest(
+        uri,
+        () => _client
+            .get(
+              uri,
+              headers: tempHeaders,
+            )
+            .timeout(_timeout),
+        headers: tempHeaders,
+        method: 'GET',
+      );
+
+      cookies.updateCookies(uri, response);
+      return handleResponse(response, parser ?? (data) => data as T);
+    } catch (e, stackTrace) {
+      logger.e(
+        'Error occurred in GET request to $endpoint',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      final errorMessage = e is ApiException ? e.message : 'Network error: $e';
+      if (showSnackBar) showErrorSnackBar(context, errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
+    } finally {
+      LoadingOverlay.hide();
+    }
+  }
+
+  Future<ApiResponse<T>> post<T>(
+    String endpoint, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> Function()? bodyParser,
+    Map<String, String>? headers,
+    T Function(dynamic)? parser,
+    BuildContext? context,
+    bool showSnackBar = true,
+    File? imageFile,
+    String imageFieldName = 'image',
+  }) async {
+    try {
+      var tempHeaders = getHeaders();
+      final uri = Uri.https(_baseUrl, endpoint);
+      final cookieHeader = cookies.getCookieHeader(uri);
+      if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
+      if (headers != null) tempHeaders = {...tempHeaders, ...headers};
+
+      http.Response response;
+
+      if (imageFile != null) {
+        final request = http.MultipartRequest('POST', uri)
+          ..headers.addAll(tempHeaders)
+          ..files.add(
+            await http.MultipartFile.fromPath(
+              'image',
+              imageFile.path,
+              filename: imageFieldName,
+            ),
+          );
+
+        if (body.isNotEmpty) {
+          request.fields.addAll(
+            body.map((key, value) => MapEntry(key, value.toString())),
+          );
+        } else if (bodyParser != null) {
+          request.fields.addAll(
+            bodyParser().map(
+              (key, value) => MapEntry(
+                key,
+                value.toString(),
+              ),
+            ),
+          );
+        }
+
+        response = await interceptRequest(
+          uri,
+          () async {
+            final streamedResponse = await request.send().timeout(_timeout);
+            return http.Response.fromStream(streamedResponse);
+          },
+          headers: tempHeaders,
+          requestBody:
+              request.fields.isEmpty ? null : jsonEncode(request.fields),
+          method: 'POST',
+        );
+      } else {
+        final tempBody = <String, dynamic>{};
+        if (body.isNotEmpty) {
+          tempBody.addAll(body);
+        } else if (bodyParser != null) {
+          tempBody.addAll(bodyParser());
+        }
+        final encodeBody = json.encode(tempBody);
+
+        response = await interceptRequest(
+          uri,
+          () => _client
+              .post(
+                uri,
+                headers: tempHeaders,
+                body: encodeBody,
+              )
+              .timeout(_timeout),
+          headers: tempHeaders,
+          requestBody: encodeBody,
+          method: 'POST',
+        );
+      }
+
+      cookies.updateCookies(uri, response);
+      return handleResponse(response, parser ?? (data) => data as T);
+    } catch (e, stackTrace) {
+      final errorMessage = e is ApiException ? e.message : 'Network error: $e';
+      logger.e(
+        'Error occurred in POST request to $endpoint',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      if (showSnackBar) showErrorSnackBar(context, errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
+    } finally {
+      LoadingOverlay.hide();
+    }
+  }
+
+  Future<ApiResponse<T>> put<T>(
+    String endpoint, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> Function()? bodyParser,
+    Map<String, String>? headers,
+    T Function(dynamic)? parser,
+    BuildContext? context,
+    bool showSnackBar = true,
+  }) async {
+    try {
+      final tempBody = <String, dynamic>{};
+
+      if (body.isNotEmpty) {
+        tempBody.addAll(body);
+      } else if (bodyParser != null) {
+        tempBody.addAll(bodyParser());
+      }
+
+      final encodeBody = json.encode(tempBody);
+      var tempHeaders = getHeaders();
+      final uri = Uri.https(_baseUrl, endpoint);
+      final cookieHeader = cookies.getCookieHeader(uri);
+      if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
+      if (headers != null) tempHeaders = {...tempHeaders, ...headers};
+
+      final response = await interceptRequest(
+        uri,
+        () => _client
+            .put(
+              uri,
+              headers: tempHeaders,
+              body: encodeBody,
+            )
+            .timeout(_timeout),
+        headers: tempHeaders,
+        method: 'PUT',
+        requestBody: encodeBody,
+      );
+
+      cookies.updateCookies(uri, response);
+      return handleResponse(response, parser ?? (data) => data as T);
+    } catch (e, stackTrace) {
+      final errorMessage = e is ApiException ? e.message : 'Network error: $e';
+      logger.e(
+        'Error occurred in PUT request to $endpoint',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      if (showSnackBar) showErrorSnackBar(context, errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
+    } finally {
+      LoadingOverlay.hide();
+    }
+  }
+
+  Future<ApiResponse<T>> delete<T>(
+    String endpoint, {
+    Map<String, String>? headers,
+    T Function(dynamic)? parser,
+    BuildContext? context,
+    bool showSnackBar = true,
+  }) async {
+    try {
+      var tempHeaders = getHeaders();
+      final uri = Uri.https(_baseUrl, endpoint);
+      final cookieHeader = cookies.getCookieHeader(uri);
+      if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
+      if (headers != null) tempHeaders = {...tempHeaders, ...headers};
+
+      final response = await interceptRequest(
+        uri,
+        () => _client.delete(uri, headers: tempHeaders).timeout(_timeout),
+        headers: tempHeaders,
+        method: 'DELETE',
+      );
+
+      cookies.updateCookies(uri, response);
+      return handleResponse(response, parser ?? (data) => data as T);
+    } catch (e, stackTrace) {
+      final errorMessage = e is ApiException ? e.message : 'Network error: $e';
+      logger.e(
+        'Error occurred in DELETE request to $endpoint',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      if (showSnackBar) showErrorSnackBar(context, errorMessage);
+      return ApiResponse<T>(
+        success: false,
+        message: errorMessage,
+        statusCode: e is ApiException ? e.statusCode : null,
+      );
+    } finally {
+      LoadingOverlay.hide();
+    }
+  }
+}

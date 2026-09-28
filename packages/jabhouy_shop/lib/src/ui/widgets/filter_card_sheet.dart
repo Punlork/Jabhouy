@@ -1,0 +1,100 @@
+// New FilterSheet widget
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
+import 'package:jabhouy_shop/jabhouy_shop.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
+
+class FilterSheet extends StatefulWidget {
+  const FilterSheet({
+    required this.initialCategoryFilter,
+    required this.onApply,
+    super.key,
+  });
+  final CategoryItemModel? initialCategoryFilter;
+  final void Function(CategoryItemModel? category) onApply;
+
+  @override
+  State<FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends State<FilterSheet> {
+  late CategoryItemModel? _categoryFilter;
+
+  bool get hasActiveFilter => _categoryFilter != null;
+
+  bool get hasChanges =>
+      _categoryFilter?.id != widget.initialCategoryFilter?.id;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoryFilter = widget.initialCategoryFilter;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return AppBottomSheet(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.filterItems,
+              style: AppTextTheme.title.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            CategoryDropdown(
+              initialValue: _categoryFilter,
+              onChanged: (value) {
+                _categoryFilter = value;
+                setState(() {});
+              },
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: hasActiveFilter
+                      ? () {
+                          widget.onApply.call(null);
+                          context.pop();
+                        }
+                      : null,
+                  child: Text(context.l10n.reset),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: !hasChanges
+                      ? null
+                      : () {
+                          widget.onApply(_categoryFilter);
+                          context.pop();
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: !hasChanges
+                        ? colorScheme.surfaceContainerHighest
+                        : colorScheme.primary,
+                    foregroundColor: !hasChanges
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onPrimary,
+                  ),
+                  child: Text(context.l10n.apply),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}

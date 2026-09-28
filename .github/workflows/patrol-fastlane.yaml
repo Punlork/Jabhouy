@@ -22,6 +22,43 @@ env:
   FLUTTER_CHANNEL: stable
 
 jobs:
+  check:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # No .fvm/ on the runner: use the SDK flutter-action puts on PATH.
+      MELOS_SDK_PATH: auto
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The same Flutter as local builds, so the analyzer baseline holds.
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          channel: stable
+          cache: true
+
+      # Both are declared assets and both are gitignored; the build fails
+      # without them, and no test reads their contents.
+      - name: Create placeholder env files
+        run: touch .env .env.dev
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: dart run melos run analyze
+
+      - name: Test
+        run: dart run melos run test
+
   # patrol-android:
   #   name: Patrol (Android)
   #   runs-on: ubuntu-latest
@@ -70,6 +107,7 @@ jobs:
 
   fastlane-android-release:
     name: Fastlane Android (release)
+    needs: check
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     env:

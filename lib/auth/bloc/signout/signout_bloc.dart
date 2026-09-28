@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:jabhouy/auth/auth.dart';
 import 'package:meta/meta.dart';
-import 'package:my_app/auth/auth.dart';
 
 part 'signout_event.dart';
 part 'signout_state.dart';

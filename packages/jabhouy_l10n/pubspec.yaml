@@ -1,0 +1,21 @@
+name: jabhouy_l10n
+description: Jabhouy's translations. Every package that puts words on screen depends on this one.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+flutter:
+  generate: true
+
+dev_dependencies:
+  very_good_analysis: ^6.0.0

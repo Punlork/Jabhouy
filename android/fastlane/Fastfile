@@ -50,22 +50,22 @@ platform :android do
 
   desc "Build development debug APK"
   lane :build_dev do
-    sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --debug")
+    sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json --debug")
   end
 
   desc "Build development release APKs split per ABI"
   lane :build_dev_release do
-    sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --release --split-per-abi")
+    sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json --release --split-per-abi")
   end
 
   desc "Build staging release APK (for internal testing)"
   lane :build_staging do
-    sh("cd #{project_root} && flutter build apk --flavor staging -t lib/main_staging.dart --release")
+    sh("cd #{project_root} && flutter build apk --flavor staging -t lib/main_staging.dart --dart-define-from-file=config/features/staging.json --release")
   end
 
   desc "Build production release APK"
   lane :build_release do
-    sh("cd #{project_root} && flutter build apk --flavor production -t lib/main_production.dart --release")
+    sh("cd #{project_root} && flutter build apk --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json --release")
   end
 
   desc "Build production release APK for CI/GitHub Releases"

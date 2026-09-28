@@ -1,0 +1,89 @@
+import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_sync/jabhouy_sync.dart';
+
+/// Sends customer outbox jobs, and applies the answer to the local row.
+class CustomerSyncAdapter implements FeatureSyncAdapter, FeaturePullAdapter {
+  const CustomerSyncAdapter(this._dao, this._api);
+
+  final CustomerDao _dao;
+  final CustomerApi _api;
+
+  @override
+  SyncEntityType get entityType => SyncEntityType.customer;
+
+  /// Downloads every page, then lets the DAO delete what the server no
+  /// longer has, but only if every page arrived and the count agrees.
+  @override
+  Future<Result<void>> pullAll() async {
+    final server = await fetchEveryPage(
+      (page, limit) => _api.fetchCustomers(page: page, limit: limit, quiet: true),
+    );
+    await _dao.reconcileServerCustomers(server.items, complete: server.complete);
+    final error = server.error;
+    return error == null ? const Ok(null) : Err(error);
+  }
+
+  @override
+  Future<SyncPushOutcome> push(OutboxEntry entry) async {
+    final id = int.tryParse(entry.localId);
+    if (id == null) {
+      return SyncPushRejected('Unparseable customer id "${entry.localId}"');
+    }
+
+    return switch (entry.operation) {
+      SyncOperation.delete => _pushDelete(id),
+      SyncOperation.create => _pushCreate(id),
+      SyncOperation.update => _pushUpdate(id),
+    };
+  }
+
+  Future<SyncPushOutcome> _pushDelete(int id) async {
+    if (id < 0) {
+      await _dao.purge(id);
+      return const SyncPushSucceeded();
+    }
+
+    final result = await _api.deleteCustomer(id);
+    if (result.isOk || result.errorOrNull?.statusCode == 404) {
+      await _dao.purge(id);
+      return const SyncPushSucceeded();
+    }
+
+    return _fail(id, result.errorOrNull!);
+  }
+
+  Future<SyncPushOutcome> _pushCreate(int id) async {
+    final customer = await _dao.findById(id);
+    if (customer == null) return const SyncPushSucceeded();
+
+    return switch (await _api.createCustomer(customer)) {
+      Ok(:final value) => () async {
+          await _dao.reconcileCreated(localId: id, serverCustomer: value);
+          return SyncPushSucceeded(serverId: '${value.id}');
+        }(),
+      Err(:final error) => _fail(id, error),
+    };
+  }
+
+  Future<SyncPushOutcome> _pushUpdate(int id) async {
+    final customer = await _dao.findById(id);
+    if (customer == null) return const SyncPushSucceeded();
+
+    return switch (await _api.updateCustomer(customer)) {
+      Ok(:final value) => () async {
+          await _dao.replace(value, SyncStatus.synced);
+          return const SyncPushSucceeded();
+        }(),
+      Err(:final error) => _fail(id, error),
+    };
+  }
+
+  Future<SyncPushOutcome> _fail(int id, AppException error) async {
+    final outcome = outcomeFor(error);
+    if (outcome is SyncPushRejected) {
+      await _dao.markFailed(id);
+    }
+    return outcome;
+  }
+}

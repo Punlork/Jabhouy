@@ -1,0 +1,220 @@
+import 'package:flutter/material.dart';
+import 'package:jabhouy_ui/src/widget/custom_outline_border.dart';
+
+class CustomTextFormField extends StatefulWidget {
+  const CustomTextFormField({
+    required this.controller,
+    required this.hintText,
+    required this.labelText,
+    this.prefixIcon,
+    super.key,
+    this.keyboardType = TextInputType.text,
+    this.obscureText = false,
+    this.validator,
+    this.autovalidateMode,
+    this.onVisibilityToggle,
+    this.action,
+    this.showClearButton = false,
+    this.decoration,
+    this.focusNode,
+    this.floatingLabelBehavior,
+    this.onChanged,
+    this.useCustomBorder = true,
+    this.maxLines = 1,
+    this.onCleared,
+    this.textCapitalization,
+    this.onTapOutside,
+    this.style,
+  });
+
+  final TextEditingController controller;
+  final TextInputAction? action;
+  final String hintText;
+  final String labelText;
+  final IconData? prefixIcon;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final String? Function(String?)? validator;
+
+  /// Null inherits the enclosing `Form`'s mode.
+  final AutovalidateMode? autovalidateMode;
+  final void Function(String?)? onChanged;
+  final VoidCallback? onVisibilityToggle;
+  final bool showClearButton;
+  final FocusNode? focusNode;
+  final InputDecoration? decoration;
+  final FloatingLabelBehavior? floatingLabelBehavior;
+  final bool useCustomBorder;
+  final int maxLines;
+  final VoidCallback? onCleared;
+  final void Function(PointerDownEvent)? onTapOutside;
+  final TextCapitalization? textCapitalization;
+  final TextStyle? style;
+
+  @override
+  State<CustomTextFormField> createState() => _CustomTextFormFieldState();
+}
+
+class _CustomTextFormFieldState extends State<CustomTextFormField> {
+  late FocusNode _focusNode;
+  late VoidCallback _controllerListener;
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
+    _hasText = widget.controller.text.isNotEmpty;
+    _controllerListener = () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _hasText = widget.controller.text.isNotEmpty;
+      });
+    };
+    widget.controller.addListener(_controllerListener);
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomTextFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_controllerListener);
+      _hasText = widget.controller.text.isNotEmpty;
+      widget.controller.addListener(_controllerListener);
+    }
+
+    if (oldWidget.focusNode != widget.focusNode) {
+      if (oldWidget.focusNode == null) {
+        _focusNode.dispose();
+      }
+      _focusNode = widget.focusNode ?? FocusNode();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_controllerListener);
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  void _clearText() {
+    if (widget.onCleared != null) {
+      widget.onCleared?.call();
+      return;
+    }
+
+    widget.controller.clear();
+    widget.onChanged?.call('');
+    _focusNode.unfocus();
+    setState(() => _hasText = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final inputTheme = Theme.of(context).inputDecorationTheme;
+
+    final customBorder = widget.useCustomBorder
+        ? CustomOutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          )
+        : const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          );
+
+    final baseDecoration = InputDecoration(
+      hintText: widget.hintText,
+      labelText: widget.labelText,
+      filled: inputTheme.filled,
+      fillColor: inputTheme.fillColor,
+      prefixIcon: widget.prefixIcon != null
+          ? Icon(
+              widget.prefixIcon,
+              color: widget.decoration?.prefixIconColor ?? colorScheme.primary,
+            )
+          : null,
+      suffixIcon: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.decoration?.suffixIcon != null)
+            widget.decoration!.suffixIcon!,
+          if (widget.showClearButton && _hasText)
+            IconButton(
+              icon: Icon(
+                Icons.clear,
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              onPressed: _clearText,
+            ),
+          if (widget.onVisibilityToggle != null)
+            IconButton(
+              icon: Icon(
+                widget.obscureText ? Icons.visibility_off : Icons.visibility,
+                color: colorScheme.primary,
+              ),
+              onPressed: widget.onVisibilityToggle,
+            ),
+        ],
+      ),
+      border: customBorder,
+      enabledBorder: customBorder,
+      focusedBorder: customBorder,
+      disabledBorder: customBorder,
+      labelStyle: TextStyle(
+        color: colorScheme.onSurface.withValues(alpha: 0.6),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      floatingLabelBehavior: widget.floatingLabelBehavior,
+      floatingLabelStyle: TextStyle(
+        color: colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+
+    final mergedDecoration = widget.decoration != null
+        ? baseDecoration.copyWith(
+            contentPadding: widget.decoration!.contentPadding,
+            border: widget.decoration!.border,
+            enabledBorder: widget.decoration!.enabledBorder,
+            focusedBorder: widget.decoration!.focusedBorder,
+            focusedErrorBorder: widget.decoration!.focusedErrorBorder,
+            errorBorder: widget.decoration!.errorBorder,
+            filled: widget.decoration!.filled,
+            fillColor: widget.decoration!.fillColor,
+            hintStyle: widget.decoration!.hintStyle,
+            suffixIconConstraints: widget.decoration!.suffixIconConstraints,
+            suffixText: widget.decoration!.suffixText,
+            suffixStyle: widget.decoration!.suffixStyle,
+            enabled: widget.decoration!.enabled,
+            //! Add other properties as needed
+          )
+        : baseDecoration;
+
+    return TextFormField(
+      style: widget.style,
+      controller: widget.controller,
+      autovalidateMode: widget.autovalidateMode,
+      keyboardType: widget.keyboardType,
+      obscureText: widget.obscureText,
+      onTapOutside: widget.onTapOutside ??
+          (event) {
+            if (!_focusNode.hasFocus) return;
+            _focusNode.unfocus();
+          },
+      textCapitalization: widget.textCapitalization ?? TextCapitalization.none,
+      textInputAction: widget.action,
+      focusNode: _focusNode,
+      decoration: mergedDecoration,
+      validator: widget.validator,
+      onChanged: widget.onChanged,
+      maxLines: widget.maxLines,
+    );
+  }
+}

@@ -1,14 +1,291 @@
 # Architecture restructure
 
-**Status:** Draft
+**Status:** Implemented
 **Author:** Punlork
-**Updated:** 2026-09-04
+**Updated:** 2026-09-28
 
 ## Summary
 
 Jabhouy moves from feature folders containing god-object services to layered features over a shared core, then extracts three packages in a pub workspace.
 The offline sync logic — currently cloned into four services with no retry path — consolidates into one engine that generalizes the idempotency and coalescing patterns already working in the income feature.
 Shop is layered first as the reference slice, and is the single feature promoted to its own package as a deliberate modularization experiment.
+
+## Vocabulary
+
+Four nouns in this repository describe "a write that has not reached the
+server". They are not synonyms, and three of them are scaffolding that
+phase 3 removes.
+
+**Outbox** is the [transactional outbox
+pattern](https://microservices.io/patterns/data/transactional-outbox.html):
+write the business row and a job row describing that write in the same
+transaction, then drain the jobs separately. The point is that the job
+survives the crash, the timeout and the process restart that the in-memory
+"push it now" call does not. Everything below follows from having a job
+table rather than a status column.
+
+| Noun | Describes | Lifetime |
+| ---- | --------- | -------- |
+| `syncStatus` (`int` 0/1/2) | a **row** | original code; gone from `lib/` as of phase 3 |
+| `SyncStatus` (enum) | a **row**, typed | phase 1; entity tables keep it as a display hint after phase 3 |
+| `OutboxEntry` | a **job**: one queued write, with its attempt count, schedule and dependency | phase 3a; the queue from here on |
+| `SyncPushOutcome` | one **attempt**: succeeded, retryable, or rejected | phase 3b |
+
+`OutboxEntries` is the Drift table; `OutboxEntry` is the row class Drift
+generates from it. That plural/singular pair is Drift's convention, not a
+distinction this design is making.
+
+The queue is `OutboxEntry`. `syncStatus` stops being a queue the moment a
+feature is wired to the engine, and survives only to tell the UI whether a
+row is still in flight. A feature that still reads `syncStatus` to decide
+what to push has not been migrated yet.
+
+## Progress
+
+Branch `refactor/architecture-restructure`. Where the code met the plan and
+the plan lost, the decision is recorded below rather than left as drift.
+
+| Phase | State | Commit |
+| ----- | ----- | ------ |
+| 0 — rename, unblock tests | done | `0a9508e` |
+| — income data-loss fix (found by phase 0) | done | `6bf59b2` |
+| 1 — `jabhouy_core` | done, as a package rather than a folder | `8c30b1f`, `caba4c5` |
+| — `SyncStatus` enum | done | `c391ebb` |
+| 3a — `OutboxEntries` table | done, schema 5 → 6 | `0dd2c1c` |
+| 3b — `jabhouy_sync` engine | done | `28a89ac` |
+| 3c — shop drains through the engine | done | `071cbe1` |
+| 3d — category drains through the engine | done | `158c3ac` |
+| 3e — customer drains through the engine | done | `b196cf1`, `82ac9e5` |
+| 3f — loaner drains through the engine; **phase 3 closed** | done | `3e4eec6`, `c7e04a4` |
+| — loaner `logic/` (part of phase 4) | done | `c7e04a4` |
+| — loaner JSON crash fix (found by 3f) | done | `c7e04a4` |
+| 2 — shop slice | done | `574109e`, `0768f99` |
+| — core primitives: `Result`, `AppException` | done | `d3240be`, `75d9403`, `13fe4d2` |
+| 4 — income slice | done | `d202623`, `6503310` |
+| 5 — `jabhouy_shop` | done, and it took three packages nobody planned | `22c5714`, `a3c7367`, `1550cfe` |
+| 6 — bloc 8→9, go_router 14→18 | done | `d886a78`, `d7b9fdc` |
+| — melos scripts, and a CI check job the release needs | done | `f1e635c` |
+| 7 — `ARCHITECTURE.md`, `CLAUDE.md`, README; **restructure closed** | done | the commit adding `ARCHITECTURE.md` |
+
+**All five features are layered and on the engine.** Phase 3 closed the
+four `syncPendingChanges()` clones; phase 4 brought income in behind the
+same seam.
+The name survives as a three-line repository method that calls
+`SyncEngine.drain()`; what is gone is forty lines of loop, four times
+over, each with its own `catch (_)`.
+
+Phase 3 turned out not to be a phase. A feature can only be wired to the
+engine once it has a repository to wire, so "extract the engine" and
+"layer the features" are one piece of work repeated four times, not two
+stages. The table records it as 3c–3f for that reason.
+
+**Order mattered, and not for the reason the plan gave.** The plan ordered
+phases by size. What actually ordered them is the dependency graph:
+`dependsOnLocalId` is inert with one adapter registered, because there is
+nothing to wait for. Category made it load-bearing for shop items, and
+customer made it load-bearing for loans. A feature's adapter is only worth
+as much as the adapter of whatever it references.
+
+**Sending a job is a `FeatureSyncAdapter`, one per feature.** The engine is
+generic over entities; knowing that a `shopItem` create is `POST /items` is
+feature knowledge and lives with the feature. `AppSyncTransport` routes a
+job to the adapter for its entity type and is the only place in the app
+that implements the `SyncTransport` port, which is what keeps
+`jabhouy_sync` free of Flutter and of `http`.
+
+**`ApiResponse` now carries `statusCode`.** `ApiException` always had one
+and `ApiService` always discarded it, so no caller could tell a 500 from a
+400. The engine is the first that must: 5xx, 408, 429 and a missing status
+retry; everything else stops. This is a down payment on the `Result<T>` row
+of the core primitives table below, not a replacement for it.
+
+**Shop's DAO is a plain class, not a `@DriftAccessor`.** The app package
+generates nothing today — `find lib -name '*.g.dart'` is empty — and a
+generated accessor mixin in the app referencing tables in `jabhouy_core`
+is exactly the cross-package codegen this doc lists as the phase 5 risk.
+The DAO's job is to be the only place that touches Drift, and holding an
+`AppDatabase` does that identically. Phase 5 can take the question on
+deliberately.
+
+**Five of the seven defects are closed, in all four features.** A delete the server rejects stays queued
+instead of being reported as a success; reconciling a created row runs in
+one transaction instead of two statements; a failed push retries with a
+backoff instead of stopping at `syncStatus = 2` forever; every failure
+keeps its reason in `OutboxEntry.lastError` instead of being collapsed by
+a `catch (_)`; and an item filed under an offline category can no longer
+reach the server before the category exists.
+
+The two still open are colliding local ids, which needs the UUID `localId`
+column, and clock-skew conflicts, which needs a server-side ordering
+decision this doc has not made.
+
+**Two bugs the refactor found, neither of them in scope.** Phase 0 found
+income marking never-uploaded notifications as synced (`6bf59b2`). Phase
+3f found that `Loaners.customer`, a denormalised JSON blob, had been
+encoding the raw `syncStatus` — an `int` until `c391ebb` made it an enum,
+after which `jsonEncode` threw on every loan carrying a customer, and the
+`catch (_)` in `syncPendingChanges` turned the crash into `syncStatus = 2`.
+Both were found by rewriting a path rather than by reading it, which is
+the argument for rewriting the drain loops instead of moving them.
+
+**`logic/` is Flutter-free, and a test says so.**
+`test/architecture/logic_layer_test.dart` walks the transitive import
+closure of every file under a `logic/` folder and fails on
+`package:flutter`, `package:drift` or `dart:ui`. Dart cannot express "this
+folder may not import that", so the rule was decorative until this file.
+
+It failed on its first run. `loaner_model.dart` imported
+`package:jabhouy/customer/customer.dart` — the barrel — which exports
+customer's `ui` folder, which reaches `flutter/material`. Three hops from
+a file that looks like a plain data class. **Inside a feature, import the
+file, not the barrel:** a barrel is a convenience for callers outside the
+feature and a Flutter leak for anything that must stay pure.
+
+`jabhouy_core` and `jabhouy_sync` are trusted rather than walked. Both run
+under `dart test` on the plain Dart VM, which has no `dart:ui`, so their
+purity is already a failing build.
+
+**Tables live in `jabhouy_core`, not in the app.** This doc scoped core to
+"db primitives". With drift's default generator, a table's generated
+companion lands in whichever package declares `@DriftDatabase`, so a table
+in a feature package and the database in core is a package cycle, which
+Dart forbids. Schema is also genuinely shared: `ShopItems.categoryId`
+references `Categories.id`. So core owns schema because schema is shared,
+and features own behaviour because behaviour is not. `jabhouy_shop` will
+own its ui, repository, api source and DAO, not its table.
+
+**Packaging came before layering.** This doc said the opposite. Core turned
+out to be mostly a move rather than a refactor, so the cost the ordering was
+protecting against did not materialise for it. The feature slices still
+follow layering-first.
+
+**Package boundaries are softer than this doc assumed.** Workspace members
+share one `package_config`, so a `package:flutter` import inside
+`jabhouy_core` resolves and the analyzer stays quiet. What actually enforces
+it is `dart test`: the plain VM has no `dart:ui`, so the suite fails to load.
+Both packages have tests for that reason, verified by adding a Flutter
+import and watching it break.
+
+**build_runner does not cross workspace members.** Regenerating drift now
+needs a run inside `packages/jabhouy_core` as well as at the root. This is
+the phase 5 codegen cost, arriving early.
+
+
+### What extracting one feature actually cost
+
+The plan drew three packages and got six. None of the extra three was a
+design preference; each was the only way out of a cycle the app package
+had been hiding.
+
+**Extracting a feature is not a move, it is a cycle break.** Shop held 21
+files importing `package:jabhouy/app/app.dart`, and that barrel exports
+`app_routes.dart`, which imports every feature. So any widget reached
+through the app barrel drags the whole feature graph behind it. Nothing in
+shop was wrong; the barrel was load-bearing in a direction nobody chose.
+
+**Two of shop's dependencies were not shop's.** `settings_page.dart` was
+482 lines reading blocs from five features, filed under `lib/shop/` only
+because the settings button is in the shop header. `shop_header.dart`
+carried the signout listeners for a signout dispatched from the settings
+page, two features away — so the app's auth flow only completed while a
+shop widget happened to be mounted. Both were found by asking what shop
+imports, not by reading shop.
+
+**Three things were trapped rather than shared.** `GlobalContext` lived in
+`app_routes.dart` because the router's `pageBuilder` assigns it, which put
+a snack bar's dependency inside the file that wires every feature.
+`TabScrollManager` was declared inside `home_page.dart` and read by shop,
+loaner and income, so three features imported the home barrel for one
+`InheritedWidget`. The route *names* sat beside the `GoRouter` config, so
+reading one name cost the whole graph; names are shared vocabulary and
+wiring is the shell's, and only the first half has to be reachable.
+
+**`jabhouy_net` points at `jabhouy_ui`, which is backwards.** `ApiService`
+shows a snack bar and a loading overlay on failure — transport choosing
+words, which the layering rules put above it. Recorded rather than fixed:
+the alternative is a second port for one call site. There is no cycle,
+because `jabhouy_ui` imports nothing from `jabhouy_net`, and
+`package_independence_test.dart` is what keeps that true.
+
+That constraint, not taste, decided `UploadBloc`. It is shared
+presentation — shop and profile both drive it — so it belongs in
+`jabhouy_ui`, and `jabhouy_ui` cannot name `UploadService` without
+completing the cycle Dart forbids. So the bloc takes an `ImageUploader`
+port and the app joins the ends with `UploadImageAdapter`. Joining two
+packages that may not name each other is what an app shell is for.
+
+**`jabhouy_l10n` deleted a port built one commit earlier.** Four widgets
+in `jabhouy_ui` read `AppLocalizations`, which a package cannot reach, so
+they got a `UiStrings` port: an interface, an `InheritedWidget` scope and
+an app-side adapter, for four strings. Then shop turned out to need
+`AppLocalizations` in twelve places, and twelve is past where a port is
+cheaper than moving the thing. Once the ARB catalog was a package the port
+had nothing left to do, and it was removed. **A port is what you build
+when the dependency cannot move. Check that it cannot.**
+
+**The phase 5 risk was named correctly and priced wrong.** Cross-package
+Drift codegen was called the likeliest source of lost time. It cost
+nothing: tables live in `jabhouy_core`, shop's DAO is a plain class, and
+`build_runner` in core after the split rewrote no source at all. The lost
+time went to the app barrel instead, which this doc never mentioned.
+
+**What the boundary buys.** `logic_layer_test.dart` had to be written
+because Dart cannot say "this folder may not import that". A package can
+say it — but only under `dart test`, which is why `jabhouy_core` and
+`jabhouy_sync` need no such test and the four Flutter packages do:
+workspace members share one `package_config`, so `package:jabhouy/...`
+resolves inside a package and the analyzer stays quiet. So the boundary is
+still a test, not the language. What changed is that the test is four
+lines of configuration instead of an import-closure walk.
+
+### What the engine gave income
+
+Income was already the sync path that did not lose writes, so it is worth
+being precise about what changed. `_loadPendingNotifications` selected
+`pending | failed` — the one query in the app that ever read `failed`, and
+the reason income recovered where the other four gave up.
+
+What it lacked was restraint. `FirebaseIncomeSyncService` replayed the
+entire backlog on every connectivity change, with no attempt count and no
+delay, so a server that was down was hammered once per network blip.
+Uploads are now jobs with a backoff.
+
+Two judgements in `IncomeSyncAdapter` are worth arguing with:
+
+- **A device that is not the main device answers retryable, not rejected.**
+  Rejected would stop the job forever; the device role can change, so the
+  job waits, backing off, and goes out if this device is promoted.
+- **A Firebase upload that does not confirm is also retryable.** That path
+  answers with a `bool`, so unlike HTTP there is no status to read and
+  nothing separates "the network was down" from "the document was
+  refused". Retrying a refused document costs a bounded number of requests;
+  dropping a recorded sale costs the seller money.
+
+`IncomeDiagnostics` is a port rather than the service, because
+`NotificationDiagnosticsService` reaches the Android bridge through the
+income barrel and `logic/` may not carry Flutter. The service satisfies the
+interface unchanged — the seam cost one `implements`.
+
+### What moved into `jabhouy_core`, and why each had to
+
+| Moved | Because |
+| ----- | ------- |
+| `Result<T>`, `AppException` | a use case cannot avoid `app.dart` while `ApiResponse` is the only way to say "this might have failed", and `app.dart` carries Flutter |
+| `tryCast`, `let` | every `fromJson` used them, and they lived in `lib/app/models/`, so no model could be read without importing the app package |
+| `Pagination`, `PaginatedResponse` | they sat in the same file, and repository signatures need them |
+
+None of the four had a Flutter dependency of its own. They were in the app
+package by accident of where they were first written, and that accident is
+what made the layering rule unenforceable.
+
+**Messages left the data layer with them.** "Saved offline. It will sync
+when you are back online." used to be chosen inside the repository, from a
+connectivity check taken *before* the push was attempted — so a write that
+went out and was rejected still said "saved offline". `_settle()` now
+re-reads the row after draining and returns what actually happened, and
+`syncFeedback()` in the `ui` layer turns that into words. This is the
+"transport returns `Result`; the `ui` layer decides what to show" row of
+the table above, arriving as a behaviour change rather than a rename.
 
 ## Context
 
@@ -166,7 +443,7 @@ It is gated by device role and retries its backlog on connectivity change.
 ## Non-goals
 
 - **Customer, auth, profile, and home keep their current shape.** Shop, loaner, and income are the app's three real features; the rest stay behind their existing services. Customer gains a DAO only where loaner needs one, because `Loaners.customerId` references `Customers.id`.
-- **No feature package beyond `jabhouy_shop`.** One is the experiment. Whether the others follow is decided after it, not before.
+- **No feature package beyond `jabhouy_shop`.** One is the experiment. Whether the others follow is decided after it, not before. *Held: shop is the only feature package. The three extra packages that phase 5 produced — `jabhouy_l10n`, `jabhouy_net`, `jabhouy_ui` — are shared infrastructure, not features.*
 - **No merge engine, CRDTs, or operational transforms.** One seller, one shop, usually one device: the conflict space does not justify them. Server-timestamp last-write-wins is the chosen policy.
 - **No migration of existing local data.** The app is in development with no external users, so schema changes may recreate the database.
 - **No database encryption.** `lmsmobileapp` uses SQLCipher because it holds customer lending data. Jabhouy does not need it yet.
@@ -179,17 +456,24 @@ The three decisions worth arguing about are all here — an outbox table instead
 
 ### Target layout
 
-The repository becomes a pub workspace. Dart is 3.13.1, so `workspace:` resolution is available natively and melos is not needed.
+The repository becomes a pub workspace. Dart is 3.13.1, so `workspace:` resolution is available natively and melos is not needed for it.
+Melos arrived later anyway (`f1e635c`), for a different reason: two packages must test under `dart test` and the rest under `flutter test`, and nothing ran both.
 
 ```text
 jabhouy/
 ├── pubspec.yaml            # workspace root
 ├── lib/                    # app shell: features in folders
 └── packages/
-    ├── jabhouy_core/       # Result, AppException, SyncStatus, network, db primitives
+    ├── jabhouy_core/       # Result, AppException, SyncStatus, route names, db primitives
+    ├── jabhouy_l10n/       # the ARB catalog and context.l10n
+    ├── jabhouy_net/        # ApiService, BaseService, connectivity, request inspection
     ├── jabhouy_sync/       # sync engine — pure Dart, no Flutter
+    ├── jabhouy_ui/         # theme, assets, shared widgets, UploadBloc
     └── jabhouy_shop/       # one feature package (experiment)
 ```
+
+This is three more packages than the plan drew, and the reason is in
+[What extracting one feature actually cost](#what-extracting-one-feature-actually-cost).
 
 ### Layering rules
 
@@ -232,7 +516,7 @@ Four replacements in `jabhouy_core`, each removing a defect named above:
 
 | Current                                         | Replacement                                                                             |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `ApiResponse{success: bool, data: T?}`          | sealed `Result<T>` with `Ok(value)` and `Err(AppException)` variants, removing `!` at call sites |
+| `ApiResponse{success: bool, data: T?}`          | **done** (`d3240be`, `13fe4d2`) — sealed `Result<T>` with `Ok(value)` and `Err(AppException)`. Live in the four layered features; auth, profile, upload, fcm and income still speak `ApiResponse` and convert at the edge of an `api/` class |
 | `int syncStatus` (`0`/`1`/`2`)                  | `enum SyncStatus { synced, pending, failed }` with a Drift converter                    |
 | `-(millis % 1000000)` local IDs                 | UUID v4 `localId` column; server ID stays nullable until reconciliation                 |
 | `BaseService.post(BuildContext?, showSnackBar)` | transport returns `Result`; the `ui` layer decides what to show                          |
@@ -341,11 +625,13 @@ The 13 features run at least four different shapes between them, which is the sa
 ## Risks and open questions
 
 - **Phase 0 touches every file.** The `my_app` → `jabhouy` rename rewrites imports across 145 files. It is mechanical and diff-reviewable, but it must land alone, not mixed with logic changes.
-- **Phase 6 is the largest behavioral risk.** go_router 14→18 is four majors against `lib/app/routes/app_routes.dart`, which uses `CustomTransitionPage`, a `redirect` reading `AuthBloc`, and a `GlobalContext.currentContext` assignment inside `pageBuilder`. `lmsmobileapp` already runs go_router 17, so a working reference exists.
-- **Cross-package Drift codegen is the likeliest source of lost time in Phase 5.** If tables live in `jabhouy_core` and DAOs in features, generated code crosses a package boundary. Decide where tables live before extracting.
+- ~~**Phase 6 is the largest behavioral risk.**~~ **Done in `d886a78` and `d7b9fdc`, with no source changes at all.** Both upgrades removed only APIs this codebase never used. The risk assessment was right about *where* to look and wrong about the cost: the three things named — `CustomTransitionPage`, the `redirect` reading `AuthBloc`, the `GlobalContext` assignment in `pageBuilder` — all still work, verified by running the app rather than by analysing it, because none of them is visible to the analyzer.
+
+  What the simulator run did **not** reach: `pushNamed` with `extra`, the nested routes under `/home`, and the authenticated branch of `redirect`. Those need a login this checkout has no credentials for. The router has no automated coverage either way — see Testing.
+- ~~**Cross-package Drift codegen is the likeliest source of lost time in Phase 5.**~~ **It cost nothing.** Tables live in `jabhouy_core`, shop's DAO is a plain class rather than a `@DriftAccessor`, and running `build_runner` in core after the split rewrote no source at all. The lost time went to the app barrel, which this list never mentioned — see [What extracting one feature actually cost](#what-extracting-one-feature-actually-cost).
 - **`sendTestNotification` is the production upload path** for real notifications, despite its name. Renaming it is in scope for Phase 4; it currently obscures which code path matters.
 - **`dio: ^5.8.0+1` is declared and never imported.** `grep "package:dio" lib/` returns nothing. Open: adopt Dio with interceptors as `lmsmobileapp` does, or drop the dependency and keep `http`. Deciding this changes the Phase 1 transport work.
-- **Open: does `OutboxEntries` supersede `BankNotifications.syncStatus`,** or does income keep its own column and register with the engine through an adapter? The first is cleaner; the second is a smaller Phase 4.
+- ~~**Open: does `OutboxEntries` supersede `BankNotifications.syncStatus`?**~~ **Answered in `6503310`: neither.** Income registers an adapter and keeps the column, exactly as the other four features do — `syncStatus` is a display hint everywhere now, and `OutboxEntry` is the queue everywhere. The fingerprint serves as both `localId` and `idempotencyKey`, so nothing had to be invented: income is the feature the outbox was generalised *from*, and the `UNIQUE` constraint on `BankNotifications.fingerprint` is the guarantee the other four needed one written for them.
 - **Open: does shop's price rule belong in `logic/`?** Shop earns no `logic/` folder under the three conditions today. If the loaner flow reuses the default/customer/seller price selection, that makes it "reused by more than one bloc" and shop graduates. Check when Phase 4 layers loaner, not before.
 
 ## Testing
@@ -363,6 +649,9 @@ Conventions: tests mirror `lib/`, `mocktail` for mocking, `bloc_test` for blocs.
 | Blocs        | `bloc_test` on emit sequences                                                              |
 | Sync engine  | Pure Dart under `dart test`, no Flutter binding                                            |
 | Migrations   | Committed schema snapshots via `drift_dev schema dump`, then generated migration tests    |
+| Layering     | `test/architecture/logic_layer_test.dart` walks the import closure of every `logic/` file and fails on Flutter, Drift or `dart:ui` |
+| Packaging    | `test/architecture/package_independence_test.dart` fails if any package imports `package:jabhouy/`. Workspace members share one `package_config`, so the pubspec does not enforce this and the analyzer stays quiet |
+| Routing      | **None.** The largest untested surface left: 351 lines in `app_routes.dart`, a `redirect` that decides every navigation, and zero tests. Phase 6 was verified by running the app, which does not survive into CI |
 
 Sync tests are named as scenarios, so the suite doubles as the description of the engine:
 

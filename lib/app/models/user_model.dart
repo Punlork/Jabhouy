@@ -1,5 +1,9 @@
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 
+part 'user_model.g.dart';
+
+@CopyWith()
 class User extends Equatable {
   const User({
     this.id,
@@ -32,24 +36,6 @@ class User extends Equatable {
       'username': username,
       'emailVerified': emailVerified,
     };
-  }
-
-  User copyWith({
-    String? id,
-    String? email,
-    String? name,
-    String? username,
-    String? image,
-    bool? emailVerified,
-  }) {
-    return User(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      name: name ?? this.name,
-      username: username ?? this.username,
-      image: image ?? this.image,
-      emailVerified: emailVerified ?? this.emailVerified,
-    );
   }
 
   @override

@@ -1,0 +1,393 @@
+// The loaner slice — the last of the four, and the mirror of shop and
+// category one table down: Loaners.customerId references Customers.id the
+// way ShopItems.categoryId references Categories.id.
+import 'dart:async';
+
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
+import 'package:jabhouy_sync/jabhouy_sync.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockLoanerApi extends Mock implements LoanerApi {}
+
+class MockCustomerApi extends Mock implements CustomerApi {}
+
+class MockConnectivityService extends Mock implements ConnectivityService {}
+
+void main() {
+  late AppDatabase db;
+  late LoanerDao dao;
+  late CustomerDao customerDao;
+  late MockLoanerApi api;
+  late MockCustomerApi customerApi;
+  late MockConnectivityService connectivity;
+  late SyncEngine engine;
+  late DefaultLoanerRepository repository;
+
+  setUpAll(() {
+    registerFallbackValue(LoanerModel(id: 0, amount: 0));
+    registerFallbackValue(const CustomerModel(id: 0, name: 'fallback'));
+  });
+
+  setUp(() {
+    db = AppDatabase(NativeDatabase.memory());
+    dao = LoanerDao(db);
+    customerDao = CustomerDao(db);
+    api = MockLoanerApi();
+    customerApi = MockCustomerApi();
+    connectivity = MockConnectivityService();
+    engine = SyncEngine(
+      database: db,
+      transport: AdapterSyncTransport([
+        LoanerSyncAdapter(dao, api),
+        CustomerSyncAdapter(customerDao, customerApi),
+      ]),
+    );
+    repository = DefaultLoanerRepository(dao, api, engine, connectivity);
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  void goOnline() {
+    when(() => connectivity.isOnline).thenAnswer((_) async => true);
+  }
+
+  void goOffline() {
+    when(() => connectivity.isOnline).thenAnswer((_) async => false);
+  }
+
+  Future<List<Loaner>> rows() => db.select(db.loaners).get();
+  Future<List<OutboxEntry>> jobs() => db.select(db.outboxEntries).get();
+
+  test('a create made offline is queued locally and nothing is pushed',
+      () async {
+    goOffline();
+
+    await repository.createLoaner(LoanerModel(id: 0, amount: 500));
+
+    final saved = (await rows()).single;
+    expect(saved.amount, 500);
+    expect(saved.id, lessThan(0));
+    expect(saved.syncStatus, SyncStatus.pending);
+
+    final job = (await jobs()).single;
+    expect(job.entityType, SyncEntityType.loaner);
+    expect(job.operation, SyncOperation.create);
+    verifyNever(() => api.createLoaner(any()));
+  });
+
+  test('a loan saved with a customer attached survives the round trip',
+      () async {
+    // Regression. Loaners.customer is a denormalised JSON blob, and the
+    // encoder wrote the raw syncStatus into it. That was an int until
+    // c391ebb made it an enum, at which point jsonEncode threw
+    // JsonUnsupportedObjectError and every loan with a customer failed to
+    // save at all.
+    goOffline();
+
+    await repository.createLoaner(
+      LoanerModel(
+        id: 0,
+        amount: 500,
+        customerId: 12,
+        customer: const CustomerModel(id: 12, name: 'Dara'),
+      ),
+    );
+
+    final saved = (await rows()).single;
+    expect(saved.customer, isNotNull);
+
+    final decoded = decodeCustomer(saved.customer);
+    expect(decoded?.id, 12);
+    expect(decoded?.name, 'Dara');
+    expect(decoded?.syncStatus, SyncStatus.synced);
+  });
+
+  test('a loan never reaches the server before its offline customer',
+      () async {
+    // Enqueued in the wrong order on purpose, as in the category test.
+    const customerLocalId = -999;
+    const loanerLocalId = -70;
+
+    await customerDao.insertPending(
+      const CustomerModel(id: customerLocalId, name: 'Dara'),
+    );
+    await dao.insertPending(
+      LoanerModel(id: loanerLocalId, amount: 500, customerId: customerLocalId),
+    );
+
+    await engine.enqueue(
+      entityType: SyncEntityType.loaner,
+      localId: '$loanerLocalId',
+      operation: SyncOperation.create,
+      idempotencyKey: 'loaner:$loanerLocalId:create',
+      dependsOnLocalId: '$customerLocalId',
+    );
+    await engine.enqueue(
+      entityType: SyncEntityType.customer,
+      localId: '$customerLocalId',
+      operation: SyncOperation.create,
+      idempotencyKey: 'customer:$customerLocalId:create',
+    );
+
+    when(() => customerApi.createCustomer(any())).thenAnswer(
+      (i) async =>
+          Ok((i.positionalArguments.first as CustomerModel).copyWith(id: 12)),
+    );
+    when(() => api.createLoaner(any())).thenAnswer(
+      (i) async =>
+          Ok((i.positionalArguments.first as LoanerModel).copyWith(id: 88)),
+    );
+
+    await engine.drain();
+
+    verifyInOrder([
+      () => customerApi.createCustomer(any()),
+      () => api.createLoaner(any()),
+    ]);
+
+    final loan = (await rows()).single;
+    expect(loan.id, 88);
+    expect(
+      loan.customerId,
+      12,
+      reason: 'pushed with the server customer id, not the local one',
+    );
+    expect(await jobs(), isEmpty);
+  });
+
+  test('a row stored without customerId reads it back from the customer blob',
+      () async {
+    // The shape every pulled loan had before fromJson read the nested id:
+    // the customer survived, its id did not, and each push was a 400.
+    await dao.cacheServerLoaners([
+      LoanerModel(
+        id: 37,
+        amount: 0,
+        customer: const CustomerModel(id: 24, name: 'Pa Ah Pnug'),
+      ),
+    ]);
+
+    expect((await dao.findById(37))!.customerId, 24);
+  });
+
+  group('with background sync', () {
+    late DefaultLoanerRepository background;
+
+    setUp(() {
+      background = DefaultLoanerRepository(
+        dao,
+        api,
+        engine,
+        connectivity,
+        flags: const FixedFeatureFlags({Feature.backgroundSync}),
+      );
+    });
+
+    test('a save returns while the server is still answering', () async {
+      goOnline();
+      final server = Completer<Result<LoanerModel>>();
+      when(() => api.createLoaner(any())).thenAnswer((_) => server.future);
+
+      final saved = await background.createLoaner(
+        LoanerModel(id: 0, amount: 500),
+      );
+
+      // Returned before the push had even started.
+      expect(saved.valueOrNull?.syncStatus, SyncStatus.pending);
+
+      await pumpEventQueue();
+      // The push is on the wire now, and the row is still waiting for it.
+      verify(() => api.createLoaner(any())).called(1);
+      expect((await rows()).single.syncStatus, SyncStatus.pending);
+
+      server.complete(Ok(LoanerModel(id: 41, amount: 500)));
+      await pumpEventQueue();
+
+      final row = (await rows()).single;
+      expect(row.id, 41, reason: 'reconciled once the push landed');
+      expect(row.syncStatus, SyncStatus.synced);
+      expect(await jobs(), isEmpty);
+    });
+
+    test('an offline save does not try the server at all', () async {
+      goOffline();
+
+      await background.createLoaner(LoanerModel(id: 0, amount: 500));
+      await pumpEventQueue();
+
+      verifyNever(() => api.createLoaner(any()));
+      expect(await jobs(), hasLength(1));
+    });
+  });
+
+  group('a pull never writes over a row with a queued job', () {
+    // The server still has loan 38 unpaid: the seller's change has not
+    // reached it, because it is queued (offline here; a rejected or
+    // retrying push leaves the same state).
+    final serverCopy = LoanerModel(id: 38, amount: 500);
+
+    void serverReturns(List<LoanerModel> loans) {
+      when(
+        () => api.fetchLoaners(
+          page: any(named: 'page'),
+          limit: any(named: 'limit'),
+          searchQuery: any(named: 'searchQuery'),
+          customer: any(named: 'customer'),
+          fromDate: any(named: 'fromDate'),
+          toDate: any(named: 'toDate'),
+        ),
+      ).thenAnswer(
+        (_) async => Ok(
+          PaginatedResponse(items: loans, pagination: Pagination()),
+        ),
+      );
+    }
+
+    setUp(() async {
+      await dao.cacheServerLoaners([serverCopy]);
+    });
+
+    test('an unsent edit survives a refresh', () async {
+      goOffline();
+      await repository.updateLoaner(serverCopy.copyWith(isPaid: true));
+
+      goOnline();
+      serverReturns([serverCopy]);
+      when(() => api.updateLoaner(any())).thenAnswer(
+        (_) async => const Err(AppException('down', statusCode: 503)),
+      );
+      await repository.refreshLoaners();
+
+      final row = (await rows()).single;
+      expect(row.isPaid, isTrue, reason: 'the edit, not the server copy');
+      expect(row.syncStatus, SyncStatus.pending);
+      expect((await jobs()).single.operation, SyncOperation.update);
+    });
+
+    test('an unsent delete is not brought back by a refresh', () async {
+      goOffline();
+      await repository.deleteLoaner(serverCopy);
+
+      goOnline();
+      serverReturns([serverCopy]);
+      when(() => api.deleteLoaner(38)).thenAnswer(
+        (_) async => const Err(AppException('down', statusCode: 503)),
+      );
+      await repository.refreshLoaners();
+
+      expect((await rows()).single.isDeleted, isTrue);
+      expect((await jobs()).single.operation, SyncOperation.delete);
+    });
+
+    test('a row with no queued job still takes the server copy', () async {
+      goOnline();
+      serverReturns([serverCopy.copyWith(isPaid: true)]);
+
+      await repository.refreshLoaners();
+
+      expect((await rows()).single.isPaid, isTrue);
+    });
+  });
+
+  group('a complete pull', () {
+    late LoanerSyncAdapter adapter;
+
+    void serverHolds(List<LoanerModel> loans, {int? total}) {
+      when(
+        () => api.fetchLoaners(
+          page: any(named: 'page'),
+          limit: any(named: 'limit'),
+          quiet: true,
+        ),
+      ).thenAnswer(
+        (_) async => Ok(
+          PaginatedResponse(
+            items: loans,
+            pagination: Pagination(totalPage: 1, total: total ?? loans.length),
+          ),
+        ),
+      );
+    }
+
+    setUp(() {
+      adapter = LoanerSyncAdapter(dao, api);
+    });
+
+    test('removes a loan the server deleted', () async {
+      await dao.cacheServerLoaners([
+        LoanerModel(id: 1, amount: 100),
+        LoanerModel(id: 2, amount: 200),
+      ]);
+      serverHolds([LoanerModel(id: 1, amount: 100)]);
+
+      expect(await adapter.pullAll(), isA<Ok<void>>());
+
+      expect((await rows()).map((r) => r.id), [1]);
+    });
+
+    test('keeps a loan with a queued job, and one the server never had',
+        () async {
+      await dao.cacheServerLoaners([LoanerModel(id: 2, amount: 200)]);
+      goOffline();
+      await repository.updateLoaner(LoanerModel(id: 2, amount: 250));
+      await repository.createLoaner(LoanerModel(id: 0, amount: 300));
+      serverHolds(const []);
+
+      await adapter.pullAll();
+
+      final ids = (await rows()).map((r) => r.id).toList();
+      expect(ids, contains(2), reason: 'its edit is still queued');
+      expect(ids.where((id) => id < 0), hasLength(1), reason: 'never sent');
+    });
+
+    test('deletes nothing when the count does not add up', () async {
+      await dao.cacheServerLoaners([
+        LoanerModel(id: 1, amount: 100),
+        LoanerModel(id: 2, amount: 200),
+      ]);
+      // One loan returned, but the server says it holds 40.
+      serverHolds([LoanerModel(id: 1, amount: 100)], total: 40);
+
+      await adapter.pullAll();
+
+      expect((await rows()).map((r) => r.id), [1, 2]);
+    });
+  });
+
+  test('a delete the server has already forgotten counts as done', () async {
+    goOnline();
+    await dao.cacheServerLoaners([LoanerModel(id: 6, amount: 500)]);
+    when(() => api.deleteLoaner(6)).thenAnswer(
+      (_) async => const Err(AppException('gone', statusCode: 404)),
+    );
+
+    await repository.deleteLoaner(LoanerModel(id: 6, amount: 500));
+
+    expect(await rows(), isEmpty);
+    expect(await jobs(), isEmpty);
+  });
+
+  test('a 400 stops the job and marks the row failed', () async {
+    goOnline();
+    when(() => api.createLoaner(any())).thenAnswer(
+      (_) async => const Err(
+        AppException('amount must be positive', statusCode: 400),
+      ),
+    );
+
+    await repository.createLoaner(LoanerModel(id: 0, amount: -1));
+
+    expect((await rows()).single.syncStatus, SyncStatus.failed);
+    expect(
+      (await jobs()).single.lastError,
+      contains('amount must be positive'),
+    );
+  });
+}

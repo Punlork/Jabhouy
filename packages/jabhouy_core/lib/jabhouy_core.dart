@@ -1,0 +1,21 @@
+/// Shared primitives and the Drift schema for Jabhouy.
+///
+/// This package has no Flutter dependency: it must keep building under
+/// `dart test`. Opening a real database file is the app's job: the
+/// AppDatabase constructor takes an executor rather than creating one.
+library jabhouy_core;
+
+export 'package:drift/drift.dart' show Value;
+
+export 'src/database/app_database.dart';
+export 'src/features/feature_flags.dart';
+export 'src/logging/logger.dart';
+export 'src/models/casts.dart';
+export 'src/models/dates.dart';
+export 'src/models/pagination.dart';
+export 'src/result/app_exception.dart';
+export 'src/result/result.dart';
+export 'src/routes/route_names.dart';
+export 'src/sync/outbox.dart';
+export 'src/sync/sync_feedback.dart';
+export 'src/sync/sync_status.dart';

@@ -1,0 +1,808 @@
+{
+  "@@locale": "km",
+  "welcomeBack": "សូមស្វាគមន៍ត្រឡប់មកវិញ",
+  "@welcomeBack": {
+    "description": "Headline text welcoming the user back on the sign-in page"
+  },
+  "signInToContinue": "ចូលដើម្បីបន្ត",
+  "@signInToContinue": {
+    "description": "Subtitle text prompting the user to sign in"
+  },
+  "enterYourEmail": "បញ្ចូលអ៊ីមែលរបស់អ្នក",
+  "@enterYourEmail": {
+    "description": "Hint text for the email input field"
+  },
+  "email": "អ៊ីមែល",
+  "@email": {
+    "description": "Label for the email input field"
+  },
+  "pleaseEnterYourEmail": "សូមបញ្ចូលអ៊ីមែលរបស់អ្នក",
+  "@pleaseEnterYourEmail": {
+    "description": "Validation message when email is empty"
+  },
+  "pleaseEnterAValidEmail": "សូមបញ្ចូលអ៊ីមែលត្រឹមត្រូវ",
+  "@pleaseEnterAValidEmail": {
+    "description": "Validation message when email format is invalid"
+  },
+  "enterYourPassword": "បញ្ចូលលេខសម្ងាត់របស់អ្នក",
+  "@enterYourPassword": {
+    "description": "Hint text for the password input field"
+  },
+  "password": "លេខសម្ងាត់",
+  "@password": {
+    "description": "Label for the password input field"
+  },
+  "pleaseEnterYourPassword": "សូមបញ្ចូលលេខសម្ងាត់របស់អ្នក",
+  "@pleaseEnterYourPassword": {
+    "description": "Validation message when password is empty"
+  },
+  "passwordMinLength": "លេខសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ",
+  "@passwordMinLength": {
+    "description": "Validation message when password is too short"
+  },
+  "login": "ចូល",
+  "@login": {
+    "description": "Text for the login button"
+  },
+  "signUp": "ចុះឈ្មោះ",
+  "@signUp": {
+    "description": "Text for the sign-up button"
+  },
+  "signinSuccessful": "ចូលបានជោគជ័យ",
+  "@signinSuccessful": {
+    "description": "Success message after signing in"
+  },
+  "createAccount": "បង្កើតគណនី",
+  "@createAccount": {
+    "description": "Headline text for the sign-up page"
+  },
+  "signUpToGetStarted": "ចុះឈ្មោះដើម្បីចាប់ផ្តើម",
+  "@signUpToGetStarted": {
+    "description": "Subtitle text prompting the user to sign up"
+  },
+  "enterYourName": "បញ្ចូលឈ្មោះរបស់អ្នក",
+  "@enterYourName": {
+    "description": "Hint text for the name input field"
+  },
+  "name": "ឈ្មោះ",
+  "@name": {
+    "description": "Label for the name input field"
+  },
+  "pleaseEnterYourName": "សូមបញ្ចូលឈ្មោះរបស់អ្នក",
+  "@pleaseEnterYourName": {
+    "description": "Validation message when name is empty"
+  },
+  "signIn": "ចូល",
+  "@signIn": {
+    "description": "Text for the sign-in button"
+  },
+  "welcomeUser": "សូមស្វាគមន៍, {name}!",
+  "@welcomeUser": {
+    "description": "Success message after signing up, with user name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noName": "គ្មានឈ្មោះ",
+  "@noName": {
+    "description": "Default text displayed when user name is not available"
+  },
+  "list": "បញ្ជី",
+  "@list": {
+    "description": "Label for the list view option in segmented button"
+  },
+  "grid": "ក្រឡា",
+  "@grid": {
+    "description": "Label for the grid view option in segmented button"
+  },
+  "searchItems": "ស្វែងរកធាតុ...",
+  "@searchItems": {
+    "description": "Hint text for the search input field"
+  },
+  "signOut": "ចាកចេញ",
+  "@signOut": {
+    "description": "Text for sign-out action in dialog title and button"
+  },
+  "confirmSignOut": "តើអ្នកប្រាកដថាចង់ចាកចេញទេ?",
+  "@confirmSignOut": {
+    "description": "Confirmation message in the sign-out dialog"
+  },
+  "cancel": "បោះបង់",
+  "@cancel": {
+    "description": "Text for the cancel button in dialogs"
+  },
+  "signoutSuccessful": "ចាកចេញជោគជ័យ",
+  "@signoutSuccessful": {
+    "description": "Success message after signing out"
+  },
+  "itemCount": "ចំនួន: {count}",
+  "@itemCount": {
+    "description": "Text displaying the number of items, with a count placeholder",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "na": "គ្មាន",
+  "@na": {
+    "description": "Default text when a value (e.g., category) is not available"
+  },
+  "customerPrice": "តម្លៃសម្រាប់អតិថិជន",
+  "@customerPrice": {
+    "description": "Label for the customer price of an item"
+  },
+  "sellerPrice": "តម្លៃសម្រាប់អ្នកលក់",
+  "@sellerPrice": {
+    "description": "Label for the seller price of an item"
+  },
+  "note": "កំណត់សម្គាល់",
+  "@note": {
+    "description": "Title for the note section of an item"
+  },
+  "edit": "កែសម្រួល",
+  "@edit": {
+    "description": "Label for the edit button"
+  },
+  "delete": "លុប",
+  "@delete": {
+    "description": "Label for the delete button and action in dialog"
+  },
+  "confirmDelete": "បញ្ជាក់ការលុប",
+  "@confirmDelete": {
+    "description": "Title for the delete confirmation dialog"
+  },
+  "confirmDeleteMessage": "តើអ្នកប្រាកដថាចង់លុប \"{name}\" មែនទេ?",
+  "@confirmDeleteMessage": {
+    "description": "Confirmation message in the delete dialog, with item name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "ការកំណត់",
+  "@settings": {
+    "description": "Label for the settings button and sheet title"
+  },
+  "diagnostics": "ការត្រួតពិនិត្យ",
+  "@diagnostics": {
+    "description": "Label for runtime diagnostics"
+  },
+  "runtimeCapture": "ការចាប់យកពេលដំណើរការ",
+  "@runtimeCapture": {
+    "description": "Section title for runtime diagnostics toggles"
+  },
+  "appLogs": "កំណត់ហេតុកម្មវិធី",
+  "@appLogs": {
+    "description": "Label for app log capture"
+  },
+  "appLogsEnabled": "កំពុងចាប់យក logger, bloc, print និងកំហុស",
+  "@appLogsEnabled": {
+    "description": "Subtitle when app log capture is enabled"
+  },
+  "appLogsDisabled": "បានបិទការចាប់យកកំណត់ហេតុកម្មវិធី",
+  "@appLogsDisabled": {
+    "description": "Subtitle when app log capture is disabled"
+  },
+  "networkInspector": "ការត្រួតពិនិត្យបណ្ដាញ",
+  "@networkInspector": {
+    "description": "Label for network diagnostics"
+  },
+  "networkLogsEnabled": "កំពុងចាប់យកសំណើ និងចម្លើយ API",
+  "@networkLogsEnabled": {
+    "description": "Subtitle when network capture is enabled"
+  },
+  "networkLogsDisabled": "បានបិទការចាប់យកបណ្ដាញ",
+  "@networkLogsDisabled": {
+    "description": "Subtitle when network capture is disabled"
+  },
+  "notificationDiagnostics": "ការត្រួតពិនិត្យការជូនដំណឹង",
+  "@notificationDiagnostics": {
+    "description": "Button label to open notification diagnostics"
+  },
+  "copyLogs": "ចម្លង",
+  "@copyLogs": {
+    "description": "Button label for copying diagnostics logs"
+  },
+  "clearLogs": "សម្អាត",
+  "@clearLogs": {
+    "description": "Button label for clearing diagnostics logs"
+  },
+  "diagnosticsCopied": "បានចម្លងការត្រួតពិនិត្យ",
+  "@diagnosticsCopied": {
+    "description": "Snack bar shown after copying diagnostics"
+  },
+  "noAppLogs": "មិនទាន់មានកំណត់ហេតុកម្មវិធីទេ។",
+  "@noAppLogs": {
+    "description": "Empty state for app logs"
+  },
+  "noNetworkLogs": "មិនទាន់មានសំណើបណ្ដាញទេ។",
+  "@noNetworkLogs": {
+    "description": "Empty state for network logs"
+  },
+  "capturedAtLabel": "ពេលចាប់យក",
+  "@capturedAtLabel": {
+    "description": "Label for diagnostics capture timestamp"
+  },
+  "statusLabel": "ស្ថានភាព",
+  "@statusLabel": {
+    "description": "Label for network response status"
+  },
+  "durationLabel": "រយៈពេល",
+  "@durationLabel": {
+    "description": "Label for request duration"
+  },
+  "requestLabel": "សំណើ",
+  "@requestLabel": {
+    "description": "Label for a request URL"
+  },
+  "requestHeadersLabel": "ក្បាលសំណើ",
+  "@requestHeadersLabel": {
+    "description": "Label for request headers"
+  },
+  "requestBodyLabel": "ខ្លឹមសារសំណើ",
+  "@requestBodyLabel": {
+    "description": "Label for request body"
+  },
+  "responseHeadersLabel": "ក្បាលចម្លើយ",
+  "@responseHeadersLabel": {
+    "description": "Label for response headers"
+  },
+  "responseBodyLabel": "ខ្លឹមសារចម្លើយ",
+  "@responseBodyLabel": {
+    "description": "Label for response body"
+  },
+  "errorLabel": "កំហុស",
+  "@errorLabel": {
+    "description": "Label for a captured error"
+  },
+  "switchLanguage": "ប្តូរភាសា",
+  "@switchLanguage": {
+    "description": "Label for the switch language option"
+  },
+  "languageEnglish": "អង់គ្លេស",
+  "@languageEnglish": {
+    "description": "Label for English language option"
+  },
+  "languageKhmer": "ខ្មែរ",
+  "@languageKhmer": {
+    "description": "Label for Khmer language option"
+  },
+  "darkMode": "របៀបងងឹត",
+  "@darkMode": {
+    "description": "Label for toggling dark theme"
+  },
+  "darkModeOn": "បានបើកផ្ទាំងពណ៌ងងឹត",
+  "@darkModeOn": {
+    "description": "Subtitle shown when dark theme is active"
+  },
+  "darkModeOff": "បានបើកផ្ទាំងពណ៌ភ្លឺ",
+  "@darkModeOff": {
+    "description": "Subtitle shown when light theme is active"
+  },
+  "editItem": "កែសម្រួលធាតុ",
+  "@editItem": {
+    "description": "AppBar title when editing an item"
+  },
+  "addNewItem": "បន្ថែមធាតុថ្មី",
+  "@addNewItem": {
+    "description": "AppBar title when adding a new item"
+  },
+  "nameRequired": "{name}ត្រូវបានទាមទារ",
+  "@nameRequired": {
+    "description": "Validation message when name is empty",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultPrice": "តម្លៃដើម",
+  "@defaultPrice": {
+    "description": "Label for the default price input field"
+  },
+  "defaultPriceRequired": "តម្លៃដើមត្រូវបានទាមទារ",
+  "@defaultPriceRequired": {
+    "description": "Validation message when default price is empty"
+  },
+  "changeToSeller": "ប្តូរទៅជាអ្នកលក់",
+  "@changeToSeller": {
+    "description": "Label for switching to seller mode"
+  },
+  "changeToDistributor": "ប្តូរទៅជាអ្នកចែកចាយ",
+  "@changeToDistributor": {
+    "description": "Label for switching to distributor mode"
+  },
+  "category": "ប្រភេទ",
+  "@category": {
+    "description": "Label for the category dropdown"
+  },
+  "electronics": "អេឡិចត្រូនិក",
+  "@electronics": {
+    "description": "Category option for electronics"
+  },
+  "accessories": "គ្រឿងបន្លាស់",
+  "@accessories": {
+    "description": "Category option for accessories"
+  },
+  "beverages": "ភេសជ្ជៈ",
+  "@beverages": {
+    "description": "Category option for beverages"
+  },
+  "other": "ផ្សេងទៀត",
+  "@other": {
+    "description": "Category option for other"
+  },
+  "imageUrl": "URL រូបភាព (ជាជម្រើស)",
+  "@imageUrl": {
+    "description": "Label for the image URL input field"
+  },
+  "saveChanges": "រក្សាទុកការផ្លាស់ប្តូរ",
+  "@saveChanges": {
+    "description": "Button text for saving changes in edit mode"
+  },
+  "addItem": "បន្ថែមធាតុ",
+  "@addItem": {
+    "description": "Button text for adding a new item"
+  },
+  "unsavedChanges": "ការផ្លាស់ប្តូរមិនទាន់រក្សាទុក",
+  "@unsavedChanges": {
+    "description": "Title for the unsaved changes dialog"
+  },
+  "confirmDiscardChanges": "អ្នកមានការផ្លាស់ប្តូរមិនទាន់រក្សាទុក។ តើអ្នកប្រាកដថាចង់បោះបង់វាទេ?",
+  "@confirmDiscardChanges": {
+    "description": "Content for the unsaved changes dialog"
+  },
+  "discard": "បោះបង់",
+  "@discard": {
+    "description": "Text for the discard button in dialogs"
+  },
+  "addCategory": "បន្ថែមប្រភេទ",
+  "@addCategory": {
+    "description": "Text for the addCategory button in dialogs"
+  },
+  "editCategory": "កែសម្រួលប្រភេទ",
+  "@editCategory": {
+    "description": "Text for the editCategory button in dialogs"
+  },
+  "deleteCategory": "លុបប្រភេទ",
+  "@deleteCategory": {
+    "description": "Text for the deleteCategory button in dialogs"
+  },
+  "add": "បន្ថែម",
+  "@add": {
+    "description": "Text for the add button in dialogs"
+  },
+  "image": "រូបភាព",
+  "@image": {
+    "description": "Text for the image button in dialogs"
+  },
+  "uploadImage": "បន្ថែមរូបភាព",
+  "@uploadImage": {
+    "description": "Text for the uploadImage button in dialogs"
+  },
+  "selectImageSource": "ជ្រើសរើសប្រភពរូបភាព",
+  "@selectImageSource": {
+    "description": "Text for the selectImageSource button in dialogs"
+  },
+  "takePhoto": "ថតរូប",
+  "@takePhoto": {
+    "description": "Text for the takePhoto button in dialogs"
+  },
+  "chooseFromGallery": "ជ្រើសរើសពីវិចិត្រសាល",
+  "@chooseFromGallery": {
+    "description": "Text for the chooseFromGallery button in dialogs"
+  },
+  "gettingReady": "កំពុងរៀបចំ",
+  "@gettingReady": {
+    "description": "Text displayed when the app is getting ready"
+  },
+  "preparingExperience": "កំពុងរៀបចំបទពិសោធន៍របស់អ្នក...",
+  "@preparingExperience": {
+    "description": "Text displayed when the app is preparing the user's experience"
+  },
+  "loadingContent": "កំពុងផ្ទុកមាតិការបស់អ្នក...",
+  "@loadingContent": {
+    "description": "Text displayed when the app is loading content"
+  },
+  "almostThere": "ជិតរួចរាល់...",
+  "@almostThere": {
+    "description": "Text displayed when the app is almost ready"
+  },
+  "imageUploadedSuccessfully": "រូបភាពបានបង្ហោះដោយជោគជ័យ",
+  "@imageUploadedSuccessfully": {
+    "description": "Message displayed when the app is almost ready"
+  },
+  "appVersion": "v{version}",
+  "@appVersion": {
+    "description": "Text displaying the app version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateAvailableTitle": "មានកំណែថ្មី",
+  "@updateAvailableTitle": {
+    "description": "Dialog title shown when a newer app release exists"
+  },
+  "updateAvailableMessage": "មានកំណែថ្មីសម្រាប់អាប់ដេត។\nកំណែបច្ចុប្បន្ន៖ v{currentVersion}\nកំណែចុងក្រោយ៖ v{latestVersion}",
+  "@updateAvailableMessage": {
+    "description": "Dialog body shown when an update is available",
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "ពេលក្រោយ",
+  "@updateLater": {
+    "description": "Button label to dismiss the update prompt"
+  },
+  "updateNow": "អាប់ដេតឥឡូវនេះ",
+  "@updateNow": {
+    "description": "Button label to open the latest release for updating"
+  },
+  "profile": "គណនី",
+  "@profile": {
+    "description": "Label for the profile"
+  },
+  "save": "រក្សាទុក",
+  "@save": {
+    "description": "Label for the save"
+  },
+  "editProfile": "កែសម្រួលគណនី",
+  "@editProfile": {
+    "description": "Label for the editProfile"
+  },
+  "profileUpdated": "ធ្វើបច្ចុប្បន្នភាពគណនី",
+  "@profileUpdated": {
+    "description": "Label for the profileUpdated"
+  },
+  "customers": "អតិថិជន",
+  "editCustomer": "កែសម្រួលអតិថិជន",
+  "addCustomer": "បន្ថែមអតិថិជន",
+  "customerName": "ឈ្មោះអតិថិជន",
+  "deleteCustomer": "លុបអតិថិជន",
+  "@customers": {
+    "description": "ស្លាកសម្រាប់ផ្នែកឬទំព័រអតិថិជន"
+  },
+  "@editCustomer": {
+    "description": "ស្លាកសម្រាប់ការកែសម្រួលអតិថិជន"
+  },
+  "@addCustomer": {
+    "description": "ស្លាកសម្រាប់ការបន្ថែមអតិថិជនថ្មី"
+  },
+  "@customerName": {
+    "description": "ស្លាកសម្រាប់វាលបញ្ចូលឈ្មោះអតិថិជន"
+  },
+  "@deleteCustomer": {
+    "description": "ស្លាកសម្រាប់ការលុបអតិថិជន"
+  },
+  "displayName": "ឈ្មោះបង្ហាញ",
+  "@displayName": {
+    "description": "Label for nickname"
+  },
+  "filterLoaners": "ត្រងអ្នកខ្ចី",
+  "@filterLoaners": {
+    "description": "Title for the loaner filter sheet"
+  },
+  "filterItems": "តម្រងធាតុ",
+  "@filterItems": {
+    "description": "Title for the loaner filter sheet"
+  },
+  "fromDate": "ចាប់ពីថ្ងៃ",
+  "@fromDate": {
+    "description": "Label for the start date field in the filter"
+  },
+  "toDate": "ដល់ថ្ងៃ",
+  "@toDate": {
+    "description": "Label for the end date field in the filter"
+  },
+  "notSet": "មិនបានកំណត់",
+  "@notSet": {
+    "description": "Placeholder text when no date is selected"
+  },
+  "reset": "កំណត់ឡើងវិញ",
+  "@reset": {
+    "description": "Text for the reset button in the filter sheet"
+  },
+  "apply": "អនុវត្ត",
+  "@apply": {
+    "description": "Text for the apply button in the filter sheet"
+  },
+  "noCategoriesAvailable": "មិនមានប្រភេទទេ",
+  "@noCategoriesAvailable": {
+    "description": "Title for the dialog when no categories are available"
+  },
+  "pleaseCreateCategoryFirst": "សូមបង្កើតប្រភេទជាមុនសិន",
+  "@pleaseCreateCategoryFirst": {
+    "description": "Message in the dialog prompting the user to create a category"
+  },
+  "createCategory": "បង្កើតប្រភេទ",
+  "@createCategory": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "noItemFound": "រកមិនឃើញធាតុ",
+  "@noItemFound": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "noLoanerFound": "រកមិនឃើញអ្នកខ្ចីទេ",
+  "@noLoanerFound": {
+    "description": "Text for the button to create a new category in the dialog"
+  },
+  "editLoaner": "កែសម្រួលអ្នកខ្ចី",
+  "@editLoaner": {
+    "description": "Title for the app bar when editing an existing loaner"
+  },
+  "addNewLoaner": "បន្ថែមអ្នកខ្ចីថ្មី",
+  "@addNewLoaner": {
+    "description": "Title for the app bar when adding a new loaner"
+  },
+  "amount": "ចំនួនទឹកប្រាក់",
+  "@amount": {
+    "description": "Label for the amount field in the loaner form"
+  },
+  "itemType": "ប្រភេទទំនិញ",
+  "@itemType": {
+    "description": "Label for choosing the type of a shop item"
+  },
+  "singleItem": "ទំនិញរាយ",
+  "@singleItem": {
+    "description": "Label for a single-item shop type"
+  },
+  "packItem": "ទំនិញកញ្ចប់",
+  "@packItem": {
+    "description": "Label for a pack-item shop type"
+  },
+  "packSize": "ចំនួនក្នុងកញ្ចប់",
+  "@packSize": {
+    "description": "Label for the quantity field of a pack item"
+  },
+  "packSizeHint": "មិនបាច់បំពេញក៏បាន។ បើបំពេញ វានឹងរក្សាទុកជា ឈ្មោះ xចំនួន។",
+  "@packSizeHint": {
+    "description": "Helper text shown under the pack size field"
+  },
+  "packSizeValidation": "សូមបញ្ចូលចំនួនក្នុងកញ្ចប់ធំជាង 1",
+  "@packSizeValidation": {
+    "description": "Validation message for invalid pack size"
+  },
+  "packSizeRequired": "សូមបញ្ចូលចំនួនក្នុងកញ្ចប់",
+  "@packSizeRequired": {
+    "description": "Validation message when pack size is required"
+  },
+  "itemsSuffix": "មុខទំនិញ",
+  "@itemsSuffix": {
+    "description": "Suffix used after a pack quantity count"
+  },
+  "variants": "ជម្រើសទំនិញ",
+  "@variants": {
+    "description": "Label for the variants section in the shop item form"
+  },
+  "variantLabel": "ឈ្មោះជម្រើស",
+  "@variantLabel": {
+    "description": "Label for a shop item variant name"
+  },
+  "addVariant": "បន្ថែមជម្រើស",
+  "@addVariant": {
+    "description": "Button text for adding a custom variant row"
+  },
+  "smallVariant": "តូច",
+  "@smallVariant": {
+    "description": "Preset label for a small variant"
+  },
+  "bigVariant": "ធំ",
+  "@bigVariant": {
+    "description": "Preset label for a big variant"
+  },
+  "canVariant": "កំប៉ុង",
+  "@canVariant": {
+    "description": "Preset label for a can variant"
+  },
+  "bottleVariant": "ដប",
+  "@bottleVariant": {
+    "description": "Preset label for a bottle variant"
+  },
+  "selectVariantError": "សូមជ្រើសយ៉ាងហោចណាស់មួយជម្រើស",
+  "@selectVariantError": {
+    "description": "Error shown when no item variant is selected"
+  },
+  "addItems": "បន្ថែមទំនិញ",
+  "@addItems": {
+    "description": "Text for the button to add multiple shop items"
+  },
+  "addLoaner": "បន្ថែមអ្នកខ្ចី",
+  "@addLoaner": {
+    "description": "Text for the button to add a new loaner"
+  },
+  "loading": "កំពុងផ្ទុក",
+  "@loading": {
+    "description": "Text for the button to add a new loaner"
+  },
+  "imgFound": "រូបភាពមាននៅក្នុងក្តារតម្បៀតខ្ទាស់។ប៉ះដើម្បីប្រើវា។",
+  "@imgFound": {
+    "description": "Image found in clipboard. Tap to use it."
+  },
+  "paid": "បានសង",
+  "@paid": {
+    "description": "ស្លាកបង្ហាញថាប្រាក់កម្ចីត្រូវបានសង"
+  },
+  "unpaid": "មិនបានសង",
+  "@unpaid": {
+    "description": "ស្លាកបង្ហាញថាប្រាក់កម្ចីត្រូវបានសង"
+  },
+  "shop": "ហាង",
+  "@shop": {
+    "description": "Label for the shop section or page"
+  },
+  "loaner": "អ្នកខ្ចី",
+  "@loaner": {
+    "description": "Label for the loaner section or page"
+  },
+  "all": "ទាំងអស់",
+  "@all": {
+    "description": "Label for the all category"
+  },
+  "income": "ចំណូល",
+  "@income": {
+    "description": "ស្លាកសម្រាប់ផ្នែកចំណូល"
+  },
+  "notifications": "ការជូនដំណឹង",
+  "@notifications": {
+    "description": "ស្លាកសម្រាប់មើលការជូនដំណឹងក្នុងផ្នែកចំណូល"
+  },
+  "searchIncome": "ស្វែងរកការជូនដំណឹងចំណូល...",
+  "@searchIncome": {
+    "description": "អត្ថបទជំនួយសម្រាប់ស្វែងរកការជូនដំណឹងធនាគារ"
+  },
+  "filterIncome": "តម្រងចំណូល",
+  "@filterIncome": {
+    "description": "ចំណងជើងសន្លឹកតម្រងចំណូល"
+  },
+  "notificationTracking": "ការតាមដានការជូនដំណឹង",
+  "@notificationTracking": {
+    "description": "ចំណងជើងកាតស្ថានភាពតាមដានការជូនដំណឹងធនាគារ"
+  },
+  "notificationTrackingEnabled": "ការតាមដានការជូនដំណឹងធនាគារកំពុងដំណើរការនៅលើឧបករណ៍នេះ។",
+  "@notificationTrackingEnabled": {
+    "description": "សារ បង្ហាញនៅពេលបើកសិទ្ធិតាមដានការជូនដំណឹង"
+  },
+  "notificationTrackingDisabled": "សូមបើកសិទ្ធិការជូនដំណឹង ដើម្បីឱ្យឧបករណ៍មេនេះអាចចាប់ ABA, Chip Mong និង ACLEDA បាន។",
+  "@notificationTrackingDisabled": {
+    "description": "សារ បង្ហាញនៅពេលមិនទាន់បើកសិទ្ធិតាមដានការជូនដំណឹង"
+  },
+  "enableNotificationAccess": "បើកសិទ្ធិ",
+  "@enableNotificationAccess": {
+    "description": "ស្លាកប៊ូតុងសម្រាប់បើកការកំណត់សិទ្ធិការជូនដំណឹង Android"
+  },
+  "refreshStatus": "ផ្ទុកស្ថានភាពឡើងវិញ",
+  "@refreshStatus": {
+    "description": "ស្លាកប៊ូតុងសម្រាប់ធ្វើបច្ចុប្បន្នភាពស្ថានភាពតាមដាន"
+  },
+  "mainDeviceTrackingHint": "សូមប្រើវានៅលើទូរស័ព្ទ Android មេ។ ការធ្វើសមកាលកម្មទៅឧបករណ៍រងអាចបន្ថែមនៅពេលក្រោយលើទិន្នន័យដូចគ្នា។",
+  "@mainDeviceTrackingHint": {
+    "description": "អត្ថបទជំនួយពណ៌នាអំពីវិសាលភាពតាមដានបច្ចុប្បន្ន"
+  },
+  "bankNotificationUnsupported": "ឧបករណ៍នេះមិនអាចចាប់ការជូនដំណឹងធនាគារបានទេ។ សូមប្រើ Android សម្រាប់ទូរស័ព្ទមេ។",
+  "@bankNotificationUnsupported": {
+    "description": "សារបង្ហាញលើវេទិកាដែលមិនគាំទ្រការចាប់ការជូនដំណឹង"
+  },
+  "incomeByBank": "ចំណូលតាមធនាគារ",
+  "@incomeByBank": {
+    "description": "ចំណងជើងខាងលើគំនូសតាងរង្វង់បង្ហាញចំណូលតាមធនាគារ"
+  },
+  "noIncomeChartData": "មិនទាន់មានទិន្នន័យចំណូលទេ។ បន្ថែមទិន្នន័យសាកល្បង ឬបើកការតាមដានដើម្បីមើលគំនូសតាង។",
+  "@noIncomeChartData": {
+    "description": "អត្ថបទពេលទទេសម្រាប់គំនូសតាងចំណូល"
+  },
+  "totalIncome": "ចំណូលសរុប",
+  "@totalIncome": {
+    "description": "ស្លាកសម្រាប់កាតសង្ខេបចំណូលសរុប"
+  },
+  "totalExpense": "ចំណាយសរុប",
+  "@totalExpense": {
+    "description": "ស្លាកសម្រាប់កាតសង្ខេបចំណាយសរុប"
+  },
+  "trackedCount": "ចំនួនតាមដាន",
+  "@trackedCount": {
+    "description": "ស្លាកសម្រាប់កាតសង្ខេបចំនួនការជូនដំណឹងដែលតាមដាន"
+  },
+  "trackedNotifications": "ការជូនដំណឹងដែលបានតាមដាន",
+  "@trackedNotifications": {
+    "description": "ស្លាកសម្រាប់តម្រងការជូនដំណឹង"
+  },
+  "allRecords": "កំណត់ត្រាទាំងអស់",
+  "@allRecords": {
+    "description": "ស្លាកសម្រាប់បង្ហាញកំណត់ត្រាទាំងអស់"
+  },
+  "incomeOnly": "ចំណូល",
+  "@incomeOnly": {
+    "description": "ស្លាកសម្រាប់បង្ហាញតែការជូនដំណឹងចំណូល"
+  },
+  "expenseOnly": "ចំណាយ",
+  "@expenseOnly": {
+    "description": "ស្លាកសម្រាប់បង្ហាញតែការជូនដំណឹងចំណាយ"
+  },
+  "noTrackedNotifications": "រកមិនឃើញការជូនដំណឹងធនាគារដែលបានតាមដាន",
+  "@noTrackedNotifications": {
+    "description": "សារពេលបញ្ជីការជូនដំណឹងធនាគារទទេ"
+  },
+  "addDemoData": "ទិន្នន័យសាកល្បង",
+  "@addDemoData": {
+    "description": "ស្លាកប៊ូតុងសម្រាប់បញ្ចូលទិន្នន័យធនាគារសាកល្បង"
+  },
+  "demoDataAdded": "បានបន្ថែមការជូនដំណឹងធនាគារសាកល្បង",
+  "@demoDataAdded": {
+    "description": "សារជោគជ័យបន្ទាប់ពីបន្ថែមទិន្នន័យសាកល្បង"
+  },
+  "bankLabel": "ធនាគារ",
+  "@bankLabel": {
+    "description": "ស្លាកសម្រាប់ផ្នែកតម្រងធនាគារ"
+  },
+  "deviceRole": "តួនាទីឧបករណ៍",
+  "@deviceRole": {
+    "description": "ស្លាកសម្រាប់បង្ហាញតួនាទីឧបករណ៍បច្ចុប្បន្ន"
+  },
+  "mainDeviceRole": "ឧបករណ៍មេ",
+  "@mainDeviceRole": {
+    "description": "ស្លាកសម្រាប់តួនាទីឧបករណ៍មេ"
+  },
+  "subDeviceRole": "ឧបករណ៍រង",
+  "@subDeviceRole": {
+    "description": "ស្លាកសម្រាប់តួនាទីឧបករណ៍រង"
+  },
+  "deviceRoleMainDescription": "ឧបករណ៍នេះចាប់ការជូនដំណឹងធនាគារ។",
+  "@deviceRoleMainDescription": {
+    "description": "អត្ថបទរងសម្រាប់តួនាទីឧបករណ៍មេនៅក្នុងការកំណត់"
+  },
+  "deviceRoleSubDescription": "ឧបករណ៍នេះជាឧបករណ៍រងសម្រាប់មើលទិន្នន័យសមកាលកម្មនៅពេលក្រោយ។",
+  "@deviceRoleSubDescription": {
+    "description": "អត្ថបទរងសម្រាប់តួនាទីឧបករណ៍រងនៅក្នុងការកំណត់"
+  },
+  "subDeviceTrackingDisabled": "ឧបករណ៍រងមិនចាប់ការជូនដំណឹងធនាគារនៅក្នុងការរៀបចំ local-only បច្ចុប្បន្នទេ។",
+  "@subDeviceTrackingDisabled": {
+    "description": "សារបង្ហាញនៅលើទំព័រចំណូលនៅពេលតួនាទីឧបករណ៍ជាឧបករណ៍រង"
+  },
+  "subDeviceTrackingHint": "កំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ ប្រសិនបើអ្នកចង់ឱ្យវាចាប់ ABA, Chip Mong និង ACLEDA នៅលើទូរស័ព្ទនេះ។",
+  "@subDeviceTrackingHint": {
+    "description": "អត្ថបទជំនួយសម្រាប់ឧបករណ៍រងនៅលើទំព័រចំណូល"
+  },
+  "mainDeviceRoleRequired": "សូមកំណត់ឧបករណ៍នេះជា ឧបករណ៍មេ មុននឹងបន្ថែមទិន្នន័យសាកល្បង ឬការជូនដំណឹងដែលបានតាមដាន។",
+  "@mainDeviceRoleRequired": {
+    "description": "សារកំហុសបង្ហាញនៅពេលឧបករណ៍រងព្យាយាមប្រើសកម្មភាពសម្រាប់ឧបករណ៍មេ"
+  },
+  "setAsMainDevice": "កំណត់ជា ឧបករណ៍មេ",
+  "@setAsMainDevice": {
+    "description": "ស្លាកសកម្មភាពសម្រាប់ទាមទារឧបករណ៍នេះជាឧបករណ៍មេសកម្ម"
+  },
+  "releaseMainDevice": "បោះបង់ឧបករណ៍មេ",
+  "@releaseMainDevice": {
+    "description": "ស្លាកសកម្មភាពសម្រាប់បោះបង់ main-device claim បច្ចុប្បន្ន"
+  },
+  "mainDeviceOnly": "សម្រាប់មេប៉ុណ្ណោះ",
+  "@mainDeviceOnly": {
+    "description": "ស្លាកខ្លីសម្រាប់សកម្មភាពដែលមានសម្រាប់តែឧបករណ៍មេ"
+  },
+  "singleMainDeviceHint": "អាចមានឧបករណ៍មេបានតែមួយប៉ុណ្ណោះ សម្រាប់ income sync ដូចគ្នា នៅពេលតែមួយ។",
+  "@singleMainDeviceHint": {
+    "description": "អត្ថបទពន្យល់អំពីច្បាប់ឧបករណ៍មេសកម្មតែមួយ"
+  },
+  "anotherMainDeviceActive": "មានឧបករណ៍មេមួយផ្សេងទៀតកំពុងសកម្មសម្រាប់ income sync នេះ។",
+  "@anotherMainDeviceActive": {
+    "description": "បង្ហាញនៅពេលឧបករណ៍មួយផ្សេងទៀតកាន់ main-device claim រួចហើយ"
+  },
+  "invalidPrice": "សូមបញ្ចូលចំនួនគត់",
+  "syncing": "កំពុងធ្វើសមកាលកម្ម…",
+  "synced": "បានធ្វើសមកាលកម្ម",
+  "changesWaiting": "{count} ការផ្លាស់ប្តូរកំពុងរង់ចាំ",
+  "changesFailed": "{count} ការផ្លាស់ប្តូរបរាជ័យ",
+  "failedChangesTitle": "ការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ",
+  "waitingToSync": "កំពុងរង់ចាំធ្វើសមកាលកម្ម",
+  "syncFailed": "មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ"
+}

@@ -7,8 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
-import 'package:my_app/app/app.dart';
-import 'package:my_app/app/service/firebase_runtime_options.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/app/service/firebase_runtime_options.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 class AppBlocObserver extends BlocObserver {
   const AppBlocObserver();
@@ -120,6 +122,9 @@ Future<void> bootstrap(
       }
       await FirebaseRuntimeOptions.persistNativeSyncConfig();
       await setupDependencies();
+      // A job the server rejected waits for a new launch, which may be a
+      // build that fixes how its body is made. Before any drain runs.
+      await getIt<SyncEngine>().releaseRejected();
 
       // Storage tab needs the DI container, so it attaches after setup.
       AppDebugger.attachStorage();

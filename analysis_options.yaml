@@ -3,7 +3,8 @@ analyzer:
     lines_longer_than_80_chars: ignore
   exclude:
     - build/**
-    - packages/**
+    # Generated; its lints are the generator's to fix, not ours.
+    - "**/*.g.dart"
     - android/**
     - ios/**
     - web/**
@@ -14,3 +15,5 @@ include: package:very_good_analysis/analysis_options.6.0.0.yaml
 linter:
   rules:
     public_member_api_docs: false
+    # pubspec.yaml groups dependencies by category instead.
+    sort_pub_dependencies: false

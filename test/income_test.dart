@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_app/income/income.dart';
+import 'package:jabhouy/income/income.dart';
 
 void main() {
   test('IncomeSummary groups income by bank and totals expenses', () {
@@ -65,7 +65,6 @@ void main() {
         bankApp: BankApp.aba,
         message: 'Received money',
         amount: 10,
-        currency: 'USD',
         isIncome: true,
         receivedAt: DateTime(2026),
       ),

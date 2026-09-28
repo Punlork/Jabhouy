@@ -2,7 +2,9 @@
 
 import 'dart:convert';
 
-import 'package:my_app/app/app.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_net/jabhouy_net.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthBootstrapResult {

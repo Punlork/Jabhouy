@@ -1,71 +1,114 @@
-name: my_app
+name: jabhouy
 description: Shop management
-version: 1.0.20+25
+version: 1.0.21+26
 publish_to: none
+
+# Workspace members. Each package declares what it imports; list a
+# dependency here only when lib/ or test/ imports it.
+workspace:
+  - packages/jabhouy_core
+  - packages/jabhouy_l10n
+  - packages/jabhouy_net
+  - packages/jabhouy_shop
+  - packages/jabhouy_sync
+  - packages/jabhouy_ui
 
 environment:
   sdk: ^3.13.0
 
 dependencies:
-  animated_text_kit: ^4.2.3
-  bloc: ^8.1.4
-  bloc_concurrency: ^0.2.5
-  cloud_firestore: ^6.2.0
-  connectivity_plus: ^7.1.0
-  dio: ^5.8.0+1
-  drift: ^2.16.0
-  dropdown_button2: ^2.3.9
-  equatable: ^2.0.7
-  firebase_analytics: ^12.0.2
-  firebase_core: ^4.6.0
-  firebase_messaging: ^16.1.3
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.6
-  flutter_dotenv: ^5.2.1
-  flutter_floating_bottom_bar: ^1.3.0
-  flutter_keyboard_visibility: ^6.0.0
-  flutter_launcher_icons: ^0.14.3
-  flutter_local_notifications: ^18.0.0
-  flutter_localizations:
-    sdk: flutter
-  flutter_native_splash: ^2.4.4
-  flutter_runtime_debugger: ^0.4.0
-  flutter_slidable: ^3.1.2
-  flutter_staggered_grid_view: ^0.7.0
-  flutter_svg: ^2.2.0
-  flutter_typeahead: ^5.2.0
+
+  # Workspace packages
+  jabhouy_core:
+    path: packages/jabhouy_core
+  jabhouy_l10n:
+    path: packages/jabhouy_l10n
+  jabhouy_net:
+    path: packages/jabhouy_net
+  jabhouy_shop:
+    path: packages/jabhouy_shop
+  jabhouy_sync:
+    path: packages/jabhouy_sync
+  jabhouy_ui:
+    path: packages/jabhouy_ui
+
+  # State management
+  bloc: ^9.2.1
+  bloc_concurrency: ^0.3.0
+  flutter_bloc: ^9.1.1
+  stream_transform: ^2.1.1
+
+  # Navigation and dependency injection
   get_it: ^8.0.3
-  go_router: ^14.8.1
-  http: ^1.3.0
-  image_picker: ^1.1.2
-  intl: ^0.20.2
-  logger: ^2.5.0
-  meta: ^1.15.0
-  package_info_plus: ^8.3.0
+  go_router: ^18.0.1
+
+  # Local storage and database
+  drift: ^2.16.0
   path: ^1.9.1
   path_provider: ^2.1.5
   shared_preferences: ^2.5.4
-  shimmer: ^3.0.0
   sqlite3: ^2.9.4
+  # No Dart import: bundles the native SQLite library Drift opens.
   sqlite3_flutter_libs: ^0.5.0
-  stream_transform: ^2.1.1
-  super_clipboard: ^0.8.24
-  transparent_image: ^2.0.1
+
+  # Networking
+  http: ^1.3.0
+
+  # Firebase and notifications
+  firebase_analytics: ^12.0.2
+  firebase_core: ^4.6.0
+  firebase_messaging: ^16.1.3
+  flutter_local_notifications: ^18.0.0
+
+  # UI components
+  flutter_floating_bottom_bar: ^1.3.0
+  flutter_keyboard_visibility: ^6.0.0
+  flutter_native_splash: ^2.4.4
+  flutter_slidable: ^3.1.2
+  flutter_svg: ^2.2.0
+  flutter_typeahead: ^5.2.0
+  shimmer: ^3.0.0
+
+  # Device and platform
+  image_picker: ^1.1.2
+  package_info_plus: ^8.3.0
   url_launcher: ^6.3.1
 
+  # Models and utilities
+  async: ^2.13.1
+  collection: ^1.19.1
+  copy_with_extension: ^18.0.0
+  equatable: ^2.0.7
+  flutter_dotenv: ^5.2.1
+  intl: ^0.20.2
+  logger: ^2.5.0
+  meta: ^1.15.0
+
+  # Debugging
+  flutter_runtime_debugger: ^0.4.0
+
 dev_dependencies:
-  bloc_test: ^9.1.7
-  build_runner: ^2.4.0
-  drift_dev: ^2.16.0
+  # Testing
+  bloc_test: ^10.0.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
   patrol: ^4.1.1
+
+  # Code generation (`melos run gen`)
+  build_runner: ^2.4.0
+  copy_with_extension_gen: ^18.0.0
+  drift_dev: ^2.16.0
+
+  # Tooling
+  # Generates app icons from flutter_launcher_icons.yaml; never imported.
+  flutter_launcher_icons: ^0.14.3
+  melos: ^7.8.1
   very_good_analysis: ^6.0.0
 
 flutter:
-  generate: true
   uses-material-design: true
   fonts:
     - family: NotoSansKhmer
@@ -104,3 +147,48 @@ patrol:
     package_name: com.pl.shop.management.dev
   ios:
     bundle_id: com.pl.shop_management.dev
+
+# One command per chore across the workspace: `dart run melos run <script>`,
+# or plain `melos run <script>` after `dart pub global activate melos`.
+melos:
+  # The app is the root package, not a folder under packages/.
+  useRootAsPackage: true
+  # The SDK FVM pins. CI has no .fvm/ and sets MELOS_SDK_PATH=auto, which
+  # means whichever SDK is on PATH.
+  sdkPath: .fvm/flutter_sdk
+
+  scripts:
+    analyze:
+      description: Analyze the whole workspace. Errors fail; the baseline is 3 non-error issues.
+      run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+    # Filters go on `melos exec`, not on the script: a script-level
+    # packageFilters prompts for a package, which hangs CI, and `steps`
+    # shells out to a `melos` that only exists after a global activate.
+    test:
+      description: Every suite, each under the runner its package allows.
+      run: dart run melos run test:dart && dart run melos run test:flutter
+
+    test:dart:
+      description: Pure-Dart packages, under dart test. No Flutter binding, by design.
+      run: dart run melos exec --no-flutter --dir-exists=test --fail-fast -- dart test
+
+    test:flutter:
+      description: The app and the Flutter packages, under flutter test.
+      run: dart run melos exec --flutter --dir-exists=test --fail-fast -- flutter test
+
+    gen:
+      description: build_runner in every package that depends on it.
+      run: dart run melos exec --depends-on=build_runner --fail-fast -- dart run build_runner build --delete-conflicting-outputs
+
+    # Each flavor with its feature flags baked in, so no one has to
+    # remember --dart-define-from-file.
+    run:dev:
+      run: flutter run --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json
+    run:stg:
+      run: flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=config/features/staging.json
+    run:prod:
+      run: flutter run --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json
+    build:prod:
+      description: Release APK, as fastlane builds it for CI.
+      run: flutter build apk --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json --release
