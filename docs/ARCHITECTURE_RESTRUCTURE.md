@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Author:** Punlork
-**Updated:** 2026-09-21
+**Updated:** 2026-09-28
 
 ## Summary
 
@@ -61,8 +61,8 @@ the plan lost, the decision is recorded below rather than left as drift.
 | — loaner JSON crash fix (found by 3f) | done | `c7e04a4` |
 | 2 — shop slice | done | `574109e`, `0768f99` |
 | — core primitives: `Result`, `AppException` | done | `d3240be`, `75d9403`, `13fe4d2` |
-| 4 — income slice | done | `d202623`, `09b8a2a` |
-| 5 — `jabhouy_shop` | done, and it took three packages nobody planned | `22c5714`, `a3c7367` |
+| 4 — income slice | done | `d202623`, `6503310` |
+| 5 — `jabhouy_shop` | done, and it took three packages nobody planned | `22c5714`, `a3c7367`, `1550cfe` |
 | 6 — bloc 8→9, go_router 14→18 | done | `d886a78`, `d7b9fdc` |
 
 **All five features are layered and on the engine.** Phase 3 closed the
@@ -628,7 +628,7 @@ The 13 features run at least four different shapes between them, which is the sa
 - ~~**Cross-package Drift codegen is the likeliest source of lost time in Phase 5.**~~ **It cost nothing.** Tables live in `jabhouy_core`, shop's DAO is a plain class rather than a `@DriftAccessor`, and running `build_runner` in core after the split rewrote no source at all. The lost time went to the app barrel, which this list never mentioned — see [What extracting one feature actually cost](#what-extracting-one-feature-actually-cost).
 - **`sendTestNotification` is the production upload path** for real notifications, despite its name. Renaming it is in scope for Phase 4; it currently obscures which code path matters.
 - **`dio: ^5.8.0+1` is declared and never imported.** `grep "package:dio" lib/` returns nothing. Open: adopt Dio with interceptors as `lmsmobileapp` does, or drop the dependency and keep `http`. Deciding this changes the Phase 1 transport work.
-- ~~**Open: does `OutboxEntries` supersede `BankNotifications.syncStatus`?**~~ **Answered in `09b8a2a`: neither.** Income registers an adapter and keeps the column, exactly as the other four features do — `syncStatus` is a display hint everywhere now, and `OutboxEntry` is the queue everywhere. The fingerprint serves as both `localId` and `idempotencyKey`, so nothing had to be invented: income is the feature the outbox was generalised *from*, and the `UNIQUE` constraint on `BankNotifications.fingerprint` is the guarantee the other four needed one written for them.
+- ~~**Open: does `OutboxEntries` supersede `BankNotifications.syncStatus`?**~~ **Answered in `6503310`: neither.** Income registers an adapter and keeps the column, exactly as the other four features do — `syncStatus` is a display hint everywhere now, and `OutboxEntry` is the queue everywhere. The fingerprint serves as both `localId` and `idempotencyKey`, so nothing had to be invented: income is the feature the outbox was generalised *from*, and the `UNIQUE` constraint on `BankNotifications.fingerprint` is the guarantee the other four needed one written for them.
 - **Open: does shop's price rule belong in `logic/`?** Shop earns no `logic/` folder under the three conditions today. If the loaner flow reuses the default/customer/seller price selection, that makes it "reused by more than one bloc" and shop graduates. Check when Phase 4 layers loaner, not before.
 
 ## Testing
