@@ -5,12 +5,16 @@ import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 /// Local-first customer writes, queued through the app's one outbox.
 class DefaultCustomerRepository implements CustomerRepository {
-  const DefaultCustomerRepository(
+  DefaultCustomerRepository(
     this._dao,
     this._api,
     this._engine,
-    this._connectivity,
-  );
+    this._connectivity, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  }) : _inBackground = flags.isEnabled(Feature.backgroundSync);
+
+  /// Saves return after the local write and push in the background.
+  final bool _inBackground;
 
   final CustomerDao _dao;
   final CustomerApi _api;
@@ -85,7 +89,13 @@ class DefaultCustomerRepository implements CustomerRepository {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
-    if (await _connectivity.isOnline) await _engine.drain();
+    if (await _connectivity.isOnline) {
+      if (_inBackground) {
+        _engine.requestSync();
+      } else {
+        await _engine.drain();
+      }
+    }
     return const Ok<void>(null);
   }
 
@@ -115,6 +125,12 @@ class DefaultCustomerRepository implements CustomerRepository {
   /// See `DefaultShopRepository._settle`.
   Future<Result<CustomerModel>> _settle(CustomerModel local) async {
     if (!await _connectivity.isOnline) return Ok(local);
+    if (_inBackground) {
+      // The row is safe on the phone; the seller does not wait for the
+      // server, and the list redraws when the push lands.
+      _engine.requestSync();
+      return Ok(local);
+    }
 
     await _engine.drain();
     final after = await _dao.findById(local.id);

@@ -17,8 +17,12 @@ extension CustomerStateExtension on CustomerState {
 }
 
 class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
-  CustomerBloc(this._repository, this._connectivityService)
-      : super(CustomerInitial()) {
+  CustomerBloc(
+    this._repository,
+    this._connectivityService, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  })  : _inBackground = flags.isEnabled(Feature.backgroundSync),
+        super(CustomerInitial()) {
     _customerSubscription =
         _repository.watchCustomers().listen((customers) {
       if (!isClosed) {
@@ -41,6 +45,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<_CustomerConnectivityChanged>(_onConnectivityChanged);
   }
 
+  /// Saves return at once and sync in the background: no overlay, and
+  /// no claim about the server in the message.
+  final bool _inBackground;
   final CustomerRepository _repository;
   final ConnectivityService _connectivityService;
   late StreamSubscription<List<CustomerModel>> _customerSubscription;
@@ -137,8 +144,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
         currentState.copyWith(
           syncMessage: syncFeedback(
             customer.syncStatus,
-            done: 'Created ${customer.name}',
-          ),
+            done: 'Created ${customer.name}', inBackground: _inBackground),
         ),
       );
     }
@@ -161,8 +167,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
         currentState.copyWith(
           syncMessage: syncFeedback(
             customer.syncStatus,
-            done: 'Updated ${customer.name}',
-          ),
+            done: 'Updated ${customer.name}', inBackground: _inBackground),
         ),
       );
     }

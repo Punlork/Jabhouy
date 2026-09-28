@@ -6,12 +6,16 @@ import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 /// Local-first loaner writes, queued through the app's one outbox.
 class DefaultLoanerRepository implements LoanerRepository {
-  const DefaultLoanerRepository(
+  DefaultLoanerRepository(
     this._dao,
     this._api,
     this._engine,
-    this._connectivity,
-  );
+    this._connectivity, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  }) : _inBackground = flags.isEnabled(Feature.backgroundSync);
+
+  /// Saves return after the local write and push in the background.
+  final bool _inBackground;
 
   final LoanerDao _dao;
   final LoanerApi _api;
@@ -114,7 +118,13 @@ class DefaultLoanerRepository implements LoanerRepository {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
-    if (await _connectivity.isOnline) await _engine.drain();
+    if (await _connectivity.isOnline) {
+      if (_inBackground) {
+        _engine.requestSync();
+      } else {
+        await _engine.drain();
+      }
+    }
     return const Ok<void>(null);
   }
 
@@ -146,6 +156,12 @@ class DefaultLoanerRepository implements LoanerRepository {
   /// See `DefaultShopRepository._settle`.
   Future<Result<LoanerModel>> _settle(LoanerModel local) async {
     if (!await _connectivity.isOnline) return Ok(local);
+    if (_inBackground) {
+      // The row is safe on the phone; the seller does not wait for the
+      // server, and the list redraws when the push lands.
+      _engine.requestSync();
+      return Ok(local);
+    }
 
     await _engine.drain();
     final after = await _dao.findById(local.id);

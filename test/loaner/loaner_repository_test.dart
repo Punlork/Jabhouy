@@ -1,6 +1,8 @@
 // The loaner slice — the last of the four, and the mirror of shop and
 // category one table down: Loaners.customerId references Customers.id the
 // way ShopItems.categoryId references Categories.id.
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/customer/customer.dart';
@@ -173,6 +175,56 @@ void main() {
     ]);
 
     expect((await dao.findById(37))!.customerId, 24);
+  });
+
+  group('with background sync', () {
+    late DefaultLoanerRepository background;
+
+    setUp(() {
+      background = DefaultLoanerRepository(
+        dao,
+        api,
+        engine,
+        connectivity,
+        flags: const FixedFeatureFlags({Feature.backgroundSync}),
+      );
+    });
+
+    test('a save returns while the server is still answering', () async {
+      goOnline();
+      final server = Completer<Result<LoanerModel>>();
+      when(() => api.createLoaner(any())).thenAnswer((_) => server.future);
+
+      final saved = await background.createLoaner(
+        LoanerModel(id: 0, amount: 500),
+      );
+
+      // Returned before the push had even started.
+      expect(saved.valueOrNull?.syncStatus, SyncStatus.pending);
+
+      await pumpEventQueue();
+      // The push is on the wire now, and the row is still waiting for it.
+      verify(() => api.createLoaner(any())).called(1);
+      expect((await rows()).single.syncStatus, SyncStatus.pending);
+
+      server.complete(Ok(LoanerModel(id: 41, amount: 500)));
+      await pumpEventQueue();
+
+      final row = (await rows()).single;
+      expect(row.id, 41, reason: 'reconciled once the push landed');
+      expect(row.syncStatus, SyncStatus.synced);
+      expect(await jobs(), isEmpty);
+    });
+
+    test('an offline save does not try the server at all', () async {
+      goOffline();
+
+      await background.createLoaner(LoanerModel(id: 0, amount: 500));
+      await pumpEventQueue();
+
+      verifyNever(() => api.createLoaner(any()));
+      expect(await jobs(), hasLength(1));
+    });
   });
 
   group('a pull never writes over a row with a queued job', () {

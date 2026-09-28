@@ -8,12 +8,16 @@ import 'package:jabhouy_sync/jabhouy_sync.dart';
 /// Sharing one engine is the point: a shop item that depends on a category
 /// can only be ordered after it if both are jobs in the same queue.
 class DefaultCategoryRepository implements CategoryRepository {
-  const DefaultCategoryRepository(
+  DefaultCategoryRepository(
     this._dao,
     this._api,
     this._engine,
-    this._connectivity,
-  );
+    this._connectivity, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  }) : _inBackground = flags.isEnabled(Feature.backgroundSync);
+
+  /// Saves return after the local write and push in the background.
+  final bool _inBackground;
 
   final CategoryDao _dao;
   final CategoryApi _api;
@@ -78,7 +82,13 @@ class DefaultCategoryRepository implements CategoryRepository {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
-    if (await _connectivity.isOnline) await _engine.drain();
+    if (await _connectivity.isOnline) {
+      if (_inBackground) {
+        _engine.requestSync();
+      } else {
+        await _engine.drain();
+      }
+    }
     return const Ok<void>(null);
   }
 
@@ -100,6 +110,12 @@ class DefaultCategoryRepository implements CategoryRepository {
   /// layer picks its message from it.
   Future<Result<CategoryItemModel>> _settle(CategoryItemModel local) async {
     if (!await _connectivity.isOnline) return Ok(local);
+    if (_inBackground) {
+      // The row is safe on the phone; the seller does not wait for the
+      // server, and the list redraws when the push lands.
+      _engine.requestSync();
+      return Ok(local);
+    }
 
     await _engine.drain();
     final after = await _dao.findById(local.id);

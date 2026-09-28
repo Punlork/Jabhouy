@@ -11,12 +11,16 @@ import 'package:jabhouy_sync/jabhouy_sync.dart';
 /// same job for every feature — which is why four near-identical copies of
 /// it existed before.
 class DefaultShopRepository implements ShopRepository {
-  const DefaultShopRepository(
+  DefaultShopRepository(
     this._dao,
     this._api,
     this._engine,
-    this._connectivity,
-  );
+    this._connectivity, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  }) : _inBackground = flags.isEnabled(Feature.backgroundSync);
+
+  /// Saves return after the local write and push in the background.
+  final bool _inBackground;
 
   final ShopDao _dao;
   // Reads still go straight out and back: a pull has nothing to queue, so
@@ -116,7 +120,13 @@ class DefaultShopRepository implements ShopRepository {
     await _dao.markDeletedPending(body.id);
     await _enqueue(body, SyncOperation.delete, 'delete');
 
-    if (await _connectivity.isOnline) await _engine.drain();
+    if (await _connectivity.isOnline) {
+      if (_inBackground) {
+        _engine.requestSync();
+      } else {
+        await _engine.drain();
+      }
+    }
     return const Ok<void>(null);
   }
 
@@ -156,6 +166,12 @@ class DefaultShopRepository implements ShopRepository {
   /// is pending or failed, and says which.
   Future<Result<ShopItemModel>> _settle(ShopItemModel local) async {
     if (!await _connectivity.isOnline) return Ok(local);
+    if (_inBackground) {
+      // The row is safe on the phone; the seller does not wait for the
+      // server, and the list redraws when the push lands.
+      _engine.requestSync();
+      return Ok(local);
+    }
 
     await _engine.drain();
     final after = await _dao.findById(local.id);

@@ -16,7 +16,11 @@ extension CategoryStateExtension on CategoryState {
 }
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  CategoryBloc(this._repository) : super(const CategoryInitial()) {
+  CategoryBloc(
+    this._repository, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  })  : _inBackground = flags.isEnabled(Feature.backgroundSync),
+        super(const CategoryInitial()) {
     _categorySubscription = _repository.watchCategories().listen((items) {
       add(_CategoryUpdatedFromLocal(items));
     });
@@ -31,6 +35,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CategoryDeleteEvent>(_onDeleteItem);
   }
 
+  /// Saves return at once and sync in the background: no overlay, and
+  /// no claim about the server in the message.
+  final bool _inBackground;
   final CategoryRepository _repository;
   late StreamSubscription<List<CategoryItemModel>> _categorySubscription;
 
@@ -41,41 +48,41 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onCreateItem(CategoryCreateEvent event, Emitter<CategoryState> emit) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.createCategory(event.body)).fold(
         ok: (c) => showSuccessSnackBar(
           null,
-          syncFeedback(c.syncStatus, done: 'Created: ${c.name}'),
+          syncFeedback(c.syncStatus, done: 'Created: ${c.name}', inBackground: _inBackground),
         ),
         err: (e) => showErrorSnackBar(null, 'Failed to create item: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
   Future<void> _onEditItem(CategoryEditEvent event, Emitter<CategoryState> emit) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.updateCategory(event.body)).fold(
         ok: (c) => showSuccessSnackBar(
           null,
-          syncFeedback(c.syncStatus, done: 'Updated: ${c.name}'),
+          syncFeedback(c.syncStatus, done: 'Updated: ${c.name}', inBackground: _inBackground),
         ),
         err: (e) => showErrorSnackBar(null, 'Failed to update item: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
   Future<void> _onDeleteItem(CategoryDeleteEvent event, Emitter<CategoryState> emit) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.deleteCategory(event.body)).fold(
         ok: (_) => showSuccessSnackBar(null, 'Deleted ${event.body.name}'),
@@ -84,7 +91,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete item: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 

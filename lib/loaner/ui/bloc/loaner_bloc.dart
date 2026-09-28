@@ -23,8 +23,13 @@ extension ShopStateExtension on LoanerState {
 }
 
 class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
-  LoanerBloc(this._repository, this._refreshLoaners, this._connectivityService)
-      : super(LoanerInitial()) {
+  LoanerBloc(
+    this._repository,
+    this._refreshLoaners,
+    this._connectivityService, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  })  : _inBackground = flags.isEnabled(Feature.backgroundSync),
+        super(LoanerInitial()) {
     _filtersController = StreamController<_LoanerFilters>.broadcast(sync: true)
       ..add(const _LoanerFilters());
 
@@ -90,6 +95,9 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   }
   static const throttleDuration = Duration(milliseconds: 300);
 
+  /// Saves return at once and sync in the background: no overlay, and
+  /// no claim about the server in the message.
+  final bool _inBackground;
   final LoanerRepository _repository;
   // The one place loaner reaches past its own repository: a loan
   // response carries its customer, and caching that is customer's job.
@@ -249,15 +257,14 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   }
 
   Future<void> _onAddLoaner(AddLoaner event, Emitter<LoanerState> emit) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.createLoaner(event.loaner)).fold(
         ok: (loan) => showSuccessSnackBar(
           null,
           syncFeedback(
             loan.syncStatus,
-            done: 'Created ${loan.customer?.name}',
-          ),
+            done: 'Created ${loan.customer?.name}', inBackground: _inBackground),
         ),
         err: (e) =>
             showErrorSnackBar(null, 'Failed to create loaner: ${e.message}'),
@@ -265,7 +272,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create loaner: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
@@ -273,15 +280,14 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     UpdateLoaner event,
     Emitter<LoanerState> emit,
   ) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.updateLoaner(event.loaner)).fold(
         ok: (loan) => showSuccessSnackBar(
           null,
           syncFeedback(
             loan.syncStatus,
-            done: 'Updated ${loan.customer?.name}',
-          ),
+            done: 'Updated ${loan.customer?.name}', inBackground: _inBackground),
         ),
         err: (e) =>
             showErrorSnackBar(null, 'Failed to update loaner: ${e.message}'),
@@ -289,7 +295,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update loaner: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
@@ -297,7 +303,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     DeleteLoaner event,
     Emitter<LoanerState> emit,
   ) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.deleteLoaner(event.body)).fold(
         ok: (_) => showSuccessSnackBar(
@@ -310,7 +316,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete loaner: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 

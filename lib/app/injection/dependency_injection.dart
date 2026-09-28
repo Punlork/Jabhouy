@@ -105,6 +105,7 @@ Future<void> setupDependencies() async {
         getIt<ShopApi>(),
         getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton<LoanerRepository>(
@@ -113,6 +114,7 @@ Future<void> setupDependencies() async {
         getIt<LoanerApi>(),
         getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton(
@@ -127,6 +129,7 @@ Future<void> setupDependencies() async {
         getIt<CustomerApi>(),
         getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton(
@@ -144,6 +147,7 @@ Future<void> setupDependencies() async {
         getIt<CategoryApi>(),
         getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton(
@@ -184,9 +188,15 @@ Future<void> setupDependencies() async {
         getIt<ShopRepository>(),
         getIt<UploadBloc>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
-    ..registerFactory(() => CategoryBloc(getIt<CategoryRepository>()))
+    ..registerFactory(
+      () => CategoryBloc(
+        getIt<CategoryRepository>(),
+        flags: getIt<FeatureFlags>(),
+      ),
+    )
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
     ..registerFactory(() => SignupBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
@@ -195,12 +205,14 @@ Future<void> setupDependencies() async {
         getIt<LoanerRepository>(),
         getIt<RefreshLoanersUseCase>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerFactory(
       () => CustomerBloc(
         getIt<CustomerRepository>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerFactory(

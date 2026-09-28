@@ -7,6 +7,11 @@ enum Feature {
   /// Bank-notification capture: the Income tab, the main/sub device role,
   /// notification diagnostics, and the Android notification listener.
   income,
+
+  /// Saves return after the local write, and lists read only from Drift
+  /// while the sync engine pushes and pulls in the background.
+  /// docs/OFFLINE_SYNC.md.
+  backgroundSync,
 }
 
 /// Answers whether a [Feature] is on.
@@ -31,6 +36,8 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
         // `bool.fromEnvironment` only works as a `const` with a literal
         // key, which is why each feature needs its own case.
         Feature.income => const bool.fromEnvironment('FEATURE_INCOME'),
+        Feature.backgroundSync =>
+          const bool.fromEnvironment('FEATURE_BACKGROUND_SYNC'),
       };
 }
 

@@ -81,25 +81,31 @@ class AppRouter {
                     getIt<ShopRepository>(),
                     getIt<UploadBloc>(),
                     getIt<ConnectivityService>(),
+                    flags: getIt<FeatureFlags>(),
                   ),
                 ),
                 BlocProvider(
                   create: (context) => SignoutBloc(getIt<AuthService>()),
                 ),
                 BlocProvider(
-                  create: (context) => CategoryBloc(getIt<CategoryRepository>()),
+                  create: (context) => CategoryBloc(
+                    getIt<CategoryRepository>(),
+                    flags: getIt<FeatureFlags>(),
+                  ),
                 ),
                 BlocProvider(
                   create: (context) => LoanerBloc(
                     getIt<LoanerRepository>(),
                     getIt<RefreshLoanersUseCase>(),
                     getIt<ConnectivityService>(),
+                    flags: getIt<FeatureFlags>(),
                   ),
                 ),
                 BlocProvider(
                   create: (context) => CustomerBloc(
                     getIt<CustomerRepository>(),
                     getIt<ConnectivityService>(),
+                    flags: getIt<FeatureFlags>(),
                   ),
                 ),
                 // No bloc, no capture: IncomeBloc is the only caller of

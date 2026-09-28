@@ -21,8 +21,13 @@ extension ShopStateExtension on ShopState {
 }
 
 class ShopBloc extends Bloc<ShopEvent, ShopState> {
-  ShopBloc(this._repository, this.upload, this._connectivityService)
-      : super(const ShopInitial()) {
+  ShopBloc(
+    this._repository,
+    this.upload,
+    this._connectivityService, {
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  })  : _inBackground = flags.isEnabled(Feature.backgroundSync),
+        super(const ShopInitial()) {
     _filtersController = StreamController<_ShopFilters>.broadcast(sync: true)
       ..add(
         const _ShopFilters(),
@@ -108,6 +113,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 
   static const throttleDuration = Duration(milliseconds: 300);
 
+  /// Saves return at once and sync in the background: no overlay, and
+  /// no claim about the server in the message.
+  final bool _inBackground;
   final ShopRepository _repository;
   final UploadBloc upload;
   final ConnectivityService _connectivityService;
@@ -127,13 +135,13 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     ShopCreateItemEvent event,
     Emitter<ShopState> emit,
   ) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.createItem(event.body)).fold(
         ok: (item) {
           showSuccessSnackBar(
             null,
-            syncFeedback(item.syncStatus, done: 'Created ${item.name}'),
+            syncFeedback(item.syncStatus, done: 'Created ${item.name}', inBackground: _inBackground),
           );
           event.onSuccess?.call();
         },
@@ -143,7 +151,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
@@ -151,13 +159,13 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     ShopEditItemEvent event,
     Emitter<ShopState> emit,
   ) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.updateItem(event.body)).fold(
         ok: (item) {
           showSuccessSnackBar(
             null,
-            syncFeedback(item.syncStatus, done: 'Updated: ${item.name}'),
+            syncFeedback(item.syncStatus, done: 'Updated: ${item.name}', inBackground: _inBackground),
           );
           event.onSuccess?.call();
         },
@@ -167,7 +175,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
@@ -179,7 +187,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       for (final item in event.items) {
         final result = await _repository.createItem(item);
@@ -202,7 +210,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create items: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
@@ -210,7 +218,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     ShopDeleteItemEvent event,
     Emitter<ShopState> emit,
   ) async {
-    LoadingOverlay.show();
+    if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.deleteItem(event.body)).fold(
         ok: (_) => showSuccessSnackBar(null, 'Deleted ${event.body.name}'),
@@ -220,7 +228,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete item: $e');
     } finally {
-      LoadingOverlay.hide();
+      if (!_inBackground) LoadingOverlay.hide();
     }
   }
 
