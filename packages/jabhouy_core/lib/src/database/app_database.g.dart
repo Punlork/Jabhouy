@@ -3503,6 +3503,290 @@ class OutboxEntriesCompanion extends UpdateCompanion<OutboxEntry> {
   }
 }
 
+class $SyncCursorsTable extends SyncCursors
+    with TableInfo<$SyncCursorsTable, SyncCursor> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncCursorsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncEntityType, String>
+  entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<SyncEntityType>($SyncCursorsTable.$converterentityType);
+  static const VerificationMeta _lastPulledAtMeta = const VerificationMeta(
+    'lastPulledAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastPulledAt = GeneratedColumn<DateTime>(
+    'last_pulled_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cursorMeta = const VerificationMeta('cursor');
+  @override
+  late final GeneratedColumn<String> cursor = GeneratedColumn<String>(
+    'cursor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [entityType, lastPulledAt, cursor];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_cursors';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncCursor> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('last_pulled_at')) {
+      context.handle(
+        _lastPulledAtMeta,
+        lastPulledAt.isAcceptableOrUnknown(
+          data['last_pulled_at']!,
+          _lastPulledAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastPulledAtMeta);
+    }
+    if (data.containsKey('cursor')) {
+      context.handle(
+        _cursorMeta,
+        cursor.isAcceptableOrUnknown(data['cursor']!, _cursorMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entityType};
+  @override
+  SyncCursor map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncCursor(
+      entityType: $SyncCursorsTable.$converterentityType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}entity_type'],
+        )!,
+      ),
+      lastPulledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_pulled_at'],
+      )!,
+      cursor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cursor'],
+      ),
+    );
+  }
+
+  @override
+  $SyncCursorsTable createAlias(String alias) {
+    return $SyncCursorsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SyncEntityType, String, String>
+  $converterentityType = const EnumNameConverter<SyncEntityType>(
+    SyncEntityType.values,
+  );
+}
+
+class SyncCursor extends DataClass implements Insertable<SyncCursor> {
+  final SyncEntityType entityType;
+
+  /// When the last complete pull of this entity succeeded.
+  final DateTime lastPulledAt;
+  final String? cursor;
+  const SyncCursor({
+    required this.entityType,
+    required this.lastPulledAt,
+    this.cursor,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['entity_type'] = Variable<String>(
+        $SyncCursorsTable.$converterentityType.toSql(entityType),
+      );
+    }
+    map['last_pulled_at'] = Variable<DateTime>(lastPulledAt);
+    if (!nullToAbsent || cursor != null) {
+      map['cursor'] = Variable<String>(cursor);
+    }
+    return map;
+  }
+
+  SyncCursorsCompanion toCompanion(bool nullToAbsent) {
+    return SyncCursorsCompanion(
+      entityType: Value(entityType),
+      lastPulledAt: Value(lastPulledAt),
+      cursor: cursor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cursor),
+    );
+  }
+
+  factory SyncCursor.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncCursor(
+      entityType: $SyncCursorsTable.$converterentityType.fromJson(
+        serializer.fromJson<String>(json['entityType']),
+      ),
+      lastPulledAt: serializer.fromJson<DateTime>(json['lastPulledAt']),
+      cursor: serializer.fromJson<String?>(json['cursor']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entityType': serializer.toJson<String>(
+        $SyncCursorsTable.$converterentityType.toJson(entityType),
+      ),
+      'lastPulledAt': serializer.toJson<DateTime>(lastPulledAt),
+      'cursor': serializer.toJson<String?>(cursor),
+    };
+  }
+
+  SyncCursor copyWith({
+    SyncEntityType? entityType,
+    DateTime? lastPulledAt,
+    Value<String?> cursor = const Value.absent(),
+  }) => SyncCursor(
+    entityType: entityType ?? this.entityType,
+    lastPulledAt: lastPulledAt ?? this.lastPulledAt,
+    cursor: cursor.present ? cursor.value : this.cursor,
+  );
+  SyncCursor copyWithCompanion(SyncCursorsCompanion data) {
+    return SyncCursor(
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      lastPulledAt: data.lastPulledAt.present
+          ? data.lastPulledAt.value
+          : this.lastPulledAt,
+      cursor: data.cursor.present ? data.cursor.value : this.cursor,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursor(')
+          ..write('entityType: $entityType, ')
+          ..write('lastPulledAt: $lastPulledAt, ')
+          ..write('cursor: $cursor')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(entityType, lastPulledAt, cursor);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncCursor &&
+          other.entityType == this.entityType &&
+          other.lastPulledAt == this.lastPulledAt &&
+          other.cursor == this.cursor);
+}
+
+class SyncCursorsCompanion extends UpdateCompanion<SyncCursor> {
+  final Value<SyncEntityType> entityType;
+  final Value<DateTime> lastPulledAt;
+  final Value<String?> cursor;
+  final Value<int> rowid;
+  const SyncCursorsCompanion({
+    this.entityType = const Value.absent(),
+    this.lastPulledAt = const Value.absent(),
+    this.cursor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncCursorsCompanion.insert({
+    required SyncEntityType entityType,
+    required DateTime lastPulledAt,
+    this.cursor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : entityType = Value(entityType),
+       lastPulledAt = Value(lastPulledAt);
+  static Insertable<SyncCursor> custom({
+    Expression<String>? entityType,
+    Expression<DateTime>? lastPulledAt,
+    Expression<String>? cursor,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entityType != null) 'entity_type': entityType,
+      if (lastPulledAt != null) 'last_pulled_at': lastPulledAt,
+      if (cursor != null) 'cursor': cursor,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncCursorsCompanion copyWith({
+    Value<SyncEntityType>? entityType,
+    Value<DateTime>? lastPulledAt,
+    Value<String?>? cursor,
+    Value<int>? rowid,
+  }) {
+    return SyncCursorsCompanion(
+      entityType: entityType ?? this.entityType,
+      lastPulledAt: lastPulledAt ?? this.lastPulledAt,
+      cursor: cursor ?? this.cursor,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(
+        $SyncCursorsTable.$converterentityType.toSql(entityType.value),
+      );
+    }
+    if (lastPulledAt.present) {
+      map['last_pulled_at'] = Variable<DateTime>(lastPulledAt.value);
+    }
+    if (cursor.present) {
+      map['cursor'] = Variable<String>(cursor.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorsCompanion(')
+          ..write('entityType: $entityType, ')
+          ..write('lastPulledAt: $lastPulledAt, ')
+          ..write('cursor: $cursor, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3513,6 +3797,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BankNotificationsTable bankNotifications =
       $BankNotificationsTable(this);
   late final $OutboxEntriesTable outboxEntries = $OutboxEntriesTable(this);
+  late final $SyncCursorsTable syncCursors = $SyncCursorsTable(this);
   late final Index outboxDrainIdx = Index(
     'outbox_drain_idx',
     'CREATE INDEX outbox_drain_idx ON outbox_entries (entity_type, next_attempt_at)',
@@ -3528,6 +3813,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     loaners,
     bankNotifications,
     outboxEntries,
+    syncCursors,
     outboxDrainIdx,
   ];
 }
@@ -5687,6 +5973,174 @@ typedef $$OutboxEntriesTableProcessedTableManager =
       OutboxEntry,
       PrefetchHooks Function()
     >;
+typedef $$SyncCursorsTableCreateCompanionBuilder =
+    SyncCursorsCompanion Function({
+      required SyncEntityType entityType,
+      required DateTime lastPulledAt,
+      Value<String?> cursor,
+      Value<int> rowid,
+    });
+typedef $$SyncCursorsTableUpdateCompanionBuilder =
+    SyncCursorsCompanion Function({
+      Value<SyncEntityType> entityType,
+      Value<DateTime> lastPulledAt,
+      Value<String?> cursor,
+      Value<int> rowid,
+    });
+
+class $$SyncCursorsTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<SyncEntityType, SyncEntityType, String>
+  get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastPulledAt => $composableBuilder(
+    column: $table.lastPulledAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cursor => $composableBuilder(
+    column: $table.cursor,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncCursorsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastPulledAt => $composableBuilder(
+    column: $table.lastPulledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cursor => $composableBuilder(
+    column: $table.cursor,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncCursorsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<SyncEntityType, String> get entityType =>
+      $composableBuilder(
+        column: $table.entityType,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get lastPulledAt => $composableBuilder(
+    column: $table.lastPulledAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cursor =>
+      $composableBuilder(column: $table.cursor, builder: (column) => column);
+}
+
+class $$SyncCursorsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncCursorsTable,
+          SyncCursor,
+          $$SyncCursorsTableFilterComposer,
+          $$SyncCursorsTableOrderingComposer,
+          $$SyncCursorsTableAnnotationComposer,
+          $$SyncCursorsTableCreateCompanionBuilder,
+          $$SyncCursorsTableUpdateCompanionBuilder,
+          (
+            SyncCursor,
+            BaseReferences<_$AppDatabase, $SyncCursorsTable, SyncCursor>,
+          ),
+          SyncCursor,
+          PrefetchHooks Function()
+        > {
+  $$SyncCursorsTableTableManager(_$AppDatabase db, $SyncCursorsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncCursorsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncCursorsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncCursorsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<SyncEntityType> entityType = const Value.absent(),
+                Value<DateTime> lastPulledAt = const Value.absent(),
+                Value<String?> cursor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsCompanion(
+                entityType: entityType,
+                lastPulledAt: lastPulledAt,
+                cursor: cursor,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required SyncEntityType entityType,
+                required DateTime lastPulledAt,
+                Value<String?> cursor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsCompanion.insert(
+                entityType: entityType,
+                lastPulledAt: lastPulledAt,
+                cursor: cursor,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncCursorsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncCursorsTable,
+      SyncCursor,
+      $$SyncCursorsTableFilterComposer,
+      $$SyncCursorsTableOrderingComposer,
+      $$SyncCursorsTableAnnotationComposer,
+      $$SyncCursorsTableCreateCompanionBuilder,
+      $$SyncCursorsTableUpdateCompanionBuilder,
+      (
+        SyncCursor,
+        BaseReferences<_$AppDatabase, $SyncCursorsTable, SyncCursor>,
+      ),
+      SyncCursor,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5703,4 +6157,6 @@ class $AppDatabaseManager {
       $$BankNotificationsTableTableManager(_db, _db.bankNotifications);
   $$OutboxEntriesTableTableManager get outboxEntries =>
       $$OutboxEntriesTableTableManager(_db, _db.outboxEntries);
+  $$SyncCursorsTableTableManager get syncCursors =>
+      $$SyncCursorsTableTableManager(_db, _db.syncCursors);
 }

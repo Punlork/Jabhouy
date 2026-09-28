@@ -35,7 +35,7 @@ graph TD
 
 | Package | Holds | Flutter |
 | --- | --- | --- |
-| `jabhouy_core` | Drift schema (`AppDatabase`, schema 7), `Result`/`AppException`, `SyncStatus`, the outbox table, route names, `FeatureFlags`, `toIsoDate` | No |
+| `jabhouy_core` | Drift schema (`AppDatabase`, schema 8), `Result`/`AppException`, `SyncStatus`, the outbox table, route names, `FeatureFlags`, `toIsoDate` | No |
 | `jabhouy_sync` | `SyncEngine`, `BackoffPolicy`, the `FeatureSyncAdapter` port and `AdapterSyncTransport` | No |
 | `jabhouy_net` | `ApiService`, `BaseService`, connectivity, request inspection | Yes |
 | `jabhouy_ui` | Theme, assets, shared widgets, `TabScrollManager`, `UploadBloc` | Yes |
@@ -139,7 +139,7 @@ The analyzer reads the generated interface and calls `syncMessage: null` redunda
 - **Local ids can collide.** Four repositories mint offline ids as `-(millis % 1000000)`, which repeats every 16.7 minutes; the UUID `localId` column the plan called for is not built.
 - **Clock skew decides conflicts.** Server-timestamp last-write-wins needs a server-side ordering decision nobody has made.
 - **No routing tests.** `app_routes.dart` and its `redirect` are verified by running the app.
-- **No migration tests.** Schema 7 has no committed snapshots.
+- **Migration tests are hand-built.** `packages/jabhouy_core/test/migration_test.dart` covers 7 → 8 by building a schema-7 file; there are no committed snapshots, so earlier steps are untested.
 - **`ApiResponse` survives** in auth, profile and one file in `lib/app`; the layered features speak `Result`.
 - **Patrol commands do not pass a flag file,** so a Patrol run builds with every feature off.
 

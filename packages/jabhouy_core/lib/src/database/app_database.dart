@@ -101,6 +101,7 @@ class BankNotifications extends Table {
     Loaners,
     BankNotifications,
     OutboxEntries,
+    SyncCursors,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -110,7 +111,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   /// The ids of [type] rows that still have a job in the outbox.
   ///
@@ -166,6 +167,10 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(outboxEntries);
           await m.createIndex(outboxDrainIdx);
         }
+
+        if (from < 8) {
+          await m.createTable(syncCursors);
+        }
       },
     );
   }
@@ -177,6 +182,8 @@ class AppDatabase extends _$AppDatabase {
       await delete(loaners).go();
       await delete(categories).go();
       await delete(customers).go();
+      // Or the next account to sign in would skip its first pull.
+      await delete(syncCursors).go();
     });
   }
 }

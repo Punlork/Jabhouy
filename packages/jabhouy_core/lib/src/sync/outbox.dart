@@ -68,3 +68,20 @@ class OutboxEntries extends Table {
         {entityType, localId},
       ];
 }
+
+/// Where each entity's last pull left off.
+///
+/// The server cannot say what changed, so a pull downloads everything and
+/// [lastPulledAt] only decides whether it is due. [cursor] is where an
+/// `updatedSince` value goes once the server offers one.
+class SyncCursors extends Table {
+  TextColumn get entityType => textEnum<SyncEntityType>()();
+
+  /// When the last complete pull of this entity succeeded.
+  DateTimeColumn get lastPulledAt => dateTime()();
+
+  TextColumn get cursor => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {entityType};
+}

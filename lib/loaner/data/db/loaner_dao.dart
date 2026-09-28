@@ -66,12 +66,24 @@ class LoanerDao {
     return row == null ? null : _toModel(row);
   }
 
-  /// Writes a page of server rows, skipping any row with a queued job.
+  /// Writes one page of server rows, as the old per-load refresh does.
+  /// A page is never the whole list, so it deletes nothing.
+  Future<void> cacheServerLoaners(List<LoanerModel> loaners) =>
+      reconcileServerLoaners(loaners, complete: false);
+
+  /// Writes server rows, skipping any row with a queued job.
   ///
   /// Writing over those would put the server's older copy where the
   /// seller's unsent edit was, and the queued job, which re-reads the row,
   /// would then send that older copy. A queued delete would come back.
-  Future<void> cacheServerLoaners(List<LoanerModel> loaners) {
+  ///
+  /// With [complete], [loaners] is everything the server holds, so a row it
+  /// did not return was deleted there and goes here too — unless it has a
+  /// queued job, or a negative id, which means the server never had it.
+  Future<void> reconcileServerLoaners(
+    List<LoanerModel> loaners, {
+    required bool complete,
+  }) {
     return _db.transaction(() async {
       // Read inside the transaction, so an edit cannot land between the
       // check and the write.
@@ -85,6 +97,18 @@ class LoanerDao {
           mode: InsertMode.insertOrReplace,
         );
       });
+      if (!complete) return;
+
+      final onServer = loaners.map((l) => l.id).toList();
+      final keep = queued.map(int.tryParse).whereType<int>().toList();
+      await (_db.loaners.delete()
+            ..where(
+              (t) =>
+                  t.id.isBiggerThanValue(0) &
+                  t.id.isNotIn(onServer) &
+                  t.id.isNotIn(keep),
+            ))
+          .go();
     });
   }
 

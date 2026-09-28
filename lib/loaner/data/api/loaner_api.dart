@@ -16,9 +16,13 @@ class LoanerApi extends BaseService {
     String? customer,
     DateTime? fromDate,
     DateTime? toDate,
+    /// The background pull passes true: nobody is waiting on it, so a
+    /// failure is logged by the engine instead of shown as a snackbar.
+    bool quiet = false,
   }) async {
     final response = await get<PaginatedResponse<LoanerModel>>(
       '',
+      showSnackBar: !quiet,
       queryParameters: {
         'page': page.toString(),
         'limit': limit.toString(),

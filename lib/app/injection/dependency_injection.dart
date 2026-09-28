@@ -68,14 +68,20 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => IncomeApi(getIt<ApiService>()))
     // One engine for the whole app: the outbox is one queue, and ordering
     // a shop item after its category only works if both drain together.
-    ..registerLazySingleton(
-      () => SyncEngine(
+    ..registerLazySingleton(() {
+      final shop = ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>());
+      final category =
+          CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>());
+      final customer =
+          CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>());
+      final loaner = LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>());
+      return SyncEngine(
         database: getIt<AppDatabase>(),
         transport: AdapterSyncTransport([
-          ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>()),
-          CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>()),
-          CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>()),
-          LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>()),
+          shop,
+          category,
+          customer,
+          loaner,
           // Registered even when Feature.income is off: a job queued
           // before the flag flipped would otherwise be rejected for good.
           IncomeSyncAdapter(
@@ -84,8 +90,10 @@ Future<void> setupDependencies() async {
             getIt<FirebaseIncomeSyncService>().canAcceptLocalCapture,
           ),
         ]),
-      ),
-    )
+        // Income pulls through PullRemoteNotificationsUseCase instead.
+        pullAdapters: [shop, category, customer, loaner],
+      );
+    })
     ..registerLazySingleton<IncomeRepository>(
       () => DefaultIncomeRepository(
         getIt<IncomeDao>(),

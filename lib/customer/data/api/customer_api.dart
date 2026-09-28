@@ -14,9 +14,13 @@ class CustomerApi extends BaseService {
     int limit = 10,
     String searchQuery = '',
     String categoryFilter = '',
+    /// The background pull passes true: nobody is waiting on it, so a
+    /// failure is logged by the engine instead of shown as a snackbar.
+    bool quiet = false,
   }) async {
     final response = await get<PaginatedResponse<CustomerModel>>(
       '',
+      showSnackBar: !quiet,
       queryParameters: {
         'page': page.toString(),
         'limit': limit.toString(),

@@ -82,8 +82,8 @@ void main() {
 
   test('the schema is at the version that introduced the outbox', () async {
     // 6 created the table; 7 renamed two of its columns before anything
-    // had ever written to it.
-    expect(db.schemaVersion, 7);
+    // had ever written to it; 8 added sync_cursors beside it.
+    expect(db.schemaVersion, greaterThanOrEqualTo(7));
     expect(await db.select(db.outboxEntries).get(), isEmpty);
   });
 }

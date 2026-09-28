@@ -136,6 +136,36 @@ void main() {
     expect((await rows()).single.customerPrice, 2500);
   });
 
+  test('a complete pull removes deleted items and keeps queued ones',
+      () async {
+    await dao.cacheServerItems(const [
+      ShopItemModel(id: 1, name: 'Tea'),
+      ShopItemModel(id: 2, name: 'Coffee'),
+      ShopItemModel(id: 3, name: 'Milk'),
+    ]);
+    goOffline();
+    await repository.updateItem(const ShopItemModel(id: 3, name: 'Oat milk'));
+    when(
+      () => api.fetchItems(
+        page: any(named: 'page'),
+        limit: any(named: 'limit'),
+        quiet: true,
+      ),
+    ).thenAnswer(
+      (_) async => Ok(
+        PaginatedResponse(
+          items: const [ShopItemModel(id: 1, name: 'Tea')],
+          pagination: Pagination(totalPage: 1, total: 1),
+        ),
+      ),
+    );
+
+    await ShopSyncAdapter(dao, api).pullAll();
+
+    final names = (await rows()).map((r) => r.name).toList()..sort();
+    expect(names, ['Oat milk', 'Tea'], reason: 'Coffee was deleted there');
+  });
+
   test('a delete the server rejects stays on the device', () async {
     goOnline();
     await dao.cacheServerItems([const ShopItemModel(id: 7, name: 'Tea')]);

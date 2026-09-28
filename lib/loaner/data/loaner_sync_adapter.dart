@@ -3,7 +3,7 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 /// Sends loaner outbox jobs, and applies the answer to the local row.
-class LoanerSyncAdapter implements FeatureSyncAdapter {
+class LoanerSyncAdapter implements FeatureSyncAdapter, FeaturePullAdapter {
   const LoanerSyncAdapter(this._dao, this._api);
 
   final LoanerDao _dao;
@@ -11,6 +11,18 @@ class LoanerSyncAdapter implements FeatureSyncAdapter {
 
   @override
   SyncEntityType get entityType => SyncEntityType.loaner;
+
+  /// Downloads every page, then lets the DAO delete what the server no
+  /// longer has, but only if every page arrived and the count agrees.
+  @override
+  Future<Result<void>> pullAll() async {
+    final server = await fetchEveryPage(
+      (page, limit) => _api.fetchLoaners(page: page, limit: limit, quiet: true),
+    );
+    await _dao.reconcileServerLoaners(server.items, complete: server.complete);
+    final error = server.error;
+    return error == null ? const Ok(null) : Err(error);
+  }
 
   @override
   Future<SyncPushOutcome> push(OutboxEntry entry) async {

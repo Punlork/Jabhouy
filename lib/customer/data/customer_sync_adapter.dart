@@ -3,7 +3,7 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 /// Sends customer outbox jobs, and applies the answer to the local row.
-class CustomerSyncAdapter implements FeatureSyncAdapter {
+class CustomerSyncAdapter implements FeatureSyncAdapter, FeaturePullAdapter {
   const CustomerSyncAdapter(this._dao, this._api);
 
   final CustomerDao _dao;
@@ -11,6 +11,18 @@ class CustomerSyncAdapter implements FeatureSyncAdapter {
 
   @override
   SyncEntityType get entityType => SyncEntityType.customer;
+
+  /// Downloads every page, then lets the DAO delete what the server no
+  /// longer has, but only if every page arrived and the count agrees.
+  @override
+  Future<Result<void>> pullAll() async {
+    final server = await fetchEveryPage(
+      (page, limit) => _api.fetchCustomers(page: page, limit: limit, quiet: true),
+    );
+    await _dao.reconcileServerCustomers(server.items, complete: server.complete);
+    final error = server.error;
+    return error == null ? const Ok(null) : Err(error);
+  }
 
   @override
   Future<SyncPushOutcome> push(OutboxEntry entry) async {

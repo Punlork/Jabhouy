@@ -43,6 +43,37 @@ class _HeldTransport implements SyncTransport {
   }
 }
 
+/// A pull adapter that records when it ran, and can be held open.
+class _RecordingPull implements FeaturePullAdapter {
+  _RecordingPull(this.entityType, this.log, {this.result = const Ok(null)});
+
+  @override
+  final SyncEntityType entityType;
+  final List<String> log;
+  final Result<void> result;
+  Completer<void>? hold;
+
+  @override
+  Future<Result<void>> pullAll() async {
+    log.add('pull ${entityType.name}');
+    await hold?.future;
+    return result;
+  }
+}
+
+/// A transport that writes to the same log as the pulls.
+class _LoggingTransport implements SyncTransport {
+  _LoggingTransport(this.log);
+
+  final List<String> log;
+
+  @override
+  Future<SyncPushOutcome> push(OutboxEntry entry) async {
+    log.add('push ${entry.localId}');
+    return const SyncPushSucceeded();
+  }
+}
+
 void main() {
   late AppDatabase db;
   late DateTime now;
@@ -335,5 +366,102 @@ void main() {
     expect(last.pushing, isFalse);
     expect(last.waiting, 1);
     expect(last.failing, 1);
+  });
+
+  group('pull', () {
+    late List<String> log;
+
+    SyncEngine pullingEngine(List<FeaturePullAdapter> adapters) => SyncEngine(
+          database: db,
+          transport: _LoggingTransport(log),
+          clock: () => now,
+          pullAdapters: adapters,
+        );
+
+    setUp(() => log = []);
+
+    test('drains first, then walks parents before children', () async {
+      // Registered child-first on purpose.
+      final engine = pullingEngine([
+        _RecordingPull(SyncEntityType.loaner, log),
+        _RecordingPull(SyncEntityType.shopItem, log),
+        _RecordingPull(SyncEntityType.customer, log),
+        _RecordingPull(SyncEntityType.category, log),
+      ]);
+      await enqueueItem(engine, 'item-1');
+
+      await engine.pull();
+
+      expect(log, [
+        'push item-1',
+        'pull category',
+        'pull customer',
+        'pull shopItem',
+        'pull loaner',
+      ]);
+    });
+
+    test('a fresh list is skipped until the window passes', () async {
+      final engine = pullingEngine([
+        _RecordingPull(SyncEntityType.loaner, log),
+      ]);
+
+      await engine.pull();
+      now = now.add(const Duration(minutes: 14));
+      await engine.pull();
+      expect(log, ['pull loaner']);
+
+      now = now.add(const Duration(minutes: 1));
+      await engine.pull();
+      expect(log, ['pull loaner', 'pull loaner']);
+    });
+
+    test('force pulls a fresh list, and only limits it', () async {
+      final engine = pullingEngine([
+        _RecordingPull(SyncEntityType.customer, log),
+        _RecordingPull(SyncEntityType.loaner, log),
+      ]);
+      await engine.pull();
+      log.clear();
+
+      await engine.pull(force: true, only: {SyncEntityType.loaner});
+
+      expect(log, ['pull loaner']);
+    });
+
+    test('a failed pull is not recorded, so the next one retries', () async {
+      final engine = pullingEngine([
+        _RecordingPull(
+          SyncEntityType.loaner,
+          log,
+          result: const Err(AppException('offline')),
+        ),
+      ]);
+
+      await engine.pull();
+      await engine.pull();
+
+      expect(log, ['pull loaner', 'pull loaner']);
+      expect(await db.select(db.syncCursors).get(), isEmpty);
+    });
+
+    test('a save during a pull waits for the pull to finish', () async {
+      final loans = _RecordingPull(SyncEntityType.loaner, log)
+        ..hold = Completer<void>();
+      final engine = pullingEngine([loans]);
+
+      final pulling = engine.pull();
+      await pumpEventQueue();
+      expect(log, ['pull loaner']);
+
+      await enqueueItem(engine, 'item-1');
+      final draining = engine.drain();
+      await pumpEventQueue();
+      expect(log, ['pull loaner'], reason: 'the push waits its turn');
+
+      loans.hold!.complete();
+      await Future.wait([pulling, draining]);
+      expect(log, ['pull loaner', 'push item-1']);
+    });
   });
 }

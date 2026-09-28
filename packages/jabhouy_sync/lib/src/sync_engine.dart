@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/src/backoff.dart';
+import 'package:jabhouy_sync/src/feature_pull_adapter.dart';
 import 'package:jabhouy_sync/src/transport.dart';
 
 /// What the engine is doing, for the sync indicator.
@@ -54,8 +55,13 @@ class SyncEngine {
     SyncDiagnostics diagnostics = const NoopSyncDiagnostics(),
     DateTime Function() clock = DateTime.now,
     int recentKeyLimit = 200,
+    List<FeaturePullAdapter> pullAdapters = const [],
+    this.pullInterval = const Duration(minutes: 15),
   })  : _db = database,
         _transport = transport,
+        _pullAdapters = {
+          for (final adapter in pullAdapters) adapter.entityType: adapter,
+        },
         _diagnostics = diagnostics,
         _clock = clock,
         _recentLimit = recentKeyLimit;
@@ -67,6 +73,34 @@ class SyncEngine {
   final int _recentLimit;
 
   final BackoffPolicy backoff;
+
+  final Map<SyncEntityType, FeaturePullAdapter> _pullAdapters;
+
+  /// How long a pull stays fresh. One seller on usually one phone makes
+  /// almost every change on this device, so this only bounds how old
+  /// another device's edits can look.
+  final Duration pullInterval;
+
+  /// Parents first, so a shop item's category and a loan's customer are
+  /// already on the phone when the child arrives.
+  static const _pullOrder = [
+    SyncEntityType.category,
+    SyncEntityType.customer,
+    SyncEntityType.shopItem,
+    SyncEntityType.loaner,
+  ];
+
+  /// The end of the queue of drains and pulls. Each waits for the one
+  /// before it, so a pull never sees a half-finished push: a create that
+  /// landed mid-pull would be missing from the list the pull downloaded,
+  /// and the pull's delete step would remove it.
+  Future<void> _tail = Future.value();
+
+  Future<T> _exclusively<T>(Future<T> Function() body) {
+    final next = _tail.then((_) => body());
+    _tail = next.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return next;
+  }
 
   /// Pushes in flight, keyed by idempotency key.
   ///
@@ -195,7 +229,7 @@ class SyncEngine {
       _again = true;
       return running;
     }
-    return _running = _run();
+    return _running = _exclusively(_run);
   }
 
   Future<int> _run() async {
@@ -229,6 +263,47 @@ class SyncEngine {
       if (cleared == 0) return total;
       total += cleared;
     }
+  }
+
+  /// Downloads every list that is stale, or every list at all with
+  /// [force], optionally limited to [only]. Drains first, so the server
+  /// has this phone's writes before it is asked for the list.
+  Future<void> pull({bool force = false, Set<SyncEntityType>? only}) =>
+      _exclusively(() => _pull(force: force, only: only));
+
+  Future<void> _pull({required bool force, Set<SyncEntityType>? only}) async {
+    await _drainOnce();
+    unawaited(_publish());
+    for (final type in _pullOrder) {
+      final adapter = _pullAdapters[type];
+      if (adapter == null || (only != null && !only.contains(type))) continue;
+      if (!force && !await _isStale(type)) continue;
+
+      switch (await adapter.pullAll()) {
+        case Ok():
+          await _db.into(_db.syncCursors).insertOnConflictUpdate(
+                SyncCursorsCompanion.insert(
+                  entityType: type,
+                  lastPulledAt: _clock(),
+                ),
+              );
+          _diagnostics.log('pulled', data: {'entityType': type.name});
+        case Err(:final error):
+          // Not recorded as pulled, so the next trigger tries again.
+          _diagnostics.log(
+            'pull failed',
+            data: {'entityType': type.name, 'error': error.message},
+          );
+      }
+    }
+  }
+
+  Future<bool> _isStale(SyncEntityType type) async {
+    final cursor = await (_db.select(_db.syncCursors)
+          ..where((t) => t.entityType.equalsValue(type)))
+        .getSingleOrNull();
+    if (cursor == null) return true;
+    return _clock().difference(cursor.lastPulledAt) >= pullInterval;
   }
 
   /// Makes every rejected job due once more. The app calls this at launch,

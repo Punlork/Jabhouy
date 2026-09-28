@@ -296,6 +296,71 @@ void main() {
     });
   });
 
+  group('a complete pull', () {
+    late LoanerSyncAdapter adapter;
+
+    void serverHolds(List<LoanerModel> loans, {int? total}) {
+      when(
+        () => api.fetchLoaners(
+          page: any(named: 'page'),
+          limit: any(named: 'limit'),
+          quiet: true,
+        ),
+      ).thenAnswer(
+        (_) async => Ok(
+          PaginatedResponse(
+            items: loans,
+            pagination: Pagination(totalPage: 1, total: total ?? loans.length),
+          ),
+        ),
+      );
+    }
+
+    setUp(() {
+      adapter = LoanerSyncAdapter(dao, api);
+    });
+
+    test('removes a loan the server deleted', () async {
+      await dao.cacheServerLoaners([
+        LoanerModel(id: 1, amount: 100),
+        LoanerModel(id: 2, amount: 200),
+      ]);
+      serverHolds([LoanerModel(id: 1, amount: 100)]);
+
+      expect(await adapter.pullAll(), isA<Ok<void>>());
+
+      expect((await rows()).map((r) => r.id), [1]);
+    });
+
+    test('keeps a loan with a queued job, and one the server never had',
+        () async {
+      await dao.cacheServerLoaners([LoanerModel(id: 2, amount: 200)]);
+      goOffline();
+      await repository.updateLoaner(LoanerModel(id: 2, amount: 250));
+      await repository.createLoaner(LoanerModel(id: 0, amount: 300));
+      serverHolds(const []);
+
+      await adapter.pullAll();
+
+      final ids = (await rows()).map((r) => r.id).toList();
+      expect(ids, contains(2), reason: 'its edit is still queued');
+      expect(ids.where((id) => id < 0), hasLength(1), reason: 'never sent');
+    });
+
+    test('deletes nothing when the count does not add up', () async {
+      await dao.cacheServerLoaners([
+        LoanerModel(id: 1, amount: 100),
+        LoanerModel(id: 2, amount: 200),
+      ]);
+      // One loan returned, but the server says it holds 40.
+      serverHolds([LoanerModel(id: 1, amount: 100)], total: 40);
+
+      await adapter.pullAll();
+
+      expect((await rows()).map((r) => r.id), [1, 2]);
+    });
+  });
+
   test('a delete the server has already forgotten counts as done', () async {
     goOnline();
     await dao.cacheServerLoaners([LoanerModel(id: 6, amount: 500)]);

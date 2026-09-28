@@ -93,12 +93,24 @@ class ShopDao {
   }
 
   /// Replaces the local cache for a page pulled from the server.
-  /// Writes a page of server rows, skipping any row with a queued job.
+  /// Writes one page of server rows, as the old per-load refresh does.
+  /// A page is never the whole list, so it deletes nothing.
+  Future<void> cacheServerItems(List<ShopItemModel> items) =>
+      reconcileServerItems(items, complete: false);
+
+  /// Writes server rows, skipping any row with a queued job.
   ///
   /// Writing over those would put the server's older copy where the
   /// seller's unsent edit was, and the queued job, which re-reads the row,
   /// would then send that older copy. A queued delete would come back.
-  Future<void> cacheServerItems(List<ShopItemModel> items) {
+  ///
+  /// With [complete], [items] is everything the server holds, so a row it
+  /// did not return was deleted there and goes here too — unless it has a
+  /// queued job, or a negative id, which means the server never had it.
+  Future<void> reconcileServerItems(
+    List<ShopItemModel> items, {
+    required bool complete,
+  }) {
     return _db.transaction(() async {
       // Read inside the transaction, so an edit cannot land between the
       // check and the write.
@@ -112,6 +124,18 @@ class ShopDao {
           mode: InsertMode.insertOrReplace,
         );
       });
+      if (!complete) return;
+
+      final onServer = items.map((i) => i.id).toList();
+      final keep = queued.map(int.tryParse).whereType<int>().toList();
+      await (_db.shopItems.delete()
+            ..where(
+              (t) =>
+                  t.id.isBiggerThanValue(0) &
+                  t.id.isNotIn(onServer) &
+                  t.id.isNotIn(keep),
+            ))
+          .go();
     });
   }
 

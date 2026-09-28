@@ -9,16 +9,23 @@ class CategoryApi extends BaseService {
   @override
   String get basePath => '/categories';
 
-  Future<Result<List<CategoryItemModel>>> fetchCategories() async {
+  Future<Result<List<CategoryItemModel>>> fetchCategories({
+    /// The background pull passes true: nobody is waiting on it, so a
+    /// failure is logged by the engine instead of shown as a snackbar.
+    bool quiet = false,
+  }) async {
     final response = await get<List<CategoryItemModel>>(
       '',
+      showSnackBar: !quiet,
       parser: (value) {
         if (value is List) {
           return value
               .map((e) => CategoryItemModel.fromJson(e as Map<String, dynamic>))
               .toList();
         }
-        return [];
+        // An error, not an empty list: a pull takes an empty list as "the
+        // server has no categories" and deletes them all.
+        throw const FormatException('Expected a list of categories');
       },
     );
     return response.toResult();

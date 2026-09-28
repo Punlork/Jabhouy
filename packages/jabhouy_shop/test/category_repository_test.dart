@@ -104,6 +104,21 @@ void main() {
     expect(row.name, 'Cold drinks');
   });
 
+  test('a pull removes a category the server deleted', () async {
+    await categoryDao.cacheServerCategories(const [
+      CategoryItemModel(id: 4, name: 'Drinks'),
+      CategoryItemModel(id: 5, name: 'Snacks'),
+    ]);
+    when(() => categoryApi.fetchCategories(quiet: true)).thenAnswer(
+      (_) async => const Ok([CategoryItemModel(id: 4, name: 'Drinks')]),
+    );
+
+    await CategorySyncAdapter(categoryDao, categoryApi).pullAll();
+
+    final rows = await db.select(db.categories).get();
+    expect(rows.map((r) => r.name), ['Drinks']);
+  });
+
   test('reconciling a category repoints the items that referenced it',
       () async {
     goOnline();

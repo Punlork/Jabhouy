@@ -3,7 +3,7 @@ import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 
 /// Sends category outbox jobs, and applies the answer to the local row.
-class CategorySyncAdapter implements FeatureSyncAdapter {
+class CategorySyncAdapter implements FeatureSyncAdapter, FeaturePullAdapter {
   const CategorySyncAdapter(this._dao, this._api);
 
   final CategoryDao _dao;
@@ -11,6 +11,19 @@ class CategorySyncAdapter implements FeatureSyncAdapter {
 
   @override
   SyncEntityType get entityType => SyncEntityType.category;
+
+  /// Categories come back as one unpaged list, so a successful fetch is
+  /// the whole list.
+  @override
+  Future<Result<void>> pullAll() async {
+    switch (await _api.fetchCategories(quiet: true)) {
+      case Ok(:final value):
+        await _dao.reconcileServerCategories(value, complete: true);
+        return const Ok(null);
+      case Err(:final error):
+        return Err(error);
+    }
+  }
 
   @override
   Future<SyncPushOutcome> push(OutboxEntry entry) async {

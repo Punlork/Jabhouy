@@ -16,9 +16,13 @@ class ShopApi extends BaseService {
     int limit = 10,
     String searchQuery = '',
     String categoryFilter = '',
+    /// The background pull passes true: nobody is waiting on it, so a
+    /// failure is logged by the engine instead of shown as a snackbar.
+    bool quiet = false,
   }) async {
     final response = await get<PaginatedResponse<ShopItemModel>>(
       '',
+      showSnackBar: !quiet,
       queryParameters: {
         'page': page.toString(),
         'limit': limit.toString(),
@@ -32,9 +36,11 @@ class ShopApi extends BaseService {
             ShopItemModel.fromJson,
           );
         }
+        // No total: an unreadable reply must not look like a complete,
+        // empty list, or a pull would delete every item.
         return PaginatedResponse<ShopItemModel>(
           items: [],
-          pagination: Pagination(total: 0, totalPage: 1),
+          pagination: Pagination(totalPage: 1),
         );
       },
     );
