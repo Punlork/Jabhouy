@@ -36,6 +36,23 @@ class SyncActivity {
       'SyncActivity(pushing: $pushing, waiting: $waiting, failing: $failing)';
 }
 
+/// Which lists a pull covers: some forced, some only if stale.
+///
+/// Requests that arrive while a pull waits fold into it, so they are kept
+/// as sets that union cleanly, rather than one `force` flag that would
+/// turn a stale check of every list into a forced download of every list.
+class _PullRequest {
+  _PullRequest({required this.forced, required this.ifStale});
+
+  final Set<SyncEntityType> forced;
+  final Set<SyncEntityType> ifStale;
+
+  _PullRequest merge(_PullRequest other) => _PullRequest(
+        forced: {...forced, ...other.forced},
+        ifStale: {...ifStale, ...other.ifStale},
+      );
+}
+
 /// When a rejected job is next due: never, until [SyncEngine.releaseRejected].
 ///
 /// The server refused these bytes, so sending them again on every drain
@@ -57,6 +74,7 @@ class SyncEngine {
     int recentKeyLimit = 200,
     List<FeaturePullAdapter> pullAdapters = const [],
     this.pullInterval = const Duration(minutes: 15),
+    this.forcedPullFloor = const Duration(seconds: 10),
   })  : _db = database,
         _transport = transport,
         _pullAdapters = {
@@ -80,6 +98,17 @@ class SyncEngine {
   /// almost every change on this device, so this only bounds how old
   /// another device's edits can look.
   final Duration pullInterval;
+
+  /// A forced pull of a list pulled this recently is skipped, so a seller
+  /// swiping pull-to-refresh again and again downloads it once. Chosen,
+  /// not measured.
+  final Duration forcedPullFloor;
+
+  /// The pull waiting its turn behind the lock, if any, and its future.
+  /// A new request folds into it: at most one pull runs and one waits,
+  /// however many are asked for.
+  _PullRequest? _waitingPull;
+  Future<void>? _waitingPullDone;
 
   /// Parents first, so a shop item's category and a loan's customer are
   /// already on the phone when the child arrives.
@@ -268,16 +297,38 @@ class SyncEngine {
   /// Downloads every list that is stale, or every list at all with
   /// [force], optionally limited to [only]. Drains first, so the server
   /// has this phone's writes before it is asked for the list.
-  Future<void> pull({bool force = false, Set<SyncEntityType>? only}) =>
-      _exclusively(() => _pull(force: force, only: only));
+  Future<void> pull({bool force = false, Set<SyncEntityType>? only}) {
+    final types = only ?? _pullAdapters.keys.toSet();
+    final request = force
+        ? _PullRequest(forced: types, ifStale: const {})
+        : _PullRequest(forced: const {}, ifStale: types);
 
-  Future<void> _pull({required bool force, Set<SyncEntityType>? only}) async {
+    final waiting = _waitingPull;
+    if (waiting != null) {
+      _waitingPull = waiting.merge(request);
+      return _waitingPullDone!;
+    }
+    _waitingPull = request;
+    return _waitingPullDone = _exclusively(() {
+      // From here on, new requests queue a fresh pull behind this one.
+      final taken = _waitingPull!;
+      _waitingPull = null;
+      _waitingPullDone = null;
+      return _pull(taken);
+    });
+  }
+
+  Future<void> _pull(_PullRequest request) async {
     await _drainOnce();
     unawaited(_publish());
     for (final type in _pullOrder) {
       final adapter = _pullAdapters[type];
-      if (adapter == null || (only != null && !only.contains(type))) continue;
-      if (!force && !await _isStale(type)) continue;
+      if (adapter == null) continue;
+      final due = request.forced.contains(type)
+          ? await _isOlderThan(type, forcedPullFloor)
+          : request.ifStale.contains(type) &&
+              await _isOlderThan(type, pullInterval);
+      if (!due) continue;
 
       switch (await adapter.pullAll()) {
         case Ok():
@@ -298,12 +349,12 @@ class SyncEngine {
     }
   }
 
-  Future<bool> _isStale(SyncEntityType type) async {
+  Future<bool> _isOlderThan(SyncEntityType type, Duration age) async {
     final cursor = await (_db.select(_db.syncCursors)
           ..where((t) => t.entityType.equalsValue(type)))
         .getSingleOrNull();
     if (cursor == null) return true;
-    return _clock().difference(cursor.lastPulledAt) >= pullInterval;
+    return _clock().difference(cursor.lastPulledAt) >= age;
   }
 
   /// Jobs whose last attempt failed, oldest first, for the sync indicator's

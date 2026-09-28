@@ -108,7 +108,7 @@ Adding a synced entity means a `SyncEntityType` value, a DAO, a `FeatureSyncAdap
 With it on, the table above changes in three places:
 
 - **A save returns at step 2.** `_settle` calls `SyncEngine.requestSync()` and returns the local row; the list redraws from Drift when the push lands. No overlay shows.
-- **Screens never fetch.** Search, filter and scroll re-point the Drift watch. `SyncCoordinator` pulls after sign-in, on app resume and on reconnect, and pull-to-refresh forces one list; the engine's 15-minute window caps each list at one download per window.
+- **Screens never fetch.** Search, filter and scroll re-point the Drift watch. `SyncCoordinator` pulls after sign-in, on app resume and on reconnect, and pull-to-refresh forces one list, its spinner lasting as long as the pull; the engine's 15-minute window caps each list at one download per window, and pull requests that arrive while one waits fold into it, with a 10-second floor on forced pulls.
 - **The seller sees sync state** in a pill above home's bottom bar (`SyncIndicator`) and an icon on each pending or failed row (`SyncStateIcon`), in place of the per-list banners.
 
 A pull downloads a whole list (`fetchEveryPage`) and deletes local rows the server no longer has, but only when the list is provably complete, the row has a positive id, and it has no queued job.

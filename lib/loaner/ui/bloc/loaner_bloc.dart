@@ -107,6 +107,14 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   late StreamSubscription<bool> _connectivitySubscription;
   late StreamController<_LoanerFilters> _filtersController;
 
+  /// Pull-to-refresh. With background sync it returns the pull itself, so
+  /// the spinner stays until the download ends and a second swipe cannot
+  /// start while one runs; the engine folds any that do into one.
+  Future<void> refresh() async {
+    if (_inBackground) return _repository.pullLatest();
+    add(LoadLoaners(forceRefresh: true, page: 1, limit: 10));
+  }
+
   @override
   Future<void> close() {
     _loanerSubscription.cancel();

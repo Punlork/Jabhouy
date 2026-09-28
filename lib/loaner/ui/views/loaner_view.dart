@@ -68,13 +68,7 @@ class _LoanerViewState extends State<LoanerView>
           :final syncMessage,
         ) =>
           RefreshIndicator(
-            onRefresh: () async => context.read<LoanerBloc>().add(
-                  LoadLoaners(
-                    forceRefresh: true,
-                    page: 1,
-                    limit: 10,
-                  ),
-                ),
+            onRefresh: () => context.read<LoanerBloc>().refresh(),
             child: Column(
               children: [
                 if (syncMessage != null)

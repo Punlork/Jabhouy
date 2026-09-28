@@ -423,6 +423,8 @@ void main() {
       ]);
       await engine.pull();
       log.clear();
+      // Past the forced-pull floor, well inside the staleness window.
+      now = now.add(const Duration(seconds: 11));
 
       await engine.pull(force: true, only: {SyncEntityType.loaner});
 
@@ -443,6 +445,65 @@ void main() {
 
       expect(log, ['pull loaner', 'pull loaner']);
       expect(await db.select(db.syncCursors).get(), isEmpty);
+    });
+
+    test('spamming pull-to-refresh downloads the list at most twice',
+        () async {
+      final loans = _RecordingPull(SyncEntityType.loaner, log)
+        ..hold = Completer<void>();
+      final engine = pullingEngine([loans]);
+
+      // One pull running, then nine more swipes while it is on the wire.
+      final swipes = [
+        for (var i = 0; i < 10; i++)
+          engine.pull(force: true, only: {SyncEntityType.loaner}),
+      ];
+      await pumpEventQueue();
+      loans.hold!.complete();
+      loans.hold = null;
+      await Future.wait(swipes);
+
+      // The running one, and one follow-up the other nine folded into --
+      // which the forced-pull floor then skips, since the list is fresh.
+      expect(log, ['pull loaner']);
+    });
+
+    test('a forced pull right after the last one is skipped', () async {
+      final engine = pullingEngine([
+        _RecordingPull(SyncEntityType.loaner, log),
+      ]);
+
+      await engine.pull(force: true);
+      now = now.add(const Duration(seconds: 5));
+      await engine.pull(force: true);
+      expect(log, ['pull loaner']);
+
+      now = now.add(const Duration(seconds: 6));
+      await engine.pull(force: true);
+      expect(log, ['pull loaner', 'pull loaner']);
+    });
+
+    test('folding a stale check into a forced pull keeps them apart',
+        () async {
+      final customers = _RecordingPull(SyncEntityType.customer, log);
+      final loans = _RecordingPull(SyncEntityType.loaner, log)
+        ..hold = Completer<void>();
+      final engine = pullingEngine([customers, loans]);
+      final first = engine.pull();
+      await pumpEventQueue();
+      loans.hold!.complete();
+      loans.hold = null;
+      await first;
+      log.clear();
+      now = now.add(const Duration(seconds: 11));
+
+      // Waiting behind nothing, a forced loan pull and a stale check of
+      // everything fold together: only loans are due.
+      final a = engine.pull(force: true, only: {SyncEntityType.loaner});
+      final b = engine.pull();
+      await Future.wait([a, b]);
+
+      expect(log, ['pull loaner']);
     });
 
     test('a save during a pull waits for the pull to finish', () async {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
@@ -81,5 +83,20 @@ void main() {
 
     verify(() => repository.pullLatest()).called(1);
     verifyZeroInteractions(refresh);
+  });
+
+  test('refresh() lasts as long as the pull, so the spinner stays up',
+      () async {
+    final pull = Completer<void>();
+    when(() => repository.pullLatest()).thenAnswer((_) => pull.future);
+
+    var finished = false;
+    unawaited(bloc.refresh().then((_) => finished = true));
+    await pumpEventQueue();
+    expect(finished, isFalse, reason: 'still downloading');
+
+    pull.complete();
+    await pumpEventQueue();
+    expect(finished, isTrue);
   });
 }

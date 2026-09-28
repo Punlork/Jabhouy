@@ -44,17 +44,8 @@ class _ShopTabState extends State<_ShopTabView>
 
   Future<void> _refreshItems() async {
     if (!mounted) return;
-    final currentState = context.read<ShopBloc>().state.asLoaded;
-    context.read<ShopBloc>().add(
-          ShopGetItemsEvent(
-            forceRefresh: true,
-            page: 1,
-            limit: currentState?.pagination.limit ?? 100,
-            searchQuery: currentState?.searchQuery,
-            categoryFilter: currentState?.categoryFilter,
-          ),
-        );
     context.read<CategoryBloc>().add(CategoryGetEvent());
+    await context.read<ShopBloc>().refresh();
   }
 
   @override
