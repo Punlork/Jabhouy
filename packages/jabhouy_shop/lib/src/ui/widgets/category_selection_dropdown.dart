@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,11 +76,11 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
               );
             },
             child: DropdownButtonFormField2<CategoryItemModel?>(
-              value: _categoryFilter != null
-                  ? state.items.firstWhere(
-                      (element) => element.id == _categoryFilter?.id,
-                    )
-                  : null,
+              // Null rather than a StateError when the filtered category
+              // is gone: deleted, or not in the list while it reloads.
+              value: state.items.firstWhereOrNull(
+                (element) => element.id == _categoryFilter?.id,
+              ),
               isExpanded: true,
               items: state.items
                   .map(

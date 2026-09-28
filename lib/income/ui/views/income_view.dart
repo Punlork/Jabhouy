@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -269,10 +270,7 @@ class _NotificationList extends StatelessWidget {
       );
     }
 
-    final grouped = <String, List<BankNotificationModel>>{};
-    for (final item in items) {
-      grouped.putIfAbsent(item.receivedDateLabel, () => []).add(item);
-    }
+    final grouped = groupBy(items, (item) => item.receivedDateLabel);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
