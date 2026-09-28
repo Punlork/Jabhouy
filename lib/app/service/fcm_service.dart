@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:async/async.dart' show AsyncMemoizer;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -43,7 +44,7 @@ class FcmService extends BaseService {
   final _foregroundIncomeMessageController = StreamController<Map<String, dynamic>>.broadcast(sync: true);
   final _recentNotificationKeys = <String>{};
   final _recentNotificationOrder = <String>[];
-  bool _initialized = false;
+  final _initialization = AsyncMemoizer<void>();
   String? _registeredDeviceId;
   String? _registeredDeviceRole;
 
@@ -60,11 +61,10 @@ class FcmService extends BaseService {
   }
 
   /// Initialise local notifications and request FCM permission.
-  /// Safe to call multiple times (idempotent).
-  Future<void> initialize() async {
-    if (_initialized) return;
-    _initialized = true;
+  /// Safe to call multiple times: later callers wait for the first setup.
+  Future<void> initialize() => _initialization.runOnce(_initialize);
 
+  Future<void> _initialize() async {
     await _setupLocalNotifications();
     if (!_isFirebaseAvailable) return;
 

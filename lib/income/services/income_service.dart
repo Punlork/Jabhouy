@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:async/async.dart' show AsyncMemoizer;
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
@@ -37,13 +38,13 @@ class IncomeService {
   final FirebaseIncomeSyncService _syncService;
   final NotificationDiagnosticsService _diagnostics;
   StreamSubscription<Map<String, dynamic>>? _nativeSubscription;
-  bool _initialized = false;
+  // A second caller waits for the first one's setup instead of returning
+  // before it finishes, which a bool set up front could not do.
+  var _initialization = AsyncMemoizer<void>();
 
+  Future<void> initialize() => _initialization.runOnce(_initialize);
 
-  Future<void> initialize() async {
-    if (_initialized) return;
-    _initialized = true;
-
+  Future<void> _initialize() async {
     await _diagnostics.initialize();
     await _diagnostics.log(
       source: 'flutter.income_service',
@@ -73,7 +74,7 @@ class IncomeService {
   Future<void> dispose() async {
     await _nativeSubscription?.cancel();
     await _syncService.dispose();
-    _initialized = false;
+    _initialization = AsyncMemoizer<void>();
   }
 
   Future<NotificationTrackingStatus> getTrackingStatus() async {
