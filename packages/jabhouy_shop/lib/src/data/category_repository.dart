@@ -16,4 +16,8 @@ abstract class CategoryRepository {
   Future<Result<CategoryItemModel>> updateCategory(CategoryItemModel body);
 
   Future<Result<void>> deleteCategory(CategoryItemModel body);
+
+  /// Pull-to-refresh with background sync: download every categories now,
+  /// whatever the staleness window says.
+  Future<void> pullLatest();
 }

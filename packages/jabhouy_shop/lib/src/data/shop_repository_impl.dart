@@ -130,6 +130,13 @@ class DefaultShopRepository implements ShopRepository {
     return const Ok<void>(null);
   }
 
+  /// Pulls items, and their categories with them, since the shop tab shows both.
+  @override
+  Future<void> pullLatest() async {
+    if (!await _connectivity.isOnline) return;
+    await _engine.pull(force: true, only: {SyncEntityType.category, SyncEntityType.shopItem});
+  }
+
   @override
   Future<void> syncPendingChanges() async {
     if (!await _connectivity.isOnline) return;

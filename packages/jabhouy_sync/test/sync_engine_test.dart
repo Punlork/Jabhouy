@@ -464,4 +464,22 @@ void main() {
       expect(log, ['pull loaner', 'push item-1']);
     });
   });
+
+  test('a reconnect makes backed-off jobs due but leaves rejections parked',
+      () async {
+    final transport = _ScriptedTransport([
+      const SyncPushRetryable('timeout'),
+      const SyncPushRejected('400'),
+    ]);
+    final engine = engineWith(transport);
+    await enqueueItem(engine, 'retrying');
+    await enqueueItem(engine, 'rejected');
+    await engine.drain();
+    expect(await engine.dueEntries(), isEmpty);
+
+    await engine.retryNow();
+
+    final due = await engine.dueEntries();
+    expect(due.map((e) => e.localId), ['retrying']);
+  });
 }

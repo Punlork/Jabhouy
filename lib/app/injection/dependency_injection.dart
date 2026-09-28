@@ -94,6 +94,9 @@ Future<void> setupDependencies() async {
         pullAdapters: [shop, category, customer, loaner],
       );
     })
+    ..registerLazySingleton(
+      () => SyncCoordinator(getIt<SyncEngine>(), getIt<ConnectivityService>()),
+    )
     ..registerLazySingleton<IncomeRepository>(
       () => DefaultIncomeRepository(
         getIt<IncomeDao>(),

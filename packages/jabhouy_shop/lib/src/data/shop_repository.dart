@@ -46,4 +46,8 @@ abstract class ShopRepository {
 
   /// Pushes every queued write. Delegates to `SyncEngine.drain()`.
   Future<void> syncPendingChanges();
+
+  /// Pull-to-refresh with background sync: download every item, and the
+  /// categories they sit in, now, whatever the staleness window says.
+  Future<void> pullLatest();
 }

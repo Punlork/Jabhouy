@@ -2,7 +2,6 @@
 // this builds a schema-7 file by hand: today's tables minus the one 8 adds.
 import 'dart:io';
 
-import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:test/test.dart';

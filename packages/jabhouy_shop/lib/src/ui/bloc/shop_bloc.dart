@@ -273,6 +273,13 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       );
     }
 
+    if (_inBackground) {
+      // The list is the Drift watch, re-pointed above; the engine keeps
+      // its rows fresh. Only pull-to-refresh asks for a pull now.
+      if (event.forceRefresh) await _repository.pullLatest();
+      return;
+    }
+
     final hasCachedItems = await _repository.hasCachedItems(
       searchQuery: newSearchQuery,
       categoryFilter: newCategoryFilter,
@@ -405,6 +412,15 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
             syncMessage: _offlineMessage(currentState.items.isNotEmpty),
           ),
         );
+      }
+      return;
+    }
+
+    if (_inBackground) {
+      // SyncCoordinator pushes and pulls on reconnect.
+      if (currentState != null) {
+        // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
+        emit(currentState.copyWith(isOffline: false, syncMessage: null));
       }
       return;
     }

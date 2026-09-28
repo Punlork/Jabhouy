@@ -96,6 +96,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onGetItems(CategoryGetEvent event, Emitter<CategoryState> emit) async {
+    // The list is the Drift watch; SyncCoordinator pulls categories, and
+    // the shop tab's pull-to-refresh pulls them with the items.
+    if (_inBackground) return;
     if (state is! CategoryLoaded) {
       emit(const CategoryLoading());
     }

@@ -57,6 +57,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     LoadCustomers event,
     Emitter<CustomerState> emit,
   ) async {
+    // The list is the Drift watch; SyncCoordinator pulls customers.
+    if (_inBackground) return;
+
     final currentState = state.asLoaded;
     final hasCachedItems = await _repository.hasCachedCustomers();
     final isOnline = await _connectivityService.isOnline;
@@ -200,6 +203,13 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           syncMessage: _offlineMessage(currentState.customers.isNotEmpty),
         ),
       );
+      return;
+    }
+
+    if (_inBackground) {
+      // SyncCoordinator pushes and pulls on reconnect.
+      // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
+      emit(currentState.copyWith(isOffline: false, syncMessage: null));
       return;
     }
 

@@ -103,6 +103,13 @@ class DefaultCustomerRepository implements CustomerRepository {
   Future<void> cacheCustomers(List<CustomerModel> customers) =>
       _dao.cacheServerCustomers(customers);
 
+  /// Pulls customers.
+  @override
+  Future<void> pullLatest() async {
+    if (!await _connectivity.isOnline) return;
+    await _engine.pull(force: true, only: {SyncEntityType.customer});
+  }
+
   @override
   Future<void> syncPendingChanges() async {
     if (!await _connectivity.isOnline) return;

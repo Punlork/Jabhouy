@@ -306,6 +306,25 @@ class SyncEngine {
     return _clock().difference(cursor.lastPulledAt) >= pullInterval;
   }
 
+  /// Makes every job that is waiting out a backoff due now.
+  ///
+  /// The app calls this when the connection returns. Wifi without internet
+  /// counts as online, so pushes made there fail and back off for up to
+  /// 30 minutes; a real reconnect is new evidence, and waiting out that
+  /// schedule would leave the seller's changes sitting unsent. Rejected
+  /// jobs stay parked: a reconnect does not change what the server refused.
+  Future<void> retryNow() async {
+    final now = _clock();
+    await (_db.update(_db.outboxEntries)
+          ..where(
+            (t) =>
+                t.lastError.isNotNull() &
+                t.nextAttemptAt.isBiggerThanValue(now) &
+                t.nextAttemptAt.equals(_parked).not(),
+          ))
+        .write(OutboxEntriesCompanion(nextAttemptAt: Value(now)));
+  }
+
   /// Makes every rejected job due once more. The app calls this at launch,
   /// so a build that fixes how a body is made gets to send it.
   Future<void> releaseRejected() async {

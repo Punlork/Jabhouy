@@ -128,6 +128,13 @@ class DefaultLoanerRepository implements LoanerRepository {
     return const Ok<void>(null);
   }
 
+  /// Pulls loans.
+  @override
+  Future<void> pullLatest() async {
+    if (!await _connectivity.isOnline) return;
+    await _engine.pull(force: true, only: {SyncEntityType.loaner});
+  }
+
   @override
   Future<void> syncPendingChanges() async {
     if (!await _connectivity.isOnline) return;

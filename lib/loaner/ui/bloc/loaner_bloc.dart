@@ -163,6 +163,23 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       }
     }
 
+    if (_inBackground) {
+      // The list is the Drift watch, re-pointed above; the engine keeps
+      // its rows fresh. Only pull-to-refresh asks for a pull now.
+      if (currentState != null) {
+        emit(
+          currentState.copyWith(
+            searchQuery: newSearchQuery,
+            fromDate: newFromDate,
+            toDate: newToDate,
+            loanerFilter: newLoanerFilter,
+          ),
+        );
+      }
+      if (event.forceRefresh) await _repository.pullLatest();
+      return;
+    }
+
     if ((state is LoanerInitial || effectivePage == 1 || event.forceRefresh) &&
         !hasCachedItems) {
       emit(const LoanerLoading());
@@ -340,6 +357,13 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
           syncMessage: _offlineMessage(currentState.items.isNotEmpty),
         ),
       );
+      return;
+    }
+
+    if (_inBackground) {
+      // SyncCoordinator pushes and pulls on reconnect.
+      // ignore: avoid_redundant_argument_values -- null clears the banner; omitting it would keep the old one.
+      emit(currentState.copyWith(isOffline: false, syncMessage: null));
       return;
     }
 

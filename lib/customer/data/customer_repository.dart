@@ -32,4 +32,8 @@ abstract class CustomerRepository {
   Future<void> cacheCustomers(List<CustomerModel> customers);
 
   Future<void> syncPendingChanges();
+
+  /// Pull-to-refresh with background sync: download every customers now,
+  /// whatever the staleness window says.
+  Future<void> pullLatest();
 }

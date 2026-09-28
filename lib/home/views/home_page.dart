@@ -33,6 +33,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   HomeTab get _selectedTab => _tabs[_selectedIndex];
   bool get _isIncomeEnabled => _tabs.contains(HomeTab.income);
+  final _isBackgroundSyncEnabled =
+      getIt<FeatureFlags>().isEnabled(Feature.backgroundSync);
 
   static Widget _pageFor(HomeTab tab) => switch (tab) {
         HomeTab.shop => const ShopTab(),
@@ -279,6 +281,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<CategoryBloc>().add(CategoryGetEvent());
     context.read<CustomerBloc>().add(LoadCustomers());
+    // With background sync the loads above only read the phone; this is
+    // what brings the lists up to date.
+    if (_isBackgroundSyncEnabled) getIt<SyncCoordinator>().start();
     if (_isIncomeEnabled) {
       context.read<IncomeBloc>().add(const RefreshIncomeTrackingStatus());
     }
@@ -307,6 +312,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         if (authState is Unauthenticated) {
           context.go(AppRoutes.signin.toPath);
           _hasLoadedProtectedData = false;
+          getIt<SyncCoordinator>().stop();
         }
       },
       child: BlocBuilder<AuthBloc, AuthState>(

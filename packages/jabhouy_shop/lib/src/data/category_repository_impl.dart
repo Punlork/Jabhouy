@@ -105,6 +105,13 @@ class DefaultCategoryRepository implements CategoryRepository {
     );
   }
 
+  /// Pulls categories.
+  @override
+  Future<void> pullLatest() async {
+    if (!await _connectivity.isOnline) return;
+    await _engine.pull(force: true, only: {SyncEntityType.category});
+  }
+
   /// See `DefaultShopRepository._settle`: the returned `syncStatus` is
   /// the honest answer to "did that reach the server?", and the `ui`
   /// layer picks its message from it.

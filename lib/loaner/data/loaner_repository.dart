@@ -44,4 +44,8 @@ abstract class LoanerRepository {
   Future<Result<void>> deleteLoaner(LoanerModel body);
 
   Future<void> syncPendingChanges();
+
+  /// Pull-to-refresh with background sync: download every loans now,
+  /// whatever the staleness window says.
+  Future<void> pullLatest();
 }
