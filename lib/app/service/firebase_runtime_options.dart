@@ -23,13 +23,15 @@ class FirebaseRuntimeOptions {
         'Firebase initialized using native platform config.',
       );
       return true;
-    } on FirebaseException catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
+      // Without google-services.json Android throws a PlatformException, not
+      // a FirebaseException. Either way the app must still start.
       logger
         ..i(
           'Firebase native config unavailable, falling back to env options.',
         )
         ..d(
-          'Firebase native init failed: ${error.code} ${error.message}',
+          'Firebase native init failed: $error',
           error: error,
           stackTrace: stackTrace,
         );
@@ -41,7 +43,16 @@ class FirebaseRuntimeOptions {
       return false;
     }
 
-    await Firebase.initializeApp(options: options);
+    try {
+      await Firebase.initializeApp(options: options);
+    } on Exception catch (error, stackTrace) {
+      logger.e(
+        'Firebase env options rejected. Income sync stays local-only.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
     logger.i('Firebase initialized for income sync.');
     return true;
   }
