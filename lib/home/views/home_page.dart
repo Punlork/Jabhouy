@@ -38,6 +38,50 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final _isBackgroundSyncEnabled =
       getIt<FeatureFlags>().isEnabled(Feature.backgroundSync);
 
+  /// Search header and bottom bar slide away while scrolling down a list
+  /// and come back on any scroll up. Category chips live in the tab, so
+  /// they stay put and move up into the header's place.
+  final _bottomBarController = BottomBarController();
+  bool _chromeVisible = true;
+  double _scrollRun = 0;
+  static const _chromeScrollThreshold = 12.0;
+
+  void _setChromeVisible(bool visible) {
+    _scrollRun = 0;
+    if (_chromeVisible == visible) return;
+    setState(() => _chromeVisible = visible);
+    visible ? _bottomBarController.show() : _bottomBarController.hide();
+  }
+
+  bool _onPageScroll(ScrollUpdateNotification notification) {
+    final metrics = notification.metrics;
+    // Category chips scroll sideways; only the tab's list counts.
+    if (metrics.axis != Axis.vertical) return false;
+
+    // At the top, pulling to refresh or scrolled back by code: show.
+    if (metrics.pixels <= metrics.minScrollExtent) {
+      _setChromeVisible(true);
+      return false;
+    }
+    // The bounce past the end, and the viewport growing as the header
+    // collapses, both read as scrolling up; neither should bring it back.
+    if (metrics.pixels >= metrics.maxScrollExtent) return false;
+
+    final delta = notification.scrollDelta ?? 0;
+    if (delta == 0) return false;
+    if (delta.sign != _scrollRun.sign) _scrollRun = 0;
+    _scrollRun += delta;
+
+    if (_scrollRun <= -_chromeScrollThreshold) {
+      _setChromeVisible(true);
+    } else if (_scrollRun >= _chromeScrollThreshold &&
+        _searchController.text.isEmpty) {
+      // A search in progress keeps its field on screen.
+      _setChromeVisible(false);
+    }
+    return false;
+  }
+
   static Widget _pageFor(HomeTab tab) => switch (tab) {
         HomeTab.shop => const ShopTab(),
         HomeTab.loaner => const LoanerView(),
@@ -298,6 +342,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
     _pageController.dispose();
     _searchController.dispose();
+    _bottomBarController.dispose();
     super.dispose();
   }
 
@@ -382,52 +427,65 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         child: Scaffold(
           extendBody: true,
           body: BottomBar(
+            controller: _bottomBarController,
+            // Visibility follows _onPageScroll: the bar's own scroll
+            // controller is not attached to any tab's list.
+            hideOnScroll: false,
+            showIcon: false,
             body: (context, controller) => SafeArea(
               maintainBottomViewPadding: true,
               child: Column(
                 children: [
-                  Builder(
-                    builder: (context) {
-                      Widget buildShopHeader({
-                        bool hasFilter = false,
-                        String? searchHintText,
-                      }) {
-                        return ShopHeader(
-                          hasFilter: hasFilter,
-                          searchHintText: searchHintText,
-                          onSettingsPressed: _openSettingsPage,
-                          onSearchChanged: _onSearchChanged,
-                          onFilterPressed: _showFilterSheet,
-                          searchController: _searchController,
-                        );
-                      }
+                  ClipRect(
+                    child: AnimatedAlign(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      alignment: Alignment.bottomCenter,
+                      heightFactor: _chromeVisible ? 1 : 0,
+                      child: Builder(
+                          builder: (context) {
+                            Widget buildShopHeader({
+                              bool hasFilter = false,
+                              String? searchHintText,
+                            }) {
+                              return ShopHeader(
+                                hasFilter: hasFilter,
+                                searchHintText: searchHintText,
+                                onSettingsPressed: _openSettingsPage,
+                                onSearchChanged: _onSearchChanged,
+                                onFilterPressed: _showFilterSheet,
+                                searchController: _searchController,
+                              );
+                            }
 
-                      return switch (_selectedTab) {
-                        HomeTab.shop => BlocBuilder<ShopBloc, ShopState>(
-                          builder: (context, state) {
-                            return buildShopHeader(
-                              hasFilter: state.asLoaded?.categoryFilter != null,
-                            );
+                            return switch (_selectedTab) {
+                              HomeTab.shop => BlocBuilder<ShopBloc, ShopState>(
+                                builder: (context, state) {
+                                  return buildShopHeader(
+                                    hasFilter: state.asLoaded?.categoryFilter != null,
+                                  );
+                                },
+                              ),
+                              HomeTab.loaner => BlocBuilder<LoanerBloc, LoanerState>(
+                                builder: (context, state) {
+                                  return buildShopHeader(
+                                    hasFilter: state.asLoaded?.hasFilter ?? false,
+                                  );
+                                },
+                              ),
+                              HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
+                                builder: (context, state) {
+                                  final loaded = state.asLoaded;
+                                  return buildShopHeader(
+                                    hasFilter: loaded?.hasFilter ?? false,
+                                    searchHintText: context.l10n.searchIncome,
+                                  );
+                                },
+                              ),
+                            };
                           },
                         ),
-                        HomeTab.loaner => BlocBuilder<LoanerBloc, LoanerState>(
-                          builder: (context, state) {
-                            return buildShopHeader(
-                              hasFilter: state.asLoaded?.hasFilter ?? false,
-                            );
-                          },
-                        ),
-                        HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
-                          builder: (context, state) {
-                            final loaded = state.asLoaded;
-                            return buildShopHeader(
-                              hasFilter: loaded?.hasFilter ?? false,
-                              searchHintText: context.l10n.searchIncome,
-                            );
-                          },
-                        ),
-                      };
-                    },
+                    ),
                   ),
                   Expanded(
                     child: MultiBlocProvider(
@@ -437,10 +495,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       ],
                       child: TabScrollManager(
                         controllers: _scrollControllers,
-                        child: PageView(
-                          controller: _pageController,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [for (final tab in _tabs) _pageFor(tab)],
+                        child: NotificationListener<ScrollUpdateNotification>(
+                          onNotification: _onPageScroll,
+                          child: PageView(
+                            controller: _pageController,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [for (final tab in _tabs) _pageFor(tab)],
+                          ),
                         ),
                       ),
                     ),
@@ -489,6 +550,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           ),
                           labelPadding: EdgeInsets.zero,
                           onTap: (index) {
+                            _setChromeVisible(true);
                             _pageController.jumpToPage(index);
                             _onItemTapped(index);
                             setState(() => _selectedIndex = index);

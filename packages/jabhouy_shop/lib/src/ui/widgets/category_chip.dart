@@ -15,22 +15,72 @@ class CategoryChips extends StatelessWidget {
       builder: (context, shopState) {
         final currentShopState = shopState.asLoaded;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: colorScheme.surfaceContainerLow,
-              border: Border.all(color: colorScheme.outlineVariant),
+        final categoryState = context.watch<CategoryBloc>().state;
+        final isAllSelected = currentShopState?.categoryFilter == null;
+
+        final categoryChips = switch (categoryState) {
+          CategoryLoaded(:final items) => [
+              for (final category in items)
+                InkWell(
+                  borderRadius: BorderRadius.circular(19),
+                  onTap: () {
+                    if (currentShopState?.categoryFilter?.name ==
+                        category.name) {
+                      return;
+                    }
+                    context.read<ShopBloc>().add(
+                          ShopGetItemsEvent(categoryFilter: category),
+                        );
+                  },
+                  child: _buildChip(
+                    context,
+                    label: category.name,
+                    isSelected: currentShopState?.categoryFilter?.name ==
+                        category.name,
+                  ),
+                ),
+            ],
+          CategoryLoading() => [
+              for (var i = 0; i < 5; i++)
+                Shimmer.fromColors(
+                  baseColor: colorScheme.surfaceContainerHighest,
+                  highlightColor: colorScheme.surfaceContainerHigh,
+                  child: Chip(
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    label: Container(
+                      width: 30,
+                      height: 20,
+                      color: colorScheme.surfaceContainerHighest,
+                    ),
+                    backgroundColor: colorScheme.surface,
+                  ),
+                ),
+            ],
+          _ => const <Widget>[],
+        };
+
+        // Edge to edge, like a pinned tab bar: the grid scrolls under it,
+        // and the chips scroll to the screen edges instead of stopping at
+        // an inset box. Fits the 52 px the grid leaves at its top.
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border(
+              bottom: BorderSide(color: colorScheme.outlineVariant),
             ),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
                 InkWell(
+                  borderRadius: BorderRadius.circular(19),
                   onTap: () {
-                    if (currentShopState?.categoryFilter == null) return;
-
+                    if (isAllSelected) return;
                     context.read<ShopBloc>().add(
                           ShopGetItemsEvent(clearCategoryFilter: true),
                         );
@@ -38,96 +88,20 @@ class CategoryChips extends StatelessWidget {
                   child: _buildChip(
                     context,
                     label: context.l10n.all,
-                    isSelected: currentShopState?.categoryFilter == null,
+                    isSelected: isAllSelected,
                   ),
                 ),
-                const SizedBox(width: 2),
-                SizedBox(
-                  height: 30,
-                  width: 8,
-                  child: VerticalDivider(
-                    color: colorScheme.outlineVariant,
+                if (categoryChips.isNotEmpty)
+                  SizedBox(
+                    height: 24,
+                    width: 17,
+                    child: VerticalDivider(color: colorScheme.outlineVariant),
                   ),
-                ),
-                const SizedBox(width: 2),
-                BlocBuilder<CategoryBloc, CategoryState>(
-                  builder: (context, state) {
-                    if (state is CategoryLoaded) {
-                      return Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: List.generate(
-                              state.items.length,
-                              (index) {
-                                final category = state.items[index];
-                                final isSelected = currentShopState?.categoryFilter?.name == category.name;
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    right: index == state.items.length - 1 ? 0 : 4,
-                                  ),
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (isSelected) return;
-
-                                      context.read<ShopBloc>().add(
-                                            ShopGetItemsEvent(
-                                              categoryFilter: category,
-                                            ),
-                                          );
-                                    },
-                                    child: _buildChip(
-                                      context,
-                                      label: category.name,
-                                      isSelected: isSelected,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ).toList(),
-                          ),
-                        ),
-                      );
-                    }
-
-                    if (state is CategoryLoading) {
-                      return Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: List.generate(
-                              5,
-                              (index) => Padding(
-                                padding: EdgeInsets.only(
-                                  right: index == 4 ? 0 : 4,
-                                ),
-                                child: Shimmer.fromColors(
-                                  baseColor: colorScheme.surfaceContainerHighest,
-                                  highlightColor: colorScheme.surfaceContainerHigh,
-                                  child: Chip(
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    label: Container(
-                                      width: 30,
-                                      height: 20,
-                                      color: colorScheme.surfaceContainerHighest,
-                                    ),
-                                    backgroundColor: colorScheme.surface,
-                                  ),
-                                ),
-                              ),
-                            ).toList(),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return const SizedBox.shrink();
-                  },
-                ),
+                for (final (index, chip) in categoryChips.indexed)
+                  Padding(
+                    padding: EdgeInsets.only(left: index == 0 ? 0 : 6),
+                    child: chip,
+                  ),
               ],
             ),
           ),
@@ -149,18 +123,21 @@ class CategoryChips extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(19),
         ),
-        side: const BorderSide(
-          width: 0,
-          color: Colors.transparent,
-        ),
-        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        // Filled and borderless, like the header's search field and
+        // filter button: the same off and on colors as that button.
+        side: BorderSide.none,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
         label: Text(label),
-        backgroundColor: isSelected ? colorScheme.primaryContainer : Colors.transparent,
+        backgroundColor: isSelected
+            ? colorScheme.primaryContainer
+            : colorScheme.surfaceContainerHigh,
         labelStyle: TextStyle(
-          color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+          color: isSelected
+              ? colorScheme.onPrimaryContainer
+              : colorScheme.onSurfaceVariant,
         ),
       ),
     );
