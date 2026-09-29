@@ -34,7 +34,7 @@ class LoanerItem extends StatelessWidget {
       ),
       margin: EdgeInsets.zero,
       color: loaner.isPaid
-          ? colorScheme.secondaryContainer.withValues(alpha: 0.35)
+          ? colorScheme.surfaceContainer
           : Theme.of(context).cardTheme.color,
       child: Padding(
         padding: const EdgeInsets.all(16),

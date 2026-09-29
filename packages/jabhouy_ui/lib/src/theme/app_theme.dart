@@ -41,9 +41,9 @@ class AppTheme {
         iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       cardTheme: CardThemeData(
-        color: brightness == Brightness.dark
-            ? colorScheme.surfaceContainerLow
-            : Colors.white,
+        // Cards and card-like containers (settings groups, income cards)
+        // both use surfaceContainerLow, so every raised surface matches.
+        color: colorScheme.surfaceContainerLow,
         elevation: brightness == Brightness.dark ? 0 : 1,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
@@ -154,6 +154,18 @@ class AppTheme {
       onError: Colors.white,
       surface: isDark ? const Color(0xFF181818) : const Color(0xFFF4F4F4),
       onSurface: isDark ? const Color(0xFFF2F2F2) : const Color(0xFF1D1D1D),
+      // fromSeed tints these blue-green even from a grey seed, which shows
+      // against the grey surface in light mode. Set them all to pure greys.
+      surfaceContainerLowest:
+          isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFFFFFF),
+      surfaceContainerLow:
+          isDark ? const Color(0xFF1B1B1B) : const Color(0xFFFFFFFF),
+      surfaceContainer:
+          isDark ? const Color(0xFF1F1F1F) : const Color(0xFFEFEFEF),
+      surfaceContainerHigh:
+          isDark ? const Color(0xFF292929) : const Color(0xFFE9E9E9),
+      surfaceContainerHighest:
+          isDark ? const Color(0xFF333333) : const Color(0xFFE3E3E3),
       onSurfaceVariant:
           isDark ? const Color(0xFFB8B8B8) : const Color(0xFF6B6B6B),
       outline: isDark ? const Color(0xFF464646) : const Color(0xFFD0D0D0),

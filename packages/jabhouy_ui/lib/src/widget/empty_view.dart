@@ -11,17 +11,18 @@ class EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
+          Icon(Icons.inventory_2_outlined, size: 64, color: muted),
           const SizedBox(height: 16),
           Text(
             msg ?? context.l10n.noItemFound,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
-              color: Colors.grey,
+              color: muted,
             ),
           ),
         ],

@@ -210,15 +210,16 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final error = Theme.of(context).colorScheme.error;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          Icon(Icons.error_outline, size: 64, color: error),
           const SizedBox(height: 16),
           Text(
             message,
-            style: const TextStyle(fontSize: 18, color: Colors.red),
+            style: TextStyle(fontSize: 18, color: error),
           ),
         ],
       ),
@@ -239,10 +240,10 @@ class ItemCount extends StatelessWidget {
       right: 40,
       child: Text(
         l10n.itemCount(counts.toString()),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );

@@ -57,13 +57,17 @@ class ShopItemCard extends StatelessWidget {
               onPressed: (_) => onEdit(item),
               borderRadius: BorderRadius.circular(12),
               icon: Icons.edit,
+              backgroundColor: colorScheme.surfaceContainerHigh,
+              foregroundColor: colorScheme.onSurface,
             ),
             const SizedBox(width: 8),
             SlidableAction(
               onPressed: (_) => _confirmDelete(context),
               borderRadius: BorderRadius.circular(12),
               icon: Icons.delete,
-              foregroundColor: Colors.white,
+              // Slidable's default background is white, which hid this icon.
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
             ),
           ],
         ),

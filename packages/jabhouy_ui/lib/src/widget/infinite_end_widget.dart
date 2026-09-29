@@ -8,12 +8,12 @@ class EndOfListIndicator extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      child: const Center(
+      child: Center(
         child: Text(
           'No more items',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.grey,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ),

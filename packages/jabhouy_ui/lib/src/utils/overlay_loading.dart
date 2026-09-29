@@ -64,7 +64,7 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
     return Stack(
       children: [
         ModalBarrier(
-          color: Colors.black.withValues(alpha: .4),
+          color: Theme.of(context).colorScheme.scrim.withValues(alpha: .4),
           dismissible: false,
         ),
         Center(
@@ -75,15 +75,12 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                 width: 140,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.white, Colors.grey.shade100],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  // Was a fixed white gradient, which stayed white in dark mode.
+                  color: Theme.of(context).colorScheme.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: .2),
+                      color: Theme.of(context).colorScheme.shadow.withValues(alpha: .2),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
