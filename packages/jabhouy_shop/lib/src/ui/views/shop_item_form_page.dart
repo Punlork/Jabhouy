@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -56,8 +54,7 @@ class _ShopItemFormPageContent extends StatefulWidget {
   State<_ShopItemFormPageContent> createState() => _ShopItemFormPageState();
 }
 
-class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
-    with ClipboardImageMixin<_ShopItemFormPageContent> {
+class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   final _formKey = GlobalKey<FormState>();
   late final ShopItemFormController _formController;
 
@@ -66,7 +63,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
   @override
   void initState() {
     super.initState();
-    registerClipboardObserver();
     _formController = ShopItemFormController(
       existingItem: widget.existingItem,
       activeCategory: widget.activeCategory,
@@ -82,10 +78,6 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
         }
       });
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      forceCheckClipboardForImage();
-    });
   }
 
   void _notifyFormChanged() {
@@ -95,19 +87,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent>
   }
 
   @override
-  void onImageFound(File file) => showImagePreviewSnackBar(file);
-
-  @override
-  void onImageSelected(File file) {
-    _uploadBloc.add(SelectUiImageEvent(image: file));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    _notifyFormChanged();
-  }
-
-  @override
   void dispose() {
     _formController.dispose();
-    unregisterClipboardObserver();
     super.dispose();
   }
 

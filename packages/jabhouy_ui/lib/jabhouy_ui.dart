@@ -9,7 +9,6 @@ library jabhouy_ui;
 
 export 'src/constant/app_assets.dart';
 export 'src/context/global_context.dart';
-export 'src/mixin/img_clipboard_mixin.dart';
 export 'src/mixin/infinite_scroll_mixin.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/color_theme.dart';

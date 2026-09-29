@@ -468,9 +468,6 @@ class AppLocalizationsKm extends AppLocalizations {
   String get loading => 'កំពុងផ្ទុក';
 
   @override
-  String get imgFound => 'រូបភាពមាននៅក្នុងក្តារតម្បៀតខ្ទាស់។ប៉ះដើម្បីប្រើវា។';
-
-  @override
   String get paid => 'បានសង';
 
   @override

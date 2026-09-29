@@ -21,12 +21,6 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     on<UploadImageEvent>(_onUploadImage);
     on<ClearImageEvent>(_onClearImage);
     on<LoadExistingImageEvent>(_onLoadExistingImage);
-    on<SelectUiImageEvent>(
-      (event, emit) {
-        _selectedImage = event.image;
-        emit(UploadImageSelected(_selectedImage!));
-      },
-    );
   }
 
   final ImageUploader _service;

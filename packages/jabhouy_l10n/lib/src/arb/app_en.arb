@@ -625,10 +625,6 @@
   "@loading": {
     "description": "Text for the button to add a new loaner"
   },
-  "imgFound": "Image found in clipboard. Tap to use it.",
-  "@imgFound": {
-    "description": "Image found in clipboard. Tap to use it."
-  },
   "paid": "PAID",
   "@paid": {
     "description": "Label indicating a loan has been paid"

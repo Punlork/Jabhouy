@@ -33,8 +33,3 @@ class LoadExistingImageEvent extends UploadEvent {
   @override
   List<Object?> get props => [imageUrl];
 }
-
-class SelectUiImageEvent extends UploadEvent {
-  SelectUiImageEvent({required this.image});
-  final File image;
-}

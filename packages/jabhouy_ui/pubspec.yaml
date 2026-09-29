@@ -18,7 +18,6 @@ dependencies:
   jabhouy_l10n:
     path: ../jabhouy_l10n
   path_provider: ^2.1.5
-  super_clipboard: ^0.8.24
 
 dev_dependencies:
   flutter_test:

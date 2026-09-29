@@ -469,9 +469,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loading => 'Loading';
 
   @override
-  String get imgFound => 'Image found in clipboard. Tap to use it.';
-
-  @override
   String get paid => 'PAID';
 
   @override

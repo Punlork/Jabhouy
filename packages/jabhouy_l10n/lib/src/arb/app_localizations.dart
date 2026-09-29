@@ -986,12 +986,6 @@ abstract class AppLocalizations {
   /// **'Loading'**
   String get loading;
 
-  /// Image found in clipboard. Tap to use it.
-  ///
-  /// In en, this message translates to:
-  /// **'Image found in clipboard. Tap to use it.'**
-  String get imgFound;
-
   /// Label indicating a loan has been paid
   ///
   /// In en, this message translates to:
