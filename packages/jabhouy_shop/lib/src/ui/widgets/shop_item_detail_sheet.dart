@@ -3,7 +3,6 @@ import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_shop/src/ui/widgets/shop_item_parts.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 void showShopItemDetailSheet({
   required BuildContext context,
@@ -43,18 +42,10 @@ class ShopItemDetailSheet extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context); // Access translations
 
-    return Container(
+    // No decoration: the modal sheet is the surface. A shadow here, with
+    // nothing filling the box, painted a grey wash over the whole sheet.
+    return Padding(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,17 +54,10 @@ class ShopItemDetailSheet extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: FadeInImage.memoryNetwork(
-                  image: item.imageUrl ?? '',
-                  fadeInDuration: const Duration(milliseconds: 15),
-                  fit: BoxFit.cover,
-                  width: 80,
-                  height: 80,
-                  placeholder: kTransparentImage,
-                  imageErrorBuilder: (context, url, error) => const AppLogo(
-                    shape: BoxShape.rectangle,
-                    useBg: false,
-                  ),
+                // Same photo-or-letter tile as the listing card.
+                child: SizedBox.square(
+                  dimension: 80,
+                  child: ShopItemThumbnail(item: item),
                 ),
               ),
               const SizedBox(width: 16),

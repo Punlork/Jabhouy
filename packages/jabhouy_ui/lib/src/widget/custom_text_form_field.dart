@@ -120,14 +120,16 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     final colorScheme = Theme.of(context).colorScheme;
     final inputTheme = Theme.of(context).inputDecorationTheme;
 
-    final customBorder = widget.useCustomBorder
-        ? CustomOutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          )
-        : const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          );
+    final customBorder = CustomOutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide.none,
+    );
+    // Without the custom border, follow the app's input theme like every
+    // other field, instead of a default black 8 px outline.
+    final enabledBorder =
+        widget.useCustomBorder ? customBorder : inputTheme.enabledBorder;
+    final focusedBorder =
+        widget.useCustomBorder ? customBorder : inputTheme.focusedBorder;
 
     final baseDecoration = InputDecoration(
       hintText: widget.hintText,
@@ -163,10 +165,10 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             ),
         ],
       ),
-      border: customBorder,
-      enabledBorder: customBorder,
-      focusedBorder: customBorder,
-      disabledBorder: customBorder,
+      border: enabledBorder,
+      enabledBorder: enabledBorder,
+      focusedBorder: focusedBorder,
+      disabledBorder: enabledBorder,
       labelStyle: TextStyle(
         color: colorScheme.onSurface.withValues(alpha: 0.6),
       ),
