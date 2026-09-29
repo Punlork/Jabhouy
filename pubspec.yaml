@@ -1,6 +1,6 @@
 name: jabhouy
 description: Shop management
-version: 1.0.24+29
+version: 1.0.25+30
 publish_to: none
 
 # Workspace members. Each package declares what it imports; list a
