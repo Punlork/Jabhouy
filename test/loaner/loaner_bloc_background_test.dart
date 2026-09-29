@@ -85,6 +85,47 @@ void main() {
     verifyZeroInteractions(refresh);
   });
 
+  test('an empty phone shows loading until the first download lands',
+      () async {
+    final table = StreamController<List<LoanerModel>>.broadcast();
+    addTearDown(table.close);
+    final loan = LoanerModel(id: 1, amount: 500);
+    when(
+      () => repository.watchLoaners(
+        searchQuery: any(named: 'searchQuery'),
+        customerFilter: any(named: 'customerFilter'),
+        fromDate: any(named: 'fromDate'),
+        toDate: any(named: 'toDate'),
+      ),
+    ).thenAnswer((_) async* {
+      yield const [];
+      yield* table.stream;
+    });
+    when(
+      () => repository.hasCachedLoaners(
+        searchQuery: any(named: 'searchQuery'),
+        customerFilter: any(named: 'customerFilter'),
+        fromDate: any(named: 'fromDate'),
+        toDate: any(named: 'toDate'),
+      ),
+    ).thenAnswer((_) async => false);
+    final pull = Completer<void>();
+    when(() => repository.pullLatest()).thenAnswer((_) => pull.future);
+    final states = <LoanerState>[];
+    final sub = bloc.stream.listen(states.add);
+
+    bloc.add(LoadLoaners());
+    await pumpEventQueue();
+    expect(states, [isA<LoanerLoading>()], reason: 'no empty view flash');
+
+    table.add([loan]);
+    pull.complete();
+    await pumpEventQueue();
+    expect((states.last as LoanerLoaded).items, [loan]);
+    verifyZeroInteractions(refresh);
+    await sub.cancel();
+  });
+
   test('refresh() lasts as long as the pull, so the spinner stays up',
       () async {
     final pull = Completer<void>();

@@ -53,7 +53,7 @@ class _LoanerViewState extends State<LoanerView>
 
     return BlocBuilder<LoanerBloc, LoanerState>(
       builder: (context, state) => switch (state) {
-        LoanerLoading() => ListView.builder(
+        LoanerInitial() || LoanerLoading() => ListView.builder(
             controller: controller,
             physics: const BouncingScrollPhysics()
                 .applyTo(const AlwaysScrollableScrollPhysics()),

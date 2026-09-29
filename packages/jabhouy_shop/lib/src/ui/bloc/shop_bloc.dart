@@ -41,6 +41,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       ),
     )
         .listen((items) {
+      _latestItems = items;
       if (!isClosed) {
         add(_ShopInternalItemsUpdated(items));
       }
@@ -55,6 +56,8 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     );
 
     on<_ShopInternalItemsUpdated>((event, emit) {
+      // An empty phone before the first download is not an empty shop.
+      if (_holdEmptyList && event.items.isEmpty) return;
       final currentState = state.asLoaded;
       emit(
         ShopLoaded(
@@ -122,6 +125,13 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
   late StreamSubscription<List<ShopItemModel>> _itemsSubscription;
   late StreamSubscription<bool> _connectivitySubscription;
   late StreamController<_ShopFilters> _filtersController;
+
+  /// With background sync, the watch reports an empty table before the
+  /// first load has checked whether a download is due; hiding that keeps
+  /// the shimmer up instead of flashing the empty view.
+  late bool _holdEmptyList = _inBackground;
+  var _firstLoadHandled = false;
+  List<ShopItemModel> _latestItems = const [];
 
   /// Pull-to-refresh. With background sync it returns the pull itself, so
   /// the spinner stays until the download ends and a second swipe cannot
@@ -291,6 +301,10 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     }
 
     if (_inBackground) {
+      if (!_firstLoadHandled) {
+        _firstLoadHandled = true;
+        if (await _pullIfNothingCached(emit)) return;
+      }
       // The list is the Drift watch, re-pointed above; the engine keeps
       // its rows fresh. Only pull-to-refresh asks for a pull now.
       if (event.forceRefresh) await _repository.pullLatest();
@@ -409,6 +423,32 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     emit(
       ShopError(result.errorOrNull?.message ?? 'Failed to load items.'),
     );
+  }
+
+  /// First load with background sync: an empty phone waits for the
+  /// download under the shimmer. Rows that land during it show at once;
+  /// offline, a failed pull or a shop with no items ends on the list.
+  ///
+  /// True when it pulled; otherwise the load carries on as usual.
+  Future<bool> _pullIfNothingCached(Emitter<ShopState> emit) async {
+    final hasCachedItems = await _repository.hasCachedItems();
+    if (!hasCachedItems && await _connectivityService.isOnline) {
+      if (state is! ShopLoaded) emit(const ShopLoading());
+      try {
+        await _repository.pullLatest();
+      } on Exception catch (error, stackTrace) {
+        addError(error, stackTrace);
+      } finally {
+        _holdEmptyList = false;
+        if (!isClosed && state is! ShopLoaded) {
+          add(_ShopInternalItemsUpdated(_latestItems));
+        }
+      }
+      return true;
+    }
+    _holdEmptyList = false;
+    if (state is! ShopLoaded) add(_ShopInternalItemsUpdated(_latestItems));
+    return false;
   }
 
   Future<void> _onConnectivityChanged(

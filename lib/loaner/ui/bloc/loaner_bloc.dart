@@ -43,6 +43,7 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
       ),
     )
         .listen((items) {
+      _latestItems = items;
       if (!isClosed) {
         add(_LoanerUpdatedFromLocal(items));
       }
@@ -57,6 +58,8 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     );
 
     on<_LoanerUpdatedFromLocal>((event, emit) {
+      // An empty phone before the first download is not an empty loan list.
+      if (_holdEmptyList && event.items.isEmpty) return;
       final currentState = state.asLoaded;
       emit(
         LoanerLoaded(
@@ -107,6 +110,13 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
   late StreamSubscription<bool> _connectivitySubscription;
   late StreamController<_LoanerFilters> _filtersController;
 
+  /// With background sync, the watch reports an empty table before the
+  /// first load has checked whether a download is due; hiding that keeps
+  /// the shimmer up instead of flashing the empty view.
+  late bool _holdEmptyList = _inBackground;
+  var _firstLoadHandled = false;
+  List<LoanerModel> _latestItems = const [];
+
   /// Pull-to-refresh. With background sync it returns the pull itself, so
   /// the spinner stays until the download ends and a second swipe cannot
   /// start while one runs; the engine folds any that do into one.
@@ -121,6 +131,35 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
     _connectivitySubscription.cancel();
     _filtersController.close();
     return super.close();
+  }
+
+  /// First load with background sync: an empty phone waits for the
+  /// download under the shimmer. Rows that land during it show at once;
+  /// offline, a failed pull or no loans at all ends on the list.
+  ///
+  /// True when it pulled; otherwise the load carries on as usual.
+  Future<bool> _pullIfNothingCached(
+    Emitter<LoanerState> emit, {
+    required bool isOnline,
+  }) async {
+    final hasCachedItems = await _repository.hasCachedLoaners();
+    if (!hasCachedItems && isOnline) {
+      if (state is! LoanerLoaded) emit(const LoanerLoading());
+      try {
+        await _repository.pullLatest();
+      } on Exception catch (error, stackTrace) {
+        addError(error, stackTrace);
+      } finally {
+        _holdEmptyList = false;
+        if (!isClosed && state is! LoanerLoaded) {
+          add(_LoanerUpdatedFromLocal(_latestItems));
+        }
+      }
+      return true;
+    }
+    _holdEmptyList = false;
+    if (state is! LoanerLoaded) add(_LoanerUpdatedFromLocal(_latestItems));
+    return false;
   }
 
   Future<void> _onLoadLoaners(
@@ -169,6 +208,11 @@ class LoanerBloc extends Bloc<LoanerEvent, LoanerState> {
           ),
         );
       }
+    }
+
+    if (_inBackground && !_firstLoadHandled) {
+      _firstLoadHandled = true;
+      if (await _pullIfNothingCached(emit, isOnline: isOnline)) return;
     }
 
     if (_inBackground) {
