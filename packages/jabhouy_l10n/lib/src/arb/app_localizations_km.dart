@@ -93,6 +93,9 @@ class AppLocalizationsKm extends AppLocalizations {
   String get cancel => 'បោះបង់';
 
   @override
+  String get sessionExpired => 'វគ្គចូលរបស់អ្នកបានផុតកំណត់។ សូមចូលម្តងទៀត។';
+
+  @override
   String get signoutSuccessful => 'ចាកចេញជោគជ័យ';
 
   @override

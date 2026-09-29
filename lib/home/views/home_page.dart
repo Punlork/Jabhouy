@@ -416,7 +416,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is Unauthenticated) {
-              showSuccessSnackBar(context, context.l10n.signoutSuccessful);
+              if (state.sessionExpired) {
+                showErrorSnackBar(context, context.l10n.sessionExpired);
+              } else {
+                showSuccessSnackBar(context, context.l10n.signoutSuccessful);
+              }
               context.goNamed(AppRoutes.signin);
             }
           },

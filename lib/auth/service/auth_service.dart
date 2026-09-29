@@ -93,48 +93,25 @@ class AuthService extends BaseService {
   Future<AuthBootstrapResult> bootstrapSession() async {
     final cachedUser = await getCachedUser();
     final hasPersistedSession = await this.hasPersistedSession;
-    final isOnline = await _connectivityService.isOnline;
 
-    if (!isOnline && cachedUser != null) {
+    // A saved session opens the app at once, online or not; the bloc then
+    // checks it with the server in the background (revalidateSession).
+    // Waiting for that call held the splash for a second or more.
+    if (cachedUser != null &&
+        (hasPersistedSession || !await _connectivityService.isOnline)) {
       return AuthBootstrapResult(
         response: ApiResponse(
           success: true,
           data: cachedUser,
-          message: 'Offline session restored',
+          message: 'Cached session restored',
         ),
         usedCachedSession: true,
       );
     }
 
-    if (!hasPersistedSession) {
-      return AuthBootstrapResult(
-        response: ApiResponse(success: false, message: 'No saved session'),
-        usedCachedSession: false,
-      );
-    }
-
-    final response = await getSession();
-    if (response.success && response.data != null) {
-      await cacheUser(response.data!);
-      return AuthBootstrapResult(
-        response: response,
-        usedCachedSession: false,
-      );
-    }
-
-    if (cachedUser != null && _isRecoverableSessionFailure(response.message)) {
-      return AuthBootstrapResult(
-        response: ApiResponse(
-          success: true,
-          data: cachedUser,
-          message: 'Using cached session while revalidation failed',
-        ),
-        usedCachedSession: true,
-      );
-    }
-
+    // hasPersistedSession needs a cached user, so none was saved.
     return AuthBootstrapResult(
-      response: response,
+      response: ApiResponse(success: false, message: 'No saved session'),
       usedCachedSession: false,
     );
   }
@@ -146,6 +123,22 @@ class AuthService extends BaseService {
         normalized.contains('socket') ||
         normalized.contains('timeout') ||
         normalized.contains('failed host lookup');
+  }
+
+  /// Checks with the server a session the app opened on from cache.
+  ///
+  /// Null when the server could not be reached: the cached session stays,
+  /// as it would have at launch. Otherwise the server's answer; a failed
+  /// one has already cleared the cached session.
+  Future<ApiResponse<User?>?> revalidateSession() async {
+    final response = await getSession();
+    if (response.success && response.data != null) {
+      await cacheUser(response.data!);
+      return response;
+    }
+    if (_isRecoverableSessionFailure(response.message)) return null;
+    await clearCachedSession();
+    return response;
   }
 
   Future<ApiResponse<User>> signup({

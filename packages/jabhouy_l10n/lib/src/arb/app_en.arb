@@ -113,6 +113,10 @@
   "@cancel": {
     "description": "Text for the cancel button in dialogs"
   },
+  "sessionExpired": "Your session has expired. Please sign in again.",
+  "@sessionExpired": {
+    "description": "Shown when the server rejects a saved session after the app opened on it"
+  },
   "signoutSuccessful": "Signout successful",
   "@signoutSuccessful": {
     "description": "Success message after signing out"

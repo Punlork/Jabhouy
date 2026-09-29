@@ -129,8 +129,11 @@ Future<void> bootstrap(
       // Storage tab needs the DI container, so it attaches after setup.
       AppDebugger.attachStorage();
 
-      await getIt<FcmService>().initialize();
       runApp(await builder());
+      // After the first frame is on its way: this asks for the notification
+      // permission, and on a fresh install that dialog waited under the
+      // splash for an answer, holding the app for seconds.
+      unawaited(getIt<FcmService>().initialize());
     },
     (error, stackTrace) {
       logger.e(

@@ -93,6 +93,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get sessionExpired =>
+      'Your session has expired. Please sign in again.';
+
+  @override
   String get signoutSuccessful => 'Signout successful';
 
   @override

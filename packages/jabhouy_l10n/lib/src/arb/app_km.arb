@@ -113,6 +113,10 @@
   "@cancel": {
     "description": "Text for the cancel button in dialogs"
   },
+  "sessionExpired": "វគ្គចូលរបស់អ្នកបានផុតកំណត់។ សូមចូលម្តងទៀត។",
+  "@sessionExpired": {
+    "description": "Shown when the server rejects a saved session after the app opened on it"
+  },
   "signoutSuccessful": "ចាកចេញជោគជ័យ",
   "@signoutSuccessful": {
     "description": "Success message after signing out"

@@ -61,4 +61,60 @@ void main() {
     expect(result.response.data?.id, 'user-1');
     expect(result.usedCachedSession, isTrue);
   });
+
+  group('with a saved session online', () {
+    void stubSession(ApiResponse<User?> response) {
+      when(
+        () => apiService.get<User?>(
+          any(),
+          parser: any(named: 'parser'),
+          queryParameters: any(named: 'queryParameters'),
+          showSnackBar: any(named: 'showSnackBar'),
+        ),
+      ).thenAnswer((_) async => response);
+    }
+
+    setUp(() {
+      getIt.registerSingleton<ApiService>(apiService);
+      when(() => apiCookies.getCookieHeader(any())).thenReturn('session=1');
+      when(() => connectivityService.isOnline).thenAnswer((_) async => true);
+    });
+
+    test('bootstrapSession opens on it without waiting for the server',
+        () async {
+      final result = await authService.bootstrapSession();
+
+      expect(result.response.data?.id, 'user-1');
+      expect(result.usedCachedSession, isTrue);
+      verifyNever(
+        () => apiService.get<User?>(
+          any(),
+          parser: any(named: 'parser'),
+          queryParameters: any(named: 'queryParameters'),
+          showSnackBar: any(named: 'showSnackBar'),
+        ),
+      );
+    });
+
+    test('revalidateSession clears a session the server rejects', () async {
+      stubSession(
+        ApiResponse(success: false, message: 'Unauthorized', statusCode: 401),
+      );
+
+      final response = await authService.revalidateSession();
+
+      expect(response?.success, isFalse);
+      expect(await authService.getCachedUser(), isNull);
+    });
+
+    test('revalidateSession keeps the session when the server is unreachable',
+        () async {
+      stubSession(ApiResponse(success: false, message: 'Network error'));
+
+      final response = await authService.revalidateSession();
+
+      expect(response, isNull);
+      expect((await authService.getCachedUser())?.id, 'user-1');
+    });
+  });
 }

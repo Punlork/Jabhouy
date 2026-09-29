@@ -27,4 +27,13 @@ class Authenticated extends AuthState {
   List<Object?> get props => [user, isOffline, isSessionTrusted];
 }
 
-class Unauthenticated extends AuthState {}
+class Unauthenticated extends AuthState {
+  const Unauthenticated({this.sessionExpired = false});
+
+  /// The server rejected a saved session after the app had opened on it,
+  /// rather than the user signing out.
+  final bool sessionExpired;
+
+  @override
+  List<Object?> get props => [sessionExpired];
+}

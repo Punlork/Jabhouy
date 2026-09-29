@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/service/auth_service.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
-import 'package:meta/meta.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -47,6 +47,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
+    var revalidate = false;
     try {
       final bootstrap = await authService.bootstrapSession();
       final response = bootstrap.response;
@@ -60,18 +61,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             isSessionTrusted: isOnline && !bootstrap.usedCachedSession,
           ),
         );
+        revalidate = isOnline && bootstrap.usedCachedSession;
       } else {
         await authService.clearCachedSession();
-        emit(Unauthenticated());
+        emit(const Unauthenticated());
       }
     } catch (_) {
       await authService.clearCachedSession();
-      emit(Unauthenticated());
+      emit(const Unauthenticated());
     } finally {
-      Future.delayed(
-        const Duration(milliseconds: 500),
-        FlutterNativeSplash.remove,
-      );
+      // Once the screen for this state has drawn, instead of a fixed
+      // 500 ms on top of the auth check.
+      WidgetsBinding.instance
+        ..addPostFrameCallback((_) => FlutterNativeSplash.remove())
+        ..scheduleFrame();
+    }
+
+    if (revalidate) await _revalidateCachedSession(emit);
+  }
+
+  /// The app opened on the cached session; now ask the server. A rejected
+  /// session signs out; an unreachable server leaves it as it is.
+  Future<void> _revalidateCachedSession(Emitter<AuthState> emit) async {
+    final response = await authService.revalidateSession();
+    if (response == null || state is! Authenticated) return;
+    if (response.success && response.data != null) {
+      emit(Authenticated(response.data!));
+    } else {
+      emit(const Unauthenticated(sessionExpired: true));
     }
   }
 
@@ -89,7 +106,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await _sessionCleanupService.clearSignedInUserData();
-    emit(Unauthenticated());
+    emit(const Unauthenticated());
   }
 
   Future<void> _onConnectivityChanged(

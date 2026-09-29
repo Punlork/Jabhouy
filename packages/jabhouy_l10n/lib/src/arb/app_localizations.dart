@@ -260,6 +260,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// Shown when the server rejects a saved session after the app opened on it
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Please sign in again.'**
+  String get sessionExpired;
+
   /// Success message after signing out
   ///
   /// In en, this message translates to:
