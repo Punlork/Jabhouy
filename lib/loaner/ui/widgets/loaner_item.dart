@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
@@ -135,14 +136,18 @@ class LoanerItem extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        SvgPicture.asset(
                           loaner.isPaid
-                              ? Icons.check_circle_rounded
-                              : Icons.pending_outlined,
-                          size: 16,
-                          color: loaner.isPaid
-                              ? colorScheme.onSecondaryContainer
-                              : colorScheme.onSurfaceVariant,
+                              ? AppAssets.statusPaid
+                              : AppAssets.statusUnpaid,
+                          width: 16,
+                          height: 16,
+                          colorFilter: ColorFilter.mode(
+                            loaner.isPaid
+                                ? colorScheme.onSecondaryContainer
+                                : colorScheme.onSurfaceVariant,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         const SizedBox(width: 6),
                         Text(

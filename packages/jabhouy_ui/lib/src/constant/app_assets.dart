@@ -22,4 +22,6 @@ class AppAssets {
   static const actionProfile = 'assets/icons/action_profile.svg';
   static const actionProtect = 'assets/icons/action_protect.svg';
   static const actionSettings = 'assets/icons/action_settings.svg';
+  static const statusPaid = 'assets/icons/status_paid.svg';
+  static const statusUnpaid = 'assets/icons/status_unpaid.svg';
 }
