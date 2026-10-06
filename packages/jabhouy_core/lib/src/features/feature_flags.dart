@@ -12,6 +12,9 @@ enum Feature {
   /// while the sync engine pushes and pulls in the background.
   /// docs/OFFLINE_SYNC.md.
   backgroundSync,
+
+  /// The App diagnostics page and the income diagnostics behind it.
+  diagnostics,
 }
 
 /// Answers whether a [Feature] is on.
@@ -38,6 +41,8 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
         Feature.income => const bool.fromEnvironment('FEATURE_INCOME'),
         Feature.backgroundSync =>
           const bool.fromEnvironment('FEATURE_BACKGROUND_SYNC'),
+        Feature.diagnostics =>
+          const bool.fromEnvironment('FEATURE_DIAGNOSTICS'),
       };
 }
 

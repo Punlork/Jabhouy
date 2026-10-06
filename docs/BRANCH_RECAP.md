@@ -71,6 +71,7 @@ Plan and details: [OFFLINE_SYNC.md](OFFLINE_SYNC.md). Behind `Feature.background
 | --- | --- | --- | --- |
 | `FEATURE_INCOME` | on | on | off |
 | `FEATURE_BACKGROUND_SYNC` | on | on | on, from 1.0.21 |
+| `FEATURE_DIAGNOSTICS` | on | on | off, from 1.0.27 |
 
 Income off hides its tab, device-role card and diagnostics, never starts capture, and leaves the Android notification listener out of the manifest — Google Play blocked 1.0.21 while it was only disabled.
 

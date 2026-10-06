@@ -38,14 +38,16 @@ class AppRouter {
     '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.profile.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.settings.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
+    if (_isDiagnosticsEnabled) '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.customer.toPath}',
     // Left out when income is off, so the redirect below sends a stale
     // link home instead of to a page with no bloc.
-    if (_isIncomeEnabled) '${AppRoutes.home.toPath}${AppRoutes.incomeDiagnostics.toPath}',
+    if (_isIncomeEnabled && _isDiagnosticsEnabled)
+      '${AppRoutes.home.toPath}${AppRoutes.incomeDiagnostics.toPath}',
   };
 
   static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
+  static bool get _isDiagnosticsEnabled => getIt<FeatureFlags>().isEnabled(Feature.diagnostics);
 
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.home.toPath,

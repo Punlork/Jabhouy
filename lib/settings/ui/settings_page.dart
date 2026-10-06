@@ -23,6 +23,7 @@ class _SettingsPageState extends State<SettingsPage> {
   int _diagnosticsTapCount = 0;
   late final Future<String> _appVersionFuture;
   final _isIncomeEnabled = getIt<FeatureFlags>().isEnabled(Feature.income);
+  final _isDiagnosticsEnabled = getIt<FeatureFlags>().isEnabled(Feature.diagnostics);
 
   @override
   void initState() {
@@ -31,6 +32,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _handleHiddenDiagnosticsTap() {
+    if (!_isDiagnosticsEnabled) {
+      return;
+    }
+
     _diagnosticsTapCount += 1;
     if (_diagnosticsTapCount < 7) {
       return;
@@ -169,12 +174,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
                     ),
-                    _SectionDivider(color: colorScheme.outlineVariant),
-                    _SettingsRow(
-                      svgAsset: AppAssets.actionDiagnostics,
-                      title: l10n.diagnostics,
-                      onTap: _openDiagnostics,
-                    ),
+                    if (_isDiagnosticsEnabled) ...[
+                      _SectionDivider(color: colorScheme.outlineVariant),
+                      _SettingsRow(
+                        svgAsset: AppAssets.actionDiagnostics,
+                        title: l10n.diagnostics,
+                        onTap: _openDiagnostics,
+                      ),
+                    ],
                   ],
                 ),
               ),
