@@ -6,18 +6,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Which Shop this phone is working in right now, and the user's role
 /// there. Every query and save is scoped to [id].
-class CurrentShop {
+class CurrentShop implements ShopScope {
   CurrentShop(this._api);
 
   static const _key = 'current_shop';
 
   final MeApi _api;
   ShopMembership? _shop;
+  String? _userId;
   List<ShopMembership> _shops = const [];
 
   /// Null until [load] has run once after sign-in.
   String? get id => _shop?.id;
+
+  @override
+  String? get shopId => id;
+
+  @override
   MemberRole? get role => _shop?.role;
+
+  @override
+  String? get userId => _userId;
+
+  @override
+  bool get syncs => _api is! FakeMeApi;
 
   /// Every Shop the user belongs to, for the shop switcher.
   List<ShopMembership> get shops => _shops;
@@ -26,6 +38,7 @@ class CurrentShop {
   /// Shop if the user is still in it, else picks the first. Offline, falls
   /// back to what was cached.
   Future<void> load(String userId) async {
+    _userId = userId;
     final prefs = await SharedPreferences.getInstance();
     final cached = _read(prefs);
     switch (await _api.shops(userId)) {
@@ -46,6 +59,7 @@ class CurrentShop {
 
   Future<void> clear() async {
     _shop = null;
+    _userId = null;
     _shops = const [];
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_key);

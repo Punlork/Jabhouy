@@ -15,6 +15,7 @@ export 'src/models/casts.dart';
 export 'src/models/dates.dart';
 export 'src/models/member_role.dart';
 export 'src/models/pagination.dart';
+export 'src/models/shop_scope.dart';
 export 'src/money/money.dart';
 export 'src/result/app_exception.dart';
 export 'src/result/result.dart';

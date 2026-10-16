@@ -1,6 +1,6 @@
 # P3 Step 2: Item and category repositories
 
-Status: open
+Status: resolved
 Blocked by: 09, 10
 
 - Repositories return `Result<T>`; writes go to Drift, then `SyncEngine.enqueue`, then drain if online.

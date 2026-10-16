@@ -1,0 +1,85 @@
+import 'package:jabhouy_core/jabhouy_core.dart';
+
+/// One way an Item is sold: a unit, an optional pack size, and its prices
+/// in one currency. A null price means "no price yet", never 0.
+class PriceOption {
+  const PriceOption({
+    required this.id,
+    required this.unit,
+    required this.currency,
+    this.packQty,
+    this.price,
+    this.wholesale,
+    this.cost,
+    this.sortOrder = 0,
+  });
+
+  final String id;
+  final String unit;
+  final int? packQty;
+  final Currency currency;
+
+  /// Whole riel or cents.
+  final int? price;
+  final int? wholesale;
+  final int? cost;
+  final int sortOrder;
+
+  Money? get selling => _money(price);
+  Money? get wholesaleMoney => _money(wholesale);
+  Money? get costMoney => _money(cost);
+
+  Money? _money(int? amount) => amount == null ? null : Money(amount, currency);
+}
+
+/// A thing the Shop sells, with one or more [PriceOption]s.
+class Item {
+  const Item({
+    required this.id,
+    required this.name,
+    required this.prices,
+    this.categoryId,
+    this.photoUrl,
+    this.note,
+    this.updatedAt,
+    this.updatedBy,
+  });
+
+  final String id;
+  final String name;
+  final String? categoryId;
+  final String? photoUrl;
+  final String? note;
+  final List<PriceOption> prices;
+  final DateTime? updatedAt;
+  final String? updatedBy;
+
+  /// True when any Price option still has no selling price.
+  bool get hasMissingPrice => prices.any((p) => p.price == null);
+}
+
+/// A unit name suggested as a chip for Items in an [ItemCategory].
+class CategoryUnit {
+  const CategoryUnit({required this.unit, this.hidden = false});
+
+  final String unit;
+  final bool hidden;
+}
+
+/// A group of Items, with the units its Items are usually sold in.
+/// (`Category` is taken by the old table's row class until schema 10.)
+class ItemCategory {
+  const ItemCategory({
+    required this.id,
+    required this.name,
+    this.sortOrder = 0,
+    this.hidden = false,
+    this.units = const [],
+  });
+
+  final String id;
+  final String name;
+  final int sortOrder;
+  final bool hidden;
+  final List<CategoryUnit> units;
+}

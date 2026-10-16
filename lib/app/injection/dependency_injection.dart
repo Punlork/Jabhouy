@@ -126,6 +126,15 @@ Future<void> setupDependencies() async {
         flags: getIt<FeatureFlags>(),
       ),
     )
+    ..registerLazySingleton(() => ItemDao(getIt<AppDatabase>()))
+    ..registerLazySingleton(
+      () => ItemRepository(
+        getIt<ItemDao>(),
+        getIt<CurrentShop>(),
+        getIt<SyncEngine>(),
+        getIt<ConnectivityService>(),
+      ),
+    )
     ..registerLazySingleton<LoanerRepository>(
       () => DefaultLoanerRepository(
         getIt<LoanerDao>(),
