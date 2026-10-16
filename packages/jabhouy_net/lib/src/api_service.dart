@@ -56,7 +56,7 @@ class ApiService {
     bool showSnackBar = true,
   }) async {
     try {
-      var tempHeaders = getHeaders();
+      var tempHeaders = {...getHeaders(), 'Origin': _origin};
       final uri = Uri.https(
         _baseUrl,
         endpoint,
@@ -99,6 +99,10 @@ class ApiService {
     }
   }
 
+  /// Better Auth refuses a cookie-carrying request that changes something
+  /// unless it names a trusted origin; the API's own URL is trusted.
+  String get _origin => 'https://$_baseUrl';
+
   Future<ApiResponse<T>> post<T>(
     String endpoint, {
     Map<String, dynamic> body = const {},
@@ -111,7 +115,7 @@ class ApiService {
     String imageFieldName = 'image',
   }) async {
     try {
-      var tempHeaders = getHeaders();
+      var tempHeaders = {...getHeaders(), 'Origin': _origin};
       final uri = Uri.https(_baseUrl, endpoint);
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
@@ -219,7 +223,7 @@ class ApiService {
       }
 
       final encodeBody = json.encode(tempBody);
-      var tempHeaders = getHeaders();
+      var tempHeaders = {...getHeaders(), 'Origin': _origin};
       final uri = Uri.https(_baseUrl, endpoint);
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
@@ -267,7 +271,7 @@ class ApiService {
     bool showSnackBar = true,
   }) async {
     try {
-      var tempHeaders = getHeaders();
+      var tempHeaders = {...getHeaders(), 'Origin': _origin};
       final uri = Uri.https(_baseUrl, endpoint);
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
