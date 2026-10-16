@@ -862,5 +862,380 @@
   "usernameRules": "3–30 letters, numbers, _ or .",
   "@usernameRules": {
     "description": "Hint and validation message for a Username"
+  },
+  "credit": "Credit",
+  "@credit": {
+    "description": "Bottom tab for the credit list"
+  },
+  "itemAdd": "Add item",
+  "@itemAdd": {
+    "description": "Button and title to add an item"
+  },
+  "itemEdit": "Edit item",
+  "@itemEdit": {
+    "description": "Title of the edit item page"
+  },
+  "itemName": "Item name",
+  "@itemName": {
+    "description": "Label of the item name field"
+  },
+  "itemPhoto": "Photo",
+  "@itemPhoto": {
+    "description": "Label of the item photo"
+  },
+  "priceSection": "Prices",
+  "@priceSection": {
+    "description": "Section title above the price rows"
+  },
+  "priceUnit": "Sold as",
+  "@priceUnit": {
+    "description": "Column label for the unit a price is for"
+  },
+  "priceCount": "Count",
+  "@priceCount": {
+    "description": "Column label for how many units a pack holds"
+  },
+  "priceSelling": "Selling price",
+  "@priceSelling": {
+    "description": "Column label for the selling price"
+  },
+  "priceWholesale": "Wholesale price",
+  "@priceWholesale": {
+    "description": "Label for the wholesale price"
+  },
+  "priceCost": "Cost price",
+  "@priceCost": {
+    "description": "Label for the cost price"
+  },
+  "priceAdd": "Add price",
+  "@priceAdd": {
+    "description": "Button that adds a price row"
+  },
+  "priceAddExample": "e.g. case ×24, sack",
+  "@priceAddExample": {
+    "description": "Example after the add price button"
+  },
+  "priceMissing": "No price yet",
+  "@priceMissing": {
+    "description": "Shown instead of a missing price, never 0"
+  },
+  "priceEdit": "Edit price",
+  "@priceEdit": {
+    "description": "Primary button on the item details sheet"
+  },
+  "optional": "(optional)",
+  "@optional": {
+    "description": "Suffix after the label of an optional field"
+  },
+  "categoryChoose": "Choose category",
+  "@categoryChoose": {
+    "description": "Title of the category picker"
+  },
+  "categoryNew": "New category",
+  "@categoryNew": {
+    "description": "Button at the bottom of the category picker"
+  },
+  "categorySuggested": "Suggested from the name · tap to change",
+  "@categorySuggested": {
+    "description": "Hint under a category suggested from the item name"
+  },
+  "noteLabel": "Note",
+  "@noteLabel": {
+    "description": "Label of a note field"
+  },
+  "searchGoods": "Search items",
+  "@searchGoods": {
+    "description": "Hint in the item search field"
+  },
+  "searchCustomers": "Search customers",
+  "@searchCustomers": {
+    "description": "Hint in the customer search field"
+  },
+  "creditAdd": "Add credit",
+  "@creditAdd": {
+    "description": "Button and title to add a credit"
+  },
+  "creditEdit": "Edit credit",
+  "@creditEdit": {
+    "description": "Title of the edit credit page"
+  },
+  "creditCustomer": "Customer",
+  "@creditCustomer": {
+    "description": "Label of the customer field on a credit"
+  },
+  "creditChoose": "Choose",
+  "@creditChoose": {
+    "description": "Button that opens the customer picker"
+  },
+  "creditItems": "Items taken",
+  "@creditItems": {
+    "description": "Section title for a credit's items"
+  },
+  "creditAddItems": "Add from price list",
+  "@creditAddItems": {
+    "description": "Button that opens the item picker"
+  },
+  "creditAmountHint": "Calculated from items",
+  "@creditAmountHint": {
+    "description": "Hint under an amount computed from a credit's items"
+  },
+  "creditTakenAt": "Date and time taken",
+  "@creditTakenAt": {
+    "description": "Label of the credit's date and time field"
+  },
+  "creditDueDate": "Due",
+  "@creditDueDate": {
+    "description": "Label of the optional due date"
+  },
+  "creditUnpaid": "Unpaid",
+  "@creditUnpaid": {
+    "description": "Status of a credit not yet paid"
+  },
+  "creditPaid": "Paid",
+  "@creditPaid": {
+    "description": "Status of a paid credit"
+  },
+  "creditMarkPaid": "Mark as paid",
+  "@creditMarkPaid": {
+    "description": "Primary button on the credit details sheet"
+  },
+  "creditTotalOwed": "Total owed",
+  "@creditTotalOwed": {
+    "description": "Title of the summary card on the credit list"
+  },
+  "creditNoAmount": "No amount yet",
+  "@creditNoAmount": {
+    "description": "Shown for a credit without an amount"
+  },
+  "creditOwes": "Owes {amount}",
+  "@creditOwes": {
+    "description": "A customer's balance in the customer picker",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "customerAddNew": "Add new customer",
+  "@customerAddNew": {
+    "description": "Button in the customer picker"
+  },
+  "customerHasCredits": "Can't delete: this customer still has credits",
+  "@customerHasCredits": {
+    "description": "Shown when deleting a customer who has credits"
+  },
+  "pickerTitle": "Choose items",
+  "@pickerTitle": {
+    "description": "Title of the item picker"
+  },
+  "pickerAddToCredit": "Add to credit",
+  "@pickerAddToCredit": {
+    "description": "Footer button of the item picker"
+  },
+  "pickerSelected": "{count} selected",
+  "@pickerSelected": {
+    "description": "Footer count in the item picker",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "timeAdd": "Add time",
+  "@timeAdd": {
+    "description": "Empty time button of the date and time field"
+  },
+  "voiceSpeakingInto": "Speaking into {field}",
+  "@voiceSpeakingInto": {
+    "description": "Title of the voice input sheet",
+    "placeholders": {
+      "field": {}
+    }
+  },
+  "voiceListening": "Listening…",
+  "@voiceListening": {
+    "description": "Shown while voice input listens"
+  },
+  "voiceUse": "Use this text",
+  "@voiceUse": {
+    "description": "Confirms the voice transcript"
+  },
+  "settingsTitle": "Shop settings",
+  "@settingsTitle": {
+    "description": "Title of the shop settings page"
+  },
+  "settingsPricesUsed": "Prices this shop uses",
+  "@settingsPricesUsed": {
+    "description": "Section title for which prices are on"
+  },
+  "settingsCurrency": "Currency",
+  "@settingsCurrency": {
+    "description": "Section title for currency settings"
+  },
+  "settingsDefaultCurrency": "Default currency",
+  "@settingsDefaultCurrency": {
+    "description": "Label of the default currency control"
+  },
+  "settingsRate": "Exchange rate",
+  "@settingsRate": {
+    "description": "Label of the exchange rate field"
+  },
+  "settingsRateFormat": "$1 = {rate} ៛",
+  "@settingsRateFormat": {
+    "description": "The exchange rate shown as dollars to riel",
+    "placeholders": {
+      "rate": {}
+    }
+  },
+  "settingsRateConfirm": "Old credits keep the rate they were made with.",
+  "@settingsRateConfirm": {
+    "description": "Confirmation when changing the exchange rate"
+  },
+  "settingsShowConverted": "Show prices in both currencies",
+  "@settingsShowConverted": {
+    "description": "Tick box for showing converted prices"
+  },
+  "settingsCategoriesUnits": "Categories and units",
+  "@settingsCategoriesUnits": {
+    "description": "Link to manage categories and units"
+  },
+  "settingsMembers": "Members and roles",
+  "@settingsMembers": {
+    "description": "Link to invite and members"
+  },
+  "lastEditedBy": "Last edited {date} by {name}",
+  "@lastEditedBy": {
+    "description": "Who last changed an item or the rate",
+    "placeholders": {
+      "date": {},
+      "name": {}
+    }
+  },
+  "currencyKhr": "Riel",
+  "@currencyKhr": {
+    "description": "Name of the Cambodian riel"
+  },
+  "currencyUsd": "Dollar",
+  "@currencyUsd": {
+    "description": "Name of the US dollar"
+  },
+  "authWelcome": "Welcome",
+  "@authWelcome": {
+    "description": "Sign-in headline"
+  },
+  "authWelcomeSub": "Sign in to see your shop's prices",
+  "@authWelcomeSub": {
+    "description": "Sign-in subtitle"
+  },
+  "authOr": "or",
+  "@authOr": {
+    "description": "Divider between Google and password sign-in"
+  },
+  "authUserOrEmail": "Username or email",
+  "@authUserOrEmail": {
+    "description": "Label of the sign-in identifier field"
+  },
+  "authSignOut": "Sign out",
+  "@authSignOut": {
+    "description": "Sign-out button on the profile page"
+  },
+  "syncNoPermission": "You no longer have permission to edit",
+  "@syncNoPermission": {
+    "description": "Shown when the server refuses a queued change"
+  },
+  "shopHello": "Hello {name}",
+  "@shopHello": {
+    "description": "Greeting on the shop choice screen",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "shopNoShop": "You're not in a shop yet. Choose one:",
+  "@shopNoShop": {
+    "description": "Shop choice prompt"
+  },
+  "shopJoin": "Join a shop",
+  "@shopJoin": {
+    "description": "Shop choice card for family members"
+  },
+  "shopJoinSub": "For family members · scan a QR or type a code",
+  "@shopJoinSub": {
+    "description": "Subtitle of the join card"
+  },
+  "shopCreate": "Create a new shop",
+  "@shopCreate": {
+    "description": "Shop choice card for owners"
+  },
+  "shopCreateSub": "For shop owners",
+  "@shopCreateSub": {
+    "description": "Subtitle of the create card"
+  },
+  "shopName": "Shop name",
+  "@shopName": {
+    "description": "Label of the shop name field"
+  },
+  "shopStarterCats": "Starter categories",
+  "@shopStarterCats": {
+    "description": "Label above the starter category chips"
+  },
+  "shopCreateBtn": "Create shop",
+  "@shopCreateBtn": {
+    "description": "Button that creates the shop"
+  },
+  "shopJoinBtn": "Join",
+  "@shopJoinBtn": {
+    "description": "Button that joins with a code"
+  },
+  "shopSwitch": "Switch shop",
+  "@shopSwitch": {
+    "description": "Opens the shop switcher"
+  },
+  "joinScan": "Scan the QR on the owner's phone",
+  "@joinScan": {
+    "description": "Join screen camera hint"
+  },
+  "joinCode": "Type the invite code",
+  "@joinCode": {
+    "description": "Label above the code boxes"
+  },
+  "joinInvalid": "Invalid code",
+  "@joinInvalid": {
+    "description": "Join error"
+  },
+  "joinExpired": "This code has expired",
+  "@joinExpired": {
+    "description": "Join error"
+  },
+  "joinUsed": "This code was already used",
+  "@joinUsed": {
+    "description": "Join error"
+  },
+  "inviteTitle": "Invite a member",
+  "@inviteTitle": {
+    "description": "Title of the invite page"
+  },
+  "inviteRole": "Role for the new member",
+  "@inviteRole": {
+    "description": "Label of the role control"
+  },
+  "inviteExpires": "Expires in 24 hours",
+  "@inviteExpires": {
+    "description": "Shown under the invite code"
+  },
+  "inviteShare": "Share code",
+  "@inviteShare": {
+    "description": "Button that opens the share sheet"
+  },
+  "roleViewer": "Can't edit prices",
+  "@roleViewer": {
+    "description": "Viewer role"
+  },
+  "roleEditor": "Can edit prices",
+  "@roleEditor": {
+    "description": "Editor role"
+  },
+  "roleOwner": "Owner",
+  "@roleOwner": {
+    "description": "Owner role"
+  },
+  "members": "Members",
+  "@members": {
+    "description": "Title of the members list"
   }
 }

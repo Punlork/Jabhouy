@@ -1327,6 +1327,540 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'3–30 letters, numbers, _ or .'**
   String get usernameRules;
+
+  /// Bottom tab for the credit list
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get credit;
+
+  /// Button and title to add an item
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get itemAdd;
+
+  /// Title of the edit item page
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get itemEdit;
+
+  /// Label of the item name field
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get itemName;
+
+  /// Label of the item photo
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get itemPhoto;
+
+  /// Section title above the price rows
+  ///
+  /// In en, this message translates to:
+  /// **'Prices'**
+  String get priceSection;
+
+  /// Column label for the unit a price is for
+  ///
+  /// In en, this message translates to:
+  /// **'Sold as'**
+  String get priceUnit;
+
+  /// Column label for how many units a pack holds
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get priceCount;
+
+  /// Column label for the selling price
+  ///
+  /// In en, this message translates to:
+  /// **'Selling price'**
+  String get priceSelling;
+
+  /// Label for the wholesale price
+  ///
+  /// In en, this message translates to:
+  /// **'Wholesale price'**
+  String get priceWholesale;
+
+  /// Label for the cost price
+  ///
+  /// In en, this message translates to:
+  /// **'Cost price'**
+  String get priceCost;
+
+  /// Button that adds a price row
+  ///
+  /// In en, this message translates to:
+  /// **'Add price'**
+  String get priceAdd;
+
+  /// Example after the add price button
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. case ×24, sack'**
+  String get priceAddExample;
+
+  /// Shown instead of a missing price, never 0
+  ///
+  /// In en, this message translates to:
+  /// **'No price yet'**
+  String get priceMissing;
+
+  /// Primary button on the item details sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Edit price'**
+  String get priceEdit;
+
+  /// Suffix after the label of an optional field
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get optional;
+
+  /// Title of the category picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose category'**
+  String get categoryChoose;
+
+  /// Button at the bottom of the category picker
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get categoryNew;
+
+  /// Hint under a category suggested from the item name
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested from the name · tap to change'**
+  String get categorySuggested;
+
+  /// Label of a note field
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get noteLabel;
+
+  /// Hint in the item search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search items'**
+  String get searchGoods;
+
+  /// Hint in the customer search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search customers'**
+  String get searchCustomers;
+
+  /// Button and title to add a credit
+  ///
+  /// In en, this message translates to:
+  /// **'Add credit'**
+  String get creditAdd;
+
+  /// Title of the edit credit page
+  ///
+  /// In en, this message translates to:
+  /// **'Edit credit'**
+  String get creditEdit;
+
+  /// Label of the customer field on a credit
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get creditCustomer;
+
+  /// Button that opens the customer picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get creditChoose;
+
+  /// Section title for a credit's items
+  ///
+  /// In en, this message translates to:
+  /// **'Items taken'**
+  String get creditItems;
+
+  /// Button that opens the item picker
+  ///
+  /// In en, this message translates to:
+  /// **'Add from price list'**
+  String get creditAddItems;
+
+  /// Hint under an amount computed from a credit's items
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated from items'**
+  String get creditAmountHint;
+
+  /// Label of the credit's date and time field
+  ///
+  /// In en, this message translates to:
+  /// **'Date and time taken'**
+  String get creditTakenAt;
+
+  /// Label of the optional due date
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get creditDueDate;
+
+  /// Status of a credit not yet paid
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get creditUnpaid;
+
+  /// Status of a paid credit
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get creditPaid;
+
+  /// Primary button on the credit details sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get creditMarkPaid;
+
+  /// Title of the summary card on the credit list
+  ///
+  /// In en, this message translates to:
+  /// **'Total owed'**
+  String get creditTotalOwed;
+
+  /// Shown for a credit without an amount
+  ///
+  /// In en, this message translates to:
+  /// **'No amount yet'**
+  String get creditNoAmount;
+
+  /// A customer's balance in the customer picker
+  ///
+  /// In en, this message translates to:
+  /// **'Owes {amount}'**
+  String creditOwes(Object amount);
+
+  /// Button in the customer picker
+  ///
+  /// In en, this message translates to:
+  /// **'Add new customer'**
+  String get customerAddNew;
+
+  /// Shown when deleting a customer who has credits
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t delete: this customer still has credits'**
+  String get customerHasCredits;
+
+  /// Title of the item picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose items'**
+  String get pickerTitle;
+
+  /// Footer button of the item picker
+  ///
+  /// In en, this message translates to:
+  /// **'Add to credit'**
+  String get pickerAddToCredit;
+
+  /// Footer count in the item picker
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String pickerSelected(Object count);
+
+  /// Empty time button of the date and time field
+  ///
+  /// In en, this message translates to:
+  /// **'Add time'**
+  String get timeAdd;
+
+  /// Title of the voice input sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking into {field}'**
+  String voiceSpeakingInto(Object field);
+
+  /// Shown while voice input listens
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get voiceListening;
+
+  /// Confirms the voice transcript
+  ///
+  /// In en, this message translates to:
+  /// **'Use this text'**
+  String get voiceUse;
+
+  /// Title of the shop settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Shop settings'**
+  String get settingsTitle;
+
+  /// Section title for which prices are on
+  ///
+  /// In en, this message translates to:
+  /// **'Prices this shop uses'**
+  String get settingsPricesUsed;
+
+  /// Section title for currency settings
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get settingsCurrency;
+
+  /// Label of the default currency control
+  ///
+  /// In en, this message translates to:
+  /// **'Default currency'**
+  String get settingsDefaultCurrency;
+
+  /// Label of the exchange rate field
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate'**
+  String get settingsRate;
+
+  /// The exchange rate shown as dollars to riel
+  ///
+  /// In en, this message translates to:
+  /// **'\$1 = {rate} ៛'**
+  String settingsRateFormat(Object rate);
+
+  /// Confirmation when changing the exchange rate
+  ///
+  /// In en, this message translates to:
+  /// **'Old credits keep the rate they were made with.'**
+  String get settingsRateConfirm;
+
+  /// Tick box for showing converted prices
+  ///
+  /// In en, this message translates to:
+  /// **'Show prices in both currencies'**
+  String get settingsShowConverted;
+
+  /// Link to manage categories and units
+  ///
+  /// In en, this message translates to:
+  /// **'Categories and units'**
+  String get settingsCategoriesUnits;
+
+  /// Link to invite and members
+  ///
+  /// In en, this message translates to:
+  /// **'Members and roles'**
+  String get settingsMembers;
+
+  /// Who last changed an item or the rate
+  ///
+  /// In en, this message translates to:
+  /// **'Last edited {date} by {name}'**
+  String lastEditedBy(Object date, Object name);
+
+  /// Name of the Cambodian riel
+  ///
+  /// In en, this message translates to:
+  /// **'Riel'**
+  String get currencyKhr;
+
+  /// Name of the US dollar
+  ///
+  /// In en, this message translates to:
+  /// **'Dollar'**
+  String get currencyUsd;
+
+  /// Sign-in headline
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get authWelcome;
+
+  /// Sign-in subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your shop\'s prices'**
+  String get authWelcomeSub;
+
+  /// Divider between Google and password sign-in
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get authOr;
+
+  /// Label of the sign-in identifier field
+  ///
+  /// In en, this message translates to:
+  /// **'Username or email'**
+  String get authUserOrEmail;
+
+  /// Sign-out button on the profile page
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get authSignOut;
+
+  /// Shown when the server refuses a queued change
+  ///
+  /// In en, this message translates to:
+  /// **'You no longer have permission to edit'**
+  String get syncNoPermission;
+
+  /// Greeting on the shop choice screen
+  ///
+  /// In en, this message translates to:
+  /// **'Hello {name}'**
+  String shopHello(Object name);
+
+  /// Shop choice prompt
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not in a shop yet. Choose one:'**
+  String get shopNoShop;
+
+  /// Shop choice card for family members
+  ///
+  /// In en, this message translates to:
+  /// **'Join a shop'**
+  String get shopJoin;
+
+  /// Subtitle of the join card
+  ///
+  /// In en, this message translates to:
+  /// **'For family members · scan a QR or type a code'**
+  String get shopJoinSub;
+
+  /// Shop choice card for owners
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new shop'**
+  String get shopCreate;
+
+  /// Subtitle of the create card
+  ///
+  /// In en, this message translates to:
+  /// **'For shop owners'**
+  String get shopCreateSub;
+
+  /// Label of the shop name field
+  ///
+  /// In en, this message translates to:
+  /// **'Shop name'**
+  String get shopName;
+
+  /// Label above the starter category chips
+  ///
+  /// In en, this message translates to:
+  /// **'Starter categories'**
+  String get shopStarterCats;
+
+  /// Button that creates the shop
+  ///
+  /// In en, this message translates to:
+  /// **'Create shop'**
+  String get shopCreateBtn;
+
+  /// Button that joins with a code
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get shopJoinBtn;
+
+  /// Opens the shop switcher
+  ///
+  /// In en, this message translates to:
+  /// **'Switch shop'**
+  String get shopSwitch;
+
+  /// Join screen camera hint
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the QR on the owner\'s phone'**
+  String get joinScan;
+
+  /// Label above the code boxes
+  ///
+  /// In en, this message translates to:
+  /// **'Type the invite code'**
+  String get joinCode;
+
+  /// Join error
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid code'**
+  String get joinInvalid;
+
+  /// Join error
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired'**
+  String get joinExpired;
+
+  /// Join error
+  ///
+  /// In en, this message translates to:
+  /// **'This code was already used'**
+  String get joinUsed;
+
+  /// Title of the invite page
+  ///
+  /// In en, this message translates to:
+  /// **'Invite a member'**
+  String get inviteTitle;
+
+  /// Label of the role control
+  ///
+  /// In en, this message translates to:
+  /// **'Role for the new member'**
+  String get inviteRole;
+
+  /// Shown under the invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in 24 hours'**
+  String get inviteExpires;
+
+  /// Button that opens the share sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Share code'**
+  String get inviteShare;
+
+  /// Viewer role
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t edit prices'**
+  String get roleViewer;
+
+  /// Editor role
+  ///
+  /// In en, this message translates to:
+  /// **'Can edit prices'**
+  String get roleEditor;
+
+  /// Owner role
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get roleOwner;
+
+  /// Title of the members list
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get members;
 }
 
 class _AppLocalizationsDelegate

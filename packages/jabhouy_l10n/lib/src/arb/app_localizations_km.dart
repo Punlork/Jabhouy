@@ -655,4 +655,284 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get usernameRules => 'អក្សរ លេខ _ ឬ . ពី 3 ដល់ 30 តួ';
+
+  @override
+  String get credit => 'ជំពាក់';
+
+  @override
+  String get itemAdd => 'បន្ថែមទំនិញ';
+
+  @override
+  String get itemEdit => 'កែទំនិញ';
+
+  @override
+  String get itemName => 'ឈ្មោះទំនិញ';
+
+  @override
+  String get itemPhoto => 'រូបថត';
+
+  @override
+  String get priceSection => 'តម្លៃ';
+
+  @override
+  String get priceUnit => 'លក់ជា';
+
+  @override
+  String get priceCount => 'ចំនួន';
+
+  @override
+  String get priceSelling => 'តម្លៃលក់';
+
+  @override
+  String get priceWholesale => 'តម្លៃលក់ដុំ';
+
+  @override
+  String get priceCost => 'តម្លៃដើម';
+
+  @override
+  String get priceAdd => 'បន្ថែមតម្លៃ';
+
+  @override
+  String get priceAddExample => 'ឧ. កេះ ×24, បេ';
+
+  @override
+  String get priceMissing => 'មិនទាន់មានតម្លៃ';
+
+  @override
+  String get priceEdit => 'កែតម្លៃ';
+
+  @override
+  String get optional => '(មិនចាំបាច់)';
+
+  @override
+  String get categoryChoose => 'ជ្រើសរើសប្រភេទ';
+
+  @override
+  String get categoryNew => 'បង្កើតប្រភេទថ្មី';
+
+  @override
+  String get categorySuggested => 'បានណែនាំតាមឈ្មោះ · ចុចដើម្បីប្តូរ';
+
+  @override
+  String get noteLabel => 'កំណត់ចំណាំ';
+
+  @override
+  String get searchGoods => 'ស្វែងរកទំនិញ';
+
+  @override
+  String get searchCustomers => 'ស្វែងរកអតិថិជន';
+
+  @override
+  String get creditAdd => 'បន្ថែមការជំពាក់';
+
+  @override
+  String get creditEdit => 'កែការជំពាក់';
+
+  @override
+  String get creditCustomer => 'អតិថិជន';
+
+  @override
+  String get creditChoose => 'ជ្រើសរើស';
+
+  @override
+  String get creditItems => 'ទំនិញដែលយក';
+
+  @override
+  String get creditAddItems => 'បន្ថែមទំនិញពីបញ្ជីតម្លៃ';
+
+  @override
+  String get creditAmountHint => 'គណនាពីទំនិញ';
+
+  @override
+  String get creditTakenAt => 'ថ្ងៃ និងម៉ោងជំពាក់';
+
+  @override
+  String get creditDueDate => 'ត្រូវសង';
+
+  @override
+  String get creditUnpaid => 'មិនទាន់សង';
+
+  @override
+  String get creditPaid => 'សងរួច';
+
+  @override
+  String get creditMarkPaid => 'សម្គាល់ថាសងរួច';
+
+  @override
+  String get creditTotalOwed => 'នៅជំពាក់សរុប';
+
+  @override
+  String get creditNoAmount => 'មិនទាន់មានចំនួន';
+
+  @override
+  String creditOwes(Object amount) {
+    return 'ជំពាក់ $amount';
+  }
+
+  @override
+  String get customerAddNew => 'បន្ថែមអតិថិជនថ្មី';
+
+  @override
+  String get customerHasCredits =>
+      'មិនអាចលុបបានទេ ព្រោះអតិថិជននេះនៅមានការជំពាក់';
+
+  @override
+  String get pickerTitle => 'ជ្រើសទំនិញ';
+
+  @override
+  String get pickerAddToCredit => 'បន្ថែមទៅការជំពាក់';
+
+  @override
+  String pickerSelected(Object count) {
+    return 'បានជ្រើស $count មុខ';
+  }
+
+  @override
+  String get timeAdd => 'បន្ថែមម៉ោង';
+
+  @override
+  String voiceSpeakingInto(Object field) {
+    return 'កំពុងបញ្ចូលទៅ $field';
+  }
+
+  @override
+  String get voiceListening => 'កំពុងស្តាប់…';
+
+  @override
+  String get voiceUse => 'ប្រើអត្ថបទនេះ';
+
+  @override
+  String get settingsTitle => 'ការកំណត់ហាង';
+
+  @override
+  String get settingsPricesUsed => 'តម្លៃដែលហាងប្រើ';
+
+  @override
+  String get settingsCurrency => 'រូបិយប័ណ្ណ';
+
+  @override
+  String get settingsDefaultCurrency => 'រូបិយប័ណ្ណលំនាំដើម';
+
+  @override
+  String get settingsRate => 'អត្រាប្តូរប្រាក់';
+
+  @override
+  String settingsRateFormat(Object rate) {
+    return '\$1 = $rate ៛';
+  }
+
+  @override
+  String get settingsRateConfirm => 'ការជំពាក់ចាស់នៅតែប្រើអត្រាដើមរបស់វា។';
+
+  @override
+  String get settingsShowConverted => 'បង្ហាញតម្លៃជារូបិយប័ណ្ណទាំងពីរ';
+
+  @override
+  String get settingsCategoriesUnits => 'ប្រភេទ និងឯកតា';
+
+  @override
+  String get settingsMembers => 'សមាជិក និងសិទ្ធិ';
+
+  @override
+  String lastEditedBy(Object date, Object name) {
+    return 'កែចុងក្រោយ $date ដោយ $name';
+  }
+
+  @override
+  String get currencyKhr => 'រៀល';
+
+  @override
+  String get currencyUsd => 'ដុល្លារ';
+
+  @override
+  String get authWelcome => 'សូមស្វាគមន៍';
+
+  @override
+  String get authWelcomeSub => 'ចូលដើម្បីមើលតម្លៃហាងរបស់អ្នក';
+
+  @override
+  String get authOr => 'ឬ';
+
+  @override
+  String get authUserOrEmail => 'ឈ្មោះអ្នកប្រើ ឬអ៊ីមែល';
+
+  @override
+  String get authSignOut => 'ចេញពីគណនី';
+
+  @override
+  String get syncNoPermission => 'អ្នកលែងមានសិទ្ធិកែ';
+
+  @override
+  String shopHello(Object name) {
+    return 'សួស្តី $name';
+  }
+
+  @override
+  String get shopNoShop => 'អ្នកមិនទាន់នៅក្នុងហាងណាមួយទេ។ ជ្រើសមួយ៖';
+
+  @override
+  String get shopJoin => 'ចូលរួមហាង';
+
+  @override
+  String get shopJoinSub => 'សម្រាប់សមាជិកគ្រួសារ · ស្កេន QR ឬវាយលេខកូដ';
+
+  @override
+  String get shopCreate => 'បង្កើតហាងថ្មី';
+
+  @override
+  String get shopCreateSub => 'សម្រាប់ម្ចាស់ហាង';
+
+  @override
+  String get shopName => 'ឈ្មោះហាង';
+
+  @override
+  String get shopStarterCats => 'ប្រភេទចាប់ផ្តើម';
+
+  @override
+  String get shopCreateBtn => 'បង្កើតហាង';
+
+  @override
+  String get shopJoinBtn => 'ចូលរួម';
+
+  @override
+  String get shopSwitch => 'ប្តូរហាង';
+
+  @override
+  String get joinScan => 'ស្កេន QR ពីទូរស័ព្ទម្ចាស់ហាង';
+
+  @override
+  String get joinCode => 'វាយលេខកូដអញ្ជើញ';
+
+  @override
+  String get joinInvalid => 'លេខកូដមិនត្រឹមត្រូវ';
+
+  @override
+  String get joinExpired => 'លេខកូដផុតកំណត់ហើយ';
+
+  @override
+  String get joinUsed => 'លេខកូដត្រូវបានប្រើរួចហើយ';
+
+  @override
+  String get inviteTitle => 'អញ្ជើញសមាជិក';
+
+  @override
+  String get inviteRole => 'សិទ្ធិរបស់អ្នកចូលរួម';
+
+  @override
+  String get inviteExpires => 'ផុតកំណត់ក្នុង ២៤ ម៉ោង';
+
+  @override
+  String get inviteShare => 'ចែករំលែកលេខកូដ';
+
+  @override
+  String get roleViewer => 'មិនអាចកែតម្លៃ';
+
+  @override
+  String get roleEditor => 'អាចកែតម្លៃ';
+
+  @override
+  String get roleOwner => 'ម្ចាស់ហាង';
+
+  @override
+  String get members => 'សមាជិក';
 }

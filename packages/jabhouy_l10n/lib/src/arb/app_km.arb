@@ -810,5 +810,380 @@
   "chooseUsername": "ជ្រើសរើសឈ្មោះអ្នកប្រើ",
   "chooseUsernameSubtitle": "អ្នកនឹងប្រើវាដើម្បីចូល។ ជ្រើសរើសមួយខាងក្រោម ឬវាយបញ្ចូលដោយខ្លួនឯង។",
   "username": "ឈ្មោះអ្នកប្រើ",
-  "usernameRules": "អក្សរ លេខ _ ឬ . ពី 3 ដល់ 30 តួ"
+  "usernameRules": "អក្សរ លេខ _ ឬ . ពី 3 ដល់ 30 តួ",
+  "credit": "ជំពាក់",
+  "@credit": {
+    "description": "Bottom tab for the credit list"
+  },
+  "itemAdd": "បន្ថែមទំនិញ",
+  "@itemAdd": {
+    "description": "Button and title to add an item"
+  },
+  "itemEdit": "កែទំនិញ",
+  "@itemEdit": {
+    "description": "Title of the edit item page"
+  },
+  "itemName": "ឈ្មោះទំនិញ",
+  "@itemName": {
+    "description": "Label of the item name field"
+  },
+  "itemPhoto": "រូបថត",
+  "@itemPhoto": {
+    "description": "Label of the item photo"
+  },
+  "priceSection": "តម្លៃ",
+  "@priceSection": {
+    "description": "Section title above the price rows"
+  },
+  "priceUnit": "លក់ជា",
+  "@priceUnit": {
+    "description": "Column label for the unit a price is for"
+  },
+  "priceCount": "ចំនួន",
+  "@priceCount": {
+    "description": "Column label for how many units a pack holds"
+  },
+  "priceSelling": "តម្លៃលក់",
+  "@priceSelling": {
+    "description": "Column label for the selling price"
+  },
+  "priceWholesale": "តម្លៃលក់ដុំ",
+  "@priceWholesale": {
+    "description": "Label for the wholesale price"
+  },
+  "priceCost": "តម្លៃដើម",
+  "@priceCost": {
+    "description": "Label for the cost price"
+  },
+  "priceAdd": "បន្ថែមតម្លៃ",
+  "@priceAdd": {
+    "description": "Button that adds a price row"
+  },
+  "priceAddExample": "ឧ. កេះ ×24, បេ",
+  "@priceAddExample": {
+    "description": "Example after the add price button"
+  },
+  "priceMissing": "មិនទាន់មានតម្លៃ",
+  "@priceMissing": {
+    "description": "Shown instead of a missing price, never 0"
+  },
+  "priceEdit": "កែតម្លៃ",
+  "@priceEdit": {
+    "description": "Primary button on the item details sheet"
+  },
+  "optional": "(មិនចាំបាច់)",
+  "@optional": {
+    "description": "Suffix after the label of an optional field"
+  },
+  "categoryChoose": "ជ្រើសរើសប្រភេទ",
+  "@categoryChoose": {
+    "description": "Title of the category picker"
+  },
+  "categoryNew": "បង្កើតប្រភេទថ្មី",
+  "@categoryNew": {
+    "description": "Button at the bottom of the category picker"
+  },
+  "categorySuggested": "បានណែនាំតាមឈ្មោះ · ចុចដើម្បីប្តូរ",
+  "@categorySuggested": {
+    "description": "Hint under a category suggested from the item name"
+  },
+  "noteLabel": "កំណត់ចំណាំ",
+  "@noteLabel": {
+    "description": "Label of a note field"
+  },
+  "searchGoods": "ស្វែងរកទំនិញ",
+  "@searchGoods": {
+    "description": "Hint in the item search field"
+  },
+  "searchCustomers": "ស្វែងរកអតិថិជន",
+  "@searchCustomers": {
+    "description": "Hint in the customer search field"
+  },
+  "creditAdd": "បន្ថែមការជំពាក់",
+  "@creditAdd": {
+    "description": "Button and title to add a credit"
+  },
+  "creditEdit": "កែការជំពាក់",
+  "@creditEdit": {
+    "description": "Title of the edit credit page"
+  },
+  "creditCustomer": "អតិថិជន",
+  "@creditCustomer": {
+    "description": "Label of the customer field on a credit"
+  },
+  "creditChoose": "ជ្រើសរើស",
+  "@creditChoose": {
+    "description": "Button that opens the customer picker"
+  },
+  "creditItems": "ទំនិញដែលយក",
+  "@creditItems": {
+    "description": "Section title for a credit's items"
+  },
+  "creditAddItems": "បន្ថែមទំនិញពីបញ្ជីតម្លៃ",
+  "@creditAddItems": {
+    "description": "Button that opens the item picker"
+  },
+  "creditAmountHint": "គណនាពីទំនិញ",
+  "@creditAmountHint": {
+    "description": "Hint under an amount computed from a credit's items"
+  },
+  "creditTakenAt": "ថ្ងៃ និងម៉ោងជំពាក់",
+  "@creditTakenAt": {
+    "description": "Label of the credit's date and time field"
+  },
+  "creditDueDate": "ត្រូវសង",
+  "@creditDueDate": {
+    "description": "Label of the optional due date"
+  },
+  "creditUnpaid": "មិនទាន់សង",
+  "@creditUnpaid": {
+    "description": "Status of a credit not yet paid"
+  },
+  "creditPaid": "សងរួច",
+  "@creditPaid": {
+    "description": "Status of a paid credit"
+  },
+  "creditMarkPaid": "សម្គាល់ថាសងរួច",
+  "@creditMarkPaid": {
+    "description": "Primary button on the credit details sheet"
+  },
+  "creditTotalOwed": "នៅជំពាក់សរុប",
+  "@creditTotalOwed": {
+    "description": "Title of the summary card on the credit list"
+  },
+  "creditNoAmount": "មិនទាន់មានចំនួន",
+  "@creditNoAmount": {
+    "description": "Shown for a credit without an amount"
+  },
+  "creditOwes": "ជំពាក់ {amount}",
+  "@creditOwes": {
+    "description": "A customer's balance in the customer picker",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "customerAddNew": "បន្ថែមអតិថិជនថ្មី",
+  "@customerAddNew": {
+    "description": "Button in the customer picker"
+  },
+  "customerHasCredits": "មិនអាចលុបបានទេ ព្រោះអតិថិជននេះនៅមានការជំពាក់",
+  "@customerHasCredits": {
+    "description": "Shown when deleting a customer who has credits"
+  },
+  "pickerTitle": "ជ្រើសទំនិញ",
+  "@pickerTitle": {
+    "description": "Title of the item picker"
+  },
+  "pickerAddToCredit": "បន្ថែមទៅការជំពាក់",
+  "@pickerAddToCredit": {
+    "description": "Footer button of the item picker"
+  },
+  "pickerSelected": "បានជ្រើស {count} មុខ",
+  "@pickerSelected": {
+    "description": "Footer count in the item picker",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "timeAdd": "បន្ថែមម៉ោង",
+  "@timeAdd": {
+    "description": "Empty time button of the date and time field"
+  },
+  "voiceSpeakingInto": "កំពុងបញ្ចូលទៅ {field}",
+  "@voiceSpeakingInto": {
+    "description": "Title of the voice input sheet",
+    "placeholders": {
+      "field": {}
+    }
+  },
+  "voiceListening": "កំពុងស្តាប់…",
+  "@voiceListening": {
+    "description": "Shown while voice input listens"
+  },
+  "voiceUse": "ប្រើអត្ថបទនេះ",
+  "@voiceUse": {
+    "description": "Confirms the voice transcript"
+  },
+  "settingsTitle": "ការកំណត់ហាង",
+  "@settingsTitle": {
+    "description": "Title of the shop settings page"
+  },
+  "settingsPricesUsed": "តម្លៃដែលហាងប្រើ",
+  "@settingsPricesUsed": {
+    "description": "Section title for which prices are on"
+  },
+  "settingsCurrency": "រូបិយប័ណ្ណ",
+  "@settingsCurrency": {
+    "description": "Section title for currency settings"
+  },
+  "settingsDefaultCurrency": "រូបិយប័ណ្ណលំនាំដើម",
+  "@settingsDefaultCurrency": {
+    "description": "Label of the default currency control"
+  },
+  "settingsRate": "អត្រាប្តូរប្រាក់",
+  "@settingsRate": {
+    "description": "Label of the exchange rate field"
+  },
+  "settingsRateFormat": "$1 = {rate} ៛",
+  "@settingsRateFormat": {
+    "description": "The exchange rate shown as dollars to riel",
+    "placeholders": {
+      "rate": {}
+    }
+  },
+  "settingsRateConfirm": "ការជំពាក់ចាស់នៅតែប្រើអត្រាដើមរបស់វា។",
+  "@settingsRateConfirm": {
+    "description": "Confirmation when changing the exchange rate"
+  },
+  "settingsShowConverted": "បង្ហាញតម្លៃជារូបិយប័ណ្ណទាំងពីរ",
+  "@settingsShowConverted": {
+    "description": "Tick box for showing converted prices"
+  },
+  "settingsCategoriesUnits": "ប្រភេទ និងឯកតា",
+  "@settingsCategoriesUnits": {
+    "description": "Link to manage categories and units"
+  },
+  "settingsMembers": "សមាជិក និងសិទ្ធិ",
+  "@settingsMembers": {
+    "description": "Link to invite and members"
+  },
+  "lastEditedBy": "កែចុងក្រោយ {date} ដោយ {name}",
+  "@lastEditedBy": {
+    "description": "Who last changed an item or the rate",
+    "placeholders": {
+      "date": {},
+      "name": {}
+    }
+  },
+  "currencyKhr": "រៀល",
+  "@currencyKhr": {
+    "description": "Name of the Cambodian riel"
+  },
+  "currencyUsd": "ដុល្លារ",
+  "@currencyUsd": {
+    "description": "Name of the US dollar"
+  },
+  "authWelcome": "សូមស្វាគមន៍",
+  "@authWelcome": {
+    "description": "Sign-in headline"
+  },
+  "authWelcomeSub": "ចូលដើម្បីមើលតម្លៃហាងរបស់អ្នក",
+  "@authWelcomeSub": {
+    "description": "Sign-in subtitle"
+  },
+  "authOr": "ឬ",
+  "@authOr": {
+    "description": "Divider between Google and password sign-in"
+  },
+  "authUserOrEmail": "ឈ្មោះអ្នកប្រើ ឬអ៊ីមែល",
+  "@authUserOrEmail": {
+    "description": "Label of the sign-in identifier field"
+  },
+  "authSignOut": "ចេញពីគណនី",
+  "@authSignOut": {
+    "description": "Sign-out button on the profile page"
+  },
+  "syncNoPermission": "អ្នកលែងមានសិទ្ធិកែ",
+  "@syncNoPermission": {
+    "description": "Shown when the server refuses a queued change"
+  },
+  "shopHello": "សួស្តី {name}",
+  "@shopHello": {
+    "description": "Greeting on the shop choice screen",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "shopNoShop": "អ្នកមិនទាន់នៅក្នុងហាងណាមួយទេ។ ជ្រើសមួយ៖",
+  "@shopNoShop": {
+    "description": "Shop choice prompt"
+  },
+  "shopJoin": "ចូលរួមហាង",
+  "@shopJoin": {
+    "description": "Shop choice card for family members"
+  },
+  "shopJoinSub": "សម្រាប់សមាជិកគ្រួសារ · ស្កេន QR ឬវាយលេខកូដ",
+  "@shopJoinSub": {
+    "description": "Subtitle of the join card"
+  },
+  "shopCreate": "បង្កើតហាងថ្មី",
+  "@shopCreate": {
+    "description": "Shop choice card for owners"
+  },
+  "shopCreateSub": "សម្រាប់ម្ចាស់ហាង",
+  "@shopCreateSub": {
+    "description": "Subtitle of the create card"
+  },
+  "shopName": "ឈ្មោះហាង",
+  "@shopName": {
+    "description": "Label of the shop name field"
+  },
+  "shopStarterCats": "ប្រភេទចាប់ផ្តើម",
+  "@shopStarterCats": {
+    "description": "Label above the starter category chips"
+  },
+  "shopCreateBtn": "បង្កើតហាង",
+  "@shopCreateBtn": {
+    "description": "Button that creates the shop"
+  },
+  "shopJoinBtn": "ចូលរួម",
+  "@shopJoinBtn": {
+    "description": "Button that joins with a code"
+  },
+  "shopSwitch": "ប្តូរហាង",
+  "@shopSwitch": {
+    "description": "Opens the shop switcher"
+  },
+  "joinScan": "ស្កេន QR ពីទូរស័ព្ទម្ចាស់ហាង",
+  "@joinScan": {
+    "description": "Join screen camera hint"
+  },
+  "joinCode": "វាយលេខកូដអញ្ជើញ",
+  "@joinCode": {
+    "description": "Label above the code boxes"
+  },
+  "joinInvalid": "លេខកូដមិនត្រឹមត្រូវ",
+  "@joinInvalid": {
+    "description": "Join error"
+  },
+  "joinExpired": "លេខកូដផុតកំណត់ហើយ",
+  "@joinExpired": {
+    "description": "Join error"
+  },
+  "joinUsed": "លេខកូដត្រូវបានប្រើរួចហើយ",
+  "@joinUsed": {
+    "description": "Join error"
+  },
+  "inviteTitle": "អញ្ជើញសមាជិក",
+  "@inviteTitle": {
+    "description": "Title of the invite page"
+  },
+  "inviteRole": "សិទ្ធិរបស់អ្នកចូលរួម",
+  "@inviteRole": {
+    "description": "Label of the role control"
+  },
+  "inviteExpires": "ផុតកំណត់ក្នុង ២៤ ម៉ោង",
+  "@inviteExpires": {
+    "description": "Shown under the invite code"
+  },
+  "inviteShare": "ចែករំលែកលេខកូដ",
+  "@inviteShare": {
+    "description": "Button that opens the share sheet"
+  },
+  "roleViewer": "មិនអាចកែតម្លៃ",
+  "@roleViewer": {
+    "description": "Viewer role"
+  },
+  "roleEditor": "អាចកែតម្លៃ",
+  "@roleEditor": {
+    "description": "Editor role"
+  },
+  "roleOwner": "ម្ចាស់ហាង",
+  "@roleOwner": {
+    "description": "Owner role"
+  },
+  "members": "សមាជិក",
+  "@members": {
+    "description": "Title of the members list"
+  }
 }

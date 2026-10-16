@@ -669,4 +669,285 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usernameRules => '3–30 letters, numbers, _ or .';
+
+  @override
+  String get credit => 'Credit';
+
+  @override
+  String get itemAdd => 'Add item';
+
+  @override
+  String get itemEdit => 'Edit item';
+
+  @override
+  String get itemName => 'Item name';
+
+  @override
+  String get itemPhoto => 'Photo';
+
+  @override
+  String get priceSection => 'Prices';
+
+  @override
+  String get priceUnit => 'Sold as';
+
+  @override
+  String get priceCount => 'Count';
+
+  @override
+  String get priceSelling => 'Selling price';
+
+  @override
+  String get priceWholesale => 'Wholesale price';
+
+  @override
+  String get priceCost => 'Cost price';
+
+  @override
+  String get priceAdd => 'Add price';
+
+  @override
+  String get priceAddExample => 'e.g. case ×24, sack';
+
+  @override
+  String get priceMissing => 'No price yet';
+
+  @override
+  String get priceEdit => 'Edit price';
+
+  @override
+  String get optional => '(optional)';
+
+  @override
+  String get categoryChoose => 'Choose category';
+
+  @override
+  String get categoryNew => 'New category';
+
+  @override
+  String get categorySuggested => 'Suggested from the name · tap to change';
+
+  @override
+  String get noteLabel => 'Note';
+
+  @override
+  String get searchGoods => 'Search items';
+
+  @override
+  String get searchCustomers => 'Search customers';
+
+  @override
+  String get creditAdd => 'Add credit';
+
+  @override
+  String get creditEdit => 'Edit credit';
+
+  @override
+  String get creditCustomer => 'Customer';
+
+  @override
+  String get creditChoose => 'Choose';
+
+  @override
+  String get creditItems => 'Items taken';
+
+  @override
+  String get creditAddItems => 'Add from price list';
+
+  @override
+  String get creditAmountHint => 'Calculated from items';
+
+  @override
+  String get creditTakenAt => 'Date and time taken';
+
+  @override
+  String get creditDueDate => 'Due';
+
+  @override
+  String get creditUnpaid => 'Unpaid';
+
+  @override
+  String get creditPaid => 'Paid';
+
+  @override
+  String get creditMarkPaid => 'Mark as paid';
+
+  @override
+  String get creditTotalOwed => 'Total owed';
+
+  @override
+  String get creditNoAmount => 'No amount yet';
+
+  @override
+  String creditOwes(Object amount) {
+    return 'Owes $amount';
+  }
+
+  @override
+  String get customerAddNew => 'Add new customer';
+
+  @override
+  String get customerHasCredits =>
+      'Can\'t delete: this customer still has credits';
+
+  @override
+  String get pickerTitle => 'Choose items';
+
+  @override
+  String get pickerAddToCredit => 'Add to credit';
+
+  @override
+  String pickerSelected(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get timeAdd => 'Add time';
+
+  @override
+  String voiceSpeakingInto(Object field) {
+    return 'Speaking into $field';
+  }
+
+  @override
+  String get voiceListening => 'Listening…';
+
+  @override
+  String get voiceUse => 'Use this text';
+
+  @override
+  String get settingsTitle => 'Shop settings';
+
+  @override
+  String get settingsPricesUsed => 'Prices this shop uses';
+
+  @override
+  String get settingsCurrency => 'Currency';
+
+  @override
+  String get settingsDefaultCurrency => 'Default currency';
+
+  @override
+  String get settingsRate => 'Exchange rate';
+
+  @override
+  String settingsRateFormat(Object rate) {
+    return '\$1 = $rate ៛';
+  }
+
+  @override
+  String get settingsRateConfirm =>
+      'Old credits keep the rate they were made with.';
+
+  @override
+  String get settingsShowConverted => 'Show prices in both currencies';
+
+  @override
+  String get settingsCategoriesUnits => 'Categories and units';
+
+  @override
+  String get settingsMembers => 'Members and roles';
+
+  @override
+  String lastEditedBy(Object date, Object name) {
+    return 'Last edited $date by $name';
+  }
+
+  @override
+  String get currencyKhr => 'Riel';
+
+  @override
+  String get currencyUsd => 'Dollar';
+
+  @override
+  String get authWelcome => 'Welcome';
+
+  @override
+  String get authWelcomeSub => 'Sign in to see your shop\'s prices';
+
+  @override
+  String get authOr => 'or';
+
+  @override
+  String get authUserOrEmail => 'Username or email';
+
+  @override
+  String get authSignOut => 'Sign out';
+
+  @override
+  String get syncNoPermission => 'You no longer have permission to edit';
+
+  @override
+  String shopHello(Object name) {
+    return 'Hello $name';
+  }
+
+  @override
+  String get shopNoShop => 'You\'re not in a shop yet. Choose one:';
+
+  @override
+  String get shopJoin => 'Join a shop';
+
+  @override
+  String get shopJoinSub => 'For family members · scan a QR or type a code';
+
+  @override
+  String get shopCreate => 'Create a new shop';
+
+  @override
+  String get shopCreateSub => 'For shop owners';
+
+  @override
+  String get shopName => 'Shop name';
+
+  @override
+  String get shopStarterCats => 'Starter categories';
+
+  @override
+  String get shopCreateBtn => 'Create shop';
+
+  @override
+  String get shopJoinBtn => 'Join';
+
+  @override
+  String get shopSwitch => 'Switch shop';
+
+  @override
+  String get joinScan => 'Scan the QR on the owner\'s phone';
+
+  @override
+  String get joinCode => 'Type the invite code';
+
+  @override
+  String get joinInvalid => 'Invalid code';
+
+  @override
+  String get joinExpired => 'This code has expired';
+
+  @override
+  String get joinUsed => 'This code was already used';
+
+  @override
+  String get inviteTitle => 'Invite a member';
+
+  @override
+  String get inviteRole => 'Role for the new member';
+
+  @override
+  String get inviteExpires => 'Expires in 24 hours';
+
+  @override
+  String get inviteShare => 'Share code';
+
+  @override
+  String get roleViewer => 'Can\'t edit prices';
+
+  @override
+  String get roleEditor => 'Can edit prices';
+
+  @override
+  String get roleOwner => 'Owner';
+
+  @override
+  String get members => 'Members';
 }

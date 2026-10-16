@@ -271,7 +271,7 @@ Put all strings in a localization file. Key strings:
 | shop.createBtn / shop.joinBtn | បង្កើតហាង / ចូលរួម |
 | join.scan / join.code | ស្កេន QR ពីទូរស័ព្ទម្ចាស់ហាង / វាយលេខកូដអញ្ជើញ |
 | invite.title / invite.role | អញ្ជើញសមាជិក / សិទ្ធិរបស់អ្នកចូលរួម |
-| role.viewer / role.editor / role.owner | មើលតែប៉ុណ្ណោះ / អាចកែតម្លៃ / ម្ចាស់ហាង |
+| role.viewer / role.editor / role.owner | មិនអាចកែតម្លៃ / អាចកែតម្លៃ / ម្ចាស់ហាង |
 | invite.expires / invite.share | ផុតកំណត់ក្នុង ២៤ ម៉ោង / ចែករំលែកលេខកូដ |
 | members | សមាជិក |
 
@@ -463,3 +463,4 @@ These override the sections above where they conflict. Background: `docs/adr/000
 35. API naming: Item `prices` (each `unit`, `packQty`, `currency`, `price`, `wholesale`, `cost`); Credit `items` (`name`, `unit`, `qty`, `unitPrice`, `total`) and `khrPerUsd` (rate when made); money fields have no suffix and are whole numbers in riel or cents.
 36. A User can belong to several Shops. Phase 7 adds a Shop switcher (Settings → sheet listing `/me` shops); the phone remembers the active `shopId`, keeps `shop_id` on every local table, and keeps one sync cursor per Shop. Switching does not wipe; removal wipes only that Shop. No multi-account switcher (one signed-in User per phone).
 37. Password sign-up is off (`emailAndPassword.disableSignUp: true`) to stop spam accounts; password sign-in stays for existing accounts; new users join with Google only. Screen ១៤ (sign up) and its link are removed. iOS is not distributed now, so no iOS Google work is needed before release. Replaces the sign-up parts of decisions 5 and 31.
+38. The viewer role is labelled `មិនអាចកែតម្លៃ` (can't edit prices), not "view only", because viewers can record Credits.
