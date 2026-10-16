@@ -229,7 +229,8 @@ class AuthService extends BaseService {
       await _initializeGoogle();
       account = await _google.authenticate();
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) return null;
+      logger.w('Google sign-in failed: ${e.code.name} ${e.description}');
+      if (_isUserCancel(e)) return null;
       rethrow;
     }
 
@@ -249,6 +250,14 @@ class AuthService extends BaseService {
 
     return response;
   }
+
+  /// Android reports a refusal such as an unregistered signing key
+  /// ("[16] Account reauth failed.") as `canceled` too; only its message
+  /// tells it from the User closing the dialog.
+  // shortcut: matches Google's message text, revisit if a real cancel shows an error.
+  bool _isUserCancel(GoogleSignInException e) =>
+      e.code == GoogleSignInExceptionCode.canceled &&
+      (e.description == null || e.description!.toLowerCase().contains('cancel'));
 
   Future<void> _initializeGoogle() => _googleInitialized ??= _google.initialize(
         serverClientId: dotenv.get('GOOGLE_SERVER_CLIENT_ID'),

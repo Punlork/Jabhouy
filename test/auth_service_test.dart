@@ -198,6 +198,21 @@ void main() {
       verifyNever(postSocial);
     });
 
+    test('throws when Google refuses but reports it as a cancel', () async {
+      when(() => google.authenticate()).thenThrow(
+        const GoogleSignInException(
+          code: GoogleSignInExceptionCode.canceled,
+          description: '[16] Account reauth failed.',
+        ),
+      );
+
+      await expectLater(
+        authService.signInWithGoogle(),
+        throwsA(isA<GoogleSignInException>()),
+      );
+      verifyNever(postSocial);
+    });
+
     test('is refused offline before opening Google', () async {
       when(() => connectivityService.isOnline).thenAnswer((_) async => false);
 
