@@ -93,6 +93,180 @@ class BankNotifications extends Table {
       ];
 }
 
+// Redesign tables (schema 9). They mirror jabhouy-api's schema and its
+// singular SQL names, and sit beside the old tables until schema 10 drops
+// those at release. Class names end in `Table` and rows in `Row` because
+// the old `Customers` table already owns the `Customer` row class.
+
+/// Columns every synced redesign row carries. The server sets them.
+mixin SyncedColumns on Table {
+  TextColumn get shopId => text()();
+  IntColumn get seq => integer().withDefault(const Constant(0))();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  TextColumn get updatedBy => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+}
+
+@DataClassName('ShopSettingsRow')
+class ShopSettingsTable extends Table with SyncedColumns {
+  @override
+  String get tableName => 'shop_settings';
+
+  BoolColumn get useWholesalePrice =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get useCostPrice => boolean().withDefault(const Constant(true))();
+  TextColumn get defaultCurrency => text().withDefault(const Constant('KHR'))();
+  IntColumn get khrPerUsd => integer().withDefault(const Constant(4000))();
+  BoolColumn get showConverted => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get rateUpdatedAt => dateTime().nullable()();
+  TextColumn get rateUpdatedBy => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {shopId};
+}
+
+@DataClassName('MemberRow')
+class MemberTable extends Table with SyncedColumns {
+  @override
+  String get tableName => 'member';
+
+  TextColumn get userId => text()();
+  TextColumn get displayName => text().nullable()();
+
+  /// `owner`, `editor` or `viewer`.
+  TextColumn get role => text()();
+
+  @override
+  Set<Column> get primaryKey => {shopId, userId};
+}
+
+@DataClassName('CategoryRow')
+class CategoryTable extends Table with SyncedColumns {
+  @override
+  String get tableName => 'category';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  BoolColumn get hidden => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Child of [CategoryTable]; travels inside it.
+@DataClassName('CategoryUnitRow')
+class CategoryUnitTable extends Table {
+  @override
+  String get tableName => 'category_unit';
+
+  TextColumn get categoryId => text()();
+  TextColumn get unit => text()();
+  BoolColumn get hidden => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {categoryId, unit};
+}
+
+@DataClassName('ItemRow')
+class ItemTable extends Table with SyncedColumns {
+  @override
+  String get tableName => 'item';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get categoryId => text().nullable()();
+  TextColumn get photoUrl => text().nullable()();
+  TextColumn get note => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// One Price option; child of [ItemTable], replaced as a set on save.
+@DataClassName('ItemPriceRow')
+class ItemPriceTable extends Table {
+  @override
+  String get tableName => 'item_price';
+
+  TextColumn get id => text()();
+  TextColumn get itemId => text()();
+  TextColumn get unit => text()();
+  IntColumn get packQty => integer().nullable()();
+  TextColumn get currency => text()();
+
+  /// Whole riel or cents. Null means no price yet, never 0.
+  IntColumn get price => integer().nullable()();
+  IntColumn get wholesale => integer().nullable()();
+  IntColumn get cost => integer().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('CustomerRow')
+class CustomerTable extends Table with SyncedColumns {
+  @override
+  String get tableName => 'customer';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get phone => text().nullable()();
+  TextColumn get note => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('CreditRow')
+class CreditTable extends Table with SyncedColumns {
+  @override
+  String get tableName => 'credit';
+
+  TextColumn get id => text()();
+  TextColumn get customerId => text()();
+  TextColumn get currency => text()();
+
+  /// Null means no amount yet.
+  IntColumn get amount => integer().nullable()();
+
+  /// The shop's rate when this credit was made; never follows later changes.
+  IntColumn get khrPerUsd => integer()();
+
+  /// `unpaid` or `paid`.
+  TextColumn get status => text()();
+  DateTimeColumn get takenAt => dateTime()();
+
+  /// `YYYY-MM-DD`, the local day.
+  TextColumn get dueDate => text().nullable()();
+  DateTimeColumn get paidAt => dateTime().nullable()();
+  TextColumn get note => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Child of [CreditTable]: a copy of what was taken, at that time's price.
+@DataClassName('CreditItemRow')
+class CreditItemTable extends Table {
+  @override
+  String get tableName => 'credit_item';
+
+  TextColumn get id => text()();
+  TextColumn get creditId => text()();
+  TextColumn get priceId => text().nullable()();
+  TextColumn get name => text()();
+  TextColumn get unit => text()();
+  IntColumn get qty => integer()();
+  TextColumn get currency => text()();
+  IntColumn get unitPrice => integer()();
+  IntColumn get total => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Customers,
@@ -102,6 +276,15 @@ class BankNotifications extends Table {
     BankNotifications,
     OutboxEntries,
     SyncCursors,
+    ShopSettingsTable,
+    MemberTable,
+    CategoryTable,
+    CategoryUnitTable,
+    ItemTable,
+    ItemPriceTable,
+    CustomerTable,
+    CreditTable,
+    CreditItemTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -111,7 +294,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   /// The ids of [type] rows that still have a job in the outbox.
   ///
@@ -171,9 +354,27 @@ class AppDatabase extends _$AppDatabase {
         if (from < 8) {
           await m.createTable(syncCursors);
         }
+
+        if (from < 9) {
+          for (final table in _redesignTableList) {
+            await m.createTable(table);
+          }
+        }
       },
     );
   }
+
+  List<TableInfo<Table, Object?>> get _redesignTableList => [
+        shopSettingsTable,
+        memberTable,
+        categoryTable,
+        categoryUnitTable,
+        itemTable,
+        itemPriceTable,
+        customerTable,
+        creditTable,
+        creditItemTable,
+      ];
 
   Future<void> clearUserData() async {
     await transaction(() async {
@@ -182,6 +383,9 @@ class AppDatabase extends _$AppDatabase {
       await delete(loaners).go();
       await delete(categories).go();
       await delete(customers).go();
+      for (final table in _redesignTableList) {
+        await delete(table).go();
+      }
       // Or the next account to sign in would skip its first pull.
       await delete(syncCursors).go();
     });

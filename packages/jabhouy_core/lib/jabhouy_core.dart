@@ -9,6 +9,7 @@ export 'package:drift/drift.dart' show Value;
 
 export 'src/database/app_database.dart';
 export 'src/features/feature_flags.dart';
+export 'src/ids/uuid_v7.dart';
 export 'src/logging/logger.dart';
 export 'src/models/casts.dart';
 export 'src/models/dates.dart';

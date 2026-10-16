@@ -445,7 +445,7 @@ These override the sections above where they conflict. Background: `docs/adr/000
 23. Every synced table carries server-set `updated_at`, `updated_by`, and a `deleted_at` tombstone.
 24. Creating and redeeming invites needs internet; it is the one action that does not work offline.
 25. A unit's identity is `(category_id, unit_name)`; the server merges duplicate units added offline.
-26. Phone clean start: `schemaVersion` 9 drops every table except `BankNotifications` and clears the outbox and sync cursors.
+26. Phone schema: version 9 adds the new tables (singular SQL names matching the API) next to the old ones, so current screens keep working; version 10, at release, drops the old business tables and clears the outbox and sync cursors, keeping `BankNotifications`.
 27. Price options sync inside their Item, and Credit items inside their Credit: one sync entity per parent, the server replaces the child set, and the later save of the whole parent wins.
 28. §3.3 split: `shop_id`, `Shop`, `Member` (role), `ShopSettings` and auto-create in Phases 2/2b; `Invite`, screens ១៥–១៨, role change and removal in Phase 7.
 29. Navigation (§6) adds: Sign in → (new Google User) Choose Username → Home; Settings → Profile (name, Username, `ចេញពីគណនី`); Settings → app diagnostics behind `FEATURE_DIAGNOSTICS`. No forgot-password route; no income routes. Until Phase 7, "no shop" auto-creates one and goes to Home.

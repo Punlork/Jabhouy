@@ -21,7 +21,7 @@ void main() {
   });
 
   test('opens on a plain Dart VM and creates every declared table', () async {
-    expect(db.schemaVersion, 8);
+    expect(db.schemaVersion, 9);
 
     // Each select proves the table exists; a missing one throws here.
     expect(await db.select(db.customers).get(), isEmpty);
@@ -92,8 +92,25 @@ void main() {
           ),
         );
 
+    await db.into(db.itemTable).insert(
+          ItemTableCompanion.insert(id: newId(), shopId: 's1', name: 'ទឹក'),
+        );
+    await db.into(db.creditTable).insert(
+          CreditTableCompanion.insert(
+            id: newId(),
+            shopId: 's1',
+            customerId: newId(),
+            currency: 'KHR',
+            khrPerUsd: 4000,
+            status: 'unpaid',
+            takenAt: DateTime.utc(2026),
+          ),
+        );
+
     await db.clearUserData();
 
+    expect(await db.select(db.itemTable).get(), isEmpty);
+    expect(await db.select(db.creditTable).get(), isEmpty);
     expect(await db.select(db.customers).get(), isEmpty);
     expect(await db.select(db.categories).get(), isEmpty);
     expect(await db.select(db.loaners).get(), isEmpty);
