@@ -1,6 +1,6 @@
 # Step 2: Khmer date and time text
 
-Status: open
+Status: resolved
 Blocked by: 03
 
 - In `jabhouy_l10n`: format a Phnom Penh `DateTime` (from `toPhnomPenh()`) as `16 តុលា 2026` and `11:05 ព្រឹក`, with ព្រឹក / រសៀល / ល្ងាច / យប់ by hour; English as `16 Oct 2026` and `11:05 AM`.
