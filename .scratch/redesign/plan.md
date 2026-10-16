@@ -76,7 +76,7 @@ Implement these as a single theme/tokens file; no hard-coded colors or sizes in 
 
 ### Typography
 
-- Font: **Kantumruy Pro** (Google Fonts; supports Khmer + Latin), weights 400/500/600/700. Fallback: Noto Sans Khmer.
+- Font: **Kantumruy Pro** (bundled; supports Khmer + Latin), weights 400/500/600/700. No fallback font is bundled.
 - Line height **1.5** globally (Khmer needs room for stacked vowels/subscripts).
 - Sizes: page title 20/600 · section title 16/700 · body & inputs 16/400 · labels 15/500 · hints 13–14/400 · prices in lists 17/700 · big amounts 26–28/700.
 - Inputs must be **16 px minimum** (prevents iOS zoom).
@@ -436,7 +436,7 @@ These override the sections above where they conflict. Background: `docs/adr/000
 14. Every Member can add, edit and mark Credits paid; only owner and editors delete them.
 15. Dark mode stays: every token in §1 gets a dark value; screens are checked in both themes.
 16. Components live in `packages/jabhouy_ui`; BottomSheet extends `AppBottomSheet`, LabeledField extends `CustomTextFormField`; StatusPill replaces the paid/unpaid icons. Tokens replace `AppColorTheme` outright.
-17. Kantumruy Pro is bundled as font assets (like NotoSansKhmer today), never fetched by `google_fonts` at runtime.
+17. Kantumruy Pro is the only bundled font (Noto Sans Khmer removed), never fetched by `google_fonts` at runtime.
 18. Money conversion, rounding and formatting live in `jabhouy_core` (pure Dart, `dart test`); MoneyInput and PriceDisplay only call them.
 19. Voice (Phase 5) adds a speech dependency; none is installed today.
 20. Dark tokens are the Dark column in §1 (contrast checked against WCAG AA).

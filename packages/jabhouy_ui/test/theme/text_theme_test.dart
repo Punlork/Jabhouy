@@ -16,9 +16,8 @@ void main() {
   };
 
   for (final MapEntry(key: name, value: style) in named.entries) {
-    test('$name uses Kantumruy Pro, falls back to Noto, line height 1.5', () {
+    test('$name uses Kantumruy Pro at line height 1.5', () {
       expect(style.fontFamily, 'KantumruyPro');
-      expect(style.fontFamilyFallback, ['NotoSansKhmer']);
       expect(style.height, 1.5);
     });
   }

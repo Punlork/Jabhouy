@@ -122,26 +122,6 @@ flutter:
           weight: 600
         - asset: fonts/KantumruyPro-Bold.ttf
           weight: 700
-    - family: NotoSansKhmer
-      fonts:
-        - asset: fonts/NotoSansKhmer-Black.ttf
-          weight: 900
-        - asset: fonts/NotoSansKhmer-Bold.ttf
-          weight: 700
-        - asset: fonts/NotoSansKhmer-ExtraBold.ttf
-          weight: 800
-        - asset: fonts/NotoSansKhmer-ExtraLight.ttf
-          weight: 200
-        - asset: fonts/NotoSansKhmer-Light.ttf
-          weight: 300
-        - asset: fonts/NotoSansKhmer-Medium.ttf
-          weight: 500
-        - asset: fonts/NotoSansKhmer-Regular.ttf
-          weight: 400
-        - asset: fonts/NotoSansKhmer-SemiBold.ttf
-          weight: 600
-        - asset: fonts/NotoSansKhmer-Thin.ttf
-          weight: 100
   assets:
     - .env
     - .env.dev
