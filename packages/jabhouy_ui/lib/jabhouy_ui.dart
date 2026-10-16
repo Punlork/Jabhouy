@@ -11,7 +11,7 @@ export 'src/constant/app_assets.dart';
 export 'src/context/global_context.dart';
 export 'src/mixin/infinite_scroll_mixin.dart';
 export 'src/theme/app_theme.dart';
-export 'src/theme/color_theme.dart';
+export 'src/theme/app_tokens.dart';
 export 'src/theme/text_theme.dart';
 export 'src/upload/image_uploader.dart';
 export 'src/upload/upload_bloc.dart';

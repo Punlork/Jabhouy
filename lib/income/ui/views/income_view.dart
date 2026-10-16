@@ -131,7 +131,7 @@ class _TrackingStatusCard extends StatelessWidget {
             children: [
               Icon(
                 isEnabled ? Icons.notifications_active_rounded : Icons.notifications_off_rounded,
-                color: isEnabled ? AppColorTheme.success : colorScheme.onSurfaceVariant,
+                color: isEnabled ? context.tokens.successText : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -203,13 +203,13 @@ class _RolePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: (isMainDevice ? AppColorTheme.success : AppColorTheme.brand).withValues(alpha: 0.12),
+        color: (isMainDevice ? context.tokens.successText : context.tokens.textPrimary).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         isMainDevice ? context.l10n.mainDeviceRole : context.l10n.subDeviceRole,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isMainDevice ? AppColorTheme.success : AppColorTheme.brand,
+              color: isMainDevice ? context.tokens.successText : context.tokens.textPrimary,
               fontWeight: FontWeight.w600,
             ),
       ),
@@ -312,7 +312,7 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final branding = resolveBankBranding(item.bankApp, colorScheme);
-    final amountColor = item.isIncome ? AppColorTheme.success : AppColorTheme.error;
+    final amountColor = item.isIncome ? context.tokens.successText : context.tokens.dangerText;
 
     return Container(
       padding: const EdgeInsets.all(16),

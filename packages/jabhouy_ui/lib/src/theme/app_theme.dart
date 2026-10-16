@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jabhouy_ui/src/theme/color_theme.dart';
+import 'package:jabhouy_ui/src/theme/app_tokens.dart';
 import 'package:jabhouy_ui/src/theme/text_theme.dart';
 
 class AppTheme {
@@ -10,13 +10,9 @@ class AppTheme {
   static ThemeData get darkTheme => _buildTheme(Brightness.dark);
 
   static ThemeData _buildTheme(Brightness brightness) {
-    final baseScheme = ColorScheme.fromSeed(
-      seedColor: brightness == Brightness.dark
-          ? AppColorTheme.brandDark
-          : AppColorTheme.brand,
-      brightness: brightness,
-    );
-    final colorScheme = _buildColorScheme(baseScheme, brightness);
+    final tokens =
+        brightness == Brightness.dark ? AppTokens.dark : AppTokens.light;
+    final colorScheme = _buildColorScheme(tokens, brightness);
     final textTheme = AppTextTheme.textTheme.apply(
       bodyColor: colorScheme.onSurface,
       displayColor: colorScheme.onSurface,
@@ -26,7 +22,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      extensions: [tokens],
+      scaffoldBackgroundColor: tokens.bg,
       fontFamily: 'NotoSansKhmer',
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
@@ -45,34 +42,39 @@ class AppTheme {
         // both use surfaceContainerLow, so every raised surface matches.
         color: colorScheme.surfaceContainerLow,
         elevation: brightness == Brightness.dark ? 0 : 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colorScheme.surfaceContainerLow,
         modalBackgroundColor: colorScheme.surfaceContainerLow,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSizes.radiusSheet),
+          ),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: brightness == Brightness.dark
-            ? colorScheme.surfaceContainerHighest
-            : Colors.white,
+        fillColor: tokens.surface,
+        hintStyle: TextStyle(color: tokens.placeholder),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+          borderSide: BorderSide(color: tokens.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+          borderSide: BorderSide(color: tokens.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSizes.radiusInput),
           borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
       ),
@@ -113,9 +115,7 @@ class AppTheme {
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: const StadiumBorder(),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -127,57 +127,38 @@ class AppTheme {
   }
 
   static ColorScheme _buildColorScheme(
-    ColorScheme baseScheme,
+    AppTokens tokens,
     Brightness brightness,
   ) {
-    final isDark = brightness == Brightness.dark;
-
-    return baseScheme.copyWith(
-      primary: isDark ? const Color(0xFFE8E8E8) : const Color(0xFF2F2F2F),
-      onPrimary: isDark ? const Color(0xFF171717) : Colors.white,
-      primaryContainer:
-          isDark ? const Color(0xFF2A2A2A) : const Color(0xFF4C4C4C),
-      onPrimaryContainer: Colors.white,
-      secondary: isDark ? const Color(0xFFCACACA) : const Color(0xFF5F5F5F),
-      onSecondary: isDark ? const Color(0xFF171717) : Colors.white,
-      secondaryContainer:
-          isDark ? const Color(0xFF242424) : const Color(0xFFEAEAEA),
-      onSecondaryContainer:
-          isDark ? const Color(0xFFF3F3F3) : const Color(0xFF1A1A1A),
-      tertiary: isDark ? const Color(0xFFBEBEBE) : const Color(0xFF757575),
-      onTertiary: isDark ? const Color(0xFF171717) : Colors.white,
-      tertiaryContainer:
-          isDark ? const Color(0xFF2B2B2B) : const Color(0xFFF0F0F0),
-      onTertiaryContainer:
-          isDark ? const Color(0xFFF3F3F3) : const Color(0xFF1A1A1A),
-      error: AppColorTheme.error,
-      onError: Colors.white,
-      surface: isDark ? const Color(0xFF181818) : const Color(0xFFF4F4F4),
-      onSurface: isDark ? const Color(0xFFF2F2F2) : const Color(0xFF1D1D1D),
-      // fromSeed tints these blue-green even from a grey seed, which shows
-      // against the grey surface in light mode. Set them all to pure greys.
-      surfaceContainerLowest:
-          isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFFFFFF),
-      surfaceContainerLow:
-          isDark ? const Color(0xFF1B1B1B) : const Color(0xFFFFFFFF),
-      surfaceContainer:
-          isDark ? const Color(0xFF1F1F1F) : const Color(0xFFEFEFEF),
-      surfaceContainerHigh:
-          isDark ? const Color(0xFF292929) : const Color(0xFFE9E9E9),
-      surfaceContainerHighest:
-          isDark ? const Color(0xFF333333) : const Color(0xFFE3E3E3),
-      onSurfaceVariant:
-          isDark ? const Color(0xFFB8B8B8) : const Color(0xFF6B6B6B),
-      outline: isDark ? const Color(0xFF464646) : const Color(0xFFD0D0D0),
-      outlineVariant:
-          isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE7E7E7),
-      inverseSurface:
-          isDark ? const Color(0xFFF2F2F2) : const Color(0xFF242424),
-      onInverseSurface:
-          isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF9F9F9),
+    return ColorScheme(
+      brightness: brightness,
+      primary: tokens.textPrimary,
+      onPrimary: tokens.onPrimary,
+      primaryContainer: tokens.surfaceSubtle,
+      onPrimaryContainer: tokens.textPrimary,
+      secondary: tokens.textSecondary,
+      onSecondary: tokens.onPrimary,
+      secondaryContainer: tokens.surfaceMuted,
+      onSecondaryContainer: tokens.textPrimary,
+      tertiary: tokens.textMuted,
+      onTertiary: tokens.onPrimary,
+      error: tokens.dangerText,
+      onError: tokens.onPrimary,
+      surface: tokens.bg,
+      onSurface: tokens.textPrimary,
+      surfaceContainerLowest: tokens.surface,
+      surfaceContainerLow: tokens.surface,
+      surfaceContainer: tokens.surfaceSubtle,
+      surfaceContainerHigh: tokens.surfaceMuted,
+      surfaceContainerHighest: tokens.surfaceMuted,
+      onSurfaceVariant: tokens.textMuted,
+      outline: tokens.border,
+      outlineVariant: tokens.divider,
+      inverseSurface: tokens.textPrimary,
+      onInverseSurface: tokens.onPrimary,
       surfaceTint: Colors.transparent,
       shadow: Colors.black,
-      scrim: Colors.black,
+      scrim: tokens.scrim,
     );
   }
 }

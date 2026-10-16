@@ -1,6 +1,6 @@
 # Step 1: Design tokens and light/dark theme
 
-Status: open
+Status: resolved
 Blocked by: none
 
 - Replace `AppColorTheme` with the §1 tokens (Light and Dark columns) in `jabhouy_ui`; build `AppTheme.lightTheme` / `darkTheme` from them. No hard-coded colors in screens.

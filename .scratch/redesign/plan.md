@@ -67,7 +67,7 @@ Implement these as a single theme/tokens file; no hard-coded colors or sizes in 
 | `textPrimary` | `#1F1F1F` | #EDEDEA | Main text, primary buttons, active chips |
 | `textSecondary` | `#3A3A3A` | #D0D0CC | Labels |
 | `textMuted` | `#5C5C5C` | #A3A3A0 | Hints, secondary info |
-| `placeholder` | `#767676` | #959592 | Input placeholders |
+| `placeholder` | `#686866` | #959592 | Input placeholders |
 | `scrim` | `#8E8E8A` | black 60% | Behind bottom sheets (or black at ~45% opacity) |
 | `warningBg` / `warningText` | `#FCEFD8` / `#6B4200` | #3D2E10 / #F5C977 | Missing price, unpaid |
 | `successBg` / `successText` | `#E2F0E4` / `#1E5B2A` | #1A3320 / #9AD3A5 | Paid |
