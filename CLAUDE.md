@@ -11,7 +11,8 @@ The Flutter SDK is pinned by FVM (`.fvmrc`, 3.47.1). Prefix plain `flutter`/`dar
 fvm dart run melos run analyze   # whole workspace; errors fail
 fvm dart run melos run test      # dart test for core/sync, flutter test for the rest
 fvm dart run melos run gen       # build_runner wherever it is a dependency
-fvm dart run melos run run:dev   # also run:stg, run:prod, build:prod
+fvm dart run melos run run:dev   # also run:stg, run:prod
+fvm dart run melos run build:prod   # release APK (production flavor), as CI builds it
 ```
 
 A single test: `fvm flutter test test/loaner/loaner_model_test.dart`, or `cd packages/jabhouy_sync && fvm dart test`.
@@ -58,3 +59,13 @@ Anything beyond those is new.
 - Some income actions are guarded by `kReleaseMode` on purpose. Keep those guards.
 - `iPad (wireless)` belongs to a tester. Never choose it as a run target.
 - Keep answers short and ask one clarifying question at a time.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as local markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

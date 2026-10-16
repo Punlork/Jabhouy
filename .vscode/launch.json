@@ -52,7 +52,6 @@
         "lib/main_production.dart",
         "--dart-define-from-file=config/features/production.json",
         "-v"
-        // "--release"
       ]
     }
   ]
