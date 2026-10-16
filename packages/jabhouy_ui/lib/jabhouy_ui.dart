@@ -17,6 +17,7 @@ export 'src/upload/image_uploader.dart';
 export 'src/upload/upload_bloc.dart';
 export 'src/utils/overlay_loading.dart';
 export 'src/utils/snack_bar.dart';
+export 'src/widget/app_bottom_nav.dart';
 export 'src/widget/app_bottom_sheet.dart';
 export 'src/widget/app_logo.dart';
 export 'src/widget/app_sheet.dart';
