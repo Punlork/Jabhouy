@@ -13,4 +13,10 @@ extension IsoDate on DateTime {
     final d = day.toString().padLeft(2, '0');
     return '$y-$m-$d';
   }
+
+  /// This moment as wall-clock time in Phnom Penh, for display.
+  ///
+  /// shortcut: fixed UTC+7, correct because Cambodia has no daylight saving;
+  /// use a timezone package if the app ever shows another zone.
+  DateTime toPhnomPenh() => toUtc().add(const Duration(hours: 7));
 }
