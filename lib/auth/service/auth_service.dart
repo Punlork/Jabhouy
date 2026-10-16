@@ -1,8 +1,12 @@
 // ignore_for_file: avoid_dynamic_calls
 
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,18 +24,34 @@ class AuthBootstrapResult {
 class AuthService extends BaseService {
   factory AuthService(
     ApiService apiService,
-    ConnectivityService connectivityService,
-  ) =>
+    ConnectivityService connectivityService, {
+    GoogleSignIn? googleSignIn,
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  }) =>
       AuthService._(
         apiService,
         connectivityService,
+        googleSignIn ?? GoogleSignIn.instance,
+        flags,
       );
 
-  AuthService._(super.apiService, this._connectivityService);
+  AuthService._(
+    super.apiService,
+    this._connectivityService,
+    this._google,
+    this._flags,
+  );
 
   static const _cachedUserKey = 'cached_auth_user';
+  static const _needsInternetToSignIn =
+      'You need internet to sign in the first time.';
 
   final ConnectivityService _connectivityService;
+  final GoogleSignIn _google;
+  final FeatureFlags _flags;
+
+  /// `GoogleSignIn.initialize` must run exactly once.
+  Future<void>? _googleInitialized;
 
   @override
   String get basePath => '/auth';
@@ -173,10 +193,7 @@ class AuthService extends BaseService {
     String callbackURL = 'sad',
   }) async {
     if (!await _connectivityService.isOnline) {
-      return ApiResponse(
-        success: false,
-        message: 'You need internet to sign in the first time.',
-      );
+      return ApiResponse(success: false, message: _needsInternetToSignIn);
     }
 
     final signinData = {
@@ -184,9 +201,11 @@ class AuthService extends BaseService {
       'password': password,
     };
 
+    // The sign-in page shows the failure, so no snackbar here as well.
     final response = await post(
       '/sign-in/username',
       body: signinData,
+      showSnackBar: false,
       parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
     );
 
@@ -195,6 +214,91 @@ class AuthService extends BaseService {
     }
 
     return response;
+  }
+
+  /// Null when the user closes the Google dialog.
+  ///
+  /// Other Google failures throw [GoogleSignInException].
+  Future<ApiResponse<User>?> signInWithGoogle() async {
+    if (!await _connectivityService.isOnline) {
+      return ApiResponse(success: false, message: _needsInternetToSignIn);
+    }
+
+    final GoogleSignInAccount account;
+    try {
+      await _initializeGoogle();
+      account = await _google.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) return null;
+      rethrow;
+    }
+
+    final response = await post(
+      '/sign-in/social',
+      body: {
+        'provider': 'google',
+        'idToken': {'token': account.authentication.idToken},
+      },
+      showSnackBar: false,
+      parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
+    );
+
+    if (response.success && response.data != null) {
+      await cacheUser(response.data!);
+    }
+
+    return response;
+  }
+
+  Future<void> _initializeGoogle() => _googleInitialized ??= _google.initialize(
+        serverClientId: dotenv.get('GOOGLE_SERVER_CLIENT_ID'),
+      );
+
+  /// Up to [count] free Usernames built from [user]'s name and email.
+  ///
+  /// Empty when none can be built or checked; the picker still takes a
+  /// typed one.
+  Future<List<String>> usernameSuggestions(User user, {int count = 3}) async {
+    final name = _usernameBase(user.name ?? '', '_');
+    final email = _usernameBase((user.email ?? '').split('@').first, '_');
+    final suffix = 100 + Random().nextInt(900);
+    final candidates = {
+      name,
+      email,
+      _usernameBase(user.name ?? '', '.'),
+      '$name$suffix',
+      '$email$suffix',
+    }.where(isValidUsername).toList();
+
+    final available = await Future.wait(candidates.map(_isUsernameAvailable));
+    return [
+      for (var i = 0; i < candidates.length; i++)
+        if (available[i]) candidates[i],
+    ].take(count).toList();
+  }
+
+  /// The username plugin's default rules.
+  static bool isValidUsername(String value) =>
+      value.length >= 3 && value.length <= 30 && RegExp(r'^[a-zA-Z0-9_.]+$').hasMatch(value);
+
+  /// Lowercase, words joined by [separator], other characters dropped.
+  String _usernameBase(String text, String separator) {
+    final base = text
+        .toLowerCase()
+        .trim()
+        .replaceAll(RegExp(r'\s+'), separator)
+        .replaceAll(RegExp('[^a-z0-9_.]'), '');
+    return base.length > 26 ? base.substring(0, 26) : base;
+  }
+
+  Future<bool> _isUsernameAvailable(String username) async {
+    final response = await post(
+      '/is-username-available',
+      body: {'username': username},
+      showSnackBar: false,
+      parser: (value) => value is Map && value['available'] == true,
+    );
+    return response.success && (response.data ?? false);
   }
 
   Future<ApiResponse<dynamic>> signout() async {
@@ -207,6 +311,15 @@ class AuthService extends BaseService {
       );
     }
 
-    return post('/sign-out');
+    final response = await post<dynamic>('/sign-out');
+    // Forget the Google account too, so on a shared phone the next person
+    // gets the account chooser. Too late to fail the sign-out over it.
+    if (response.success && _flags.isEnabled(Feature.googleSignIn)) {
+      try {
+        await _initializeGoogle();
+        await _google.signOut();
+      } catch (_) {}
+    }
+    return response;
   }
 }

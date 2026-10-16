@@ -804,5 +804,11 @@
   "changesFailed": "{count} ការផ្លាស់ប្តូរបរាជ័យ",
   "failedChangesTitle": "ការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ",
   "waitingToSync": "កំពុងរង់ចាំធ្វើសមកាលកម្ម",
-  "syncFailed": "មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ"
+  "syncFailed": "មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ",
+  "continueWithGoogle": "បន្តជាមួយ Google",
+  "googleSignInFailed": "មិនអាចចូលជាមួយ Google បានទេ។ សូមព្យាយាមម្តងទៀត។",
+  "chooseUsername": "ជ្រើសរើសឈ្មោះអ្នកប្រើ",
+  "chooseUsernameSubtitle": "អ្នកនឹងប្រើវាដើម្បីចូល។ ជ្រើសរើសមួយខាងក្រោម ឬវាយបញ្ចូលដោយខ្លួនឯង។",
+  "username": "ឈ្មោះអ្នកប្រើ",
+  "usernameRules": "អក្សរ លេខ _ ឬ . ពី 3 ដល់ 30 តួ"
 }

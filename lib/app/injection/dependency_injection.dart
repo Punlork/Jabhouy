@@ -34,6 +34,7 @@ Future<void> setupDependencies() async {
       () => AuthService(
         getIt<ApiService>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton(NotificationTrackingBridge.new)

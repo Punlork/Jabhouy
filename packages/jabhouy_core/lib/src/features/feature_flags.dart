@@ -15,6 +15,9 @@ enum Feature {
 
   /// The App diagnostics page and the income diagnostics behind it.
   diagnostics,
+
+  /// "Continue with Google" on the sign-in and sign-up pages.
+  googleSignIn,
 }
 
 /// Answers whether a [Feature] is on.
@@ -43,6 +46,8 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
           const bool.fromEnvironment('FEATURE_BACKGROUND_SYNC'),
         Feature.diagnostics =>
           const bool.fromEnvironment('FEATURE_DIAGNOSTICS'),
+        Feature.googleSignIn =>
+          const bool.fromEnvironment('FEATURE_GOOGLE_SIGN_IN'),
       };
 }
 

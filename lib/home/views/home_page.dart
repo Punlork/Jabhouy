@@ -314,9 +314,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       if (!mounted) return;
       final authState = context.read<AuthBloc>().state;
       if (authState is Authenticated) {
-        _loadProtectedData();
+        _onAuthenticated(authState);
       }
     });
+  }
+
+  /// The app opens on Home before the session is known, so the Username
+  /// gate in `authRedirect` has to be applied here once it is.
+  void _onAuthenticated(Authenticated authState) {
+    if (!authState.user.hasUsername) {
+      context.goNamed(AppRoutes.chooseUsername);
+      return;
+    }
+    _loadProtectedData();
   }
 
   void _loadProtectedData() {
@@ -352,7 +362,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
       listener: (context, authState) {
         if (authState is Authenticated) {
-          _loadProtectedData();
+          _onAuthenticated(authState);
           return;
         }
 

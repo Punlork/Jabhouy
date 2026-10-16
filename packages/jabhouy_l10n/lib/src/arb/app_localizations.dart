@@ -1291,6 +1291,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not saved to the server'**
   String get syncFailed;
+
+  /// Button on the sign-in and sign-up pages that signs in with a Google account
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
+  /// Shown when Google sign-in fails on the phone, before reaching the server
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t sign in with Google. Please try again.'**
+  String get googleSignInFailed;
+
+  /// Title of the page where a User who joined with Google picks a Username
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a username'**
+  String get chooseUsername;
+
+  /// Explains the Username picker, above the suggestions
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll use it to sign in. Pick one below or type your own.'**
+  String get chooseUsernameSubtitle;
+
+  /// Label of the Username field
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// Hint and validation message for a Username
+  ///
+  /// In en, this message translates to:
+  /// **'3–30 letters, numbers, _ or .'**
+  String get usernameRules;
 }
 
 class _AppLocalizationsDelegate

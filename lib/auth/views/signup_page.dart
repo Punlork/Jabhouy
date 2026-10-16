@@ -12,8 +12,12 @@ class SignupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<SignupBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => getIt<SignupBloc>()),
+        // For "Continue with Google", which signs in rather than up.
+        BlocProvider(create: (context) => getIt<SigninBloc>()),
+      ],
       child: const _SignupPageContent(),
     );
   }
@@ -116,6 +120,20 @@ class _SignupPageContentState extends State<_SignupPageContent>
                           context
                               .read<AuthBloc>()
                               .add(AuthSignedIn(state.user));
+                        }
+                      },
+                    ),
+                    BlocListener<SigninBloc, SigninState>(
+                      listener: (context, state) {
+                        if (state is SigninSuccess) {
+                          context
+                              .read<AuthBloc>()
+                              .add(AuthSignedIn(state.user));
+                        } else if (state is SigninFailure) {
+                          showErrorSnackBar(
+                            context,
+                            state.error ?? l10n.googleSignInFailed,
+                          );
                         }
                       },
                     ),
@@ -251,6 +269,8 @@ class _SignupPageContentState extends State<_SignupPageContent>
                             );
                           },
                         ),
+                        const SizedBox(height: 12),
+                        const GoogleSignInButton(),
                         const SizedBox(height: 20),
                       ],
                     ),

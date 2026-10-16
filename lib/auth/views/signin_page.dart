@@ -105,6 +105,11 @@ class _SigninPageContentState extends State<_SigninPageContent>
                           context
                               .read<AuthBloc>()
                               .add(AuthSignedIn(state.user));
+                        } else if (state is SigninFailure) {
+                          showErrorSnackBar(
+                            context,
+                            state.error ?? l10n.googleSignInFailed,
+                          );
                         }
                       },
                     ),
@@ -219,6 +224,8 @@ class _SigninPageContentState extends State<_SigninPageContent>
                             );
                           },
                         ),
+                        const SizedBox(height: 12),
+                        const GoogleSignInButton(),
                         const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,

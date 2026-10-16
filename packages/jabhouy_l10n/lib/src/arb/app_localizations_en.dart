@@ -649,4 +649,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncFailed => 'Not saved to the server';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get googleSignInFailed =>
+      'Couldn\'t sign in with Google. Please try again.';
+
+  @override
+  String get chooseUsername => 'Choose a username';
+
+  @override
+  String get chooseUsernameSubtitle =>
+      'You\'ll use it to sign in. Pick one below or type your own.';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get usernameRules => '3–30 letters, numbers, _ or .';
 }

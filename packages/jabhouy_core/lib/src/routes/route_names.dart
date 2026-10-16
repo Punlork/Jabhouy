@@ -12,6 +12,7 @@ class AppRoutes {
   static const home = 'home';
   static const signin = 'signin';
   static const signup = 'signup';
+  static const chooseUsername = 'choose_username';
   static const formShop = 'form_shop';
   static const formLoaner = 'form_loaner';
   static const category = 'category';

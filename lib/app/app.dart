@@ -5,6 +5,7 @@ export 'injection/dependency_injection.dart';
 export 'models/user_model.dart';
 export 'pages/app_diagnostics_page.dart';
 export 'routes/app_routes.dart';
+export 'routes/auth_redirect.dart';
 export 'service/app_log_service.dart';
 export 'service/debug/app_debugger.dart';
 export 'service/fcm_service.dart';

@@ -635,4 +635,24 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get syncFailed => 'មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ';
+
+  @override
+  String get continueWithGoogle => 'បន្តជាមួយ Google';
+
+  @override
+  String get googleSignInFailed =>
+      'មិនអាចចូលជាមួយ Google បានទេ។ សូមព្យាយាមម្តងទៀត។';
+
+  @override
+  String get chooseUsername => 'ជ្រើសរើសឈ្មោះអ្នកប្រើ';
+
+  @override
+  String get chooseUsernameSubtitle =>
+      'អ្នកនឹងប្រើវាដើម្បីចូល។ ជ្រើសរើសមួយខាងក្រោម ឬវាយបញ្ចូលដោយខ្លួនឯង។';
+
+  @override
+  String get username => 'ឈ្មោះអ្នកប្រើ';
+
+  @override
+  String get usernameRules => 'អក្សរ លេខ _ ឬ . ពី 3 ដល់ 30 តួ';
 }

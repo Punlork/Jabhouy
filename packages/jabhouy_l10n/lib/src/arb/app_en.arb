@@ -838,5 +838,29 @@
   "syncFailed": "Not saved to the server",
   "@syncFailed": {
     "description": "Tooltip on a row the server refused or has not accepted yet"
+  },
+  "continueWithGoogle": "Continue with Google",
+  "@continueWithGoogle": {
+    "description": "Button on the sign-in and sign-up pages that signs in with a Google account"
+  },
+  "googleSignInFailed": "Couldn't sign in with Google. Please try again.",
+  "@googleSignInFailed": {
+    "description": "Shown when Google sign-in fails on the phone, before reaching the server"
+  },
+  "chooseUsername": "Choose a username",
+  "@chooseUsername": {
+    "description": "Title of the page where a User who joined with Google picks a Username"
+  },
+  "chooseUsernameSubtitle": "You'll use it to sign in. Pick one below or type your own.",
+  "@chooseUsernameSubtitle": {
+    "description": "Explains the Username picker, above the suggestions"
+  },
+  "username": "Username",
+  "@username": {
+    "description": "Label of the Username field"
+  },
+  "usernameRules": "3–30 letters, numbers, _ or .",
+  "@usernameRules": {
+    "description": "Hint and validation message for a Username"
   }
 }

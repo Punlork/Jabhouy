@@ -17,8 +17,10 @@ class SigninSuccess extends SigninState {
 }
 
 class SigninFailure extends SigninState {
-  const SigninFailure(this.error);
-  final String error;
+  const SigninFailure([this.error]);
+
+  /// Null when the page should show a generic message.
+  final String? error;
 
   @override
   List<Object?> get props => [error];

@@ -18,7 +18,7 @@ import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-/// The router itself, and the two sets its redirect consults.
+/// The router itself; its redirect rules live in [authRedirect].
 ///
 /// The route *names* live in `jabhouy_core` as [AppRoutes], because a
 /// feature package needs them and this file imports every feature. What
@@ -26,48 +26,16 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 class AppRouter {
   const AppRouter._();
 
-  static final allowedUnauthenticated = {
-    AppRoutes.signin.toPath,
-    AppRoutes.signup.toPath,
-  };
-
-  static final allowedAuthenticated = {
-    AppRoutes.home.toPath,
-    '${AppRoutes.home.toPath}${AppRoutes.formShop.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.formLoaner.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.profile.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.settings.toPath}',
-    if (_isDiagnosticsEnabled) '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.customer.toPath}',
-    // Left out when income is off, so the redirect below sends a stale
-    // link home instead of to a page with no bloc.
-    if (_isIncomeEnabled && _isDiagnosticsEnabled)
-      '${AppRoutes.home.toPath}${AppRoutes.incomeDiagnostics.toPath}',
-  };
-
   static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
-  static bool get _isDiagnosticsEnabled => getIt<FeatureFlags>().isEnabled(Feature.diagnostics);
 
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.home.toPath,
     observers: [DebuggerRouteObserver()],
-    redirect: (context, state) {
-      final authState = BlocProvider.of<AuthBloc>(context).state;
-      final currentPath = state.matchedLocation;
-
-      if (authState is Unauthenticated) {
-        if (!allowedUnauthenticated.contains(currentPath)) {
-          return AppRoutes.signin.toPath;
-        }
-      }
-      if (authState is Authenticated) {
-        if (!allowedAuthenticated.contains(currentPath)) {
-          return AppRoutes.home.toPath;
-        }
-      }
-      return null;
-    },
+    redirect: (context, state) => authRedirect(
+      BlocProvider.of<AuthBloc>(context).state,
+      state.matchedLocation,
+      getIt<FeatureFlags>(),
+    ),
     routes: [
       GoRoute(
         path: AppRoutes.home.toPath,
@@ -301,6 +269,24 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const SigninPage(),
+            transitionsBuilder: _rightToLeftTransition,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.chooseUsername.toPath,
+        name: AppRoutes.chooseUsername,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          GlobalContext.currentContext = context;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BlocProvider(
+              create: (context) => ProfileBloc(
+                getIt<UploadBloc>(),
+                getIt<ProfileService>(),
+              ),
+              child: const ChooseUsernamePage(),
+            ),
             transitionsBuilder: _rightToLeftTransition,
           );
         },
