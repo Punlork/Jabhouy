@@ -1,6 +1,6 @@
 # Step 1: Bundle Kantumruy Pro
 
-Status: open
+Status: resolved
 Blocked by: none
 
 - Add Regular, Medium, SemiBold, Bold (400–700) from `fonts/Kantumruy_Pro.zip` as assets, like NotoSansKhmer in `pubspec.yaml`. No `google_fonts`.

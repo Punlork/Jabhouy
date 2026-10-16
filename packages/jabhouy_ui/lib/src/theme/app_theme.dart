@@ -24,7 +24,7 @@ class AppTheme {
       colorScheme: colorScheme,
       extensions: [tokens],
       scaffoldBackgroundColor: tokens.bg,
-      fontFamily: 'NotoSansKhmer',
+      fontFamily: 'KantumruyPro',
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
