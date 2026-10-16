@@ -1,6 +1,6 @@
 # Step 3: Money components
 
-Status: open
+Status: resolved
 Blocked by: 03, 05
 
 - MoneyInput: numeric field with a `៛ | $` toggle; riel whole numbers with separators, dollars up to 2 decimals; `≈` converted hint below. No mic.

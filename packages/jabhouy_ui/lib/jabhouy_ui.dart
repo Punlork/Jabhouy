@@ -29,6 +29,8 @@ export 'src/widget/empty_view.dart';
 export 'src/widget/icon_button.dart';
 export 'src/widget/infinite_end_widget.dart';
 export 'src/widget/labeled_field.dart';
+export 'src/widget/money_input.dart';
+export 'src/widget/price_display.dart';
 export 'src/widget/qty_stepper.dart';
 export 'src/widget/search_field.dart';
 export 'src/widget/segmented_control.dart';
