@@ -19,6 +19,7 @@ export 'src/utils/overlay_loading.dart';
 export 'src/utils/snack_bar.dart';
 export 'src/widget/app_bottom_sheet.dart';
 export 'src/widget/app_logo.dart';
+export 'src/widget/app_sheet.dart';
 export 'src/widget/chips.dart';
 export 'src/widget/custom_loading.dart';
 export 'src/widget/custom_outline_border.dart';

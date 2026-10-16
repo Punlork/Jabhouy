@@ -1,6 +1,6 @@
 # Step 2: Basic components
 
-Status: open
+Status: resolved
 Blocked by: 01, 02, 04
 
 In `jabhouy_ui`, from tokens only:

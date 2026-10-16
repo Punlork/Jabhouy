@@ -435,7 +435,7 @@ These override the sections above where they conflict. Background: `docs/adr/000
 13. Drop `CategoryUnit.usage_count`; order unit chips by counting Price options on the phone.
 14. Every Member can add, edit and mark Credits paid; only owner and editors delete them.
 15. Dark mode stays: every token in §1 gets a dark value; screens are checked in both themes.
-16. Components live in `packages/jabhouy_ui`; BottomSheet extends `AppBottomSheet`, LabeledField extends `CustomTextFormField`; StatusPill replaces the paid/unpaid icons. Tokens replace `AppColorTheme` outright.
+16. Components live in `packages/jabhouy_ui`; BottomSheet (`AppSheet`) builds on `AppBottomSheet`; LabeledField is a label + hint around any input child (not a `CustomTextFormField` wrapper, whose floating label clashes); StatusPill replaces the paid/unpaid icons. Tokens replace `AppColorTheme` outright.
 17. Kantumruy Pro is the only bundled font (Noto Sans Khmer removed), never fetched by `google_fonts` at runtime.
 18. Money conversion, rounding and formatting live in `jabhouy_core` (pure Dart, `dart test`); MoneyInput and PriceDisplay only call them.
 19. Voice (Phase 5) adds a speech dependency; none is installed today.

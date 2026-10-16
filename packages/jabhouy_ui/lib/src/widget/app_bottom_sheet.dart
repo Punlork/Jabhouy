@@ -5,10 +5,14 @@ class AppBottomSheet extends StatelessWidget {
     required this.child,
     super.key,
     this.maxHeightFactor = 0.9,
+    this.scrollable = true,
   });
 
   final Widget child;
   final double maxHeightFactor;
+
+  /// False when [child] scrolls part of itself, e.g. to keep a footer fixed.
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +27,7 @@ class AppBottomSheet extends StatelessWidget {
           constraints: BoxConstraints(
             maxHeight: mediaQuery.size.height * maxHeightFactor,
           ),
-          child: SingleChildScrollView(child: child),
+          child: scrollable ? SingleChildScrollView(child: child) : child,
         ),
       ),
     );
