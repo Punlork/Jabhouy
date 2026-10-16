@@ -33,7 +33,8 @@ class CustomLoading extends StatefulWidget {
   State<CustomLoading> createState() => _GridBottomLoaderState();
 }
 
-class _GridBottomLoaderState extends State<CustomLoading> with TickerProviderStateMixin {
+class _GridBottomLoaderState extends State<CustomLoading>
+    with TickerProviderStateMixin {
   late final List<AnimationController> _controllers;
   late final List<Animation<double>> _animations;
 
@@ -44,19 +45,13 @@ class _GridBottomLoaderState extends State<CustomLoading> with TickerProviderSta
     // Initialize controllers and animations
     _controllers = List.generate(
       widget.itemCount,
-      (index) => AnimationController(
-        vsync: this,
-        duration: widget.duration,
-      ),
+      (index) => AnimationController(vsync: this, duration: widget.duration),
     );
 
     _animations = List.generate(
       widget.itemCount,
       (index) => Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(
-          parent: _controllers[index],
-          curve: Curves.easeInOut,
-        ),
+        CurvedAnimation(parent: _controllers[index], curve: Curves.easeInOut),
       ),
     );
 
@@ -89,11 +84,14 @@ class _GridBottomLoaderState extends State<CustomLoading> with TickerProviderSta
           return AnimatedBuilder(
             animation: _animations[index],
             builder: (context, child) {
-              final effectiveColor = widget.color ?? Theme.of(context).primaryColor;
+              final effectiveColor =
+                  widget.color ?? Theme.of(context).primaryColor;
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 height: widget.dotSize,
-                width: widget.dotSize / 2 + (widget.dotSize / 2 * _animations[index].value),
+                width:
+                    widget.dotSize / 2 +
+                    (widget.dotSize / 2 * _animations[index].value),
                 decoration: BoxDecoration(
                   color: effectiveColor.withAlpha(
                     (255 * (0.6 + (0.4 * _animations[index].value))).toInt(),

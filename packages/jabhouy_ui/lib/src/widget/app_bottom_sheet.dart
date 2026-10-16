@@ -23,9 +23,7 @@ class AppBottomSheet extends StatelessWidget {
           constraints: BoxConstraints(
             maxHeight: mediaQuery.size.height * maxHeightFactor,
           ),
-          child: SingleChildScrollView(
-            child: child,
-          ),
+          child: SingleChildScrollView(child: child),
         ),
       ),
     );

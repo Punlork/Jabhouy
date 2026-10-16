@@ -32,7 +32,10 @@ void main() {
         'textSecondary on surface': (tokens.textSecondary, tokens.surface),
         'textMuted on surface': (tokens.textMuted, tokens.surface),
         'textMuted on bg': (tokens.textMuted, tokens.bg),
-        'placeholder on surfaceMuted': (tokens.placeholder, tokens.surfaceMuted),
+        'placeholder on surfaceMuted': (
+          tokens.placeholder,
+          tokens.surfaceMuted,
+        ),
         'warningText on warningBg': (tokens.warningText, tokens.warningBg),
         'successText on successBg': (tokens.successText, tokens.successBg),
         'dangerText on surface': (tokens.dangerText, tokens.surface),

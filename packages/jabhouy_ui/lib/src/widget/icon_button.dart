@@ -13,9 +13,9 @@ class IconButtonWidget extends StatelessWidget {
     this.backgroundColor,
     this.borderColor,
   }) : assert(
-          icon != null || svgAsset != null,
-          'Either icon or svgAsset must be provided.',
-        );
+         icon != null || svgAsset != null,
+         'Either icon or svgAsset must be provided.',
+       );
   final IconData? icon;
   final String? svgAsset;
   final VoidCallback onPressed;
@@ -39,8 +39,9 @@ class IconButtonWidget extends StatelessWidget {
           icon: _buildIcon(),
           style: IconButton.styleFrom(
             padding: EdgeInsets.zero,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
             backgroundColor:
                 backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
             side: borderColor == null

@@ -126,10 +126,12 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     );
     // Without the custom border, follow the app's input theme like every
     // other field, instead of a default black 8 px outline.
-    final enabledBorder =
-        widget.useCustomBorder ? customBorder : inputTheme.enabledBorder;
-    final focusedBorder =
-        widget.useCustomBorder ? customBorder : inputTheme.focusedBorder;
+    final enabledBorder = widget.useCustomBorder
+        ? customBorder
+        : inputTheme.enabledBorder;
+    final focusedBorder = widget.useCustomBorder
+        ? customBorder
+        : inputTheme.focusedBorder;
 
     final baseDecoration = InputDecoration(
       hintText: widget.hintText,
@@ -205,7 +207,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       autovalidateMode: widget.autovalidateMode,
       keyboardType: widget.keyboardType,
       obscureText: widget.obscureText,
-      onTapOutside: widget.onTapOutside ??
+      onTapOutside:
+          widget.onTapOutside ??
           (event) {
             if (!_focusNode.hasFocus) return;
             _focusNode.unfocus();

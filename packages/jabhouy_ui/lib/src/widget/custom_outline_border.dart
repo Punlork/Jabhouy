@@ -38,7 +38,10 @@ class CustomOutlineInputBorder extends InputBorder {
   bool get isOutline => false;
 
   @override
-  CustomOutlineInputBorder copyWith({BorderSide? borderSide, BorderRadius? borderRadius}) {
+  CustomOutlineInputBorder copyWith({
+    BorderSide? borderSide,
+    BorderRadius? borderRadius,
+  }) {
     return CustomOutlineInputBorder(
       borderSide: borderSide ?? this.borderSide,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -57,7 +60,14 @@ class CustomOutlineInputBorder extends InputBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    return Path()..addRect(Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0, rect.height - borderSide.width)));
+    return Path()..addRect(
+      Rect.fromLTWH(
+        rect.left,
+        rect.top,
+        rect.width,
+        math.max(0, rect.height - borderSide.width),
+      ),
+    );
   }
 
   @override

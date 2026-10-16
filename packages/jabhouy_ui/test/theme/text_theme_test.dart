@@ -33,11 +33,21 @@ void main() {
     test('${theme.brightness.name} theme sets the font on every text slot', () {
       final t = theme.textTheme;
       for (final style in [
-        t.displayLarge, t.displayMedium, t.displaySmall,
-        t.headlineLarge, t.headlineMedium, t.headlineSmall,
-        t.titleLarge, t.titleMedium, t.titleSmall,
-        t.bodyLarge, t.bodyMedium, t.bodySmall,
-        t.labelLarge, t.labelMedium, t.labelSmall,
+        t.displayLarge,
+        t.displayMedium,
+        t.displaySmall,
+        t.headlineLarge,
+        t.headlineMedium,
+        t.headlineSmall,
+        t.titleLarge,
+        t.titleMedium,
+        t.titleSmall,
+        t.bodyLarge,
+        t.bodyMedium,
+        t.bodySmall,
+        t.labelLarge,
+        t.labelMedium,
+        t.labelSmall,
       ]) {
         expect(style!.fontFamily, 'KantumruyPro');
         expect(style.height, 1.5);
