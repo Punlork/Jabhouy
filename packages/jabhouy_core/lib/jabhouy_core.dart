@@ -13,6 +13,7 @@ export 'src/ids/uuid_v7.dart';
 export 'src/logging/logger.dart';
 export 'src/models/casts.dart';
 export 'src/models/dates.dart';
+export 'src/models/member_role.dart';
 export 'src/models/pagination.dart';
 export 'src/money/money.dart';
 export 'src/result/app_exception.dart';

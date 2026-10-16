@@ -28,9 +28,9 @@ _Avoid_: Merging, account sync
 A User who belongs to a Shop, with one role: owner, editor or viewer.
 _Avoid_: Staff, employee, collaborator
 
-**Active Shop**:
+**Current Shop**:
 The Shop a User is working in right now on their phone; a User in several Shops switches between them.
-_Avoid_: Current store, selected account
+_Avoid_: Active shop, current store, selected account
 
 **Owner**:
 The Member who created the Shop and manages its settings and Members.

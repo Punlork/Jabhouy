@@ -18,6 +18,12 @@ enum Feature {
 
   /// "Continue with Google" on the sign-in and sign-up pages.
   googleSignIn,
+
+  /// The signed-in user's Shops come from the API's `GET /me` instead of a
+  /// fake one-shop answer. Off until jabhouy-api's shop setup is live.
+  /// Rows written under the fake shop id do not sync after switching; the
+  /// release clean start wipes them anyway.
+  serverShops,
 }
 
 /// Answers whether a [Feature] is on.
@@ -48,6 +54,8 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
           const bool.fromEnvironment('FEATURE_DIAGNOSTICS'),
         Feature.googleSignIn =>
           const bool.fromEnvironment('FEATURE_GOOGLE_SIGN_IN'),
+        Feature.serverShops =>
+          const bool.fromEnvironment('FEATURE_SERVER_SHOPS'),
       };
 }
 

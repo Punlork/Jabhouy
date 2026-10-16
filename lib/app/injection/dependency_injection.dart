@@ -5,6 +5,7 @@ import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
@@ -30,6 +31,11 @@ Future<void> setupDependencies() async {
     ..registerSingleton(ConnectivityService())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
+    // Flip FEATURE_SERVER_SHOPS in config/features/<flavor>.json to switch.
+    ..registerLazySingleton(
+      () => meApiFor(getIt<FeatureFlags>(), getIt<ApiService>()),
+    )
+    ..registerLazySingleton(() => CurrentShop(getIt<MeApi>()))
     ..registerLazySingleton(
       () => AuthService(
         getIt<ApiService>(),
@@ -170,6 +176,7 @@ Future<void> setupDependencies() async {
         incomeSyncService: getIt<FirebaseIncomeSyncService>(),
         notificationTrackingBridge: getIt<NotificationTrackingBridge>(),
         notificationDiagnosticsService: getIt<NotificationDiagnosticsService>(),
+        currentShop: getIt<CurrentShop>(),
       ),
     )
     ..registerFactory(
@@ -187,6 +194,7 @@ Future<void> setupDependencies() async {
         getIt<AuthService>(),
         getIt<ConnectivityService>(),
         getIt<SessionCleanupService>(),
+        getIt<CurrentShop>(),
       )..add(AuthCheckRequested()),
     )
     ..registerFactory(

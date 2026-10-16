@@ -1,6 +1,6 @@
 # P3 Step 1: Active Shop from /me
 
-Status: open
+Status: resolved
 Blocked by: 09
 
 - After sign-in, read `GET /me`; remember the Active Shop id and the user's role on the phone.

@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/service/auth_service.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 
 part 'auth_event.dart';
@@ -20,6 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.authService,
     this._connectivityService,
     this._sessionCleanupService,
+    this._currentShop,
   ) : super(AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthSignedIn>(_onAuthSignedIn);
@@ -34,6 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService authService;
   final ConnectivityService _connectivityService;
   final SessionCleanupService _sessionCleanupService;
+  final CurrentShop _currentShop;
   late final StreamSubscription<bool> _connectivitySubscription;
 
   @override
@@ -54,6 +57,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final isOnline = await _connectivityService.isOnline;
 
       if (response.success && response.data != null) {
+        // Before Home draws, so every screen knows its Shop and role.
+        final userId = response.data!.id;
+        if (userId != null) await _currentShop.load(userId);
         emit(
           Authenticated(
             response.data!,
