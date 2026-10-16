@@ -63,4 +63,26 @@ void main() {
       expect(const Money(95, Currency.usd).formatApprox(), r'≈ $0.95');
     });
   });
+
+  group('tryParse', () {
+    test('reads grouped riel and dollar decimals', () {
+      expect(Money.tryParse('30,000', Currency.khr), const Money(30000, Currency.khr));
+      expect(Money.tryParse('7.5', Currency.usd), const Money(750, Currency.usd));
+      expect(Money.tryParse('1,234.05', Currency.usd), const Money(123405, Currency.usd));
+      expect(Money.tryParse('0', Currency.khr), const Money(0, Currency.khr));
+    });
+
+    test('returns null for empty or invalid input, never 0', () {
+      expect(Money.tryParse('', Currency.khr), isNull);
+      expect(Money.tryParse('abc', Currency.khr), isNull);
+      expect(Money.tryParse('7.505', Currency.usd), isNull);
+      expect(Money.tryParse('7.5', Currency.khr), isNull);
+      expect(Money.tryParse('-5', Currency.khr), isNull);
+    });
+  });
+
+  test('formatNumber has no currency sign', () {
+    expect(const Money(30000, Currency.khr).formatNumber(), '30,000');
+    expect(const Money(750, Currency.usd).formatNumber(), '7.50');
+  });
 }
