@@ -970,15 +970,12 @@ class AppLocalizationsKm extends AppLocalizations {
   String get priceNotNumber => 'សូមបញ្ចូលតម្លៃជាលេខ';
 
   @override
-  String get pricePackOverOne => 'ចំនួនក្នុងកញ្ចប់ត្រូវលើសពី ១';
+  String get pricePackPositive => 'ចំនួនត្រូវធំជាង ០';
 
   @override
   String priceBarcodeUsed(Object name) {
     return 'បាកូដនេះប្រើរួចហើយសម្រាប់ «$name»';
   }
-
-  @override
-  String get priceNoRow => 'សូមបញ្ចូលឯកតា ឬតម្លៃយ៉ាងហោចណាស់មួយ';
 
   @override
   String priceUnitsFor(Object category) {
@@ -1032,7 +1029,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get priceSellingHint => 'ឧ. 3,000';
 
   @override
-  String get priceCountHint => '24';
+  String get priceCountHint => '1';
 
   @override
   String get categoryHint => 'ជ្រើសប្រភេទ ងាយស្រួលស្វែងរកពេលក្រោយ';
@@ -1042,4 +1039,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get categoryNameHint => 'ឧ. ភេសជ្ជៈ';
+
+  @override
+  String get priceWholesaleLabel => 'លក់ដុំ';
 }

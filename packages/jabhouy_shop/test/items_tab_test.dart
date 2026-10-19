@@ -64,6 +64,8 @@ void main() {
       await repo.saveItem(
         Item(id: 'rice', name: 'អង្ករផ្កាម្លិះ', prices: [_option('បេ', null)]),
       );
+      // Quick add: a name only, priced later.
+      await repo.saveItem(const Item(id: 'sugar', name: 'ស្ករ', prices: []));
     });
     opened.clear();
     await tester.pumpWidget(
@@ -97,10 +99,11 @@ void main() {
     expect(find.text('3,000 ៛'), findsOneWidget);
     expect(find.text('1 កេះ · ×24'), findsOneWidget);
     expect(find.text('60,000 ៛'), findsOneWidget);
-    // The warning chip and the rice row's missing price.
-    expect(find.text('មិនទាន់មានតម្លៃ'), findsNWidgets(2));
+    // The warning chip, the rice row's missing price, and the unpriced
+    // sugar row.
+    expect(find.text('មិនទាន់មានតម្លៃ'), findsNWidgets(3));
     expect(find.text('0 ៛'), findsNothing);
-    expect(find.text('ទំនិញ 2 មុខ · ក–អ'), findsOneWidget);
+    expect(find.text('ទំនិញ 3 មុខ · ក–អ'), findsOneWidget);
 
     await tester.tap(find.text('Coca-Cola'));
     await settle(tester);
@@ -126,6 +129,7 @@ void main() {
     await settle(tester);
 
     expect(find.text('អង្ករផ្កាម្លិះ'), findsOneWidget);
+    expect(find.text('ស្ករ'), findsOneWidget, reason: 'no price is missing');
     expect(find.text('Coca-Cola'), findsNothing);
     await close(tester);
   });
@@ -133,8 +137,8 @@ void main() {
   testWidgets('a viewer sees no warning chip', (tester) async {
     await pumpTab(tester, role: MemberRole.viewer);
 
-    // Only the rice row's own missing price; no chip.
-    expect(find.text('មិនទាន់មានតម្លៃ'), findsOneWidget);
+    // Only the rows' own missing prices; no chip.
+    expect(find.text('មិនទាន់មានតម្លៃ'), findsNWidgets(2));
     await close(tester);
   });
 

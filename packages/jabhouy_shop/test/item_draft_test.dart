@@ -58,7 +58,7 @@ void main() {
       });
     });
 
-    test('a pack of 0 or 1 is rejected; an empty count is fine', () {
+    test('a count must be above 0; 1 and an empty count are fine', () {
       final draft = _draft(
         rows: [
           _row(unit: 'ដប', packQty: '1'),
@@ -66,13 +66,17 @@ void main() {
           _row(unit: 'បេ'),
         ],
       );
-      expect(draft.validate().keys, ['ដប.packQty', 'កេះ.packQty']);
+      expect(draft.validate(), {
+        'កេះ.packQty': const FormProblem(ProblemKind.packQtyNotPositive),
+      });
     });
 
-    test('a form with only empty rows needs a price row', () {
-      expect(_draft(rows: [_row()]).validate(), {
-        'rows': const FormProblem(ProblemKind.noPriceRow),
-      });
+    test('a name alone saves: quick add, priced later', () {
+      final draft = _draft(rows: [_row()]);
+      expect(draft.validate(), isEmpty);
+      final item = draft.toItem();
+      expect(item.prices, isEmpty);
+      expect(item.hasMissingPrice, isTrue, reason: 'shows under the chip');
     });
 
     test('a barcode used by another item names that item', () {

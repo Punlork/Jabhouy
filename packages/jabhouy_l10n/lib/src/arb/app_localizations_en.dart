@@ -985,15 +985,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceNotNumber => 'Enter a number';
 
   @override
-  String get pricePackOverOne => 'A pack holds more than 1';
+  String get pricePackPositive => 'The count must be more than 0';
 
   @override
   String priceBarcodeUsed(Object name) {
     return 'This barcode is already used by «$name»';
   }
-
-  @override
-  String get priceNoRow => 'Add at least one unit or price';
 
   @override
   String priceUnitsFor(Object category) {
@@ -1047,7 +1044,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceSellingHint => 'e.g. 3,000';
 
   @override
-  String get priceCountHint => '24';
+  String get priceCountHint => '1';
 
   @override
   String get categoryHint => 'Pick a category to find it faster later';
@@ -1057,4 +1054,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryNameHint => 'e.g. Drinks';
+
+  @override
+  String get priceWholesaleLabel => 'Wholesale';
 }

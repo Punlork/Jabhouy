@@ -69,9 +69,14 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SearchField(
-              hintText: l10n.categorySearch,
+            // White with a border (canvas ៥), not Home's muted search.
+            TextField(
               onChanged: (v) => setState(() => _query = v),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: l10n.categorySearch,
+                prefixIcon: Icon(Icons.search_rounded, color: t.textMuted),
+              ),
             ),
             const SizedBox(height: 8),
             for (final category in shown)

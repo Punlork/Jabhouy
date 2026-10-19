@@ -1928,23 +1928,17 @@ abstract class AppLocalizations {
   /// **'Enter a number'**
   String get priceNotNumber;
 
-  /// Error for a pack count of 0 or 1
+  /// Error for a pack count of 0
   ///
   /// In en, this message translates to:
-  /// **'A pack holds more than 1'**
-  String get pricePackOverOne;
+  /// **'The count must be more than 0'**
+  String get pricePackPositive;
 
   /// Error for a barcode another item in the shop uses
   ///
   /// In en, this message translates to:
   /// **'This barcode is already used by «{name}»'**
   String priceBarcodeUsed(Object name);
-
-  /// Error when every price row is empty
-  ///
-  /// In en, this message translates to:
-  /// **'Add at least one unit or price'**
-  String get priceNoRow;
 
   /// Hint under the unit chips
   ///
@@ -2039,7 +2033,7 @@ abstract class AppLocalizations {
   /// Hint in the narrow pack count field, after ×
   ///
   /// In en, this message translates to:
-  /// **'24'**
+  /// **'1'**
   String get priceCountHint;
 
   /// Hint under the category chips in the item form
@@ -2059,6 +2053,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. Drinks'**
   String get categoryNameHint;
+
+  /// Short wholesale label on the item details sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Wholesale'**
+  String get priceWholesaleLabel;
 }
 
 class _AppLocalizationsDelegate

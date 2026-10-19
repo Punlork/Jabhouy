@@ -1282,9 +1282,9 @@
   "@priceNotNumber": {
     "description": "Error for a price that is not a number"
   },
-  "pricePackOverOne": "A pack holds more than 1",
-  "@pricePackOverOne": {
-    "description": "Error for a pack count of 0 or 1"
+  "pricePackPositive": "The count must be more than 0",
+  "@pricePackPositive": {
+    "description": "Error for a pack count of 0"
   },
   "priceBarcodeUsed": "This barcode is already used by «{name}»",
   "@priceBarcodeUsed": {
@@ -1292,10 +1292,6 @@
     "placeholders": {
       "name": {}
     }
-  },
-  "priceNoRow": "Add at least one unit or price",
-  "@priceNoRow": {
-    "description": "Error when every price row is empty"
   },
   "priceUnitsFor": "Units for «{category}»",
   "@priceUnitsFor": {
@@ -1366,7 +1362,7 @@
   "@priceSellingHint": {
     "description": "Hint in the selling price field"
   },
-  "priceCountHint": "24",
+  "priceCountHint": "1",
   "@priceCountHint": {
     "description": "Hint in the narrow pack count field, after ×"
   },
@@ -1381,5 +1377,9 @@
   "categoryNameHint": "e.g. Drinks",
   "@categoryNameHint": {
     "description": "Hint in the new category name field"
+  },
+  "priceWholesaleLabel": "Wholesale",
+  "@priceWholesaleLabel": {
+    "description": "Short wholesale label on the item details sheet"
   }
 }

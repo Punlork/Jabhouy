@@ -13,9 +13,8 @@ String problemText(AppLocalizations l10n, FormProblem problem) =>
       ProblemKind.rielDecimals => l10n.priceRielNoDecimals,
       ProblemKind.usdDecimals => l10n.priceUsdTwoDecimals,
       ProblemKind.invalidNumber => l10n.priceNotNumber,
-      ProblemKind.packQtyOverOne => l10n.pricePackOverOne,
+      ProblemKind.packQtyNotPositive => l10n.pricePackPositive,
       ProblemKind.barcodeUsed => l10n.priceBarcodeUsed(problem.itemName ?? ''),
-      ProblemKind.noPriceRow => l10n.priceNoRow,
     };
 
 const _unitFlex = 2;
@@ -270,8 +269,8 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
   }
 }
 
-/// Secondary price field: grey fill, no border, label inside.
-/// The plan draws it 40 px; it is 44 so it stays a valid tap target.
+/// Secondary price field (canvas ៣ខ): an underline, label inside, the
+/// row's currency at the end. 44 tall so it stays a valid tap target.
 class _QuietField extends StatelessWidget {
   const _QuietField({
     required this.label,
@@ -295,11 +294,16 @@ class _QuietField extends StatelessWidget {
     final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
     return Container(
       height: AppSizes.minTapTarget,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
-        color: t.surfaceSubtle,
-        borderRadius: BorderRadius.circular(10),
-        border: hasError ? Border.all(color: t.dangerText, width: 2) : null,
+        border: Border(
+          bottom: hasError
+              ? BorderSide(color: t.dangerText, width: 2)
+              : BorderSide(
+                  color: t.textMuted.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
+        ),
       ),
       child: Row(
         children: [
@@ -315,14 +319,16 @@ class _QuietField extends StatelessWidget {
                   decimal: true,
                 ),
                 style: AppTextTheme.hint.copyWith(color: t.textPrimary),
-                // The app theme fills and outlines every field; the quiet
-                // field draws its own background, so turn both off here.
-                decoration: const InputDecoration(
+                // The app theme fills and outlines every field; this one
+                // draws only its underline, so turn both off here.
+                decoration: InputDecoration(
                   isCollapsed: true,
                   filled: false,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
+                  hintText: '0',
+                  hintStyle: AppTextTheme.hint.copyWith(color: t.placeholder),
                 ),
               ),
             ),

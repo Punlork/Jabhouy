@@ -75,7 +75,7 @@ void main() {
       (tester) async {
     await pumpForm(tester);
     // Empty fields show the design's examples.
-    for (final hint in ['ឧ. អង្ករផ្កាម្លិះ', 'ឧ. ដប', '24', 'ឧ. 3,000']) {
+    for (final hint in ['ឧ. អង្ករផ្កាម្លិះ', 'ឧ. ដប', '1', 'ឧ. 3,000']) {
       expect(find.text(hint), findsOneWidget, reason: hint);
     }
 
@@ -123,12 +123,12 @@ void main() {
     await pumpForm(tester);
 
     await tester.enterText(rowField(0, 0), 'កេះ');
-    await tester.enterText(rowField(0, 1), '1');
+    await tester.enterText(rowField(0, 1), '0');
     await tester.enterText(rowField(0, 2), '3000.5');
     await save(tester);
 
     expect(find.text('សូមបញ្ចូលឈ្មោះទំនិញ'), findsOneWidget);
-    expect(find.text('ចំនួនក្នុងកញ្ចប់ត្រូវលើសពី ១'), findsOneWidget);
+    expect(find.text('ចំនួនត្រូវធំជាង ០'), findsOneWidget);
     expect(find.text('តម្លៃរៀលមិនអាចមានទសភាគ'), findsOneWidget);
     final items = await tester.runAsync(() => repo.watchItems().first);
     expect(items, isEmpty);

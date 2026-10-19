@@ -194,9 +194,7 @@ class _ItemRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          border: divider
-              ? Border(bottom: BorderSide(color: t.divider))
-              : null,
+          border: divider ? Border(bottom: BorderSide(color: t.divider)) : null,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +212,10 @@ class _ItemRow extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  for (final option in item.prices) _PriceLine(option),
+                  if (item.prices.isEmpty)
+                    const _PriceLine(null)
+                  else
+                    for (final option in item.prices) _PriceLine(option),
                 ],
               ),
             ),
@@ -256,7 +257,10 @@ class _ItemCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              for (final option in item.prices) _PriceLine(option),
+              if (item.prices.isEmpty)
+                const _PriceLine(null)
+              else
+                for (final option in item.prices) _PriceLine(option),
             ],
           ),
         ),
@@ -265,14 +269,25 @@ class _ItemCard extends StatelessWidget {
   }
 }
 
-/// `1 ដប` or `1 កេះ · ×24` on the left, the price on the right.
+/// `1 ដប` or `1 កេះ · ×24` on the left, the price on the right. A null
+/// [option] is an Item saved without prices: `មិនទាន់មានតម្លៃ` alone.
 class _PriceLine extends StatelessWidget {
   const _PriceLine(this.option);
 
-  final PriceOption option;
+  final PriceOption? option;
 
   @override
   Widget build(BuildContext context) {
+    final option = this.option;
+    if (option == null) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 3),
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: PriceDisplay(price: null, khrPerUsd: 0, showConverted: false),
+        ),
+      );
+    }
     final pack = option.packQty == null ? '' : ' · ×${option.packQty}';
     return Padding(
       padding: const EdgeInsets.only(top: 3),

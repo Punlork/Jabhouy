@@ -60,8 +60,9 @@ class Item {
   final DateTime? updatedAt;
   final String? updatedBy;
 
-  /// True when any Price option still has no selling price.
-  bool get hasMissingPrice => prices.any((p) => p.price == null);
+  /// True with no Price option yet, or any without a selling price.
+  bool get hasMissingPrice =>
+      prices.isEmpty || prices.any((p) => p.price == null);
 }
 
 /// What the item form shows and defaults to, from the Shop's settings.

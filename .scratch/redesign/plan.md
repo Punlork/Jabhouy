@@ -483,3 +483,5 @@ The updated body (§3.1b, Phase 3a, new §5.1/§5.3 details, canvas ១–១ឃ
 
 Open: the unknown-barcode sheet (§3.1b attach / create) is not on the canvas; decide before building the scan flow.
 50. Until the server seeds Shops (Phase 2b) and issue 16 can create categories, the stand-in Shop (`syncs == false`) gets §3.2's 11 starter categories on the phone when it has none. A server Shop is never seeded by the phone.
+51. Quick add: an Item may be saved with a name only (no price row required); it counts as missing a price and waits under the `មិនទាន់មានតម្លៃ` chip. Pack count must be above 0 (`ចំនួនត្រូវធំជាង ០`), so `×1` is allowed. Form validation is: name required, count above 0, no decimals in riel, barcode not used by another Item.
+52. Wholesale and cost fields in a price row use the underline style (canvas ៣ខ); the remove-row `✕` sits at the end of that line so the price field keeps room beside the `៛ $` switch.

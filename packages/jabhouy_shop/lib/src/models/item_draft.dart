@@ -8,9 +8,8 @@ enum ProblemKind {
   rielDecimals,
   usdDecimals,
   invalidNumber,
-  packQtyOverOne,
+  packQtyNotPositive,
   barcodeUsed,
-  noPriceRow,
 }
 
 /// Why one field cannot save; [itemName] names the other Item for
@@ -88,14 +87,15 @@ class ItemDraft {
 
   Iterable<PriceRowDraft> get _usedRows => rows.where((r) => !r.isEmpty);
 
-  /// Problems keyed by field: `name`, `rows`, or `<rowId>.<field>`.
+  /// Problems keyed by field: `name` or `<rowId>.<field>`. No row is
+  /// required: an Item saved with a name only waits under the
+  /// missing-price chip (quick add).
   /// [barcodeOwners] maps a barcode to the other Item already using it.
   Map<String, FormProblem> validate({
     Map<String, String> barcodeOwners = const {},
   }) {
     final problems = <String, FormProblem>{
       if (name.trim().isEmpty) 'name': const FormProblem(ProblemKind.nameRequired),
-      if (_usedRows.isEmpty) 'rows': const FormProblem(ProblemKind.noPriceRow),
     };
     for (final row in _usedRows) {
       final pack = row.packQty.trim();
@@ -103,7 +103,7 @@ class ItemDraft {
         final qty = parseWholeNumber(pack);
         final kind = switch (qty) {
           null => ProblemKind.invalidNumber,
-          <= 1 => ProblemKind.packQtyOverOne,
+          <= 0 => ProblemKind.packQtyNotPositive,
           _ => null,
         };
         if (kind != null) problems['${row.id}.packQty'] = FormProblem(kind);

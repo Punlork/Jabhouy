@@ -62,7 +62,8 @@ void main() {
     expect(find.text('ភេសជ្ជៈ'), findsOneWidget);
     expect(find.text('1 កេះ · ×24'), findsOneWidget);
     expect(find.text('3,000 ៛'), findsOneWidget);
-    expect(find.text('2,500 ៛'), findsOneWidget, reason: 'cost for everyone');
+    expect(find.text('ដើម: 2,500 ៛'), findsOneWidget, reason: 'cost for all');
+    expect(find.text('ដើម: —'), findsOneWidget);
     expect(find.text('មិនទាន់មានតម្លៃ'), findsOneWidget);
     expect(find.text('កែតម្លៃ'), findsNothing);
     expect(find.text('លុប'), findsNothing);

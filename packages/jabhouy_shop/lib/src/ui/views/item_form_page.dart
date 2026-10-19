@@ -326,7 +326,6 @@ class _ItemFormPageState extends State<ItemFormPage> {
     final l10n = context.l10n;
     final t = context.tokens;
     final category = state.categories.where((c) => c.id == state.categoryId);
-    final rowsProblem = state.problems['rows'];
     return Column(
       key: _keyFor('rows'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,9 +338,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
         const PriceRowHeader(),
         const SizedBox(height: AppSizes.fieldGap),
         for (final (i, row) in _rows.indexed)
-          Padding(
+          Container(
             key: _keyFor(row.id),
-            padding: const EdgeInsets.only(bottom: 16),
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: t.dividerStrong)),
+            ),
             child: PriceRowEditor(
               key: ValueKey(row.id),
               initial: row,
@@ -362,7 +365,6 @@ class _ItemFormPageState extends State<ItemFormPage> {
                   : null,
             ),
           ),
-        if (rowsProblem != null) ErrorLine(problemText(l10n, rowsProblem)),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: InkWell(

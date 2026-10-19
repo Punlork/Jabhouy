@@ -62,115 +62,189 @@ class ItemDetailsSheet extends StatelessWidget {
     final edited = item.updatedAt;
     final editedLine = switch ((edited, editorName)) {
       (null, _) => null,
-      (final at?, null) => l10n.lastEditedOn(
-        l10n.formatDate(at.toPhnomPenh()),
-      ),
+      (final at?, null) => l10n.lastEditedOn(l10n.formatDate(at.toPhnomPenh())),
       (final at?, final name?) => l10n.lastEditedBy(
         l10n.formatDate(at.toPhnomPenh()),
         name,
       ),
     };
+    const buttonSize = Size.fromHeight(52);
 
-    return AppSheet(
-      title: item.name,
-      footer: canEdit
-          ? Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _confirmDelete(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: t.dangerText,
-                      side: BorderSide(color: t.dangerBorder),
-                      minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
-                    ),
-                    child: Text(l10n.delete),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: FilledButton(
-                    onPressed: onEdit,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
-                    ),
-                    child: Text(l10n.priceEdit),
-                  ),
-                ),
-              ],
-            )
-          : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (categoryName != null)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
+    return AppBottomSheet(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 2,
-                ),
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: t.surfaceSubtle,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusChip),
+                  color: t.border,
+                  borderRadius: BorderRadius.circular(2),
                 ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _Header(item: item, categoryName: categoryName),
+            const SizedBox(height: 8),
+            if (item.prices.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: PriceDisplay(
+                  price: null,
+                  khrPerUsd: 0,
+                  showConverted: false,
+                ),
+              ),
+            for (final (i, option) in item.prices.indexed)
+              _PriceBlock(
+                option: option,
+                settings: settings,
+                divider: i < item.prices.length - 1,
+              ),
+            if (editedLine != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  categoryName!,
-                  style: AppTextTheme.hint.copyWith(color: t.textSecondary),
+                  editedLine,
+                  style: AppTextTheme.hint.copyWith(color: t.textMuted),
                 ),
               ),
-            ),
-          for (final option in item.prices)
-            _PriceBlock(option: option, settings: settings),
-          if (editedLine != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                editedLine,
-                style: AppTextTheme.hint.copyWith(color: t.textMuted),
+            if (canEdit) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: onEdit,
+                      style: FilledButton.styleFrom(minimumSize: buttonSize),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: Text(l10n.priceEdit),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _confirmDelete(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: t.dangerText,
+                        side: BorderSide(color: t.dangerBorder),
+                        minimumSize: buttonSize,
+                      ),
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                      label: Text(l10n.delete),
+                    ),
+                  ),
+                ],
               ),
-            ),
-        ],
+            ],
+          ],
+        ),
       ),
     );
   }
 }
 
+/// Thumbnail, name and category tag, with the close button.
+class _Header extends StatelessWidget {
+  const _Header({required this.item, this.categoryName});
+
+  final Item item;
+  final String? categoryName;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final letter = item.name.isEmpty
+        ? ''
+        : String.fromCharCode(item.name.runes.first);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: t.surfaceMuted,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            letter,
+            style: AppTextTheme.pageTitle.copyWith(
+              fontSize: 24,
+              color: t.textMuted,
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.name,
+                style: AppTextTheme.pageTitle.copyWith(color: t.textPrimary),
+              ),
+              if (categoryName != null) ...[
+                const SizedBox(height: 4),
+                // No alignment: an aligned Container fills the width.
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: t.surfaceSubtle,
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Text(
+                    categoryName!,
+                    style: AppTextTheme.hint.copyWith(color: t.textSecondary),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          icon: Icon(Icons.close_rounded, color: t.textSecondary),
+        ),
+      ],
+    );
+  }
+}
+
+/// One Price option: `1 ដប` and the big price, the converted line, then
+/// wholesale and cost in one muted line.
 class _PriceBlock extends StatelessWidget {
-  const _PriceBlock({required this.option, required this.settings});
+  const _PriceBlock({
+    required this.option,
+    required this.settings,
+    required this.divider,
+  });
 
   final PriceOption option;
   final PriceSettings settings;
+  final bool divider;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final t = context.tokens;
-    final pack = option.packQty == null ? '' : ' · ×${option.packQty}';
     final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
-
-    Widget secondary(String label, Money? money) => Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Row(
-        children: [
-          Expanded(child: Text(label, style: muted)),
-          Text(
-            money?.format() ?? '—',
-            style: AppTextTheme.label.copyWith(color: t.textSecondary),
-          ),
-        ],
-      ),
-    );
+    String line(String label, Money? money) =>
+        '$label: ${money?.format() ?? '—'}';
 
     return Container(
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: t.surface,
-        border: Border.all(color: t.divider),
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: divider ? Border(bottom: BorderSide(color: t.divider)) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -179,22 +253,52 @@ class _PriceBlock extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  '1 ${option.unit}$pack',
-                  style: AppTextTheme.label.copyWith(color: t.textSecondary),
+                child: Text.rich(
+                  TextSpan(
+                    text: '1 ${option.unit}',
+                    children: [
+                      if (option.packQty != null)
+                        TextSpan(
+                          text: ' · ×${option.packQty}',
+                          style: TextStyle(
+                            color: t.textMuted,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                    ],
+                  ),
+                  style: AppTextTheme.body.copyWith(
+                    color: t.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               PriceDisplay(
                 price: option.selling,
                 khrPerUsd: settings.khrPerUsd,
                 showConverted: true,
-                style: AppTextTheme.amount,
+                style: AppTextTheme.price.copyWith(fontSize: 20),
               ),
             ],
           ),
-          if (settings.useWholesale)
-            secondary(l10n.priceWholesale, option.wholesaleMoney),
-          if (settings.useCost) secondary(l10n.priceCost, option.costMoney),
+          if (settings.useWholesale || settings.useCost) ...[
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 16,
+              children: [
+                if (settings.useWholesale)
+                  Text(
+                    line(l10n.priceWholesaleLabel, option.wholesaleMoney),
+                    style: muted,
+                  ),
+                if (settings.useCost)
+                  Text(
+                    line(l10n.priceCostShort, option.costMoney),
+                    style: muted,
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );

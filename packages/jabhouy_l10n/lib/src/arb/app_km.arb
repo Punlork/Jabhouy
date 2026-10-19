@@ -1230,9 +1230,9 @@
   "@priceNotNumber": {
     "description": "Error for a price that is not a number"
   },
-  "pricePackOverOne": "ចំនួនក្នុងកញ្ចប់ត្រូវលើសពី ១",
-  "@pricePackOverOne": {
-    "description": "Error for a pack count of 0 or 1"
+  "pricePackPositive": "ចំនួនត្រូវធំជាង ០",
+  "@pricePackPositive": {
+    "description": "Error for a pack count of 0"
   },
   "priceBarcodeUsed": "បាកូដនេះប្រើរួចហើយសម្រាប់ «{name}»",
   "@priceBarcodeUsed": {
@@ -1240,10 +1240,6 @@
     "placeholders": {
       "name": {}
     }
-  },
-  "priceNoRow": "សូមបញ្ចូលឯកតា ឬតម្លៃយ៉ាងហោចណាស់មួយ",
-  "@priceNoRow": {
-    "description": "Error when every price row is empty"
   },
   "priceUnitsFor": "ឯកតាសម្រាប់ «{category}»",
   "@priceUnitsFor": {
@@ -1314,7 +1310,7 @@
   "@priceSellingHint": {
     "description": "Hint in the selling price field"
   },
-  "priceCountHint": "24",
+  "priceCountHint": "1",
   "@priceCountHint": {
     "description": "Hint in the narrow pack count field, after ×"
   },
@@ -1329,5 +1325,9 @@
   "categoryNameHint": "ឧ. ភេសជ្ជៈ",
   "@categoryNameHint": {
     "description": "Hint in the new category name field"
+  },
+  "priceWholesaleLabel": "លក់ដុំ",
+  "@priceWholesaleLabel": {
+    "description": "Short wholesale label on the item details sheet"
   }
 }
