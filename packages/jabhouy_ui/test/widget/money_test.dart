@@ -93,7 +93,7 @@ void main() {
       await tester.tap(find.byTooltip('ប្តូររូបិយប័ណ្ណ'));
       await tester.pump();
       expect(texts.last.$2, Currency.usd, reason: 'a switch is reported too');
-      expect(find.text(r'$'), findsOneWidget, reason: 'the toggle shows \$');
+      expect(find.text(r'$'), findsOneWidget, reason: r'the toggle shows $');
     },
   );
 
