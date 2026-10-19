@@ -89,15 +89,8 @@ class _MoneyInputState extends State<MoneyInput> {
         TextField(
           controller: _controller,
           onChanged: _onText,
-          keyboardType: TextInputType.numberWithOptions(
-            decimal: _currency == Currency.usd,
-          ),
-          inputFormatters: [
-            if (_currency == Currency.khr)
-              _GroupedDigitsFormatter()
-            else
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-          ],
+          keyboardType: moneyKeyboard(_currency),
+          inputFormatters: moneyFormatters(_currency),
           style: AppTextTheme.body.copyWith(color: t.textPrimary),
           decoration: InputDecoration(
             errorText: widget.errorText,
@@ -204,6 +197,19 @@ class _Segment extends StatelessWidget {
     );
   }
 }
+
+/// The keyboard for typing an amount in [currency].
+TextInputType moneyKeyboard(Currency currency) =>
+    TextInputType.numberWithOptions(decimal: currency == Currency.usd);
+
+/// What a money field accepts: riel digits grouped by thousands, or
+/// dollars with up to two decimals. Shared by every amount field.
+List<TextInputFormatter> moneyFormatters(Currency currency) => [
+  if (currency == Currency.khr)
+    _GroupedDigitsFormatter()
+  else
+    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+];
 
 /// Keeps only digits and groups them by thousands while typing. A dot is
 /// left as typed, so `3,000.5` reads as a mistake rather than 30,005.

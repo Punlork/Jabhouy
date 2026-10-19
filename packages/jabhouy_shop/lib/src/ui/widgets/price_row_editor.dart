@@ -99,6 +99,19 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     super.dispose();
   }
 
+  /// Wholesale and cost follow the row's currency: when the price
+  /// switches, their amounts convert too, as the price's does.
+  void _convertSecondary(Currency to) {
+    for (final c in [_wholesale, _cost]) {
+      final money = Money.tryParse(c.text, _draft.currency);
+      c.text =
+          money
+              ?.convertTo(to, khrPerUsd: widget.settings.khrPerUsd)
+              .formatNumber() ??
+          '';
+    }
+  }
+
   void _update({
     String? unit,
     String? packQty,
@@ -126,7 +139,6 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     final t = context.tokens;
     final problems = widget.problems;
     final settings = widget.settings;
-    final symbol = _draft.currency == Currency.khr ? '៛' : r'$';
     // The remove button sits on this line: on the price line it left the
     // price field too narrow to read.
     final showQuiet =
@@ -194,8 +206,15 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                 currency: _draft.currency,
                 khrPerUsd: settings.khrPerUsd,
                 hintText: l10n.priceSellingHint,
-                onText: (text, currency) =>
-                    setState(() => _update(price: text, currency: currency)),
+                onText: (text, currency) => setState(() {
+                  if (currency != _draft.currency) _convertSecondary(currency);
+                  _update(
+                    price: text,
+                    currency: currency,
+                    wholesale: _wholesale.text,
+                    cost: _cost.text,
+                  );
+                }),
                 errorText: problems['price'] == null
                     ? null
                     : problemText(l10n, problems['price']!),
@@ -212,7 +231,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                   child: _QuietField(
                     label: l10n.priceWholesaleShort,
                     semanticLabel: l10n.priceWholesale,
-                    symbol: symbol,
+                    currency: _draft.currency,
                     controller: _wholesale,
                     hasError: problems.containsKey('wholesale'),
                     onChanged: (v) => _update(wholesale: v),
@@ -225,7 +244,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                   child: _QuietField(
                     label: l10n.priceCostShort,
                     semanticLabel: l10n.priceCost,
-                    symbol: symbol,
+                    currency: _draft.currency,
                     controller: _cost,
                     hasError: problems.containsKey('cost'),
                     onChanged: (v) => _update(cost: v),
@@ -275,7 +294,7 @@ class _QuietField extends StatelessWidget {
   const _QuietField({
     required this.label,
     required this.semanticLabel,
-    required this.symbol,
+    required this.currency,
     required this.controller,
     required this.hasError,
     required this.onChanged,
@@ -283,7 +302,7 @@ class _QuietField extends StatelessWidget {
 
   final String label;
   final String semanticLabel;
-  final String symbol;
+  final Currency currency;
   final TextEditingController controller;
   final bool hasError;
   final ValueChanged<String> onChanged;
@@ -294,6 +313,8 @@ class _QuietField extends StatelessWidget {
     final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
     return Container(
       height: AppSizes.minTapTarget,
+      // Centres the baseline-aligned row vertically in the 44 px box.
+      alignment: AlignmentDirectional.centerStart,
       padding: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
         border: Border(
@@ -305,7 +326,11 @@ class _QuietField extends StatelessWidget {
                 ),
         ),
       ),
+      // Baseline, not centre: Khmer and Latin glyphs sit at different
+      // heights, so centring the boxes leaves the number looking off.
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: [
           Text(label, style: muted),
           const SizedBox(width: 6),
@@ -315,9 +340,8 @@ class _QuietField extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 onChanged: onChanged,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
+                keyboardType: moneyKeyboard(currency),
+                inputFormatters: moneyFormatters(currency),
                 style: AppTextTheme.hint.copyWith(color: t.textPrimary),
                 // The app theme fills and outlines every field; this one
                 // draws only its underline, so turn both off here.
@@ -333,7 +357,10 @@ class _QuietField extends StatelessWidget {
               ),
             ),
           ),
-          Text(symbol, style: muted.copyWith(fontWeight: FontWeight.w600)),
+          Text(
+            currency == Currency.khr ? '៛' : r'$',
+            style: muted.copyWith(fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
