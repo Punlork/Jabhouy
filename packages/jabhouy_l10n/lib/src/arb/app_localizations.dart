@@ -1999,6 +1999,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search items'**
   String get itemSearchHint;
+
+  /// Tooltip of the ៛ / $ toggle in a money field
+  ///
+  /// In en, this message translates to:
+  /// **'Switch currency'**
+  String get currencySwitch;
+
+  /// Hint inside the unit field of a price row
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. bottle'**
+  String get priceUnitHint;
 }
 
 class _AppLocalizationsDelegate

@@ -1010,4 +1010,10 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get itemSearchHint => 'ស្វែងរកឈ្មោះទំនិញ';
+
+  @override
+  String get currencySwitch => 'ប្តូររូបិយប័ណ្ណ';
+
+  @override
+  String get priceUnitHint => 'ឧ. ដប';
 }

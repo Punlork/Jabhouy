@@ -1286,5 +1286,13 @@
   "itemSearchHint": "ស្វែងរកឈ្មោះទំនិញ",
   "@itemSearchHint": {
     "description": "Hint in the Home search field"
+  },
+  "currencySwitch": "ប្តូររូបិយប័ណ្ណ",
+  "@currencySwitch": {
+    "description": "Tooltip of the ៛ / $ toggle in a money field"
+  },
+  "priceUnitHint": "ឧ. ដប",
+  "@priceUnitHint": {
+    "description": "Hint inside the unit field of a price row"
   }
 }

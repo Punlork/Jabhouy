@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/src/theme/app_tokens.dart';
 import 'package:jabhouy_ui/src/theme/text_theme.dart';
 
-/// A money field with a `៛ | $` toggle and a muted converted hint below.
+/// A money field with a `៛ ▾` toggle and a muted converted hint below.
 /// Reports null while empty or unreadable, so a missing price is never 0.
 ///
 /// shortcut: [value] is read once; give the widget a new key to reset it
@@ -98,20 +99,11 @@ class _MoneyInputState extends State<MoneyInput> {
           style: AppTextTheme.body.copyWith(color: t.textPrimary),
           decoration: InputDecoration(
             errorText: widget.errorText,
-            suffixIcon: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _CurrencyButton(
-                  label: '៛',
-                  selected: _currency == Currency.khr,
-                  onTap: () => _switchTo(Currency.khr),
-                ),
-                _CurrencyButton(
-                  label: r'$',
-                  selected: _currency == Currency.usd,
-                  onTap: () => _switchTo(Currency.usd),
-                ),
-              ],
+            // One compact toggle leaves the narrow price column room to
+            // type; two buttons took most of it.
+            suffixIcon: _CurrencyToggle(
+              label: _currency == Currency.khr ? '៛' : r'$',
+              onTap: () => _switchTo(other),
             ),
           ),
         ),
@@ -129,36 +121,35 @@ class _MoneyInputState extends State<MoneyInput> {
   }
 }
 
-class _CurrencyButton extends StatelessWidget {
-  const _CurrencyButton({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+class _CurrencyToggle extends StatelessWidget {
+  const _CurrencyToggle({required this.label, required this.onTap});
 
   final String label;
-  final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Semantics(
-      button: true,
-      selected: selected,
+    return Tooltip(
+      message: context.l10n.currencySwitch,
       child: InkResponse(
         onTap: onTap,
         radius: AppSizes.minTapTarget / 2,
-        child: SizedBox.square(
-          dimension: AppSizes.minTapTarget,
-          child: Center(
-            child: Text(
-              label,
-              style: AppTextTheme.label.copyWith(
-                color: selected ? t.textPrimary : t.textMuted,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+        child: SizedBox(
+          width: AppSizes.minTapTarget,
+          height: AppSizes.minTapTarget,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: AppTextTheme.label.copyWith(
+                  color: t.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
+              Icon(Icons.expand_more_rounded, size: 14, color: t.textMuted),
+            ],
           ),
         ),
       ),

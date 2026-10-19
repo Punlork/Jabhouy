@@ -145,7 +145,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                 controller: _unit,
                 onChanged: (v) => _update(unit: v),
                 decoration: InputDecoration(
-                  hintText: l10n.priceUnit,
+                  hintText: l10n.priceUnitHint,
                   error: problems.containsKey('unit') ? const SizedBox() : null,
                 ),
               ),
@@ -161,7 +161,19 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                   keyboardType: TextInputType.number,
                   inputFormatters: const [WholeNumberFormatter()],
                   decoration: InputDecoration(
-                    prefixText: '×',
+                    // prefixText only shows while focused; this always does.
+                    prefixIcon: Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 12),
+                      child: Text(
+                        '×',
+                        style: AppTextTheme.body.copyWith(color: t.textMuted),
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 14,
+                    ),
                     error: problems.containsKey('packQty')
                         ? const SizedBox()
                         : null,
@@ -299,7 +311,15 @@ class _QuietField extends StatelessWidget {
                   decimal: true,
                 ),
                 style: AppTextTheme.hint.copyWith(color: t.textPrimary),
-                decoration: const InputDecoration.collapsed(hintText: ''),
+                // The app theme fills and outlines every field; the quiet
+                // field draws its own background, so turn both off here.
+                decoration: const InputDecoration(
+                  isCollapsed: true,
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
               ),
             ),
           ),

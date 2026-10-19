@@ -1025,4 +1025,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get itemSearchHint => 'Search items';
+
+  @override
+  String get currencySwitch => 'Switch currency';
+
+  @override
+  String get priceUnitHint => 'e.g. bottle';
 }

@@ -90,9 +90,10 @@ void main() {
       expect(find.text('3000.5'), findsOneWidget);
       expect(texts.last, ('3000.5', Currency.khr));
       expect(find.text('តម្លៃរៀលមិនអាចមានទសភាគ'), findsOneWidget);
-      await tester.tap(find.text(r'$'));
+      await tester.tap(find.byTooltip('ប្តូររូបិយប័ណ្ណ'));
       await tester.pump();
       expect(texts.last.$2, Currency.usd, reason: 'a switch is reported too');
+      expect(find.text(r'$'), findsOneWidget, reason: 'the toggle shows \$');
     },
   );
 
@@ -102,7 +103,8 @@ void main() {
     (tester) async {
       reported.clear();
       await tester.enterText(find.byType(TextField), '30000');
-      await tester.tap(find.text(r'$'));
+      // One toggle showing the current currency; a tap flips it.
+      await tester.tap(find.byTooltip('ប្តូររូបិយប័ណ្ណ'));
       await tester.pump();
       expect(find.text('7.50'), findsOneWidget);
       expect(reported.last, const Money(750, Currency.usd));

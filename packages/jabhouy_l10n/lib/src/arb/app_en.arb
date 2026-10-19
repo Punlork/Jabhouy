@@ -1338,5 +1338,13 @@
   "itemSearchHint": "Search items",
   "@itemSearchHint": {
     "description": "Hint in the Home search field"
+  },
+  "currencySwitch": "Switch currency",
+  "@currencySwitch": {
+    "description": "Tooltip of the ៛ / $ toggle in a money field"
+  },
+  "priceUnitHint": "e.g. bottle",
+  "@priceUnitHint": {
+    "description": "Hint inside the unit field of a price row"
   }
 }
