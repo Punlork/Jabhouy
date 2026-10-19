@@ -354,7 +354,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                   if (key.startsWith('${row.id}.'))
                     key.substring(row.id.length + 1): value,
               },
-              unitChips: i == 0 ? state.units : const [],
+              unitChips: state.units,
               unitHint: i == 0 && category.isNotEmpty
                   ? l10n.priceUnitsFor(category.first.name)
                   : null,

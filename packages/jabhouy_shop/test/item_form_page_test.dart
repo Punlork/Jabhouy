@@ -122,6 +122,37 @@ void main() {
     await tester.runAsync(db.close);
   });
 
+  testWidgets('every price row offers the unit chips', (tester) async {
+    await tester.runAsync(() async {
+      await repo.saveCategory(
+        const ItemCategory(
+          id: 'drinks',
+          name: 'ភេសជ្ជៈ',
+          units: [CategoryUnit(unit: 'ដប'), CategoryUnit(unit: 'កេះ')],
+        ),
+      );
+      // The form opens on the last used category.
+      await repo.saveItem(
+        const Item(id: 'old', name: 'old', categoryId: 'drinks', prices: []),
+      );
+    });
+    await pumpForm(tester);
+    await tester.tap(find.textContaining('បន្ថែមតម្លៃ'));
+    await tester.pumpAndSettle();
+
+    final secondRow = find.byType(PriceRowEditor).at(1);
+    await tester.tap(
+      find.descendant(of: secondRow, matching: find.text('កេះ')),
+    );
+    await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
+    await save(tester);
+
+    final items = await tester.runAsync(() => repo.watchItems().first);
+    final coke = items!.firstWhere((i) => i.name == 'Coca-Cola');
+    expect(coke.prices.single.unit, 'កេះ', reason: 'row 1 left empty');
+    await tester.runAsync(db.close);
+  });
+
   testWidgets('saving with problems shows each message and writes nothing',
       (tester) async {
     await pumpForm(tester);
