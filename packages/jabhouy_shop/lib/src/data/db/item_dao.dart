@@ -30,16 +30,7 @@ class ItemDao {
     if (categoryId != null) {
       query.where(_db.itemTable.categoryId.equals(categoryId));
     }
-    return query.watch().map((rows) {
-      final items = <String, (ItemRow, List<PriceOption>)>{};
-      for (final row in rows) {
-        final item = row.readTable(_db.itemTable);
-        final entry = items.putIfAbsent(item.id, () => (item, []));
-        final price = row.readTableOrNull(_db.itemPriceTable);
-        if (price != null) entry.$2.add(_option(price));
-      }
-      return [for (final (row, prices) in items.values) _item(row, prices)];
-    });
+    return query.watch().map(_itemsFrom);
   }
 
   /// Writes the Item and replaces its Price options; adds new units to
@@ -311,6 +302,55 @@ class ItemDao {
     });
   }
 
+  /// Records that [itemId] was opened, then keeps [shopId]'s newest 10.
+  Future<void> recordView(String shopId, String itemId, DateTime at) {
+    return _db.transaction(() async {
+      await _db
+          .into(_db.recentItemTable)
+          .insertOnConflictUpdate(
+            RecentItemTableCompanion.insert(
+              shopId: shopId,
+              itemId: itemId,
+              viewedAt: at,
+            ),
+          );
+      await _db.customUpdate(
+        '''
+        DELETE FROM recent_item WHERE shop_id = ?1 AND item_id NOT IN (
+          SELECT item_id FROM recent_item WHERE shop_id = ?1
+          ORDER BY viewed_at DESC LIMIT 10)
+        ''',
+        variables: [Variable(shopId)],
+        updates: {_db.recentItemTable},
+        updateKind: UpdateKind.delete,
+      );
+    });
+  }
+
+  /// [shopId]'s recently opened, live Items, newest first.
+  Stream<List<Item>> watchRecentItems(String shopId) {
+    final query =
+        _db.select(_db.recentItemTable).join([
+            innerJoin(
+              _db.itemTable,
+              _db.itemTable.id.equalsExp(_db.recentItemTable.itemId),
+            ),
+            leftOuterJoin(
+              _db.itemPriceTable,
+              _db.itemPriceTable.itemId.equalsExp(_db.itemTable.id),
+            ),
+          ])
+          ..where(
+            _db.recentItemTable.shopId.equals(shopId) &
+                _db.itemTable.deletedAt.isNull(),
+          )
+          ..orderBy([
+            OrderingTerm.desc(_db.recentItemTable.viewedAt),
+            OrderingTerm.asc(_db.itemPriceTable.sortOrder),
+          ]);
+    return query.watch().map(_itemsFrom);
+  }
+
   /// Sets each category's `sortOrder` to its index in [ids]. One transaction.
   Future<void> reorderCategories(
     List<String> ids, {
@@ -352,6 +392,18 @@ class ItemDao {
         )
         .get();
     return [for (final row in rows) row.read<String>('unit')];
+  }
+
+  /// Item + price rows, in query order, folded into Items.
+  List<Item> _itemsFrom(List<TypedResult> rows) {
+    final items = <String, (ItemRow, List<PriceOption>)>{};
+    for (final row in rows) {
+      final item = row.readTable(_db.itemTable);
+      final entry = items.putIfAbsent(item.id, () => (item, []));
+      final price = row.readTableOrNull(_db.itemPriceTable);
+      if (price != null) entry.$2.add(_option(price));
+    }
+    return [for (final (row, prices) in items.values) _item(row, prices)];
   }
 
   static Item _item(ItemRow row, List<PriceOption> prices) => Item(

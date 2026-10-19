@@ -143,6 +143,68 @@ void main() {
     expect([for (final i in found) i.id], ['big', 'vital']);
   });
 
+  group('recently viewed', () {
+    late DateTime now;
+    ItemRepository ticking(String shopId) => ItemRepository(
+      ItemDao(db),
+      _Scope(shopId),
+      engine,
+      connectivity,
+      clock: () => now = now.add(const Duration(minutes: 1)),
+    );
+    Future<List<String>> recent(ItemRepository shop) async => [
+      for (final i in await shop.watchRecentItems().first) i.id,
+    ];
+
+    setUp(() => now = DateTime.utc(2026, 10, 19));
+
+    test('keeps the 10 newest, newest first', () async {
+      final shop = ticking('s1');
+      for (var i = 1; i <= 12; i++) {
+        await shop.saveItem(Item(id: 'i$i', name: 'i$i', prices: const []));
+        await shop.recordView('i$i');
+      }
+      expect(await recent(shop), [for (var i = 12; i >= 3; i--) 'i$i']);
+      expect(await db.select(db.recentItemTable).get(), hasLength(10));
+    });
+
+    test('re-opening moves an item to the front without a duplicate', () async {
+      final shop = ticking('s1');
+      for (final id in ['a', 'b', 'c']) {
+        await shop.saveItem(Item(id: id, name: id, prices: const []));
+        await shop.recordView(id);
+      }
+      await shop.recordView('a');
+      expect(await recent(shop), ['a', 'c', 'b']);
+    });
+
+    test("another shop's recents are not shown, and nothing is queued",
+        () async {
+      final mine = ticking('s1');
+      final theirs = ticking('s2');
+      await theirs.saveItem(const Item(id: 'x', name: 'x', prices: []));
+      await theirs.recordView('x');
+      await db.delete(db.outboxEntries).go();
+      await theirs.recordView('x');
+
+      expect(await recent(mine), isEmpty);
+      expect(await recent(theirs), ['x']);
+      expect(await jobs(), isEmpty);
+    });
+
+    test('a deleted item drops out', () async {
+      final shop = ticking('s1');
+      await shop.saveItem(
+        Item(id: 'a', name: 'a', prices: [_option('ដប', 3000)]),
+      );
+      await shop.recordView('a');
+      expect((await shop.watchRecentItems().first).single.prices, hasLength(1));
+
+      await shop.deleteItem('a');
+      expect(await recent(shop), isEmpty);
+    });
+  });
+
   test('delete leaves a tombstone and hides the item', () async {
     final shop = repo('s1');
     await shop.saveItem(

@@ -77,6 +77,13 @@ class ItemRepository {
     return const Ok(null);
   }
 
+  /// Remembers an opened Item on this phone only; never synced (decision 46).
+  Future<void> recordView(String itemId) =>
+      _dao.recordView(_shopId, itemId, _clock());
+
+  /// The last 10 opened Items, newest first, for RecentPills.
+  Stream<List<Item>> watchRecentItems() => _dao.watchRecentItems(_shopId);
+
   /// Pull to refresh: sends queued changes now.
   /// shortcut: pushes only; pulling Items from the server lands with
   /// issue 11 (`/shops/:id/changes`).

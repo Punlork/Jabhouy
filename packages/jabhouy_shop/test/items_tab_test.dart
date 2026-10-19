@@ -90,8 +90,9 @@ void main() {
     await tester.runAsync(db.close);
   }
 
-  testWidgets('one row per item, one line per price, never 0 ៛',
-      (tester) async {
+  testWidgets('one row per item, one line per price, never 0 ៛', (
+    tester,
+  ) async {
     await pumpTab(tester);
 
     expect(find.text('Coca-Cola'), findsOneWidget);
@@ -108,6 +109,8 @@ void main() {
     await tester.tap(find.text('Coca-Cola'));
     await settle(tester);
     expect(find.byType(ItemDetailsSheet), findsOneWidget);
+    final recent = await tester.runAsync(() => repo.watchRecentItems().first);
+    expect(recent!.map((i) => i.id), ['coke'], reason: 'opening is recorded');
     final sheet = tester.widget<BottomSheet>(find.byType(BottomSheet));
     expect(
       sheet.backgroundColor,
@@ -121,8 +124,9 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('the warning chip narrows to items missing a price',
-      (tester) async {
+  testWidgets('the warning chip narrows to items missing a price', (
+    tester,
+  ) async {
     await pumpTab(tester);
 
     await tester.tap(find.text('មិនទាន់មានតម្លៃ').first);

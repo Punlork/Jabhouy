@@ -85,6 +85,9 @@ class ItemListCubit extends Cubit<ItemListState> {
 
   Future<void> delete(String id) => _repository.deleteItem(id);
 
+  /// The details sheet opened [id]: it joins Recently viewed.
+  Future<void> viewed(String id) => _repository.recordView(id);
+
   /// Pull to refresh.
   Future<void> refresh() => _repository.pullLatest();
 
