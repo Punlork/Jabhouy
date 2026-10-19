@@ -41,12 +41,13 @@ class ItemListCubit extends Cubit<ItemListState> {
     emit(state.copyWith(canEdit: _scope.role?.canEditPrices ?? false));
     // The watch below picks the categories up once they are written.
     unawaited(_repository.seedStarterCategories());
-    unawaited(
-      _repository.priceSettings().then((s) {
-        if (!isClosed) emit(state.copyWith(settings: s));
-      }),
-    );
     _subscriptions
+      ..add(
+        // Live, so a new rate updates every ≈ at once.
+        _repository.watchPriceSettings().listen(
+          (settings) => emit(state.copyWith(settings: settings)),
+        ),
+      )
       ..add(
         _repository.watchCategories().listen(
           (categories) => emit(state.copyWith(categories: categories)),

@@ -189,26 +189,56 @@ class ItemDao {
   /// A Member's display name in [shopId], if the phone knows it.
   Future<String?> memberName(String shopId, String userId) async {
     final row =
-        await (_db.select(_db.memberTable)..where(
-              (m) => m.shopId.equals(shopId) & m.userId.equals(userId),
-            ))
+        await (_db.select(_db.memberTable)
+              ..where((m) => m.shopId.equals(shopId) & m.userId.equals(userId)))
             .getSingleOrNull();
     return row?.displayName;
   }
 
   /// The Shop's price settings; the table's defaults until a row exists.
-  Future<PriceSettings> priceSettings(String shopId) async {
-    final row = await (_db.select(
-      _db.shopSettingsTable,
-    )..where((s) => s.shopId.equals(shopId))).getSingleOrNull();
-    if (row == null) return const PriceSettings();
-    return PriceSettings(
-      useWholesale: row.useWholesalePrice,
-      useCost: row.useCostPrice,
-      currency: Currency.values.byName(row.defaultCurrency.toLowerCase()),
-      khrPerUsd: row.khrPerUsd,
-    );
-  }
+  Future<PriceSettings> priceSettings(String shopId) =>
+      watchPriceSettings(shopId).first;
+
+  Stream<PriceSettings> watchPriceSettings(String shopId) =>
+      (_db.select(
+        _db.shopSettingsTable,
+      )..where((s) => s.shopId.equals(shopId))).watchSingleOrNull().map(
+        (row) => row == null
+            ? const PriceSettings()
+            : PriceSettings(
+                useWholesale: row.useWholesalePrice,
+                useCost: row.useCostPrice,
+                currency: Currency.values.byName(
+                  row.defaultCurrency.toLowerCase(),
+                ),
+                khrPerUsd: row.khrPerUsd,
+                showConverted: row.showConverted,
+                rateUpdatedAt: row.rateUpdatedAt,
+                rateUpdatedBy: row.rateUpdatedBy,
+              ),
+      );
+
+  Future<void> savePriceSettings(
+    String shopId,
+    PriceSettings settings, {
+    required DateTime now,
+    String? userId,
+  }) => _db
+      .into(_db.shopSettingsTable)
+      .insertOnConflictUpdate(
+        ShopSettingsTableCompanion.insert(
+          shopId: shopId,
+          useWholesalePrice: Value(settings.useWholesale),
+          useCostPrice: Value(settings.useCost),
+          defaultCurrency: Value(settings.currency.name.toUpperCase()),
+          khrPerUsd: Value(settings.khrPerUsd),
+          showConverted: Value(settings.showConverted),
+          rateUpdatedAt: Value(settings.rateUpdatedAt),
+          rateUpdatedBy: Value(settings.rateUpdatedBy),
+          updatedAt: Value(now),
+          updatedBy: Value(userId),
+        ),
+      );
 
   Stream<List<ItemCategory>> watchCategories(String shopId) {
     final query =

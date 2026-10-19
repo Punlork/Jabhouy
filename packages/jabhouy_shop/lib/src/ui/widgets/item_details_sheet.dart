@@ -328,7 +328,7 @@ class _PriceBlock extends StatelessWidget {
               PriceDisplay(
                 price: option.selling,
                 khrPerUsd: settings.khrPerUsd,
-                showConverted: true,
+                showConverted: settings.showConverted,
                 style: AppTextTheme.price.copyWith(fontSize: 20),
               ),
             ],

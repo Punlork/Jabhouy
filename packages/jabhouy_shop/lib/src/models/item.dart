@@ -1,4 +1,7 @@
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
+
+part 'item.g.dart';
 
 /// One way an Item is sold: a unit, an optional pack size, and its prices
 /// in one currency. A null price means "no price yet", never 0.
@@ -65,13 +68,17 @@ class Item {
       prices.isEmpty || prices.any((p) => p.price == null);
 }
 
-/// What the item form shows and defaults to, from the Shop's settings.
+/// The Shop's price and currency settings (canvas ១២ក).
+@CopyWith()
 class PriceSettings {
   const PriceSettings({
     this.useWholesale = false,
     this.useCost = true,
     this.currency = Currency.khr,
     this.khrPerUsd = 4000,
+    this.showConverted = true,
+    this.rateUpdatedAt,
+    this.rateUpdatedBy,
   });
 
   final bool useWholesale;
@@ -80,6 +87,13 @@ class PriceSettings {
   /// Default currency for a new price row.
   final Currency currency;
   final int khrPerUsd;
+
+  /// Shows the `≈` other-currency line under prices.
+  final bool showConverted;
+
+  /// When and by whom [khrPerUsd] last changed.
+  final DateTime? rateUpdatedAt;
+  final String? rateUpdatedBy;
 }
 
 /// A unit name suggested as a chip for Items in an [ItemCategory].

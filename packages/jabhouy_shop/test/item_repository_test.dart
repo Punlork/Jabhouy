@@ -11,14 +11,14 @@ import 'package:mocktail/mocktail.dart';
 class _MockConnectivity extends Mock implements ConnectivityService {}
 
 class _Scope implements ShopScope {
-  _Scope(this.shopId, {this.syncs = true});
+  _Scope(this.shopId, {this.syncs = true, this.role = MemberRole.owner});
 
   @override
   final String shopId;
   @override
   final bool syncs;
   @override
-  MemberRole get role => MemberRole.owner;
+  final MemberRole role;
   @override
   String get userId => 'u1';
 }
@@ -313,6 +313,61 @@ void main() {
     final server = repo('s1');
     await server.seedStarterCategories();
     expect(await server.watchCategories().first, isEmpty);
+  });
+
+  test('the owner saves settings; a watch sees them and a job is queued',
+      () async {
+    var now = DateTime.utc(2026, 10, 19, 3);
+    final shop = ItemRepository(
+      ItemDao(db),
+      _Scope('s1'),
+      engine,
+      connectivity,
+      clock: () => now,
+    );
+    final seen = <PriceSettings>[];
+    final sub = shop.watchPriceSettings().listen(seen.add);
+    addTearDown(sub.cancel);
+
+    final result = await shop.savePriceSettings(
+      const PriceSettings(
+        useWholesale: true,
+        currency: Currency.usd,
+        khrPerUsd: 4100,
+        showConverted: false,
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result, isA<Ok<PriceSettings>>());
+    final saved = seen.last;
+    expect(
+      (saved.useWholesale, saved.currency, saved.khrPerUsd, saved.showConverted),
+      (true, Currency.usd, 4100, false),
+    );
+    expect(saved.rateUpdatedAt!.toUtc(), now, reason: 'the rate changed');
+    expect(saved.rateUpdatedBy, 'u1');
+    expect((await jobs()).single.entityType, SyncEntityType.shopSettings);
+
+    // Saving the same rate again leaves "last edited" alone.
+    now = now.add(const Duration(days: 1));
+    await shop.savePriceSettings(saved.copyWith(useCost: false));
+    await Future<void>.delayed(Duration.zero);
+    expect(seen.last.rateUpdatedAt!.toUtc(), DateTime.utc(2026, 10, 19, 3));
+  });
+
+  test('only the owner may change shop settings', () async {
+    final editor = ItemRepository(
+      ItemDao(db),
+      _Scope('s1', role: MemberRole.editor),
+      engine,
+      connectivity,
+    );
+    final result = await editor.savePriceSettings(
+      const PriceSettings(useWholesale: true),
+    );
+    expect(result, isA<Err<PriceSettings>>());
+    expect((await editor.priceSettings()).useWholesale, isFalse);
   });
 
   test('a syncing shop queues a job per write', () async {

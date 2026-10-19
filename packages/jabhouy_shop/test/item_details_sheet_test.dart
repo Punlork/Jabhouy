@@ -149,4 +149,27 @@ void main() {
     expect(onScreen(find.text('កែតម្លៃ')), isTrue);
     expect(find.text('1 u11'), findsOneWidget, reason: 'last price reached');
   });
+
+  testWidgets('the ≈ line follows the shop setting', (tester) async {
+    for (final show in [true, false]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('km'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: ItemDetailsSheet(
+              item: _item,
+              settings: PriceSettings(showConverted: show),
+              canEdit: false,
+              onEdit: () {},
+              onDelete: () {},
+            ),
+          ),
+        ),
+      );
+      expect(find.text(r'≈ $0.75'), show ? findsOneWidget : findsNothing);
+    }
+  });
 }

@@ -16,6 +16,9 @@ enum SyncEntityType {
 
   /// Redesign category with its units; `category` is the old table's.
   itemCategory,
+
+  /// The Shop's price and currency settings; one row per Shop.
+  shopSettings,
 }
 
 /// What an outbox job will do to the server.

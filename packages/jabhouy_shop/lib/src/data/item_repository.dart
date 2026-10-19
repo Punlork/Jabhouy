@@ -101,8 +101,39 @@ class ItemRepository {
 
   Future<PriceSettings> priceSettings() => _dao.priceSettings(_shopId);
 
-  Future<String?> memberName(String userId) =>
-      _dao.memberName(_shopId, userId);
+  Stream<PriceSettings> watchPriceSettings() =>
+      _dao.watchPriceSettings(_shopId);
+
+  /// Owner only (the server enforces it too). A new rate records when and
+  /// by whom; an unchanged one keeps its "last edited".
+  Future<Result<PriceSettings>> savePriceSettings(PriceSettings next) async {
+    if (_scope.role != MemberRole.owner) {
+      return const Err(AppException('Only the owner changes shop settings.'));
+    }
+    final now = _clock();
+    final current = await _dao.priceSettings(_shopId);
+    final saved = next.khrPerUsd == current.khrPerUsd
+        ? next.copyWith(
+            rateUpdatedAt: current.rateUpdatedAt,
+            rateUpdatedBy: current.rateUpdatedBy,
+          )
+        : next.copyWith(rateUpdatedAt: now, rateUpdatedBy: _scope.userId);
+    await _dao.savePriceSettings(
+      _shopId,
+      saved,
+      now: now,
+      userId: _scope.userId,
+    );
+    await _queue(
+      SyncEntityType.shopSettings,
+      _shopId,
+      SyncOperation.update,
+      now,
+    );
+    return Ok(saved);
+  }
+
+  Future<String?> memberName(String userId) => _dao.memberName(_shopId, userId);
 
   /// Gives the stand-in Shop the starter categories when it has none. A
   /// server Shop is seeded by the server, so it is left alone.

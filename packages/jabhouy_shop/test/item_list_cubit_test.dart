@@ -129,6 +129,14 @@ void main() {
     expect((await settled(list)).items.map((i) => i.id), ['rice']);
   });
 
+  test('a settings change reaches the list without a restart', () async {
+    final list = cubit()..start();
+    await settled(list);
+
+    await repo.savePriceSettings(const PriceSettings(khrPerUsd: 4100));
+    expect((await settled(list)).settings.khrPerUsd, 4100);
+  });
+
   test("the editor's name comes from the Shop's members", () async {
     await db.into(db.memberTable).insert(
       MemberTableCompanion.insert(
