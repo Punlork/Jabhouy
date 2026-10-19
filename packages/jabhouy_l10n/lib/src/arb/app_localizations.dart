@@ -2131,6 +2131,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For troubleshooting'**
   String get settingsDiagnosticsHint;
+
+  /// After the first three prices on a Home card
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String itemMorePrices(Object count);
 }
 
 class _AppLocalizationsDelegate

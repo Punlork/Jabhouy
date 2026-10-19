@@ -313,8 +313,6 @@ class PriceRowSummary extends StatelessWidget {
     final l10n = context.l10n;
     final t = context.tokens;
     final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
-    final pack = draft.packQty.trim().isEmpty ? '' : ' · ×${draft.packQty}';
-    final unit = draft.unit.trim().isEmpty ? '—' : draft.unit.trim();
     final extras = [
       for (final (label, text) in [
         (l10n.priceWholesaleLabel, draft.wholesale),
@@ -350,18 +348,10 @@ class PriceRowSummary extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            text: '1 $unit',
-                            children: [
-                              TextSpan(
-                                text: pack,
-                                style: TextStyle(
-                                  color: t.textMuted,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
+                        child: Text(
+                          unitLabel(
+                            draft.unit,
+                            parseWholeNumber(draft.packQty),
                           ),
                           style: AppTextTheme.body.copyWith(
                             color: t.textPrimary,

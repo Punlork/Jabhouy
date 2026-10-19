@@ -61,7 +61,7 @@ void main() {
 
     expect(find.text('Coca-Cola'), findsOneWidget);
     expect(find.text('ភេសជ្ជៈ'), findsOneWidget);
-    expect(find.text('1 កេះ · ×24'), findsOneWidget);
+    expect(find.text('កេះ (24)'), findsOneWidget);
     expect(find.text('3,000 ៛'), findsOneWidget);
     expect(find.text('ដើម: 2,500 ៛'), findsOneWidget, reason: 'cost for all');
     expect(find.text('ដើម: —'), findsOneWidget);
@@ -143,11 +143,11 @@ void main() {
     bool onScreen(Finder f) => screen.contains(tester.getCenter(f));
     expect(onScreen(find.text('កែតម្លៃ')), isTrue, reason: 'buttons fixed');
 
-    await tester.drag(find.text('1 u3'), const Offset(0, -300));
+    await tester.drag(find.text('u3'), const Offset(0, -300));
     await tester.pumpAndSettle();
     expect(onScreen(find.text('Many')), isTrue, reason: 'header fixed');
     expect(onScreen(find.text('កែតម្លៃ')), isTrue);
-    expect(find.text('1 u11'), findsOneWidget, reason: 'last price reached');
+    expect(find.text('u11'), findsOneWidget, reason: 'last price reached');
   });
 
   testWidgets('the ≈ line follows the shop setting', (tester) async {

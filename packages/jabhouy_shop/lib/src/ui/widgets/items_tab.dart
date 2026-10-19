@@ -215,7 +215,7 @@ class _ItemRow extends StatelessWidget {
                   if (item.prices.isEmpty)
                     const _PriceLine(null)
                   else
-                    for (final option in item.prices) _PriceLine(option),
+                    ..._priceLines(context, item),
                 ],
               ),
             ),
@@ -260,7 +260,7 @@ class _ItemCard extends StatelessWidget {
               if (item.prices.isEmpty)
                 const _PriceLine(null)
               else
-                for (final option in item.prices) _PriceLine(option),
+                ..._priceLines(context, item),
             ],
           ),
         ),
@@ -269,7 +269,23 @@ class _ItemCard extends StatelessWidget {
   }
 }
 
-/// `1 ដប` or `1 កេះ · ×24` on the left, the price on the right. A null
+/// Three price lines at most, then `+n ទៀត`: the sheet shows the rest.
+List<Widget> _priceLines(BuildContext context, Item item) {
+  const shown = 3;
+  return [
+    for (final option in item.prices.take(shown)) _PriceLine(option),
+    if (item.prices.length > shown)
+      Padding(
+        padding: const EdgeInsets.only(top: 3),
+        child: Text(
+          context.l10n.itemMorePrices(item.prices.length - shown),
+          style: AppTextTheme.hint.copyWith(color: context.tokens.textMuted),
+        ),
+      ),
+  ];
+}
+
+/// `ដប` or `កេះ (12)` on the left, the price on the right. A null
 /// [option] is an Item saved without prices: `មិនទាន់មានតម្លៃ` alone.
 class _PriceLine extends StatelessWidget {
   const _PriceLine(this.option);
@@ -288,7 +304,6 @@ class _PriceLine extends StatelessWidget {
         ),
       );
     }
-    final pack = option.packQty == null ? '' : ' · ×${option.packQty}';
     return Padding(
       padding: const EdgeInsets.only(top: 3),
       child: Row(
@@ -297,7 +312,7 @@ class _PriceLine extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              '1 ${option.unit}$pack',
+              option.label,
               style: AppTextTheme.hint.copyWith(
                 color: context.tokens.textMuted,
               ),

@@ -1094,4 +1094,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDiagnosticsHint => 'For troubleshooting';
+
+  @override
+  String itemMorePrices(Object count) {
+    return '+$count more';
+  }
 }

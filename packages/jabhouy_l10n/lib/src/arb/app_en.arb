@@ -1429,5 +1429,12 @@
   "settingsDiagnosticsHint": "For troubleshooting",
   "@settingsDiagnosticsHint": {
     "description": "Subtitle of the diagnostics row"
+  },
+  "itemMorePrices": "+{count} more",
+  "@itemMorePrices": {
+    "description": "After the first three prices on a Home card",
+    "placeholders": {
+      "count": {}
+    }
   }
 }

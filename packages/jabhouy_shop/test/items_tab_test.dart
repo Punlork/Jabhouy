@@ -95,9 +95,9 @@ void main() {
     await pumpTab(tester);
 
     expect(find.text('Coca-Cola'), findsOneWidget);
-    expect(find.text('1 ដប'), findsOneWidget);
+    expect(find.text('ដប'), findsOneWidget);
     expect(find.text('3,000 ៛'), findsOneWidget);
-    expect(find.text('1 កេះ · ×24'), findsOneWidget);
+    expect(find.text('កេះ (24)'), findsOneWidget);
     expect(find.text('60,000 ៛'), findsOneWidget);
     // The warning chip, the rice row's missing price, and the unpriced
     // sugar row.
@@ -142,10 +142,29 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('a card shows three prices, then how many more', (tester) async {
+    await pumpTab(tester);
+    await tester.runAsync(
+      () => repo.saveItem(
+        Item(
+          id: 'many',
+          name: 'Many',
+          prices: [for (var i = 0; i < 5; i++) _option('u$i', 1000 + i)],
+        ),
+      ),
+    );
+    await settle(tester);
+
+    expect(find.text('u2'), findsOneWidget);
+    expect(find.text('u3'), findsNothing);
+    expect(find.text('+2 ទៀត'), findsOneWidget);
+    await close(tester);
+  });
+
   testWidgets('the grid shows the same price lines', (tester) async {
     await pumpTab(tester, grid: true);
 
-    expect(find.text('1 កេះ · ×24'), findsOneWidget);
+    expect(find.text('កេះ (24)'), findsOneWidget);
     expect(find.text('60,000 ៛'), findsOneWidget);
     await close(tester);
   });

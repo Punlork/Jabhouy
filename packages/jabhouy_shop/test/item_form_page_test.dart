@@ -200,7 +200,14 @@ void main() {
     await save(tester);
 
     expect(find.text('ចំនួនត្រូវធំជាង ០'), findsOneWidget);
-    expect(find.text('កេះ'), findsOneWidget, reason: 'the bad row is open');
+    expect(
+      find.descendant(
+        of: find.byType(PriceRowEditor),
+        matching: find.text('កេះ'),
+      ),
+      findsOneWidget,
+      reason: 'the bad row is open',
+    );
     await tester.runAsync(db.close);
   });
 

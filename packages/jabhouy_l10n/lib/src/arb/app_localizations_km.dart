@@ -1078,4 +1078,9 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get settingsDiagnosticsHint => 'សម្រាប់ដោះស្រាយបញ្ហា';
+
+  @override
+  String itemMorePrices(Object count) {
+    return '+$count ទៀត';
+  }
 }

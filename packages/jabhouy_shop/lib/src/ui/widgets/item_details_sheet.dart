@@ -305,20 +305,8 @@ class _PriceBlock extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    text: '1 ${option.unit}',
-                    children: [
-                      if (option.packQty != null)
-                        TextSpan(
-                          text: ' · ×${option.packQty}',
-                          style: TextStyle(
-                            color: t.textMuted,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                    ],
-                  ),
+                child: Text(
+                  option.label,
                   style: AppTextTheme.body.copyWith(
                     color: t.textPrimary,
                     fontWeight: FontWeight.w600,

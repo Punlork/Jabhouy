@@ -153,4 +153,19 @@ void main() {
       expect(suggestCategory('ប្រេងឆា', categories), isNull);
     });
   });
+
+  group('unitLabel', () {
+    test('a pack count above 1 shows in brackets', () {
+      expect(unitLabel('កេះ', 12), 'កេះ (12)');
+    });
+
+    test('no count, or ×1, shows the unit alone', () {
+      expect(unitLabel('ដប', null), 'ដប');
+      expect(unitLabel('ដប', 1), 'ដប');
+    });
+
+    test('an empty unit shows a dash', () {
+      expect(unitLabel('  ', 12), '— (12)');
+    });
+  });
 }

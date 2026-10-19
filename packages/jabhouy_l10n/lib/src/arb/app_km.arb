@@ -1377,5 +1377,12 @@
   "settingsDiagnosticsHint": "សម្រាប់ដោះស្រាយបញ្ហា",
   "@settingsDiagnosticsHint": {
     "description": "Subtitle of the diagnostics row"
+  },
+  "itemMorePrices": "+{count} ទៀត",
+  "@itemMorePrices": {
+    "description": "After the first three prices on a Home card",
+    "placeholders": {
+      "count": {}
+    }
   }
 }

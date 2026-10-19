@@ -3,6 +3,13 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 
 part 'item.g.dart';
 
+/// How a Price option is named everywhere: `ដប`, or `កេះ (12)` for a
+/// pack of more than one. A blank unit shows as `—`.
+String unitLabel(String unit, int? packQty) {
+  final name = unit.trim().isEmpty ? '—' : unit.trim();
+  return packQty != null && packQty > 1 ? '$name ($packQty)' : name;
+}
+
 /// One way an Item is sold: a unit, an optional pack size, and its prices
 /// in one currency. A null price means "no price yet", never 0.
 class PriceOption {
@@ -29,6 +36,9 @@ class PriceOption {
   final int? wholesale;
   final int? cost;
   final int sortOrder;
+
+  /// `ដប` or `កេះ (12)`.
+  String get label => unitLabel(unit, packQty);
 
   Money? get selling => _money(price);
   Money? get wholesaleMoney => _money(wholesale);
