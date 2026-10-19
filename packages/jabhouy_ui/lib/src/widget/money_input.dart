@@ -128,8 +128,16 @@ class _CurrencySegments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final symbol = selected == Currency.khr ? '៛' : r'$';
+    final other = selected == Currency.khr ? Currency.usd : Currency.khr;
+    // One node for screen readers: inner per-symbol nodes got clipped into
+    // invisible ones while the row scrolled. Sighted taps still hit each
+    // symbol; a screen reader's tap flips the currency.
     return Semantics(
-      label: context.l10n.currencySwitch,
+      button: true,
+      label: '${context.l10n.currencySwitch} $symbol',
+      onTap: () => onSelect(other),
+      excludeSemantics: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -162,33 +170,29 @@ class _Segment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Semantics(
-      button: true,
-      selected: selected,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        // A 36 px square to see, a 44 px square to tap.
-        child: SizedBox.square(
-          dimension: AppSizes.minTapTarget,
-          child: Center(
-            child: Container(
-              width: 36,
-              height: 32,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: selected ? t.textPrimary : null,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                symbol,
-                // Kantumruy draws ៛ small; it needs a larger size to read.
-                style: TextStyle(
-                  fontSize: symbol == '៛' ? 22 : 17,
-                  height: 1.1,
-                  fontWeight: FontWeight.w700,
-                  color: selected ? t.onPrimary : t.textMuted,
-                ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      // A 36 px square to see, a 44 px square to tap.
+      child: SizedBox.square(
+        dimension: AppSizes.minTapTarget,
+        child: Center(
+          child: Container(
+            width: 36,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: selected ? t.textPrimary : null,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              symbol,
+              // Kantumruy draws ៛ small; it needs a larger size to read.
+              style: TextStyle(
+                fontSize: symbol == '៛' ? 22 : 17,
+                height: 1.1,
+                fontWeight: FontWeight.w700,
+                color: selected ? t.onPrimary : t.textMuted,
               ),
             ),
           ),

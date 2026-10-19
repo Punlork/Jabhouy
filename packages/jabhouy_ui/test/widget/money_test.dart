@@ -74,6 +74,22 @@ void main() {
     },
   );
 
+  testBothThemes(
+    'the currency switch is one accessible control, with no child nodes',
+    () => input(Currency.khr),
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      final node = tester.getSemantics(
+        find.bySemanticsLabel(RegExp('ប្តូររូបិយប័ណ្ណ')),
+      );
+      // A child node can be clipped into an invisible one while the row
+      // scrolls (a debug-mode semantics error).
+      expect(node.childrenCount, 0);
+      expect(node.label, contains('៛'));
+      semantics.dispose();
+    },
+  );
+
   final texts = <(String, Currency)>[];
   testBothThemes(
     'MoneyInput keeps a riel decimal visible instead of losing the dot',
