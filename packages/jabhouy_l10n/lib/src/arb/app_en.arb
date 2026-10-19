@@ -1381,5 +1381,53 @@
   "priceWholesaleLabel": "Wholesale",
   "@priceWholesaleLabel": {
     "description": "Short wholesale label on the item details sheet"
+  },
+  "settingsPricesCurrency": "Prices & currency",
+  "@settingsPricesCurrency": {
+    "description": "Title of the shop's price and currency settings"
+  },
+  "settingsPricesUsedHint": "Ticked prices show on every item",
+  "@settingsPricesUsedHint": {
+    "description": "Under the prices-used heading"
+  },
+  "settingsAlwaysOn": "Always on",
+  "@settingsAlwaysOn": {
+    "description": "Subtitle of the selling price row"
+  },
+  "settingsWholesaleHint": "For bulk buyers",
+  "@settingsWholesaleHint": {
+    "description": "Subtitle of the wholesale price row"
+  },
+  "settingsRateKeepsOld": "Old credits keep their rate",
+  "@settingsRateKeepsOld": {
+    "description": "After the rate's last-edited line"
+  },
+  "settingsRateInvalid": "The rate must be more than 0",
+  "@settingsRateInvalid": {
+    "description": "Error for an empty or zero rate"
+  },
+  "settingsOwnerOnly": "Only the shop owner can change shop settings",
+  "@settingsOwnerOnly": {
+    "description": "Note under shop settings for non-owners"
+  },
+  "settingsAppSection": "App",
+  "@settingsAppSection": {
+    "description": "Settings section for app options"
+  },
+  "settingsHelpSection": "Help",
+  "@settingsHelpSection": {
+    "description": "Settings section for help"
+  },
+  "settingsAppearance": "Appearance",
+  "@settingsAppearance": {
+    "description": "Settings row for light or dark mode"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Settings row for the app language"
+  },
+  "settingsDiagnosticsHint": "For troubleshooting",
+  "@settingsDiagnosticsHint": {
+    "description": "Subtitle of the diagnostics row"
   }
 }

@@ -1042,4 +1042,40 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get priceWholesaleLabel => 'លក់ដុំ';
+
+  @override
+  String get settingsPricesCurrency => 'តម្លៃ និងរូបិយប័ណ្ណ';
+
+  @override
+  String get settingsPricesUsedHint => 'តម្លៃដែលធីក នឹងបង្ហាញនៅគ្រប់ទំនិញ';
+
+  @override
+  String get settingsAlwaysOn => 'តែងតែបើក';
+
+  @override
+  String get settingsWholesaleHint => 'សម្រាប់អ្នកទិញដុំ';
+
+  @override
+  String get settingsRateKeepsOld => 'ការជំពាក់ចាស់រក្សាអត្រាដើម';
+
+  @override
+  String get settingsRateInvalid => 'អត្រាត្រូវធំជាង ០';
+
+  @override
+  String get settingsOwnerOnly => 'មានតែម្ចាស់ហាងទេដែលអាចកែការកំណត់ហាងបាន';
+
+  @override
+  String get settingsAppSection => 'កម្មវិធី';
+
+  @override
+  String get settingsHelpSection => 'ជំនួយ';
+
+  @override
+  String get settingsAppearance => 'រូបរាង';
+
+  @override
+  String get settingsLanguage => 'ភាសា';
+
+  @override
+  String get settingsDiagnosticsHint => 'សម្រាប់ដោះស្រាយបញ្ហា';
 }

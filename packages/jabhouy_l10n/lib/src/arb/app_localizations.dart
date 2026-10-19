@@ -2059,6 +2059,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wholesale'**
   String get priceWholesaleLabel;
+
+  /// Title of the shop's price and currency settings
+  ///
+  /// In en, this message translates to:
+  /// **'Prices & currency'**
+  String get settingsPricesCurrency;
+
+  /// Under the prices-used heading
+  ///
+  /// In en, this message translates to:
+  /// **'Ticked prices show on every item'**
+  String get settingsPricesUsedHint;
+
+  /// Subtitle of the selling price row
+  ///
+  /// In en, this message translates to:
+  /// **'Always on'**
+  String get settingsAlwaysOn;
+
+  /// Subtitle of the wholesale price row
+  ///
+  /// In en, this message translates to:
+  /// **'For bulk buyers'**
+  String get settingsWholesaleHint;
+
+  /// After the rate's last-edited line
+  ///
+  /// In en, this message translates to:
+  /// **'Old credits keep their rate'**
+  String get settingsRateKeepsOld;
+
+  /// Error for an empty or zero rate
+  ///
+  /// In en, this message translates to:
+  /// **'The rate must be more than 0'**
+  String get settingsRateInvalid;
+
+  /// Note under shop settings for non-owners
+  ///
+  /// In en, this message translates to:
+  /// **'Only the shop owner can change shop settings'**
+  String get settingsOwnerOnly;
+
+  /// Settings section for app options
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get settingsAppSection;
+
+  /// Settings section for help
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get settingsHelpSection;
+
+  /// Settings row for light or dark mode
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearance;
+
+  /// Settings row for the app language
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// Subtitle of the diagnostics row
+  ///
+  /// In en, this message translates to:
+  /// **'For troubleshooting'**
+  String get settingsDiagnosticsHint;
 }
 
 class _AppLocalizationsDelegate

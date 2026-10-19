@@ -20,6 +20,7 @@ class AppRoutes {
   static const customer = 'customer';
   static const profile = 'profile';
   static const settings = 'settings';
+  static const priceSettings = 'price_settings';
   static const appDiagnostics = 'app_diagnostics';
   static const incomeDiagnostics = 'income_diagnostics';
 }

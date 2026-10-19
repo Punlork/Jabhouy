@@ -1329,5 +1329,53 @@
   "priceWholesaleLabel": "លក់ដុំ",
   "@priceWholesaleLabel": {
     "description": "Short wholesale label on the item details sheet"
+  },
+  "settingsPricesCurrency": "តម្លៃ និងរូបិយប័ណ្ណ",
+  "@settingsPricesCurrency": {
+    "description": "Title of the shop's price and currency settings"
+  },
+  "settingsPricesUsedHint": "តម្លៃដែលធីក នឹងបង្ហាញនៅគ្រប់ទំនិញ",
+  "@settingsPricesUsedHint": {
+    "description": "Under the prices-used heading"
+  },
+  "settingsAlwaysOn": "តែងតែបើក",
+  "@settingsAlwaysOn": {
+    "description": "Subtitle of the selling price row"
+  },
+  "settingsWholesaleHint": "សម្រាប់អ្នកទិញដុំ",
+  "@settingsWholesaleHint": {
+    "description": "Subtitle of the wholesale price row"
+  },
+  "settingsRateKeepsOld": "ការជំពាក់ចាស់រក្សាអត្រាដើម",
+  "@settingsRateKeepsOld": {
+    "description": "After the rate's last-edited line"
+  },
+  "settingsRateInvalid": "អត្រាត្រូវធំជាង ០",
+  "@settingsRateInvalid": {
+    "description": "Error for an empty or zero rate"
+  },
+  "settingsOwnerOnly": "មានតែម្ចាស់ហាងទេដែលអាចកែការកំណត់ហាងបាន",
+  "@settingsOwnerOnly": {
+    "description": "Note under shop settings for non-owners"
+  },
+  "settingsAppSection": "កម្មវិធី",
+  "@settingsAppSection": {
+    "description": "Settings section for app options"
+  },
+  "settingsHelpSection": "ជំនួយ",
+  "@settingsHelpSection": {
+    "description": "Settings section for help"
+  },
+  "settingsAppearance": "រូបរាង",
+  "@settingsAppearance": {
+    "description": "Settings row for light or dark mode"
+  },
+  "settingsLanguage": "ភាសា",
+  "@settingsLanguage": {
+    "description": "Settings row for the app language"
+  },
+  "settingsDiagnosticsHint": "សម្រាប់ដោះស្រាយបញ្ហា",
+  "@settingsDiagnosticsHint": {
+    "description": "Subtitle of the diagnostics row"
   }
 }

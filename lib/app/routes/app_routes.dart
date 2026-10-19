@@ -236,8 +236,6 @@ class AppRouter {
             name: AppRoutes.settings,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final categoryBloc = extra?['category'] as CategoryBloc? ?? context.read<CategoryBloc>();
-              final shopBloc = extra?['shop'] as ShopBloc? ?? context.read<ShopBloc>();
               final customerBloc = extra?['customerBloc'] as CustomerBloc? ?? context.read<CustomerBloc>();
               final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
               final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ?? context.read<SignoutBloc>();
@@ -247,13 +245,36 @@ class AppRouter {
                 key: state.pageKey,
                 child: MultiBlocProvider(
                   providers: [
-                    BlocProvider.value(value: categoryBloc),
-                    BlocProvider.value(value: shopBloc),
                     BlocProvider.value(value: customerBloc),
                     if (incomeBloc != null) BlocProvider.value(value: incomeBloc),
                     BlocProvider.value(value: signoutBloc),
+                    // Shared with the Prices & currency screen, so its
+                    // changes show in the Settings row on return.
+                    BlocProvider(
+                      create: (_) => PriceSettingsCubit(
+                        getIt<ItemRepository>(),
+                        getIt<CurrentShop>(),
+                      )..load(),
+                    ),
                   ],
                   child: const SettingsPage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.priceSettings.toPath,
+            name: AppRoutes.priceSettings,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              final cubit = extra['priceSettingsCubit'] as PriceSettingsCubit;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider.value(
+                  value: cubit,
+                  child: const PriceSettingsPage(),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

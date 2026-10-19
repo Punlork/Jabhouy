@@ -204,8 +204,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.pushNamed(
       AppRoutes.settings,
       extra: {
-        'category': context.read<CategoryBloc>(),
-        'shop': context.read<ShopBloc>(),
         'customerBloc': context.read<CustomerBloc>(),
         if (_isIncomeEnabled) 'incomeBloc': context.read<IncomeBloc>(),
         'signoutBloc': context.read<SignoutBloc>(),

@@ -1057,4 +1057,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceWholesaleLabel => 'Wholesale';
+
+  @override
+  String get settingsPricesCurrency => 'Prices & currency';
+
+  @override
+  String get settingsPricesUsedHint => 'Ticked prices show on every item';
+
+  @override
+  String get settingsAlwaysOn => 'Always on';
+
+  @override
+  String get settingsWholesaleHint => 'For bulk buyers';
+
+  @override
+  String get settingsRateKeepsOld => 'Old credits keep their rate';
+
+  @override
+  String get settingsRateInvalid => 'The rate must be more than 0';
+
+  @override
+  String get settingsOwnerOnly =>
+      'Only the shop owner can change shop settings';
+
+  @override
+  String get settingsAppSection => 'App';
+
+  @override
+  String get settingsHelpSection => 'Help';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsDiagnosticsHint => 'For troubleshooting';
 }

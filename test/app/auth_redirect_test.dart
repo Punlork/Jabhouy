@@ -31,6 +31,8 @@ void main() {
     expect(authRedirect(signedIn, settings, flags), isNull);
     final itemForm = '$home${AppRoutes.formItem.toPath}';
     expect(authRedirect(signedIn, itemForm, flags), isNull);
+    final prices = '$home${AppRoutes.priceSettings.toPath}';
+    expect(authRedirect(signedIn, prices, flags), isNull);
   });
 
   test('income diagnostics is reachable only with income and diagnostics on', () {
