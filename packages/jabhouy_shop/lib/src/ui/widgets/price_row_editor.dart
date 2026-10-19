@@ -177,7 +177,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                     prefixIconConstraints: const BoxConstraints(),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 6,
-                      vertical: 14,
+                      vertical: 13,
                     ),
                     error: problems.containsKey('packQty')
                         ? const SizedBox()

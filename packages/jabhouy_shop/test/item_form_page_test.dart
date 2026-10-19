@@ -74,6 +74,10 @@ void main() {
   testWidgets('ដប + កេះ ×24 in one form saves one item with two prices',
       (tester) async {
     await pumpForm(tester);
+    // Unit, count and price line up at the design's 50 px.
+    for (final field in [0, 1, 2]) {
+      expect(tester.getSize(rowField(0, field)).height, 50, reason: '$field');
+    }
     // Empty fields show the design's examples.
     for (final hint in ['ឧ. អង្ករផ្កាម្លិះ', 'ឧ. ដប', '1', 'ឧ. 3,000']) {
       expect(find.text(hint), findsOneWidget, reason: hint);

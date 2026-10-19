@@ -62,6 +62,11 @@ class AppTheme {
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
+        // 13 + a 24 px line (16 px text at 1.5) + 13 = the 50 px input.
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 13,
+        ),
         filled: true,
         fillColor: tokens.surface,
         hintStyle: TextStyle(color: tokens.placeholder),
