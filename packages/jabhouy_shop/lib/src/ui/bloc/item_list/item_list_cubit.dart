@@ -85,6 +85,9 @@ class ItemListCubit extends Cubit<ItemListState> {
 
   Future<void> delete(String id) => _repository.deleteItem(id);
 
+  /// Pull to refresh.
+  Future<void> refresh() => _repository.pullLatest();
+
   /// For the details sheet's "last edited by"; null when unknown.
   Future<String?> editorName(String? userId) async =>
       userId == null ? null : _repository.memberName(userId);

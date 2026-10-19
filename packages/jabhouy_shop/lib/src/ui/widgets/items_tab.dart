@@ -119,52 +119,66 @@ class _ItemsTabState extends State<ItemsTab>
               ),
             ),
             Expanded(
-              child: state.loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : state.items.isEmpty
-                  ? Center(
-                      child: Text(
-                        l10n.itemListEmpty,
-                        style: AppTextTheme.body.copyWith(color: t.textMuted),
-                      ),
-                    )
-                  : state.grid
-                  ? MasonryGridView.count(
-                      controller: controller,
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      padding: _listPadding,
-                      itemCount: state.items.length,
-                      itemBuilder: (context, i) => _ItemCard(
-                        item: state.items[i],
-                        onTap: () => _openItem(state.items[i]),
-                      ),
-                    )
-                  : ListView(
-                      controller: controller,
-                      padding: _listPadding,
-                      children: [
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: t.surface,
-                            borderRadius: BorderRadius.circular(
-                              AppSizes.radiusCard,
+              child: RefreshIndicator(
+                onRefresh: cubit.refresh,
+                child: state.loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : state.items.isEmpty
+                    // A scroll view, so an empty list can still be pulled.
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          const SizedBox(height: 160),
+                          Center(
+                            child: Text(
+                              l10n.itemListEmpty,
+                              style: AppTextTheme.body.copyWith(
+                                color: t.textMuted,
+                              ),
                             ),
                           ),
-                          child: Column(
-                            children: [
-                              for (final (i, item) in state.items.indexed)
-                                _ItemRow(
-                                  item: item,
-                                  divider: i < state.items.length - 1,
-                                  onTap: () => _openItem(item),
-                                ),
-                            ],
-                          ),
+                        ],
+                      )
+                    : state.grid
+                    ? MasonryGridView.count(
+                        controller: controller,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        padding: _listPadding,
+                        itemCount: state.items.length,
+                        itemBuilder: (context, i) => _ItemCard(
+                          item: state.items[i],
+                          onTap: () => _openItem(state.items[i]),
                         ),
-                      ],
-                    ),
+                      )
+                    : ListView(
+                        controller: controller,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: _listPadding,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: t.surface,
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.radiusCard,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                for (final (i, item) in state.items.indexed)
+                                  _ItemRow(
+                                    item: item,
+                                    divider: i < state.items.length - 1,
+                                    onTap: () => _openItem(item),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ],
         );

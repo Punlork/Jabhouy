@@ -142,6 +142,17 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('pulling the list down refreshes it', (tester) async {
+    await pumpTab(tester);
+
+    await tester.fling(find.text('Coca-Cola'), const Offset(0, 400), 1000);
+    await tester.pump();
+    expect(find.byType(RefreshProgressIndicator), findsOneWidget);
+    await settle(tester);
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+    await close(tester);
+  });
+
   testWidgets('a card shows three prices, then how many more', (tester) async {
     await pumpTab(tester);
     await tester.runAsync(

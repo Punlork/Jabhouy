@@ -75,6 +75,14 @@ class ItemRepository {
     return const Ok(null);
   }
 
+  /// Pull to refresh: sends queued changes now.
+  /// shortcut: pushes only; pulling Items from the server lands with
+  /// issue 11 (`/shops/:id/changes`).
+  Future<void> pullLatest() async {
+    if (!_scope.syncs || !await _connectivity.isOnline) return;
+    await _engine.drain();
+  }
+
   Stream<List<ItemCategory>> watchCategories() => _dao.watchCategories(_shopId);
 
   Future<Result<ItemCategory>> saveCategory(ItemCategory category) async {
