@@ -60,8 +60,42 @@ void main() {
     expect(find.text('ជ្រើសទំនិញ'), findsNothing);
   });
 
-  testWidgets('showAppSheet opens part way and grows as its content scrolls',
-      (tester) async {
+  testWidgets('with short content the footer sits at the sheet bottom', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showAppSheet<void>(
+              context,
+              initialSize: 0.55,
+              builder: (context, controller) => AppSheet(
+                title: 'ទំនិញ',
+                scrollController: controller,
+                footer: const Text('footer'),
+                child: const Text('short'),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    final sheetBottom = tester.getBottomLeft(find.byType(AppSheet)).dy;
+    final footerBottom = tester.getBottomLeft(find.text('footer')).dy;
+    expect(sheetBottom - footerBottom, lessThan(40));
+  });
+
+  testWidgets('showAppSheet opens part way and grows as its content scrolls', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(400, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(

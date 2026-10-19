@@ -56,7 +56,6 @@ class AppSheet extends StatelessWidget {
     return AppBottomSheet(
       scrollable: false,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
@@ -95,7 +94,9 @@ class AppSheet extends StatelessWidget {
               ],
             ),
           ),
-          Flexible(
+          // Fills the sheet, so a short body still leaves the footer at
+          // the bottom rather than floating mid-sheet.
+          Expanded(
             child: SingleChildScrollView(
               controller: scrollController,
               padding: const EdgeInsets.symmetric(
