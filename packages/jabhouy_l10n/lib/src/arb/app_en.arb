@@ -1353,5 +1353,17 @@
     "placeholders": {
       "date": {}
     }
+  },
+  "itemNameHint": "e.g. Jasmine rice",
+  "@itemNameHint": {
+    "description": "Hint in the item name field"
+  },
+  "itemNoteHint": "Supplier, where it is kept…",
+  "@itemNoteHint": {
+    "description": "Hint in the item note field"
+  },
+  "priceSellingHint": "e.g. 3,000",
+  "@priceSellingHint": {
+    "description": "Hint in the selling price field"
   }
 }

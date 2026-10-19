@@ -1021,4 +1021,13 @@ class AppLocalizationsKm extends AppLocalizations {
   String lastEditedOn(Object date) {
     return 'កែចុងក្រោយ $date';
   }
+
+  @override
+  String get itemNameHint => 'ឧ. អង្ករផ្កាម្លិះ';
+
+  @override
+  String get itemNoteHint => 'អ្នកផ្គត់ផ្គង់, កន្លែងដាក់ទំនិញ…';
+
+  @override
+  String get priceSellingHint => 'ឧ. 3,000';
 }

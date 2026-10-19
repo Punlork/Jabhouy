@@ -1301,5 +1301,17 @@
     "placeholders": {
       "date": {}
     }
+  },
+  "itemNameHint": "ឧ. អង្ករផ្កាម្លិះ",
+  "@itemNameHint": {
+    "description": "Hint in the item name field"
+  },
+  "itemNoteHint": "អ្នកផ្គត់ផ្គង់, កន្លែងដាក់ទំនិញ…",
+  "@itemNoteHint": {
+    "description": "Hint in the item note field"
+  },
+  "priceSellingHint": "ឧ. 3,000",
+  "@priceSellingHint": {
+    "description": "Hint in the selling price field"
   }
 }

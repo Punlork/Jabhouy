@@ -74,6 +74,10 @@ void main() {
   testWidgets('ដប + កេះ ×24 in one form saves one item with two prices',
       (tester) async {
     await pumpForm(tester);
+    // Empty fields show the design's examples.
+    for (final hint in ['ឧ. អង្ករផ្កាម្លិះ', 'ឧ. ដប', 'ឧ. 3,000']) {
+      expect(find.text(hint), findsOneWidget, reason: hint);
+    }
 
     await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
     await tester.enterText(rowField(0, 0), 'ដប');

@@ -188,6 +188,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                 value: Money.tryParse(_draft.price, _draft.currency),
                 currency: _draft.currency,
                 khrPerUsd: settings.khrPerUsd,
+                hintText: l10n.priceSellingHint,
                 onText: (text, currency) => setState(
                   () => _update(price: text, currency: currency),
                 ),

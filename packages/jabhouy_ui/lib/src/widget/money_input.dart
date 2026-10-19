@@ -18,6 +18,7 @@ class MoneyInput extends StatefulWidget {
     this.onChanged,
     this.onText,
     this.errorText,
+    this.hintText,
     this.value,
     super.key,
   });
@@ -35,6 +36,7 @@ class MoneyInput extends StatefulWidget {
   /// that [onChanged] reports as null.
   final void Function(String text, Currency currency)? onText;
   final String? errorText;
+  final String? hintText;
 
   @override
   State<MoneyInput> createState() => _MoneyInputState();
@@ -100,6 +102,7 @@ class _MoneyInputState extends State<MoneyInput> {
           style: AppTextTheme.body.copyWith(color: t.textPrimary),
           decoration: InputDecoration(
             errorText: widget.errorText,
+            hintText: widget.hintText,
             // One compact toggle leaves the narrow price column room to
             // type; two buttons took most of it.
             suffixIcon: _CurrencyToggle(

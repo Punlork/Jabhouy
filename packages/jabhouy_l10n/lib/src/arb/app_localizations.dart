@@ -2017,6 +2017,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last edited {date}'**
   String lastEditedOn(Object date);
+
+  /// Hint in the item name field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Jasmine rice'**
+  String get itemNameHint;
+
+  /// Hint in the item note field
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier, where it is kept…'**
+  String get itemNoteHint;
+
+  /// Hint in the selling price field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 3,000'**
+  String get priceSellingHint;
 }
 
 class _AppLocalizationsDelegate

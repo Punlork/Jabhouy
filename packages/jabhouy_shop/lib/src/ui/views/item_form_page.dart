@@ -121,7 +121,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
                     LabeledField(
                       label: l10n.noteLabel,
                       optional: true,
-                      child: TextField(controller: _note, maxLines: 2),
+                      child: TextField(
+                        controller: _note,
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          hintText: l10n.itemNoteHint,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -162,6 +168,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
             controller: _name,
             onChanged: _cubit.nameChanged,
             decoration: InputDecoration(
+              hintText: l10n.itemNameHint,
               errorText: nameProblem == null
                   ? null
                   : problemText(l10n, nameProblem),

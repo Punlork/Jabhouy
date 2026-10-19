@@ -1036,4 +1036,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String lastEditedOn(Object date) {
     return 'Last edited $date';
   }
+
+  @override
+  String get itemNameHint => 'e.g. Jasmine rice';
+
+  @override
+  String get itemNoteHint => 'Supplier, where it is kept…';
+
+  @override
+  String get priceSellingHint => 'e.g. 3,000';
 }
