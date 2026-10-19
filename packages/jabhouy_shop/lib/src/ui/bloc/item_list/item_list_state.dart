@@ -12,6 +12,7 @@ class ItemListState extends Equatable {
     this.missingOnly = false,
     this.grid = false,
     this.canEdit = false,
+    this.settings = const PriceSettings(),
   });
 
   final bool loading;
@@ -27,6 +28,7 @@ class ItemListState extends Equatable {
 
   /// Owner or editor: sees the missing-price chip.
   final bool canEdit;
+  final PriceSettings settings;
 
   @override
   List<Object?> get props => [
@@ -39,5 +41,6 @@ class ItemListState extends Equatable {
     missingOnly,
     grid,
     canEdit,
+    settings,
   ];
 }

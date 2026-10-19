@@ -1346,5 +1346,12 @@
   "priceUnitHint": "e.g. bottle",
   "@priceUnitHint": {
     "description": "Hint inside the unit field of a price row"
+  },
+  "lastEditedOn": "Last edited {date}",
+  "@lastEditedOn": {
+    "description": "Item sheet footer line when the editor's name is unknown",
+    "placeholders": {
+      "date": {}
+    }
   }
 }

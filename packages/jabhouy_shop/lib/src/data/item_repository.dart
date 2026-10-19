@@ -101,6 +101,9 @@ class ItemRepository {
 
   Future<PriceSettings> priceSettings() => _dao.priceSettings(_shopId);
 
+  Future<String?> memberName(String userId) =>
+      _dao.memberName(_shopId, userId);
+
   /// Gives the stand-in Shop the starter categories when it has none. A
   /// server Shop is seeded by the server, so it is left alone.
   Future<void> seedStarterCategories() async {

@@ -121,6 +121,29 @@ void main() {
     expect((await settled(list)).items, hasLength(2));
   });
 
+  test('settings load on start, and delete hides the item', () async {
+    final list = cubit()..start();
+    expect((await settled(list)).settings.useCost, isTrue);
+
+    await list.delete('coke');
+    expect((await settled(list)).items.map((i) => i.id), ['rice']);
+  });
+
+  test("the editor's name comes from the Shop's members", () async {
+    await db.into(db.memberTable).insert(
+      MemberTableCompanion.insert(
+        shopId: 's1',
+        userId: 'u2',
+        role: 'editor',
+        displayName: const Value('ដារ៉ា'),
+      ),
+    );
+    final list = cubit();
+    expect(await list.editorName('u2'), 'ដារ៉ា');
+    expect(await list.editorName('nobody'), isNull);
+    expect(await list.editorName(null), isNull);
+  });
+
   test('the grid choice is reported so the app can remember it', () async {
     final saved = <bool>[];
     final list = ItemListCubit(repo, scope, onGridChanged: saved.add);

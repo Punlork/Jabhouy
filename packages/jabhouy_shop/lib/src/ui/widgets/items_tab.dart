@@ -4,14 +4,16 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 import 'package:jabhouy_shop/src/ui/bloc/item_list/item_list_cubit.dart';
+import 'package:jabhouy_shop/src/ui/widgets/item_details_sheet.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 /// Home's shop tab (canvas ១, ១ក): filter chips, the list header with the
-/// grid toggle, and every Item with one line per Price option.
+/// grid toggle, and every Item with one line per Price option. A tap
+/// opens the details sheet; its `កែតម្លៃ` calls [onEditItem].
 class ItemsTab extends StatefulWidget {
-  const ItemsTab({required this.onOpenItem, super.key});
+  const ItemsTab({required this.onEditItem, super.key});
 
-  final ValueChanged<Item> onOpenItem;
+  final ValueChanged<Item> onEditItem;
 
   @override
   State<ItemsTab> createState() => _ItemsTabState();
@@ -21,6 +23,34 @@ class _ItemsTabState extends State<ItemsTab>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
+
+  Future<void> _openItem(Item item) async {
+    final cubit = context.read<ItemListCubit>();
+    final editorName = await cubit.editorName(item.updatedBy);
+    if (!mounted) return;
+    final state = cubit.state;
+    final category = state.categories.where((c) => c.id == item.categoryId);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => ItemDetailsSheet(
+        item: item,
+        categoryName: category.isEmpty ? null : category.first.name,
+        settings: state.settings,
+        canEdit: state.canEdit,
+        editorName: editorName,
+        onEdit: () {
+          Navigator.pop(sheetContext);
+          widget.onEditItem(item);
+        },
+        onDelete: () {
+          Navigator.pop(sheetContext);
+          cubit.delete(item.id);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +138,7 @@ class _ItemsTabState extends State<ItemsTab>
                       itemCount: state.items.length,
                       itemBuilder: (context, i) => _ItemCard(
                         item: state.items[i],
-                        onTap: () => widget.onOpenItem(state.items[i]),
+                        onTap: () => _openItem(state.items[i]),
                       ),
                     )
                   : ListView(
@@ -128,7 +158,7 @@ class _ItemsTabState extends State<ItemsTab>
                                 _ItemRow(
                                   item: item,
                                   divider: i < state.items.length - 1,
-                                  onTap: () => widget.onOpenItem(item),
+                                  onTap: () => _openItem(item),
                                 ),
                             ],
                           ),

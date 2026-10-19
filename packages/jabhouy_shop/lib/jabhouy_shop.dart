@@ -33,6 +33,7 @@ export 'src/ui/views/shop_item_form_page.dart';
 export 'src/ui/widgets/category_chip.dart';
 export 'src/ui/widgets/category_selection_dropdown.dart';
 export 'src/ui/widgets/filter_card_sheet.dart';
+export 'src/ui/widgets/item_details_sheet.dart';
 export 'src/ui/widgets/items_tab.dart';
 export 'src/ui/widgets/price_row_editor.dart';
 export 'src/ui/widgets/shop_grid_builder.dart';

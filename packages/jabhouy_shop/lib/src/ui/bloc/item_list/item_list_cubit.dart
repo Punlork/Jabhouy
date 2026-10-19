@@ -41,6 +41,11 @@ class ItemListCubit extends Cubit<ItemListState> {
     emit(state.copyWith(canEdit: _scope.role?.canEditPrices ?? false));
     // The watch below picks the categories up once they are written.
     unawaited(_repository.seedStarterCategories());
+    unawaited(
+      _repository.priceSettings().then((s) {
+        if (!isClosed) emit(state.copyWith(settings: s));
+      }),
+    );
     _subscriptions
       ..add(
         _repository.watchCategories().listen(
@@ -76,6 +81,12 @@ class ItemListCubit extends Cubit<ItemListState> {
     emit(state.copyWith(categoryId: categoryId, missingOnly: missingOnly));
     _watchItems();
   }
+
+  Future<void> delete(String id) => _repository.deleteItem(id);
+
+  /// For the details sheet's "last edited by"; null when unknown.
+  Future<String?> editorName(String? userId) async =>
+      userId == null ? null : _repository.memberName(userId);
 
   void toggleGrid() {
     emit(state.copyWith(grid: !state.grid));

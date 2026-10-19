@@ -2011,6 +2011,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. bottle'**
   String get priceUnitHint;
+
+  /// Item sheet footer line when the editor's name is unknown
+  ///
+  /// In en, this message translates to:
+  /// **'Last edited {date}'**
+  String lastEditedOn(Object date);
 }
 
 class _AppLocalizationsDelegate

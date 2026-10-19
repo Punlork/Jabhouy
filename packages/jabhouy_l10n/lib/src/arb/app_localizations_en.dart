@@ -1031,4 +1031,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceUnitHint => 'e.g. bottle';
+
+  @override
+  String lastEditedOn(Object date) {
+    return 'Last edited $date';
+  }
 }

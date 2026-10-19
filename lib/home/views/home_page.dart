@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget _pageFor(HomeTab tab) => switch (tab) {
-        HomeTab.shop => ItemsTab(onOpenItem: _openItemForm),
+        HomeTab.shop => ItemsTab(onEditItem: _openItemForm),
         HomeTab.loaner => const LoanerView(),
         HomeTab.income => const IncomeView(),
       };
@@ -213,8 +213,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  /// Adds an Item, or edits [item]. Until issue 14 a tapped row opens
-  /// here rather than in the details sheet.
+  /// Adds an Item, or edits [item] (from the details sheet).
   void _openItemForm([Item? item]) {
     context.pushNamed(AppRoutes.formItem, extra: {'existingItem': item});
   }

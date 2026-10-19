@@ -186,6 +186,16 @@ class ItemDao {
     return row?.categoryId;
   }
 
+  /// A Member's display name in [shopId], if the phone knows it.
+  Future<String?> memberName(String shopId, String userId) async {
+    final row =
+        await (_db.select(_db.memberTable)..where(
+              (m) => m.shopId.equals(shopId) & m.userId.equals(userId),
+            ))
+            .getSingleOrNull();
+    return row?.displayName;
+  }
+
   /// The Shop's price settings; the table's defaults until a row exists.
   Future<PriceSettings> priceSettings(String shopId) async {
     final row = await (_db.select(

@@ -75,7 +75,7 @@ void main() {
         home: Scaffold(
           body: BlocProvider(
             create: (_) => ItemListCubit(repo, scope, grid: grid)..start(),
-            child: ItemsTab(onOpenItem: (item) => opened.add(item.id)),
+            child: ItemsTab(onEditItem: (item) => opened.add(item.id)),
           ),
         ),
       ),
@@ -103,6 +103,11 @@ void main() {
     expect(find.text('ទំនិញ 2 មុខ · ក–អ'), findsOneWidget);
 
     await tester.tap(find.text('Coca-Cola'));
+    await settle(tester);
+    expect(find.byType(ItemDetailsSheet), findsOneWidget);
+    expect(opened, isEmpty, reason: 'a tap shows details first');
+    await tester.tap(find.text('កែតម្លៃ'));
+    await settle(tester);
     expect(opened, ['coke']);
     await close(tester);
   });

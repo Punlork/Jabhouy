@@ -1016,4 +1016,9 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get priceUnitHint => 'ឧ. ដប';
+
+  @override
+  String lastEditedOn(Object date) {
+    return 'កែចុងក្រោយ $date';
+  }
 }

@@ -25,6 +25,8 @@ abstract class _$ItemListStateCWProxy {
 
   ItemListState canEdit(bool canEdit);
 
+  ItemListState settings(PriceSettings settings);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `ItemListState(...).copyWith.fieldName(value)`.
@@ -43,6 +45,7 @@ abstract class _$ItemListStateCWProxy {
     bool missingOnly,
     bool grid,
     bool canEdit,
+    PriceSettings settings,
   });
 }
 
@@ -82,6 +85,9 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
   @override
   ItemListState canEdit(bool canEdit) => call(canEdit: canEdit);
 
+  @override
+  ItemListState settings(PriceSettings settings) => call(settings: settings);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `ItemListState(...).copyWith.fieldName(value)`.
@@ -101,6 +107,7 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
     Object? missingOnly = const $CopyWithPlaceholder(),
     Object? grid = const $CopyWithPlaceholder(),
     Object? canEdit = const $CopyWithPlaceholder(),
+    Object? settings = const $CopyWithPlaceholder(),
   }) {
     return ItemListState(
       loading: loading == const $CopyWithPlaceholder() || loading == null
@@ -142,6 +149,10 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
           ? _value.canEdit
           // ignore: cast_nullable_to_non_nullable
           : canEdit as bool,
+      settings: settings == const $CopyWithPlaceholder() || settings == null
+          ? _value.settings
+          // ignore: cast_nullable_to_non_nullable
+          : settings as PriceSettings,
     );
   }
 }
