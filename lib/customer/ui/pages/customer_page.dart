@@ -239,7 +239,7 @@ class _CustomerPageContent extends StatelessWidget {
                 foregroundColor: colorScheme.primary,
               ),
               child: Text(
-                isEdit ? context.l10n.saveChanges : context.l10n.addItem,
+                isEdit ? context.l10n.saveChanges : context.l10n.addCustomer,
                 style: AppTextTheme.caption,
               ),
             ),
