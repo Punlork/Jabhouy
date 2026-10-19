@@ -1,6 +1,7 @@
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_shop/src/data/db/item_dao.dart';
+import 'package:jabhouy_shop/src/logic/item_search.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 
@@ -41,19 +42,20 @@ class ItemRepository {
 
   String get _shopId => _scope.shopId!;
 
+  /// A [search] ranks in memory (decision 42): best match first.
   Stream<List<Item>> watchItems({
     String search = '',
     String? categoryId,
     bool missingOnly = false,
   }) {
-    final items = _dao.watchItems(
-      _shopId,
-      search: search,
-      categoryId: categoryId,
-    );
-    return missingOnly
-        ? items.map((all) => [...all.where((i) => i.hasMissingPrice)])
-        : items;
+    final query = normalizeSearch(search);
+    return _dao.watchItems(_shopId, categoryId: categoryId).map((all) {
+      final items = missingOnly
+          ? [...all.where((i) => i.hasMissingPrice)]
+          : all;
+      if (query.isEmpty) return items;
+      return [for (final hit in searchItems(items, query)) hit.item];
+    });
   }
 
   /// Items with any Price option still missing its selling price.

@@ -18,6 +18,7 @@ export 'src/data/item_repository.dart';
 export 'src/data/shop_repository.dart';
 export 'src/data/shop_repository_impl.dart';
 export 'src/data/shop_sync_adapter.dart';
+export 'src/logic/item_search.dart';
 export 'src/models/category_model.dart';
 export 'src/models/item.dart';
 export 'src/models/item_draft.dart';

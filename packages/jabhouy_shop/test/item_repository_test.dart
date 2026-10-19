@@ -127,6 +127,22 @@ void main() {
     expect(await db.select(db.itemPriceTable).get(), hasLength(1));
   });
 
+  test('a search ranks in memory and finds nicknames', () async {
+    final shop = repo('s1');
+    await shop.saveItem(
+      const Item(
+        id: 'vital',
+        name: 'Vital 1.5L',
+        nicknames: ['ទឹកធំ'],
+        prices: [],
+      ),
+    );
+    await shop.saveItem(const Item(id: 'big', name: 'ទឹកធំ', prices: []));
+
+    final found = await shop.watchItems(search: 'ទឹកធំ').first;
+    expect([for (final i in found) i.id], ['big', 'vital']);
+  });
+
   test('delete leaves a tombstone and hides the item', () async {
     final shop = repo('s1');
     await shop.saveItem(

@@ -11,11 +11,7 @@ class ItemDao {
 
   final AppDatabase _db;
 
-  Stream<List<Item>> watchItems(
-    String shopId, {
-    String search = '',
-    String? categoryId,
-  }) {
+  Stream<List<Item>> watchItems(String shopId, {String? categoryId}) {
     final query =
         _db.select(_db.itemTable).join([
             leftOuterJoin(
@@ -31,9 +27,6 @@ class ItemDao {
             OrderingTerm.asc(_db.itemTable.name),
             OrderingTerm.asc(_db.itemPriceTable.sortOrder),
           ]);
-    if (search.isNotEmpty) {
-      query.where(_db.itemTable.name.like('%$search%'));
-    }
     if (categoryId != null) {
       query.where(_db.itemTable.categoryId.equals(categoryId));
     }
