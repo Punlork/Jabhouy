@@ -154,6 +154,20 @@ void main() {
     expect(await repo.watchItems().first, hasLength(2));
   });
 
+  test('a new category is saved, listed and picked', () async {
+    final cubit = ItemFormCubit(repo);
+    addTearDown(cubit.close);
+    await cubit.load();
+
+    await cubit.createCategory('  នំ  ');
+
+    final saved = await repo.watchCategories().first;
+    expect(saved.map((c) => c.name), contains('នំ'));
+    final created = saved.firstWhere((c) => c.name == 'នំ');
+    expect(cubit.state.categoryId, created.id);
+    expect(cubit.state.categories.map((c) => c.id), contains(created.id));
+  });
+
   test('editing keeps the item and its category', () async {
     const existing = Item(
       id: 'coke',

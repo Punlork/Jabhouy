@@ -1369,5 +1369,17 @@
   "priceCountHint": "24",
   "@priceCountHint": {
     "description": "Hint in the narrow pack count field, after ×"
+  },
+  "categoryHint": "Pick a category to find it faster later",
+  "@categoryHint": {
+    "description": "Hint under the category chips in the item form"
+  },
+  "categorySearch": "Search categories",
+  "@categorySearch": {
+    "description": "Hint in the category picker's search field"
+  },
+  "categoryNameHint": "e.g. Drinks",
+  "@categoryNameHint": {
+    "description": "Hint in the new category name field"
   }
 }

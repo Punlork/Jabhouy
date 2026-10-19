@@ -1048,4 +1048,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceCountHint => '24';
+
+  @override
+  String get categoryHint => 'Pick a category to find it faster later';
+
+  @override
+  String get categorySearch => 'Search categories';
+
+  @override
+  String get categoryNameHint => 'e.g. Drinks';
 }

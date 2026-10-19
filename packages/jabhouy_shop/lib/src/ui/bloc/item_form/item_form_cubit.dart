@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_shop/src/data/item_repository.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 import 'package:jabhouy_shop/src/models/item_draft.dart';
@@ -51,6 +52,18 @@ class ItemFormCubit extends Cubit<ItemFormState> {
         units: await _unitsFor(id),
       ),
     );
+  }
+
+  /// Saves a category typed in the picker and chooses it.
+  Future<void> createCategory(String name) async {
+    final category = ItemCategory(
+      id: newId(),
+      name: name.trim(),
+      sortOrder: state.categories.length,
+    );
+    await _repository.saveCategory(category);
+    emit(state.copyWith(categories: [...state.categories, category]));
+    await pickCategory(category.id);
   }
 
   /// Suggests a category from the name until the user picks one.

@@ -1033,4 +1033,13 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get priceCountHint => '24';
+
+  @override
+  String get categoryHint => 'ជ្រើសប្រភេទ ងាយស្រួលស្វែងរកពេលក្រោយ';
+
+  @override
+  String get categorySearch => 'ស្វែងរកប្រភេទ';
+
+  @override
+  String get categoryNameHint => 'ឧ. ភេសជ្ជៈ';
 }

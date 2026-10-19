@@ -73,6 +73,7 @@ void main() {
       onPick: (v) => picked = v,
     ),
     (tester) async {
+      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
       await tester.tap(find.text('កេះ'));
       expect(picked, 'កេះ');
       await expectAccessible(tester);

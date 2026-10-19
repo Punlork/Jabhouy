@@ -31,6 +31,7 @@ export 'src/ui/views/item_form_page.dart';
 export 'src/ui/views/shop_item_form_controller.dart';
 export 'src/ui/views/shop_item_form_page.dart';
 export 'src/ui/widgets/category_chip.dart';
+export 'src/ui/widgets/category_picker_sheet.dart';
 export 'src/ui/widgets/category_selection_dropdown.dart';
 export 'src/ui/widgets/filter_card_sheet.dart';
 export 'src/ui/widgets/item_details_sheet.dart';

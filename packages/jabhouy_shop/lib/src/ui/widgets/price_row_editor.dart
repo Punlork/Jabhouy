@@ -18,7 +18,7 @@ String problemText(AppLocalizations l10n, FormProblem problem) =>
       ProblemKind.noPriceRow => l10n.priceNoRow,
     };
 
-const _unitFlex = 3;
+const _unitFlex = 2;
 const _priceFlex = 5;
 const _countWidth = 64.0;
 const _gap = 8.0;
@@ -33,7 +33,10 @@ class PriceRowHeader extends StatelessWidget {
     final style = AppTextTheme.hint.copyWith(color: context.tokens.textMuted);
     return Row(
       children: [
-        Expanded(flex: _unitFlex, child: Text(l10n.priceUnit, style: style)),
+        Expanded(
+          flex: _unitFlex,
+          child: Text(l10n.priceUnit, style: style),
+        ),
         const SizedBox(width: _gap),
         SizedBox(
           width: _countWidth,
@@ -125,6 +128,8 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     final problems = widget.problems;
     final settings = widget.settings;
     final symbol = _draft.currency == Currency.khr ? '៛' : r'$';
+    // The remove button sits on this line: on the price line it left the
+    // price field too narrow to read.
     final showQuiet =
         settings.useWholesale || settings.useCost || widget.onRemove != null;
     final below = [
@@ -190,9 +195,8 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                 currency: _draft.currency,
                 khrPerUsd: settings.khrPerUsd,
                 hintText: l10n.priceSellingHint,
-                onText: (text, currency) => setState(
-                  () => _update(price: text, currency: currency),
-                ),
+                onText: (text, currency) =>
+                    setState(() => _update(price: text, currency: currency)),
                 errorText: problems['price'] == null
                     ? null
                     : problemText(l10n, problems['price']!),
@@ -215,9 +219,9 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                     onChanged: (v) => _update(wholesale: v),
                   ),
                 ),
-                const SizedBox(width: _gap),
+                if (settings.useCost) const SizedBox(width: _gap),
               ],
-              if (settings.useCost) ...[
+              if (settings.useCost)
                 Expanded(
                   child: _QuietField(
                     label: l10n.priceCostShort,
@@ -228,14 +232,12 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                     onChanged: (v) => _update(cost: v),
                   ),
                 ),
-                const SizedBox(width: _gap),
-              ],
               if (!settings.useWholesale && !settings.useCost) const Spacer(),
               if (widget.onRemove != null)
                 IconButton(
                   onPressed: widget.onRemove,
                   tooltip: l10n.priceRemove,
-                  icon: Icon(Icons.delete_outline, color: t.dangerText),
+                  icon: Icon(Icons.close_rounded, size: 20, color: t.textMuted),
                 ),
             ],
           ),

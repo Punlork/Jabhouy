@@ -4,7 +4,9 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/src/models/item_draft.dart';
 import 'package:jabhouy_shop/src/ui/bloc/item_form/item_form_cubit.dart';
+import 'package:jabhouy_shop/src/ui/widgets/category_picker_sheet.dart';
 import 'package:jabhouy_shop/src/ui/widgets/price_row_editor.dart';
+import 'package:jabhouy_shop/src/ui/widgets/text_prompt_dialog.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 /// Add or edit an Item with its Price options (canvas ៣, ៤, ៤ខ, ៤គ).
@@ -73,9 +75,11 @@ class _ItemFormPageState extends State<ItemFormPage> {
   }
 
   Future<void> _addNickname() async {
-    final name = await showDialog<String>(
-      context: context,
-      builder: (_) => const _NicknameDialog(),
+    final l10n = context.l10n;
+    final name = await showTextPrompt(
+      context,
+      title: l10n.itemNicknames,
+      hintText: l10n.itemAddNicknameExample,
     );
     final trimmed = name?.trim() ?? '';
     if (trimmed.isEmpty || _nicknames.contains(trimmed)) return;
@@ -87,8 +91,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
     final l10n = context.l10n;
     final t = context.tokens;
     return BlocConsumer<ItemFormCubit, ItemFormState>(
-      listenWhen: (a, b) =>
-          a.status != b.status || a.problems != b.problems,
+      listenWhen: (a, b) => a.status != b.status || a.problems != b.problems,
       listener: (context, state) {
         if (state.status == ItemFormStatus.ready && _rows.isEmpty) {
           setState(() => _rows.add(_emptyRow(state)));
@@ -103,9 +106,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
         return Scaffold(
           backgroundColor: t.bg,
           appBar: AppBar(
-            title: Text(
-              _cubit.existing == null ? l10n.itemAdd : l10n.itemEdit,
+            centerTitle: false,
+            leading: IconButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              icon: const Icon(Icons.arrow_back_rounded),
             ),
+            title: Text(_cubit.existing == null ? l10n.itemAdd : l10n.itemEdit),
           ),
           body: loading
               ? const Center(child: CircularProgressIndicator())
@@ -206,11 +213,34 @@ class _ItemFormPageState extends State<ItemFormPage> {
             for (final nickname in _nicknames)
               InputChip(
                 label: Text(nickname),
+                backgroundColor: t.surfaceMuted,
+                side: BorderSide.none,
+                shape: const StadiumBorder(),
+                deleteIcon: const Icon(Icons.close_rounded, size: 14),
                 onDeleted: () => setState(() => _nicknames.remove(nickname)),
               ),
+            // shortcut: solid border where the canvas draws a dashed one;
+            // Flutter has no dashed border without a package.
             ActionChip(
-              label: Text(l10n.itemAddNickname),
               onPressed: _addNickname,
+              backgroundColor: Colors.transparent,
+              side: BorderSide(color: t.border),
+              shape: const StadiumBorder(),
+              label: Text.rich(
+                TextSpan(
+                  text: l10n.itemAddNickname,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  children: [
+                    TextSpan(
+                      text: ' (${l10n.itemAddNicknameExample})',
+                      style: TextStyle(
+                        color: t.textMuted,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -218,11 +248,31 @@ class _ItemFormPageState extends State<ItemFormPage> {
     );
   }
 
+  Future<void> _openCategoryPicker(ItemFormState state) async {
+    final picked = await showCategoryPicker(
+      context,
+      categories: state.categories,
+      selectedId: state.categoryId,
+      onCreate: (name) async {
+        await _cubit.createCategory(name);
+        return _cubit.state.categoryId!;
+      },
+    );
+    if (picked != null && picked != _cubit.state.categoryId) {
+      await _cubit.pickCategory(picked);
+    }
+  }
+
   Widget _categorySection(ItemFormState state) {
     final l10n = context.l10n;
     final t = context.tokens;
     final visible = state.categories.where((c) => !c.hidden).toList();
     final selected = visible.where((c) => c.id == state.categoryId);
+    // The chosen category first, then the rest, five at most (canvas ៤ក).
+    final chips = [
+      ...selected,
+      ...visible.where((c) => c.id != state.categoryId),
+    ].take(5).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -231,22 +281,43 @@ class _ItemFormPageState extends State<ItemFormPage> {
           style: AppTextTheme.sectionTitle.copyWith(color: t.textPrimary),
         ),
         const SizedBox(height: 10),
-        // shortcut: every category as a chip; issue 16's picker adds
-        // `ទាំងអស់ ›` and trims this to the top few.
         QuickPickChips(
-          options: [for (final c in visible) c.name],
+          options: [for (final c in chips) c.name],
           selected: selected.isEmpty ? null : selected.first.name,
-          onPick: (name) => _cubit.pickCategory(
-            visible.firstWhere((c) => c.name == name).id,
+          onPick: (name) =>
+              _cubit.pickCategory(chips.firstWhere((c) => c.name == name).id),
+          trailing: InkWell(
+            onTap: () => _openCategoryPicker(state),
+            borderRadius: BorderRadius.circular(AppSizes.radiusChip),
+            child: SizedBox(
+              height: AppSizes.minTapTarget,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.all,
+                      style: AppTextTheme.label.copyWith(
+                        color: t.textSecondary,
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
+                      color: t.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        if (state.suggested) ...[
-          const SizedBox(height: AppSizes.fieldGap),
-          Text(
-            l10n.categorySuggested,
-            style: AppTextTheme.hint.copyWith(color: t.textMuted),
-          ),
-        ],
+        const SizedBox(height: AppSizes.fieldGap),
+        Text(
+          state.suggested ? l10n.categorySuggested : l10n.categoryHint,
+          style: AppTextTheme.hint.copyWith(color: t.textMuted),
+        ),
       ],
     );
   }
@@ -284,9 +355,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
               unitHint: i == 0 && category.isNotEmpty
                   ? l10n.priceUnitsFor(category.first.name)
                   : null,
-              onChanged: (draft) => _rows[_rows.indexWhere(
-                (r) => r.id == draft.id,
-              )] = draft,
+              onChanged: (draft) =>
+                  _rows[_rows.indexWhere((r) => r.id == draft.id)] = draft,
               onRemove: _rows.length > 1
                   ? () => setState(() => _rows.removeAt(i))
                   : null,
@@ -295,63 +365,39 @@ class _ItemFormPageState extends State<ItemFormPage> {
         if (rowsProblem != null) ErrorLine(problemText(l10n, rowsProblem)),
         Align(
           alignment: AlignmentDirectional.centerStart,
-          child: TextButton.icon(
-            onPressed: () => setState(() => _rows.add(_emptyRow(state))),
-            icon: const Icon(Icons.add),
-            label: Text.rich(
-              TextSpan(
-                text: '${l10n.priceAdd} ',
+          child: InkWell(
+            onTap: () => setState(() => _rows.add(_emptyRow(state))),
+            child: SizedBox(
+              height: AppSizes.minTapTarget,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextSpan(
-                    text: '(${l10n.priceAddExample})',
-                    style: TextStyle(
-                      color: t.textMuted,
-                      fontWeight: FontWeight.w400,
+                  Icon(Icons.add_rounded, size: 18, color: t.textPrimary),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text.rich(
+                      TextSpan(
+                        text: '${l10n.priceAdd} ',
+                        children: [
+                          TextSpan(
+                            text: '(${l10n.priceAddExample})',
+                            style: TextStyle(
+                              color: t.textMuted,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      style: AppTextTheme.label.copyWith(
+                        color: t.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Owns its controller: the field stays on screen while the dialog
-/// animates out, so the page must not dispose it on pop.
-class _NicknameDialog extends StatefulWidget {
-  const _NicknameDialog();
-
-  @override
-  State<_NicknameDialog> createState() => _NicknameDialogState();
-}
-
-class _NicknameDialogState extends State<_NicknameDialog> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AlertDialog(
-      title: Text(l10n.itemNicknames),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        decoration: InputDecoration(hintText: l10n.itemAddNicknameExample),
-        onSubmitted: (v) => Navigator.pop(context, v),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, _controller.text),
-          child: Text(l10n.save),
         ),
       ],
     );

@@ -102,7 +102,7 @@ void main() {
       (tester) async {
     await pumpForm(tester);
 
-    await tester.tap(find.text('+ ឈ្មោះផ្សេង'));
+    await tester.tap(find.textContaining('+ ឈ្មោះផ្សេង'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).last, 'ទឹកធំ');
     await tester.tap(find.text('រក្សាទុក').last);

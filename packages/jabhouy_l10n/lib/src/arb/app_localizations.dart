@@ -2041,6 +2041,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'24'**
   String get priceCountHint;
+
+  /// Hint under the category chips in the item form
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category to find it faster later'**
+  String get categoryHint;
+
+  /// Hint in the category picker's search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories'**
+  String get categorySearch;
+
+  /// Hint in the new category name field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Drinks'**
+  String get categoryNameHint;
 }
 
 class _AppLocalizationsDelegate

@@ -1317,5 +1317,17 @@
   "priceCountHint": "24",
   "@priceCountHint": {
     "description": "Hint in the narrow pack count field, after ×"
+  },
+  "categoryHint": "ជ្រើសប្រភេទ ងាយស្រួលស្វែងរកពេលក្រោយ",
+  "@categoryHint": {
+    "description": "Hint under the category chips in the item form"
+  },
+  "categorySearch": "ស្វែងរកប្រភេទ",
+  "@categorySearch": {
+    "description": "Hint in the category picker's search field"
+  },
+  "categoryNameHint": "ឧ. ភេសជ្ជៈ",
+  "@categoryNameHint": {
+    "description": "Hint in the new category name field"
   }
 }

@@ -71,15 +71,75 @@ class QuickPickChips extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 8,
+      runSpacing: 8,
       children: [
         for (final option in options)
-          _Chip(
+          _OutlinedChip(
             label: option,
             selected: option == selected,
             onTap: () => onPick(option),
           ),
         if (trailing != null) trailing!,
       ],
+    );
+  }
+}
+
+/// A suggestion chip (canvas ៤ក): white with a border, or dark with a
+/// check when chosen.
+class _OutlinedChip extends StatelessWidget {
+  const _OutlinedChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final fg = selected ? t.onPrimary : t.textPrimary;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSizes.radiusChip),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.minTapTarget),
+          child: Center(
+            widthFactor: 1,
+            child: Container(
+              height: AppSizes.chipHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: selected ? t.textPrimary : t.surface,
+                border: selected ? null : Border.all(color: t.border),
+                borderRadius: BorderRadius.circular(AppSizes.radiusChip),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (selected) ...[
+                    Icon(Icons.check_rounded, size: 16, color: fg),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    label,
+                    style: AppTextTheme.label.copyWith(
+                      color: fg,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
