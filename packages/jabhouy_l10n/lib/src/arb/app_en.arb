@@ -1237,5 +1237,83 @@
   "members": "Members",
   "@members": {
     "description": "Title of the members list"
+  },
+  "itemNicknames": "Other names",
+  "@itemNicknames": {
+    "description": "Label for an item's other names"
+  },
+  "itemNicknamesHint": "Helps search find it",
+  "@itemNicknamesHint": {
+    "description": "Why other names are worth adding"
+  },
+  "itemAddNickname": "+ Other name",
+  "@itemAddNickname": {
+    "description": "Button that adds an other name"
+  },
+  "itemAddNicknameExample": "e.g. ទឹកធំ, Kulen",
+  "@itemAddNicknameExample": {
+    "description": "Example after the add other name button"
+  },
+  "itemNameMissing": "Enter the item name",
+  "@itemNameMissing": {
+    "description": "Error when saving an item without a name"
+  },
+  "itemDuplicateName": "An item with this name already exists",
+  "@itemDuplicateName": {
+    "description": "Warning, not an error: saving again saves a new item"
+  },
+  "itemSaveAsNew": "or save as a new item",
+  "@itemSaveAsNew": {
+    "description": "Follows the duplicate name warning"
+  },
+  "itemView": "View",
+  "@itemView": {
+    "description": "Link that opens the other item"
+  },
+  "priceRielNoDecimals": "Riel prices can't have decimals",
+  "@priceRielNoDecimals": {
+    "description": "Error for a decimal in a riel price"
+  },
+  "priceUsdTwoDecimals": "Dollars take at most 2 decimals",
+  "@priceUsdTwoDecimals": {
+    "description": "Error for more than two decimals in a dollar price"
+  },
+  "priceNotNumber": "Enter a number",
+  "@priceNotNumber": {
+    "description": "Error for a price that is not a number"
+  },
+  "pricePackOverOne": "A pack holds more than 1",
+  "@pricePackOverOne": {
+    "description": "Error for a pack count of 0 or 1"
+  },
+  "priceBarcodeUsed": "This barcode is already used by «{name}»",
+  "@priceBarcodeUsed": {
+    "description": "Error for a barcode another item in the shop uses",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "priceNoRow": "Add at least one unit or price",
+  "@priceNoRow": {
+    "description": "Error when every price row is empty"
+  },
+  "priceUnitsFor": "Units for «{category}»",
+  "@priceUnitsFor": {
+    "description": "Hint under the unit chips",
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "priceWholesaleShort": "Wholesale",
+  "@priceWholesaleShort": {
+    "description": "Prefix inside the wholesale field of a price row"
+  },
+  "priceCostShort": "Cost",
+  "@priceCostShort": {
+    "description": "Prefix inside the cost field of a price row"
+  },
+  "priceRemove": "Remove this price",
+  "@priceRemove": {
+    "description": "Accessible label of the remove price row button"
   }
 }

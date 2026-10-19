@@ -196,6 +196,97 @@ void main() {
     expect(units, hasLength(2));
   });
 
+  test('a barcode in use names its item, but not the one being edited',
+      () async {
+    final shop = repo('s1');
+    await shop.saveItem(
+      Item(
+        id: 'coke',
+        name: 'Coca-Cola',
+        prices: [
+          PriceOption(
+            id: newId(),
+            unit: 'ដប',
+            currency: Currency.khr,
+            barcode: '885',
+          ),
+        ],
+      ),
+    );
+    await repo('s2').saveItem(
+      Item(
+        id: 'other',
+        name: 'Other shop',
+        prices: [
+          PriceOption(
+            id: newId(),
+            unit: 'ដប',
+            currency: Currency.khr,
+            barcode: '999',
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      await shop.barcodeOwners(['885', '999'], exceptItemId: 'new'),
+      {'885': 'Coca-Cola'},
+    );
+    expect(await shop.barcodeOwners(['885'], exceptItemId: 'coke'), isEmpty);
+  });
+
+  test('a same-named item is found, ignoring case and spaces', () async {
+    final shop = repo('s1');
+    await shop.saveItem(
+      Item(id: 'coke', name: 'Coca-Cola', prices: [_option('ដប', 3000)]),
+    );
+
+    expect(await shop.itemNamed(' coca-cola ', exceptItemId: 'new'), 'coke');
+    expect(await shop.itemNamed('Coca-Cola', exceptItemId: 'coke'), isNull);
+  });
+
+  test('the last used category is the newest saved item with one', () async {
+    var now = DateTime.utc(2026, 10, 19);
+    final shop = ItemRepository(
+      ItemDao(db),
+      _Scope('s1'),
+      engine,
+      connectivity,
+      clock: () => now = now.add(const Duration(minutes: 1)),
+    );
+    expect(await shop.lastUsedCategoryId(), isNull);
+    await shop.saveItem(
+      Item(id: 'a', name: 'a', categoryId: 'rice', prices: [_option('ដប', 1)]),
+    );
+    await shop.saveItem(
+      Item(id: 'b', name: 'b', categoryId: _drinks, prices: [_option('ដប', 1)]),
+    );
+    await shop.saveItem(Item(id: 'c', name: 'c', prices: [_option('ដប', 1)]));
+
+    expect(await shop.lastUsedCategoryId(), _drinks);
+  });
+
+  test('price settings fall back to the defaults without a row', () async {
+    final settings = await repo('s1').priceSettings();
+    expect(settings.useWholesale, isFalse);
+    expect(settings.useCost, isTrue);
+    expect(settings.currency, Currency.khr);
+    expect(settings.khrPerUsd, 4000);
+
+    await db.into(db.shopSettingsTable).insert(
+      ShopSettingsTableCompanion.insert(
+        shopId: 's1',
+        useWholesalePrice: const Value(true),
+        defaultCurrency: const Value('USD'),
+        khrPerUsd: const Value(4100),
+      ),
+    );
+    final saved = await repo('s1').priceSettings();
+    expect(saved.useWholesale, isTrue);
+    expect(saved.currency, Currency.usd);
+    expect(saved.khrPerUsd, 4100);
+  });
+
   test('a syncing shop queues a job per write', () async {
     final shop = repo('s1');
     await shop.saveItem(

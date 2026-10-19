@@ -1185,5 +1185,83 @@
   "members": "សមាជិក",
   "@members": {
     "description": "Title of the members list"
+  },
+  "itemNicknames": "ឈ្មោះផ្សេង",
+  "@itemNicknames": {
+    "description": "Label for an item's other names"
+  },
+  "itemNicknamesHint": "ជួយឱ្យស្វែងរកឃើញ",
+  "@itemNicknamesHint": {
+    "description": "Why other names are worth adding"
+  },
+  "itemAddNickname": "+ ឈ្មោះផ្សេង",
+  "@itemAddNickname": {
+    "description": "Button that adds an other name"
+  },
+  "itemAddNicknameExample": "ឧ. ទឹកធំ, Kulen",
+  "@itemAddNicknameExample": {
+    "description": "Example after the add other name button"
+  },
+  "itemNameMissing": "សូមបញ្ចូលឈ្មោះទំនិញ",
+  "@itemNameMissing": {
+    "description": "Error when saving an item without a name"
+  },
+  "itemDuplicateName": "មានទំនិញឈ្មោះនេះរួចហើយ",
+  "@itemDuplicateName": {
+    "description": "Warning, not an error: saving again saves a new item"
+  },
+  "itemSaveAsNew": "ឬរក្សាទុកជាទំនិញថ្មី",
+  "@itemSaveAsNew": {
+    "description": "Follows the duplicate name warning"
+  },
+  "itemView": "មើល",
+  "@itemView": {
+    "description": "Link that opens the other item"
+  },
+  "priceRielNoDecimals": "តម្លៃរៀលមិនអាចមានទសភាគ",
+  "@priceRielNoDecimals": {
+    "description": "Error for a decimal in a riel price"
+  },
+  "priceUsdTwoDecimals": "ដុល្លារមានទសភាគបានតែ ២ ខ្ទង់",
+  "@priceUsdTwoDecimals": {
+    "description": "Error for more than two decimals in a dollar price"
+  },
+  "priceNotNumber": "សូមបញ្ចូលតម្លៃជាលេខ",
+  "@priceNotNumber": {
+    "description": "Error for a price that is not a number"
+  },
+  "pricePackOverOne": "ចំនួនក្នុងកញ្ចប់ត្រូវលើសពី ១",
+  "@pricePackOverOne": {
+    "description": "Error for a pack count of 0 or 1"
+  },
+  "priceBarcodeUsed": "បាកូដនេះប្រើរួចហើយសម្រាប់ «{name}»",
+  "@priceBarcodeUsed": {
+    "description": "Error for a barcode another item in the shop uses",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "priceNoRow": "សូមបញ្ចូលឯកតា ឬតម្លៃយ៉ាងហោចណាស់មួយ",
+  "@priceNoRow": {
+    "description": "Error when every price row is empty"
+  },
+  "priceUnitsFor": "ឯកតាសម្រាប់ «{category}»",
+  "@priceUnitsFor": {
+    "description": "Hint under the unit chips",
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "priceWholesaleShort": "ដុំ",
+  "@priceWholesaleShort": {
+    "description": "Prefix inside the wholesale field of a price row"
+  },
+  "priceCostShort": "ដើម",
+  "@priceCostShort": {
+    "description": "Prefix inside the cost field of a price row"
+  },
+  "priceRemove": "លុបតម្លៃនេះ",
+  "@priceRemove": {
+    "description": "Accessible label of the remove price row button"
   }
 }

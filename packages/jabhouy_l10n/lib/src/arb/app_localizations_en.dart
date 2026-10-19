@@ -950,4 +950,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get members => 'Members';
+
+  @override
+  String get itemNicknames => 'Other names';
+
+  @override
+  String get itemNicknamesHint => 'Helps search find it';
+
+  @override
+  String get itemAddNickname => '+ Other name';
+
+  @override
+  String get itemAddNicknameExample => 'e.g. ទឹកធំ, Kulen';
+
+  @override
+  String get itemNameMissing => 'Enter the item name';
+
+  @override
+  String get itemDuplicateName => 'An item with this name already exists';
+
+  @override
+  String get itemSaveAsNew => 'or save as a new item';
+
+  @override
+  String get itemView => 'View';
+
+  @override
+  String get priceRielNoDecimals => 'Riel prices can\'t have decimals';
+
+  @override
+  String get priceUsdTwoDecimals => 'Dollars take at most 2 decimals';
+
+  @override
+  String get priceNotNumber => 'Enter a number';
+
+  @override
+  String get pricePackOverOne => 'A pack holds more than 1';
+
+  @override
+  String priceBarcodeUsed(Object name) {
+    return 'This barcode is already used by «$name»';
+  }
+
+  @override
+  String get priceNoRow => 'Add at least one unit or price';
+
+  @override
+  String priceUnitsFor(Object category) {
+    return 'Units for «$category»';
+  }
+
+  @override
+  String get priceWholesaleShort => 'Wholesale';
+
+  @override
+  String get priceCostShort => 'Cost';
+
+  @override
+  String get priceRemove => 'Remove this price';
 }

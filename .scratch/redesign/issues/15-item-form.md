@@ -1,6 +1,6 @@
 # P3 Step 3: Add and edit item form
 
-Status: open
+Status: resolved
 Blocked by: 12, 19
 
 - Photo + name; nicknames as removable chips with `+ ឈ្មោះផ្សេង` (optional). Category QuickPickChips + `ទាំងអស់ ›`, suggested from the name by keyword, last used otherwise.
@@ -15,3 +15,11 @@ Blocked by: 12, 19
 - Duplicate name is a warning only (canvas ៤គ, decision 49): `មានទំនិញឈ្មោះនេះរួចហើយ · មើល · ឬរក្សាទុកជាទំនិញថ្មី`.
 
 **Done when:** creating ដប 3,000 ៛ + កេះ ×24 60,000 ៛ in one form saves one Item with two Price options; a row left empty saves null; each error above blocks saving with its message; a duplicate name still saves.
+
+## Comments
+
+- 2026-10-19: built as `ItemFormPage` + `ItemFormCubit` beside the old form; reachable once issue 13 wires Home to it. Verified by cubit and widget tests, not yet on a device.
+- Left for later issues: photo (24), `ទាំងអស់ ›` category picker (16; all categories show as chips until then), the duplicate warning's `មើល` link (14), row barcode button (22), mic on name and note (Phase 5).
+- Quiet wholesale/cost fields are 44 px, not the plan's 40, to stay valid tap targets.
+- Duplicate name: the first save shows the warning; saving again with the same name goes ahead.
+- Khmer wording to confirm: `priceUsdTwoDecimals`, `priceNotNumber`, `priceNoRow` (not in the plan's copy).

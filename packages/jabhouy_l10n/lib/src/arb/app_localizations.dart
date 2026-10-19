@@ -1861,6 +1861,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Members'**
   String get members;
+
+  /// Label for an item's other names
+  ///
+  /// In en, this message translates to:
+  /// **'Other names'**
+  String get itemNicknames;
+
+  /// Why other names are worth adding
+  ///
+  /// In en, this message translates to:
+  /// **'Helps search find it'**
+  String get itemNicknamesHint;
+
+  /// Button that adds an other name
+  ///
+  /// In en, this message translates to:
+  /// **'+ Other name'**
+  String get itemAddNickname;
+
+  /// Example after the add other name button
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. ទឹកធំ, Kulen'**
+  String get itemAddNicknameExample;
+
+  /// Error when saving an item without a name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the item name'**
+  String get itemNameMissing;
+
+  /// Warning, not an error: saving again saves a new item
+  ///
+  /// In en, this message translates to:
+  /// **'An item with this name already exists'**
+  String get itemDuplicateName;
+
+  /// Follows the duplicate name warning
+  ///
+  /// In en, this message translates to:
+  /// **'or save as a new item'**
+  String get itemSaveAsNew;
+
+  /// Link that opens the other item
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get itemView;
+
+  /// Error for a decimal in a riel price
+  ///
+  /// In en, this message translates to:
+  /// **'Riel prices can\'t have decimals'**
+  String get priceRielNoDecimals;
+
+  /// Error for more than two decimals in a dollar price
+  ///
+  /// In en, this message translates to:
+  /// **'Dollars take at most 2 decimals'**
+  String get priceUsdTwoDecimals;
+
+  /// Error for a price that is not a number
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number'**
+  String get priceNotNumber;
+
+  /// Error for a pack count of 0 or 1
+  ///
+  /// In en, this message translates to:
+  /// **'A pack holds more than 1'**
+  String get pricePackOverOne;
+
+  /// Error for a barcode another item in the shop uses
+  ///
+  /// In en, this message translates to:
+  /// **'This barcode is already used by «{name}»'**
+  String priceBarcodeUsed(Object name);
+
+  /// Error when every price row is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one unit or price'**
+  String get priceNoRow;
+
+  /// Hint under the unit chips
+  ///
+  /// In en, this message translates to:
+  /// **'Units for «{category}»'**
+  String priceUnitsFor(Object category);
+
+  /// Prefix inside the wholesale field of a price row
+  ///
+  /// In en, this message translates to:
+  /// **'Wholesale'**
+  String get priceWholesaleShort;
+
+  /// Prefix inside the cost field of a price row
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get priceCostShort;
+
+  /// Accessible label of the remove price row button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this price'**
+  String get priceRemove;
 }
 
 class _AppLocalizationsDelegate

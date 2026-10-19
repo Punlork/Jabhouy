@@ -13,7 +13,9 @@ class MoneyInput extends StatefulWidget {
   const MoneyInput({
     required this.currency,
     required this.khrPerUsd,
-    required this.onChanged,
+    this.onChanged,
+    this.onText,
+    this.errorText,
     this.value,
     super.key,
   });
@@ -25,7 +27,12 @@ class MoneyInput extends StatefulWidget {
 
   /// Rate for the hint and the toggle: the shop's, or a credit's snapshot.
   final int khrPerUsd;
-  final ValueChanged<Money?> onChanged;
+  final ValueChanged<Money?>? onChanged;
+
+  /// The text as typed and the chosen currency, so a form can name a typo
+  /// that [onChanged] reports as null.
+  final void Function(String text, Currency currency)? onText;
+  final String? errorText;
 
   @override
   State<MoneyInput> createState() => _MoneyInputState();
@@ -52,7 +59,8 @@ class _MoneyInputState extends State<MoneyInput> {
 
   void _onText(String text) {
     setState(() => _money = Money.tryParse(text, _currency));
-    widget.onChanged(_money);
+    widget.onChanged?.call(_money);
+    widget.onText?.call(text, _currency);
   }
 
   void _switchTo(Currency to) {
@@ -63,7 +71,8 @@ class _MoneyInputState extends State<MoneyInput> {
       _money = converted;
       _controller.text = converted?.formatNumber() ?? '';
     });
-    widget.onChanged(converted);
+    widget.onChanged?.call(converted);
+    widget.onText?.call(_controller.text, to);
   }
 
   @override
@@ -88,6 +97,7 @@ class _MoneyInputState extends State<MoneyInput> {
           ],
           style: AppTextTheme.body.copyWith(color: t.textPrimary),
           decoration: InputDecoration(
+            errorText: widget.errorText,
             suffixIcon: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -156,13 +166,21 @@ class _CurrencyButton extends StatelessWidget {
   }
 }
 
-/// Keeps only digits and groups them by thousands while typing.
+/// Keeps only digits and groups them by thousands while typing. A dot is
+/// left as typed, so `3,000.5` reads as a mistake rather than 30,005.
 class _GroupedDigitsFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+    if (newValue.text.contains('.')) {
+      final kept = newValue.text.replaceAll(RegExp(r'[^\d,.]'), '');
+      return TextEditingValue(
+        text: kept,
+        selection: TextSelection.collapsed(offset: kept.length),
+      );
+    }
     final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return TextEditingValue.empty;
     final text = Money(int.parse(digits), Currency.khr).formatNumber();

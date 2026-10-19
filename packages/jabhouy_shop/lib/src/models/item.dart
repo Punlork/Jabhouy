@@ -64,6 +64,23 @@ class Item {
   bool get hasMissingPrice => prices.any((p) => p.price == null);
 }
 
+/// What the item form shows and defaults to, from the Shop's settings.
+class PriceSettings {
+  const PriceSettings({
+    this.useWholesale = false,
+    this.useCost = true,
+    this.currency = Currency.khr,
+    this.khrPerUsd = 4000,
+  });
+
+  final bool useWholesale;
+  final bool useCost;
+
+  /// Default currency for a new price row.
+  final Currency currency;
+  final int khrPerUsd;
+}
+
 /// A unit name suggested as a chip for Items in an [ItemCategory].
 class CategoryUnit {
   const CategoryUnit({required this.unit, this.hidden = false});

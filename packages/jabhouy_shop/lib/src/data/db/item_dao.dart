@@ -123,6 +123,83 @@ class ItemDao {
     );
   }
 
+  /// Barcode → name of another live Item in [shopId] using it.
+  Future<Map<String, String>> barcodeOwners(
+    String shopId,
+    Iterable<String> barcodes, {
+    required String exceptItemId,
+  }) async {
+    final query =
+        _db.select(_db.itemPriceTable).join([
+          innerJoin(
+            _db.itemTable,
+            _db.itemTable.id.equalsExp(_db.itemPriceTable.itemId),
+          ),
+        ])..where(
+          _db.itemTable.shopId.equals(shopId) &
+              _db.itemTable.deletedAt.isNull() &
+              _db.itemTable.id.equals(exceptItemId).not() &
+              _db.itemPriceTable.barcode.isIn(barcodes),
+        );
+    return {
+      for (final row in await query.get())
+        row.readTable(_db.itemPriceTable).barcode!: row
+            .readTable(_db.itemTable)
+            .name,
+    };
+  }
+
+  /// Id of another live Item in [shopId] with this name, ignoring case
+  /// and outer spaces.
+  Future<String?> itemNamed(
+    String shopId,
+    String name, {
+    required String exceptItemId,
+  }) async {
+    final row =
+        await (_db.select(_db.itemTable)
+              ..where(
+                (i) =>
+                    i.shopId.equals(shopId) &
+                    i.deletedAt.isNull() &
+                    i.id.equals(exceptItemId).not() &
+                    i.name.trim().lower().equals(name.trim().toLowerCase()),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    return row?.id;
+  }
+
+  /// Category of the newest saved Item in [shopId] that has one.
+  Future<String?> lastUsedCategoryId(String shopId) async {
+    final row =
+        await (_db.select(_db.itemTable)
+              ..where(
+                (i) =>
+                    i.shopId.equals(shopId) &
+                    i.deletedAt.isNull() &
+                    i.categoryId.isNotNull(),
+              )
+              ..orderBy([(i) => OrderingTerm.desc(i.updatedAt)])
+              ..limit(1))
+            .getSingleOrNull();
+    return row?.categoryId;
+  }
+
+  /// The Shop's price settings; the table's defaults until a row exists.
+  Future<PriceSettings> priceSettings(String shopId) async {
+    final row = await (_db.select(
+      _db.shopSettingsTable,
+    )..where((s) => s.shopId.equals(shopId))).getSingleOrNull();
+    if (row == null) return const PriceSettings();
+    return PriceSettings(
+      useWholesale: row.useWholesalePrice,
+      useCost: row.useCostPrice,
+      currency: Currency.values.byName(row.defaultCurrency.toLowerCase()),
+      khrPerUsd: row.khrPerUsd,
+    );
+  }
+
   Stream<List<ItemCategory>> watchCategories(String shopId) {
     final query =
         _db.select(_db.categoryTable).join([

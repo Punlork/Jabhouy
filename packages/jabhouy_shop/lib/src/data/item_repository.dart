@@ -72,6 +72,18 @@ class ItemRepository {
     return Ok(category);
   }
 
+  Future<Map<String, String>> barcodeOwners(
+    Iterable<String> barcodes, {
+    required String exceptItemId,
+  }) => _dao.barcodeOwners(_shopId, barcodes, exceptItemId: exceptItemId);
+
+  Future<String?> itemNamed(String name, {required String exceptItemId}) =>
+      _dao.itemNamed(_shopId, name, exceptItemId: exceptItemId);
+
+  Future<String?> lastUsedCategoryId() => _dao.lastUsedCategoryId(_shopId);
+
+  Future<PriceSettings> priceSettings() => _dao.priceSettings(_shopId);
+
   /// Visible units for the form's chips, most used first.
   Future<List<String>> unitsFor(String categoryId) =>
       _dao.unitsByUse(categoryId);

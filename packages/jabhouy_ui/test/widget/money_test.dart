@@ -74,6 +74,28 @@ void main() {
     },
   );
 
+  final texts = <(String, Currency)>[];
+  testBothThemes(
+    'MoneyInput keeps a riel decimal visible instead of losing the dot',
+    () => MoneyInput(
+      currency: Currency.khr,
+      khrPerUsd: 4000,
+      onText: (text, currency) => texts.add((text, currency)),
+      errorText: 'តម្លៃរៀលមិនអាចមានទសភាគ',
+    ),
+    (tester) async {
+      texts.clear();
+      await tester.enterText(find.byType(TextField), '3000.5');
+      await tester.pump();
+      expect(find.text('3000.5'), findsOneWidget);
+      expect(texts.last, ('3000.5', Currency.khr));
+      expect(find.text('តម្លៃរៀលមិនអាចមានទសភាគ'), findsOneWidget);
+      await tester.tap(find.text(r'$'));
+      await tester.pump();
+      expect(texts.last.$2, Currency.usd, reason: 'a switch is reported too');
+    },
+  );
+
   testBothThemes(
     'MoneyInput toggle converts the value',
     () => input(Currency.khr),

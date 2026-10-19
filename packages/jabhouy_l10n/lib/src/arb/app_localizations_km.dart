@@ -935,4 +935,62 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get members => 'សមាជិក';
+
+  @override
+  String get itemNicknames => 'ឈ្មោះផ្សេង';
+
+  @override
+  String get itemNicknamesHint => 'ជួយឱ្យស្វែងរកឃើញ';
+
+  @override
+  String get itemAddNickname => '+ ឈ្មោះផ្សេង';
+
+  @override
+  String get itemAddNicknameExample => 'ឧ. ទឹកធំ, Kulen';
+
+  @override
+  String get itemNameMissing => 'សូមបញ្ចូលឈ្មោះទំនិញ';
+
+  @override
+  String get itemDuplicateName => 'មានទំនិញឈ្មោះនេះរួចហើយ';
+
+  @override
+  String get itemSaveAsNew => 'ឬរក្សាទុកជាទំនិញថ្មី';
+
+  @override
+  String get itemView => 'មើល';
+
+  @override
+  String get priceRielNoDecimals => 'តម្លៃរៀលមិនអាចមានទសភាគ';
+
+  @override
+  String get priceUsdTwoDecimals => 'ដុល្លារមានទសភាគបានតែ ២ ខ្ទង់';
+
+  @override
+  String get priceNotNumber => 'សូមបញ្ចូលតម្លៃជាលេខ';
+
+  @override
+  String get pricePackOverOne => 'ចំនួនក្នុងកញ្ចប់ត្រូវលើសពី ១';
+
+  @override
+  String priceBarcodeUsed(Object name) {
+    return 'បាកូដនេះប្រើរួចហើយសម្រាប់ «$name»';
+  }
+
+  @override
+  String get priceNoRow => 'សូមបញ្ចូលឯកតា ឬតម្លៃយ៉ាងហោចណាស់មួយ';
+
+  @override
+  String priceUnitsFor(Object category) {
+    return 'ឯកតាសម្រាប់ «$category»';
+  }
+
+  @override
+  String get priceWholesaleShort => 'ដុំ';
+
+  @override
+  String get priceCostShort => 'ដើម';
+
+  @override
+  String get priceRemove => 'លុបតម្លៃនេះ';
 }
