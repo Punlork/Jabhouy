@@ -2035,6 +2035,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. 3,000'**
   String get priceSellingHint;
+
+  /// Hint in the narrow pack count field, after ×
+  ///
+  /// In en, this message translates to:
+  /// **'24'**
+  String get priceCountHint;
 }
 
 class _AppLocalizationsDelegate

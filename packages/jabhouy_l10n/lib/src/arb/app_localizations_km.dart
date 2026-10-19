@@ -1030,4 +1030,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get priceSellingHint => 'ឧ. 3,000';
+
+  @override
+  String get priceCountHint => '24';
 }

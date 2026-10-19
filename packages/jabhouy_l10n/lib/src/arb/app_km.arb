@@ -1313,5 +1313,9 @@
   "priceSellingHint": "ឧ. 3,000",
   "@priceSellingHint": {
     "description": "Hint in the selling price field"
+  },
+  "priceCountHint": "24",
+  "@priceCountHint": {
+    "description": "Hint in the narrow pack count field, after ×"
   }
 }

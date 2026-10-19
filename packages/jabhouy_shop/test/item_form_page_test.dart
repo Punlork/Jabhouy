@@ -75,7 +75,7 @@ void main() {
       (tester) async {
     await pumpForm(tester);
     // Empty fields show the design's examples.
-    for (final hint in ['ឧ. អង្ករផ្កាម្លិះ', 'ឧ. ដប', 'ឧ. 3,000']) {
+    for (final hint in ['ឧ. អង្ករផ្កាម្លិះ', 'ឧ. ដប', '24', 'ឧ. 3,000']) {
       expect(find.text(hint), findsOneWidget, reason: hint);
     }
 

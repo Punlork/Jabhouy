@@ -161,6 +161,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                   keyboardType: TextInputType.number,
                   inputFormatters: const [WholeNumberFormatter()],
                   decoration: InputDecoration(
+                    hintText: l10n.priceCountHint,
                     // prefixText only shows while focused; this always does.
                     prefixIcon: Padding(
                       padding: const EdgeInsetsDirectional.only(start: 12),

@@ -1045,4 +1045,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceSellingHint => 'e.g. 3,000';
+
+  @override
+  String get priceCountHint => '24';
 }
