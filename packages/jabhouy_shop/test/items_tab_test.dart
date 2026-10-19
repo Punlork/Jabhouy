@@ -105,6 +105,12 @@ void main() {
     await tester.tap(find.text('Coca-Cola'));
     await settle(tester);
     expect(find.byType(ItemDetailsSheet), findsOneWidget);
+    final sheet = tester.widget<BottomSheet>(find.byType(BottomSheet));
+    expect(
+      sheet.backgroundColor,
+      isNot(Colors.transparent),
+      reason: 'AppSheet relies on the sheet theme for its background',
+    );
     expect(opened, isEmpty, reason: 'a tap shows details first');
     await tester.tap(find.text('កែតម្លៃ'));
     await settle(tester);

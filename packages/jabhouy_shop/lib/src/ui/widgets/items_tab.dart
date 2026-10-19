@@ -33,7 +33,6 @@ class _ItemsTabState extends State<ItemsTab>
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (sheetContext) => ItemDetailsSheet(
         item: item,
         categoryName: category.isEmpty ? null : category.first.name,

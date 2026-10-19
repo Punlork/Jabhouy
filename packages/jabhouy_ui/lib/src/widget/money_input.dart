@@ -5,7 +5,8 @@ import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/src/theme/app_tokens.dart';
 import 'package:jabhouy_ui/src/theme/text_theme.dart';
 
-/// A money field with a `៛ ▾` toggle and a muted converted hint below.
+/// A money field with a `៛` / `$` toggle button and a muted converted
+/// hint below.
 /// Reports null while empty or unreadable, so a missing price is never 0.
 ///
 /// shortcut: [value] is read once; give the widget a new key to reset it
@@ -132,24 +133,31 @@ class _CurrencyToggle extends StatelessWidget {
     final t = context.tokens;
     return Tooltip(
       message: context.l10n.currencySwitch,
+      // 44 × 44 tap target around a 36 px bordered button (canvas ៤ខ).
       child: InkResponse(
         onTap: onTap,
         radius: AppSizes.minTapTarget / 2,
-        child: SizedBox(
-          width: AppSizes.minTapTarget,
-          height: AppSizes.minTapTarget,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
+        child: SizedBox.square(
+          dimension: AppSizes.minTapTarget,
+          child: Center(
+            child: Container(
+              height: 36,
+              constraints: const BoxConstraints(minWidth: 36),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                color: t.bg,
+                border: Border.all(color: t.border),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Text(
                 label,
                 style: AppTextTheme.label.copyWith(
                   color: t.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              Icon(Icons.expand_more_rounded, size: 14, color: t.textMuted),
-            ],
+            ),
           ),
         ),
       ),
