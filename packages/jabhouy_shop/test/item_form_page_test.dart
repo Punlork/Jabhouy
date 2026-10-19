@@ -94,6 +94,26 @@ void main() {
     await tester.runAsync(db.close);
   });
 
+  testWidgets('adding a nickname shows it as a chip and saves it',
+      (tester) async {
+    await pumpForm(tester);
+
+    await tester.tap(find.text('+ ឈ្មោះផ្សេង'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'ទឹកធំ');
+    await tester.tap(find.text('រក្សាទុក').last);
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(InputChip, 'ទឹកធំ'), findsOneWidget);
+    await tester.enterText(find.byKey(ItemFormPage.nameKey), 'ទឹកអូគូលេនធំ');
+    await tester.enterText(rowField(0, 0), 'ដប');
+    await save(tester);
+
+    final items = await tester.runAsync(() => repo.watchItems().first);
+    expect(items!.single.nicknames, ['ទឹកធំ']);
+    await tester.runAsync(db.close);
+  });
+
   testWidgets('saving with problems shows each message and writes nothing',
       (tester) async {
     await pumpForm(tester);

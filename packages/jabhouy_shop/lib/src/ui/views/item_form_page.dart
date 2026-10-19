@@ -73,27 +73,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
   }
 
   Future<void> _addNickname() async {
-    final l10n = context.l10n;
-    final controller = TextEditingController();
     final name = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.itemNicknames),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: l10n.itemAddNicknameExample),
-          onSubmitted: (v) => Navigator.pop(context, v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
+      builder: (_) => const _NicknameDialog(),
     );
-    controller.dispose();
     final trimmed = name?.trim() ?? '';
     if (trimmed.isEmpty || _nicknames.contains(trimmed)) return;
     setState(() => _nicknames.add(trimmed));
@@ -323,6 +306,45 @@ class _ItemFormPageState extends State<ItemFormPage> {
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Owns its controller: the field stays on screen while the dialog
+/// animates out, so the page must not dispose it on pop.
+class _NicknameDialog extends StatefulWidget {
+  const _NicknameDialog();
+
+  @override
+  State<_NicknameDialog> createState() => _NicknameDialogState();
+}
+
+class _NicknameDialogState extends State<_NicknameDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(l10n.itemNicknames),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(hintText: l10n.itemAddNicknameExample),
+        onSubmitted: (v) => Navigator.pop(context, v),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: Text(l10n.save),
         ),
       ],
     );
