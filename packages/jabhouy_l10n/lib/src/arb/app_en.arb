@@ -1095,6 +1095,21 @@
   "@settingsCategoriesUnits": {
     "description": "Link to manage categories and units"
   },
+  "categoriesCount": "{count} categories",
+  "@categoriesCount": {
+    "description": "Under the categories & units link",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "categoryHidden": "Hidden",
+  "@categoryHidden": {
+    "description": "Tag on a hidden category and its hide switch"
+  },
+  "categoryUnits": "Units",
+  "@categoryUnits": {
+    "description": "Units heading and add-unit chip in the category sheet"
+  },
   "settingsMembers": "Members and roles",
   "@settingsMembers": {
     "description": "Link to invite and members"
@@ -1414,10 +1429,6 @@
   "@settingsAppSection": {
     "description": "Settings section for app options"
   },
-  "settingsHelpSection": "Help",
-  "@settingsHelpSection": {
-    "description": "Settings section for help"
-  },
   "settingsAppearance": "Appearance",
   "@settingsAppearance": {
     "description": "Settings row for light or dark mode"
@@ -1425,10 +1436,6 @@
   "settingsLanguage": "Language",
   "@settingsLanguage": {
     "description": "Settings row for the app language"
-  },
-  "settingsDiagnosticsHint": "For troubleshooting",
-  "@settingsDiagnosticsHint": {
-    "description": "Subtitle of the diagnostics row"
   },
   "itemMorePrices": "+{count} more",
   "@itemMorePrices": {

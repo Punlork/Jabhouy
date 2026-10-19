@@ -196,6 +196,39 @@ void main() {
     expect(units, hasLength(2));
   });
 
+  test(
+    'reordering rewrites every sort order and queues each category',
+    () async {
+      final shop = repo('s1');
+      for (final (i, id) in ['a', 'b', 'c'].indexed) {
+        await shop.saveCategory(ItemCategory(id: id, name: id, sortOrder: i));
+      }
+      await db.delete(db.outboxEntries).go();
+
+      await shop.reorderCategories(['c', 'a', 'b']);
+
+      final ordered = await shop.watchCategories().first;
+      expect([for (final c in ordered) c.id], ['c', 'a', 'b']);
+      expect([for (final c in ordered) c.sortOrder], [0, 1, 2]);
+      expect(await jobs(), hasLength(3));
+    },
+  );
+
+  test('a viewer may not change categories', () async {
+    final viewer = ItemRepository(
+      ItemDao(db),
+      _Scope('s1', role: MemberRole.viewer),
+      engine,
+      connectivity,
+    );
+    expect(
+      await viewer.saveCategory(const ItemCategory(id: 'a', name: 'a')),
+      isA<Err<ItemCategory>>(),
+    );
+    expect(await viewer.reorderCategories(['a']), isA<Err<void>>());
+    expect(await viewer.watchCategories().first, isEmpty);
+  });
+
   test('a barcode in use names its item, but not the one being edited',
       () async {
     final shop = repo('s1');

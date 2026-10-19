@@ -24,6 +24,9 @@ class _MockSignoutBloc extends MockBloc<SignoutEvent, SignoutState>
 class _MockPriceSettings extends MockCubit<PriceSettings?>
     implements PriceSettingsCubit {}
 
+class _MockCategories extends MockCubit<List<ItemCategory>?>
+    implements CategoriesCubit {}
+
 void main() {
   late _MockAppBloc app;
   late _MockSignoutBloc signout;
@@ -69,6 +72,11 @@ void main() {
     when(() => prices.state).thenReturn(
       const PriceSettings(useWholesale: true),
     );
+    final categories = _MockCategories();
+    when(() => categories.state).thenReturn(const [
+      ItemCategory(id: 'a', name: 'ភេសជ្ជៈ'),
+      ItemCategory(id: 'b', name: 'អង្ករ', hidden: true),
+    ]);
     await tester.binding.setSurfaceSize(const Size(390, 1100));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -78,6 +86,7 @@ void main() {
           BlocProvider<AuthBloc>.value(value: auth),
           BlocProvider<SignoutBloc>.value(value: signout),
           BlocProvider<PriceSettingsCubit>.value(value: prices),
+          BlocProvider<CategoriesCubit>.value(value: categories),
         ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,
@@ -103,6 +112,13 @@ void main() {
 
     expect(find.text('តម្លៃ និងរូបិយប័ណ្ណ'), findsOneWidget);
     expect(find.text(r'$1 = 4,000 ៛ · លក់ដុំ · ដើម'), findsOneWidget);
+  });
+
+  testWidgets('the categories row counts every category', (tester) async {
+    await pumpPage(tester);
+
+    expect(find.text('ប្រភេទ និងឯកតា'), findsOneWidget);
+    expect(find.text('2 ប្រភេទ'), findsOneWidget);
   });
 
   testWidgets('sign out asks first', (tester) async {

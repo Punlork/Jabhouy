@@ -1658,6 +1658,24 @@ abstract class AppLocalizations {
   /// **'Categories and units'**
   String get settingsCategoriesUnits;
 
+  /// Under the categories & units link
+  ///
+  /// In en, this message translates to:
+  /// **'{count} categories'**
+  String categoriesCount(Object count);
+
+  /// Tag on a hidden category and its hide switch
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get categoryHidden;
+
+  /// Units heading and add-unit chip in the category sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Units'**
+  String get categoryUnits;
+
   /// Link to invite and members
   ///
   /// In en, this message translates to:
@@ -2108,12 +2126,6 @@ abstract class AppLocalizations {
   /// **'App'**
   String get settingsAppSection;
 
-  /// Settings section for help
-  ///
-  /// In en, this message translates to:
-  /// **'Help'**
-  String get settingsHelpSection;
-
   /// Settings row for light or dark mode
   ///
   /// In en, this message translates to:
@@ -2125,12 +2137,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get settingsLanguage;
-
-  /// Subtitle of the diagnostics row
-  ///
-  /// In en, this message translates to:
-  /// **'For troubleshooting'**
-  String get settingsDiagnosticsHint;
 
   /// After the first three prices on a Home card
   ///

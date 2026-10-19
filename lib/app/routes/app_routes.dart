@@ -256,6 +256,12 @@ class AppRouter {
                         getIt<CurrentShop>(),
                       )..load(),
                     ),
+                    BlocProvider(
+                      create: (_) => CategoriesCubit(
+                        getIt<ItemRepository>(),
+                        getIt<CurrentShop>(),
+                      )..load(),
+                    ),
                   ],
                   child: const SettingsPage(),
                 ),
@@ -275,6 +281,23 @@ class AppRouter {
                 child: BlocProvider.value(
                   value: cubit,
                   child: const PriceSettingsPage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.categoriesUnits.toPath,
+            name: AppRoutes.categoriesUnits,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              final cubit = extra['categoriesCubit'] as CategoriesCubit;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider.value(
+                  value: cubit,
+                  child: const CategoriesUnitsPage(),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

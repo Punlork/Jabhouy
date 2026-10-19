@@ -318,6 +318,27 @@ class ItemDao {
     });
   }
 
+  /// Sets each category's `sortOrder` to its index in [ids]. One transaction.
+  Future<void> reorderCategories(
+    List<String> ids, {
+    required DateTime now,
+    String? userId,
+  }) {
+    return _db.transaction(() async {
+      for (final (i, id) in ids.indexed) {
+        await (_db.update(
+          _db.categoryTable,
+        )..where((c) => c.id.equals(id))).write(
+          CategoryTableCompanion(
+            sortOrder: Value(i),
+            updatedAt: Value(now),
+            updatedBy: Value(userId),
+          ),
+        );
+      }
+    });
+  }
+
   /// Visible units of [categoryId], most used first (decision 13).
   Future<List<String>> unitsByUse(String categoryId) async {
     final rows = await _db

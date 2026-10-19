@@ -74,7 +74,7 @@ class QuickPickChips extends StatelessWidget {
       runSpacing: 8,
       children: [
         for (final option in options)
-          _OutlinedChip(
+          PickChip(
             label: option,
             selected: option == selected,
             onTap: () => onPick(option),
@@ -87,16 +87,19 @@ class QuickPickChips extends StatelessWidget {
 
 /// A suggestion chip (canvas ៤ក): white with a border, or dark with a
 /// check when chosen.
-class _OutlinedChip extends StatelessWidget {
-  const _OutlinedChip({
+class PickChip extends StatelessWidget {
+  const PickChip({
     required this.label,
     required this.selected,
     required this.onTap,
+    super.key,
   });
 
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+
+  /// Null shows the chip without a tap, e.g. read-only.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

@@ -85,7 +85,9 @@ class ItemRepository {
 
   Stream<List<ItemCategory>> watchCategories() => _dao.watchCategories(_shopId);
 
+  /// Owner and editor; a viewer only reads (the server enforces it too).
   Future<Result<ItemCategory>> saveCategory(ItemCategory category) async {
+    if (_scope.role == MemberRole.viewer) return const Err(_viewerReadOnly);
     final now = _clock();
     await _dao.saveCategory(_shopId, category, now: now, userId: _scope.userId);
     await _queue(
@@ -96,6 +98,19 @@ class ItemRepository {
     );
     return Ok(category);
   }
+
+  /// Gives every category in [ids] its place in the list as `sortOrder`.
+  Future<Result<void>> reorderCategories(List<String> ids) async {
+    if (_scope.role == MemberRole.viewer) return const Err(_viewerReadOnly);
+    final now = _clock();
+    await _dao.reorderCategories(ids, now: now, userId: _scope.userId);
+    for (final id in ids) {
+      await _queue(SyncEntityType.itemCategory, id, SyncOperation.update, now);
+    }
+    return const Ok(null);
+  }
+
+  static const _viewerReadOnly = AppException('A viewer cannot edit.');
 
   Future<Map<String, String>> barcodeOwners(
     Iterable<String> barcodes, {

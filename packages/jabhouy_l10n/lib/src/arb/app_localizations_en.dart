@@ -846,6 +846,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCategoriesUnits => 'Categories and units';
 
   @override
+  String categoriesCount(Object count) {
+    return '$count categories';
+  }
+
+  @override
+  String get categoryHidden => 'Hidden';
+
+  @override
+  String get categoryUnits => 'Units';
+
+  @override
   String get settingsMembers => 'Members and roles';
 
   @override
@@ -1084,16 +1095,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAppSection => 'App';
 
   @override
-  String get settingsHelpSection => 'Help';
-
-  @override
   String get settingsAppearance => 'Appearance';
 
   @override
   String get settingsLanguage => 'Language';
-
-  @override
-  String get settingsDiagnosticsHint => 'For troubleshooting';
 
   @override
   String itemMorePrices(Object count) {

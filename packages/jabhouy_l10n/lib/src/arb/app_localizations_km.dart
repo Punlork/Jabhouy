@@ -831,6 +831,17 @@ class AppLocalizationsKm extends AppLocalizations {
   String get settingsCategoriesUnits => 'ប្រភេទ និងឯកតា';
 
   @override
+  String categoriesCount(Object count) {
+    return '$count ប្រភេទ';
+  }
+
+  @override
+  String get categoryHidden => 'លាក់';
+
+  @override
+  String get categoryUnits => 'ឯកតា';
+
+  @override
   String get settingsMembers => 'សមាជិក និងសិទ្ធិ';
 
   @override
@@ -1068,16 +1079,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get settingsAppSection => 'កម្មវិធី';
 
   @override
-  String get settingsHelpSection => 'ជំនួយ';
-
-  @override
   String get settingsAppearance => 'រូបរាង';
 
   @override
   String get settingsLanguage => 'ភាសា';
-
-  @override
-  String get settingsDiagnosticsHint => 'សម្រាប់ដោះស្រាយបញ្ហា';
 
   @override
   String itemMorePrices(Object count) {

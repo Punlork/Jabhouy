@@ -130,6 +130,13 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  void _openCategoriesUnits() {
+    context.pushNamed(
+      AppRoutes.categoriesUnits,
+      extra: {'categoriesCubit': context.read<CategoriesCubit>()},
+    );
+  }
+
   /// `$1 = 4,000 ៛ · លក់ដុំ · ដើម`: the rate and the extra prices in use.
   String _pricesSummary(AppLocalizations l10n, PriceSettings s) => [
         l10n.settingsRateFormat(Money(s.khrPerUsd, Currency.khr).formatNumber()),
@@ -200,6 +207,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: _openPriceSettings,
                   ),
                 ),
+                BlocBuilder<CategoriesCubit, List<ItemCategory>?>(
+                  builder: (context, categories) => _Row(
+                    icon: Icons.category_outlined,
+                    title: l10n.settingsCategoriesUnits,
+                    subtitle: categories == null
+                        ? null
+                        : l10n.categoriesCount(categories.length),
+                    onTap: _openCategoriesUnits,
+                  ),
+                ),
                 _Row(
                   icon: Icons.people_outline_rounded,
                   title: l10n.customers,
@@ -259,20 +276,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            if (_isDiagnosticsEnabled) ...[
-              const SizedBox(height: 22),
-              _Section(
-                title: l10n.settingsHelpSection,
-                rows: [
-                  _Row(
-                    icon: Icons.monitor_heart_outlined,
-                    title: l10n.diagnostics,
-                    subtitle: l10n.settingsDiagnosticsHint,
-                    onTap: _openDiagnostics,
-                  ),
-                ],
-              ),
-            ],
             const SizedBox(height: 22),
             Material(
               color: t.surface,

@@ -1043,6 +1043,21 @@
   "@settingsCategoriesUnits": {
     "description": "Link to manage categories and units"
   },
+  "categoriesCount": "{count} ប្រភេទ",
+  "@categoriesCount": {
+    "description": "Under the categories & units link",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "categoryHidden": "លាក់",
+  "@categoryHidden": {
+    "description": "Tag on a hidden category and its hide switch"
+  },
+  "categoryUnits": "ឯកតា",
+  "@categoryUnits": {
+    "description": "Units heading and add-unit chip in the category sheet"
+  },
   "settingsMembers": "សមាជិក និងសិទ្ធិ",
   "@settingsMembers": {
     "description": "Link to invite and members"
@@ -1362,10 +1377,6 @@
   "@settingsAppSection": {
     "description": "Settings section for app options"
   },
-  "settingsHelpSection": "ជំនួយ",
-  "@settingsHelpSection": {
-    "description": "Settings section for help"
-  },
   "settingsAppearance": "រូបរាង",
   "@settingsAppearance": {
     "description": "Settings row for light or dark mode"
@@ -1373,10 +1384,6 @@
   "settingsLanguage": "ភាសា",
   "@settingsLanguage": {
     "description": "Settings row for the app language"
-  },
-  "settingsDiagnosticsHint": "សម្រាប់ដោះស្រាយបញ្ហា",
-  "@settingsDiagnosticsHint": {
-    "description": "Subtitle of the diagnostics row"
   },
   "itemMorePrices": "+{count} ទៀត",
   "@itemMorePrices": {

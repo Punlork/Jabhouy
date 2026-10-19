@@ -33,6 +33,7 @@ Set<String> _allowedAuthenticated(FeatureFlags flags) {
     '${AppRoutes.home.toPath}${AppRoutes.profile.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.settings.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.priceSettings.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.categoriesUnits.toPath}',
     if (diagnostics) '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.customer.toPath}',
     // Left out when income is off, so the redirect sends a stale link home
