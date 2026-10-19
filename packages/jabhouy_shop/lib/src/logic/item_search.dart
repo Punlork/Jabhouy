@@ -26,18 +26,26 @@ String normalizeSearch(String text) =>
 /// allows one changed, missing or extra character, for queries of 4+.
 List<SearchHit> searchItems(List<Item> items, String query) {
   final q = normalizeSearch(query);
-  return [
-    for (final item in items)
-      if (_match(item, q) case final hit?) hit,
-  ]..sort((a, b) {
-    final byRank = a.rank.index.compareTo(b.rank.index);
-    if (byRank != 0) return byRank;
-    return normalizeSearch(a.item.name).compareTo(normalizeSearch(b.item.name));
-  });
+  // Each name is normalized once here, not on every sort comparison.
+  final hits =
+      [
+        for (final item in items)
+          if (_match(item, q) case final hit?) hit,
+      ]..sort((a, b) {
+        final byRank = a.$1.rank.index.compareTo(b.$1.rank.index);
+        return byRank != 0 ? byRank : a.$2.compareTo(b.$2);
+      });
+  return [for (final (hit, _) in hits) hit];
 }
 
-SearchHit? _match(Item item, String q) {
+/// The hit and its normalized name, the sort's tiebreak.
+(SearchHit, String)? _match(Item item, String q) {
   final name = normalizeSearch(item.name);
+  final hit = _rank(item, name, q);
+  return hit == null ? null : (hit, name);
+}
+
+SearchHit? _rank(Item item, String name, String q) {
   if (name == q) return SearchHit(item, SearchRank.exact);
   if (name.startsWith(q)) return SearchHit(item, SearchRank.startsWith);
   for (final nickname in item.nicknames) {
