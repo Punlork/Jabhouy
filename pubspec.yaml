@@ -175,8 +175,6 @@ melos:
     # remember --dart-define-from-file.
     run:dev:
       run: flutter run --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json
-    run:stg:
-      run: flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=config/features/staging.json
     run:prod:
       run: flutter run --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json
     build:prod:

@@ -21,18 +21,6 @@ platform :ios do
     sh("cd #{project_root} && flutter build ios --flavor development -t lib/main_development.dart --debug --no-codesign")
   end
 
-  desc "Build staging (for TestFlight/internal)"
-  lane :build_staging do
-    sh("cd #{project_root} && flutter build ios --flavor staging -t lib/main_staging.dart --release")
-    build_app(
-      workspace: "Runner.xcworkspace",
-      scheme: "staging",
-      export_method: "app-store",
-      output_directory: "./build",
-      output_name: "Jabhouy-staging.ipa",
-    )
-  end
-
   desc "Build production (for TestFlight/App Store)"
   lane :build_release do
     sh("cd #{project_root} && flutter build ios --flavor production -t lib/main_production.dart --release")
@@ -42,14 +30,6 @@ platform :ios do
       export_method: "app-store",
       output_directory: "./build",
       output_name: "Jabhouy.ipa",
-    )
-  end
-
-  desc "Deploy staging to TestFlight"
-  lane :staging do
-    build_staging
-    upload_to_testflight(
-      skip_waiting_for_build_processing: true,
     )
   end
 

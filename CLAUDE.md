@@ -11,7 +11,7 @@ The Flutter SDK is pinned by FVM (`.fvmrc`, 3.47.1). Prefix plain `flutter`/`dar
 fvm dart run melos run analyze   # whole workspace; errors fail
 fvm dart run melos run test      # dart test for core/sync, flutter test for the rest
 fvm dart run melos run gen       # build_runner wherever it is a dependency
-fvm dart run melos run run:dev   # also run:stg, run:prod
+fvm dart run melos run run:dev   # also run:prod
 fvm dart run melos run build:prod   # release APK (production flavor), as CI builds it
 ```
 

@@ -22,22 +22,6 @@
       ]
     },
     {
-      "name": "Staging",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main_staging.dart",
-      "args": [
-        "fvm",
-        "flutter",
-        "run",
-        "--flavor",
-        "staging",
-        "--target",
-        "lib/main_staging.dart",
-        "--dart-define-from-file=config/features/staging.json",
-      ]
-    },
-    {
       "name": "Production",
       "request": "launch",
       "type": "dart",

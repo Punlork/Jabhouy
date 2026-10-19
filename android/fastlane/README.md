@@ -39,14 +39,6 @@ Build development debug APK
 
 Build development release APKs split per ABI
 
-### android build_staging
-
-```sh
-[bundle exec] fastlane android build_staging
-```
-
-Build staging release APK (for internal testing)
-
 ### android build_release
 
 ```sh
@@ -77,7 +69,7 @@ Distribute development arm64-v8a release APK to Firebase App Distribution
 [bundle exec] fastlane android internal
 ```
 
-Deploy to internal testing track (Google Play)
+Deploy production to internal testing track (Google Play)
 
 ### android beta
 

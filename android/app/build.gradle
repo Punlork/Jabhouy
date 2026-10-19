@@ -6,7 +6,6 @@ plugins {
 
 def firebaseConfigFiles = [
     file('src/development/google-services.json'),
-    file('src/staging/google-services.json'),
     file('src/main/google-services.json'),
 ]
 def hasGoogleServicesConfig = firebaseConfigFiles.any { it.exists() }
@@ -138,7 +137,7 @@ android {
     // the overlay that removes it.
     if (!isFeatureEnabled('FEATURE_INCOME')) {
         sourceSets.all { set ->
-            if (set.name in ['development', 'staging', 'production']) {
+            if (set.name in ['development', 'production']) {
                 set.manifest.srcFile 'src/noIncome/AndroidManifest.xml'
             }
         }
@@ -150,12 +149,6 @@ android {
             dimension "default"
             applicationIdSuffix ""
             manifestPlaceholders = [appName: "Jabhouy"]
-            signingConfig signingConfigs.release
-        }
-        staging {
-            dimension "default"
-            applicationIdSuffix ".stg"
-            manifestPlaceholders = [appName: "[STG] Jabhouy"]
             signingConfig signingConfigs.release
         }
         development {

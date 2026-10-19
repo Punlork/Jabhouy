@@ -5,7 +5,6 @@
 /// capability tier without inspecting `kReleaseMode` at each call site.
 enum AppFlavor {
   development,
-  staging,
   production;
 
   bool get isProduction => this == AppFlavor.production;
