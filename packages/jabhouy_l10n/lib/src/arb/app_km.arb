@@ -1039,7 +1039,7 @@
   "@settingsShowConverted": {
     "description": "Tick box for showing converted prices"
   },
-  "settingsCategoriesUnits": "ប្រភេទ និងឯកតា",
+  "settingsCategoriesUnits": "ប្រភេទទំនិញ និងពាក្យកាត់",
   "@settingsCategoriesUnits": {
     "description": "Link to manage categories and units"
   },
@@ -1054,7 +1054,7 @@
   "@categoryHidden": {
     "description": "Tag on a hidden category and its hide switch"
   },
-  "categoryUnits": "ឯកតា",
+  "categoryUnits": "ពាក្យកាត់",
   "@categoryUnits": {
     "description": "Units heading and add-unit chip in the category sheet"
   },
@@ -1256,7 +1256,7 @@
       "name": {}
     }
   },
-  "priceUnitsFor": "ឯកតាសម្រាប់ «{category}»",
+  "priceUnitsFor": "ពាក្យកាត់សម្រាប់ «{category}»",
   "@priceUnitsFor": {
     "description": "Hint under the unit chips",
     "placeholders": {

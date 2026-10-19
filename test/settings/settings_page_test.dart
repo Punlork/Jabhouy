@@ -117,7 +117,7 @@ void main() {
   testWidgets('the categories row counts every category', (tester) async {
     await pumpPage(tester);
 
-    expect(find.text('ប្រភេទ និងឯកតា'), findsOneWidget);
+    expect(find.text('ប្រភេទទំនិញ និងពាក្យកាត់'), findsOneWidget);
     expect(find.text('2 ប្រភេទ'), findsOneWidget);
   });
 

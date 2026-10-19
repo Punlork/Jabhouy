@@ -118,7 +118,7 @@ void main() {
       'ភេសជ្ជៈត្រជាក់',
     );
     await tester.tap(find.text('កេះ'));
-    await tester.tap(find.text('+ ឯកតា'));
+    await tester.tap(find.text('+ ពាក្យកាត់'));
     await settle(tester);
     await tester.enterText(find.byType(TextField).last, 'កំប៉ុង');
     await tester.tap(find.text('រក្សាទុក').last);

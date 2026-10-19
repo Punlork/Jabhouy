@@ -828,7 +828,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get settingsShowConverted => 'បង្ហាញតម្លៃជារូបិយប័ណ្ណទាំងពីរ';
 
   @override
-  String get settingsCategoriesUnits => 'ប្រភេទ និងឯកតា';
+  String get settingsCategoriesUnits => 'ប្រភេទទំនិញ និងពាក្យកាត់';
 
   @override
   String categoriesCount(Object count) {
@@ -839,7 +839,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get categoryHidden => 'លាក់';
 
   @override
-  String get categoryUnits => 'ឯកតា';
+  String get categoryUnits => 'ពាក្យកាត់';
 
   @override
   String get settingsMembers => 'សមាជិក និងសិទ្ធិ';
@@ -990,7 +990,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String priceUnitsFor(Object category) {
-    return 'ឯកតាសម្រាប់ «$category»';
+    return 'ពាក្យកាត់សម្រាប់ «$category»';
   }
 
   @override
