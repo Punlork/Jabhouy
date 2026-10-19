@@ -33,35 +33,36 @@ class AppBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return SafeArea(
-      top: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.screenPadding,
-              0,
-              AppSizes.screenPadding,
-              12,
-            ),
-            child: FloatingActionButton.extended(
-              onPressed: onAction,
-              backgroundColor: t.textPrimary,
-              foregroundColor: t.onPrimary,
-              shape: const StadiumBorder(),
-              icon: const Icon(Icons.add_rounded),
-              label: Text(actionLabel, style: AppTextTheme.label),
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.screenPadding,
+            0,
+            AppSizes.screenPadding,
+            12,
           ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: t.surface,
-              border: Border(top: BorderSide(color: t.dividerStrong)),
-            ),
+          child: FloatingActionButton.extended(
+            onPressed: onAction,
+            backgroundColor: t.textPrimary,
+            foregroundColor: t.onPrimary,
+            shape: const StadiumBorder(),
+            icon: const Icon(Icons.add_rounded),
+            label: Text(actionLabel, style: AppTextTheme.label),
+          ),
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: t.surface,
+            border: Border(top: BorderSide(color: t.dividerStrong)),
+          ),
+          // Inside the bar, so its white runs under the home indicator.
+          child: SafeArea(
+            top: false,
             child: Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 2),
               child: Row(
                 children: [
                   for (final (i, tab) in tabs.indexed)
@@ -76,8 +77,8 @@ class AppBottomNav extends StatelessWidget {
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -96,25 +97,41 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final fg = selected ? t.onPrimary : t.textMuted;
+    final fg = selected ? t.onPrimary : t.textSecondary;
+    // The whole half is the tap target; the dark pill only hugs the
+    // active icon and label, so the add button stays the one big shape.
     return Semantics(
       button: true,
       selected: selected,
-      child: Material(
-        color: selected ? t.textPrimary : Colors.transparent,
-        shape: const StadiumBorder(),
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const StadiumBorder(),
-          child: SizedBox(
-            height: AppSizes.buttonHeight - 6,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(tab.icon, color: fg),
-                const SizedBox(width: 8),
-                Text(tab.label, style: AppTextTheme.label.copyWith(color: fg)),
-              ],
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const StadiumBorder(),
+        child: SizedBox(
+          height: AppSizes.minTapTarget + 4,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOut,
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              decoration: ShapeDecoration(
+                color: selected ? t.textPrimary : Colors.transparent,
+                shape: const StadiumBorder(),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(tab.icon, color: fg, size: 22),
+                  const SizedBox(width: 8),
+                  Text(
+                    tab.label,
+                    style: AppTextTheme.label.copyWith(
+                      color: fg,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
