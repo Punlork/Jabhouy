@@ -1,6 +1,6 @@
 # Draft: contract addition for find-first (for jabhouy-api #2)
 
-Not posted yet. Paste into #2 once approved.
+Posted to jabhouy-api #2 on 2026-10-19 (body edited and a comment added); #2 is the source of truth now.
 
 ## Shapes: Item
 
