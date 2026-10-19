@@ -8,6 +8,7 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 final _item = Item(
   id: 'coke',
   name: 'Coca-Cola',
+  note: 'ដាក់នៅធ្នើទី ២',
   categoryId: 'drinks',
   updatedAt: DateTime.utc(2026, 10, 19, 3),
   prices: const [
@@ -65,6 +66,7 @@ void main() {
     expect(find.text('ដើម: 2,500 ៛'), findsOneWidget, reason: 'cost for all');
     expect(find.text('ដើម: —'), findsOneWidget);
     expect(find.text('មិនទាន់មានតម្លៃ'), findsOneWidget);
+    expect(find.text('ដាក់នៅធ្នើទី ២'), findsOneWidget, reason: 'the note');
     expect(find.text('កែតម្លៃ'), findsNothing);
     expect(find.text('លុប'), findsNothing);
   });

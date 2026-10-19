@@ -119,6 +119,28 @@ class ItemDetailsSheet extends StatelessWidget {
                       settings: settings,
                       divider: i < item.prices.length - 1,
                     ),
+                  if (item.note case final note? when note.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.noteLabel,
+                            style: AppTextTheme.hint.copyWith(
+                              color: t.textMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            note,
+                            style: AppTextTheme.body.copyWith(
+                              color: t.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   if (editedLine != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8, bottom: 4),
