@@ -81,7 +81,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get grid => 'ក្រឡា';
 
   @override
-  String get searchItems => 'ស្វែងរកធាតុ...';
+  String get searchItems => 'ស្វែងរកទំនិញ...';
 
   @override
   String get signOut => 'ចាកចេញ';
@@ -220,10 +220,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get darkModeOff => 'បានបើកផ្ទាំងពណ៌ភ្លឺ';
 
   @override
-  String get editItem => 'កែសម្រួលធាតុ';
+  String get editItem => 'កែសម្រួលទំនិញ';
 
   @override
-  String get addNewItem => 'បន្ថែមធាតុថ្មី';
+  String get addNewItem => 'បន្ថែមទំនិញថ្មី';
 
   @override
   String nameRequired(String name) {
@@ -276,7 +276,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get saveChanges => 'រក្សាទុកការផ្លាស់ប្តូរ';
 
   @override
-  String get addItem => 'បន្ថែមធាតុ';
+  String get addItem => 'បន្ថែមទំនិញ';
 
   @override
   String get unsavedChanges => 'ការផ្លាស់ប្តូរមិនទាន់រក្សាទុក';
@@ -371,7 +371,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get filterLoaners => 'ត្រងអ្នកខ្ចី';
 
   @override
-  String get filterItems => 'តម្រងធាតុ';
+  String get filterItems => 'តម្រងទំនិញ';
 
   @override
   String get fromDate => 'ចាប់ពីថ្ងៃ';
@@ -398,7 +398,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get createCategory => 'បង្កើតប្រភេទ';
 
   @override
-  String get noItemFound => 'រកមិនឃើញធាតុ';
+  String get noItemFound => 'រកមិនឃើញទំនិញ';
 
   @override
   String get noLoanerFound => 'រកមិនឃើញអ្នកខ្ចីទេ';

@@ -97,7 +97,7 @@
   "@grid": {
     "description": "Label for the grid view option in segmented button"
   },
-  "searchItems": "ស្វែងរកធាតុ...",
+  "searchItems": "ស្វែងរកទំនិញ...",
   "@searchItems": {
     "description": "Hint text for the search input field"
   },
@@ -287,11 +287,11 @@
   "@darkModeOff": {
     "description": "Subtitle shown when light theme is active"
   },
-  "editItem": "កែសម្រួលធាតុ",
+  "editItem": "កែសម្រួលទំនិញ",
   "@editItem": {
     "description": "AppBar title when editing an item"
   },
-  "addNewItem": "បន្ថែមធាតុថ្មី",
+  "addNewItem": "បន្ថែមទំនិញថ្មី",
   "@addNewItem": {
     "description": "AppBar title when adding a new item"
   },
@@ -348,7 +348,7 @@
   "@saveChanges": {
     "description": "Button text for saving changes in edit mode"
   },
-  "addItem": "បន្ថែមធាតុ",
+  "addItem": "បន្ថែមទំនិញ",
   "@addItem": {
     "description": "Button text for adding a new item"
   },
@@ -497,7 +497,7 @@
   "@filterLoaners": {
     "description": "Title for the loaner filter sheet"
   },
-  "filterItems": "តម្រងធាតុ",
+  "filterItems": "តម្រងទំនិញ",
   "@filterItems": {
     "description": "Title for the loaner filter sheet"
   },
@@ -533,7 +533,7 @@
   "@createCategory": {
     "description": "Text for the button to create a new category in the dialog"
   },
-  "noItemFound": "រកមិនឃើញធាតុ",
+  "noItemFound": "រកមិនឃើញទំនិញ",
   "@noItemFound": {
     "description": "Text for the button to create a new category in the dialog"
   },
