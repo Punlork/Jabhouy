@@ -193,12 +193,14 @@ class _ItemFormPageState extends State<ItemFormPage> {
             onChanged: _cubit.nameChanged,
             decoration: InputDecoration(
               hintText: l10n.itemNameHint,
-              errorText: nameProblem == null
-                  ? null
-                  : problemText(l10n, nameProblem),
+              error: nameProblem == null ? null : const SizedBox(),
             ),
           ),
         ),
+        if (nameProblem != null) ...[
+          const SizedBox(height: AppSizes.fieldGap),
+          ErrorLine(problemText(l10n, nameProblem)),
+        ],
         if (state.duplicateOf != null) ...[
           const SizedBox(height: AppSizes.fieldGap),
           Text(

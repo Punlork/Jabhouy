@@ -17,6 +17,7 @@ class MoneyInput extends StatefulWidget {
     this.onChanged,
     this.onText,
     this.errorText,
+    this.hasError = false,
     this.hintText,
     this.value,
     super.key,
@@ -35,6 +36,9 @@ class MoneyInput extends StatefulWidget {
   /// that [onChanged] reports as null.
   final void Function(String text, Currency currency)? onText;
   final String? errorText;
+
+  /// A red border with no text, for a form that shows the message itself.
+  final bool hasError;
   final String? hintText;
 
   @override
@@ -94,6 +98,9 @@ class _MoneyInputState extends State<MoneyInput> {
           style: AppTextTheme.body.copyWith(color: t.textPrimary),
           decoration: InputDecoration(
             errorText: widget.errorText,
+            error: widget.errorText == null && widget.hasError
+                ? const SizedBox()
+                : null,
             hintText: widget.hintText,
             suffixIcon: Padding(
               padding: const EdgeInsetsDirectional.only(end: 4),

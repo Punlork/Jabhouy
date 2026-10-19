@@ -143,9 +143,14 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     // price field too narrow to read.
     final showQuiet =
         settings.useWholesale || settings.useCost || widget.onRemove != null;
-    final below = [
-      for (final field in ['unit', 'packQty', 'wholesale', 'cost', 'barcode'])
-        if (problems[field] case final problem?) problemText(l10n, problem),
+    // Each message sits under the line its field is on.
+    List<Widget> errorsFor(List<String> fields) => [
+      for (final field in fields)
+        if (problems[field] case final problem?)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSizes.fieldGap),
+            child: ErrorLine(problemText(l10n, problem)),
+          ),
     ];
 
     return Column(
@@ -215,13 +220,12 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                     cost: _cost.text,
                   );
                 }),
-                errorText: problems['price'] == null
-                    ? null
-                    : problemText(l10n, problems['price']!),
+                hasError: problems.containsKey('price'),
               ),
             ),
           ],
         ),
+        ...errorsFor(['unit', 'packQty', 'price']),
         if (showQuiet) ...[
           const SizedBox(height: _gap),
           Row(
@@ -260,11 +264,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
             ],
           ),
         ],
-        for (final message in below)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSizes.fieldGap),
-            child: ErrorLine(message),
-          ),
+        ...errorsFor(['wholesale', 'cost', 'barcode']),
         if (widget.unitChips.isNotEmpty) ...[
           const SizedBox(height: 12),
           QuickPickChips(
