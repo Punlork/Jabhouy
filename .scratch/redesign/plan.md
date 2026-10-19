@@ -466,3 +466,19 @@ These override the sections above where they conflict. Background: `docs/adr/000
 38. The viewer role is labelled `មិនអាចកែតម្លៃ` (can't edit prices), not "view only", because viewers can record Credits.
 39. PriceRowEditor is built in Phase 3 inside `jabhouy_shop` (its only user), against the real Price option model; it is not a shared `jabhouy_ui` component.
 40. One `ItemRepository` / `ItemDao` in `jabhouy_shop` covers Items, Price options, categories and units; the category model is `ItemCategory` (the old table owns `Category`). Packages read the Current Shop through `ShopScope` in core; its `syncs` is false for the stand-in Shop, so nothing is queued until the real `/me` is on.
+
+## Decisions from the find-first update (2026-10-19)
+
+The updated body (§3.1b, Phase 3a, new §5.1/§5.3 details, canvas ១–១ឃ, ៤ខ, ៤គ, ៣ក) adds find-first features. Decisions 1–40 still override it wherever it repeats older text.
+
+41. Barcode uniqueness within a Shop is checked on the phone only (the item form blocks a duplicate). The server has no unique rule, so no Item save is lost; if an offline duplicate slips through, a scan lists every matching Item to pick from.
+42. Search runs in memory on the phone: normalize (strip zero-width spaces, lowercase Latin), then rank exact → starts-with → nickname → contains → fuzzy. Fuzzy allows one wrong character and only for queries of 4+ characters.
+43. Home on scroll down: the category FilterChips stay pinned at the top; search + scan, RecentPills and the list header slide away and return on a small scroll up.
+44. Feature flags stay build-time (`config/features/<flavor>.json`). New flags: `FEATURE_BARCODE_SCAN` (scan button, scan result, row barcode button) and `FEATURE_VOICE_INPUT` (mic buttons, voice sheet); on in development, off in staging and production until proven on a real device. Search, nicknames, Recently viewed and currency get no flag.
+45. Item `nicknames` is a JSON list column locally and an array in the API; PriceOption gains `barcode`. Phone schema 10 adds both columns; the release-time drop of old tables (decision 26) moves to schema 11.
+46. Recently viewed: last 10 Items per Shop in a local, never-synced table, newest first, de-duplicated.
+47. Barcode scanning uses `mobile_scanner` (offline, ML Kit on Android).
+48. Phase order: 3 → 3a (find first) → 3b (currency; mostly done in Phase 1) → 4.
+49. A duplicate item name is a warning, not an error (canvas ៤គ): `មានទំនិញឈ្មោះនេះរួចហើយ · មើល · ឬរក្សាទុកជាទំនិញថ្មី`.
+
+Open: the unknown-barcode sheet (§3.1b attach / create) is not on the canvas; decide before building the scan flow.
