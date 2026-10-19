@@ -288,18 +288,22 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
   }
 }
 
-/// A price row that is not being edited, as one tappable line:
-/// `1 កេះ · ×12   12,222 ៛  ✎`, then wholesale and cost when set.
+/// A price row's header: `1 កេះ · ×12   12,222 ៛  ▾`, then wholesale and
+/// cost when set. Tapping it opens or closes the row.
 class PriceRowSummary extends StatelessWidget {
   const PriceRowSummary({
     required this.draft,
     required this.onTap,
+    this.expanded = false,
     this.hasProblem = false,
     super.key,
   });
 
   final PriceRowDraft draft;
   final VoidCallback onTap;
+
+  /// The row's fields show below this header.
+  final bool expanded;
 
   /// Outlined in red: the row holds a save-time problem.
   final bool hasProblem;
@@ -373,7 +377,10 @@ class PriceRowSummary extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.edit_outlined, size: 18, color: t.textMuted),
+            Icon(
+              expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+              color: t.textSecondary,
+            ),
           ],
         ),
       ),

@@ -157,28 +157,36 @@ void main() {
     await tester.runAsync(db.close);
   });
 
-  testWidgets('one row is open; the others collapse to a summary line',
+  testWidgets('each price has a header that opens and closes its row',
       (tester) async {
     await pumpForm(tester);
     await tester.enterText(openField(0), 'ដប');
     await tester.enterText(openField(2), '3000');
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃ'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(PriceRowEditor), findsOneWidget);
-    final summary = find.byType(PriceRowSummary);
-    expect(summary, findsOneWidget);
+    await tester.pump();
+    // The open row's header follows what is typed.
+    final headers = find.byType(PriceRowSummary);
     expect(
-      find.descendant(of: summary, matching: find.text('3,000 ៛')),
+      find.descendant(of: headers.first, matching: find.text('3,000 ៛')),
       findsOneWidget,
     );
+    expect(find.byIcon(Icons.expand_less_rounded), findsOneWidget);
 
-    // Opening the first row closes the new, empty one.
-    await tester.tap(summary);
+    await tester.tap(find.textContaining('បន្ថែមតម្លៃ'));
+    await tester.pumpAndSettle();
+    expect(headers, findsNWidgets(2));
+    expect(find.byType(PriceRowEditor), findsOneWidget, reason: 'one open');
+
+    // Close the new row: nothing is open.
+    await tester.tap(headers.last);
+    await tester.pumpAndSettle();
+    expect(find.byType(PriceRowEditor), findsNothing);
+    expect(find.byIcon(Icons.expand_more_rounded), findsNWidgets(2));
+
+    // Reopen the first: its text is kept.
+    await tester.tap(headers.first);
     await tester.pumpAndSettle();
     expect(find.byType(PriceRowEditor), findsOneWidget);
-    expect(find.byType(PriceRowSummary), findsOneWidget);
-    expect(find.text('3,000'), findsOneWidget, reason: 'its text is kept');
+    expect(find.text('3,000'), findsOneWidget);
     await tester.runAsync(db.close);
   });
 

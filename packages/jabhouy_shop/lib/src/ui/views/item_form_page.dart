@@ -368,10 +368,17 @@ class _ItemFormPageState extends State<ItemFormPage> {
                     ),
                     onTap: () => setState(() => _openRowId = row.id),
                   )
-                // Column labels belong to the open row's fields only.
+                // The header stays on top to close the row; column labels
+                // belong to the open row's fields only.
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      PriceRowSummary(
+                        draft: row,
+                        expanded: true,
+                        onTap: () => setState(() => _openRowId = null),
+                      ),
+                      const SizedBox(height: 8),
                       const PriceRowHeader(),
                       const SizedBox(height: AppSizes.fieldGap),
                       PriceRowEditor(
@@ -388,9 +395,12 @@ class _ItemFormPageState extends State<ItemFormPage> {
                         unitHint: category.isNotEmpty
                             ? l10n.priceUnitsFor(category.first.name)
                             : null,
-                        onChanged: (draft) =>
-                            _rows[_rows.indexWhere((r) => r.id == draft.id)] =
-                                draft,
+                        // Rebuild so the header follows what is typed.
+                        onChanged: (draft) => setState(
+                          () =>
+                              _rows[_rows.indexWhere((r) => r.id == draft.id)] =
+                                  draft,
+                        ),
                         onRemove: _rows.length > 1
                             ? () => setState(() => _rows.removeAt(i))
                             : null,
