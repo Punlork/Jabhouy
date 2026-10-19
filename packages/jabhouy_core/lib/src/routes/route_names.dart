@@ -14,6 +14,7 @@ class AppRoutes {
   static const signup = 'signup';
   static const chooseUsername = 'choose_username';
   static const formShop = 'form_shop';
+  static const formItem = 'form_item';
   static const formLoaner = 'form_loaner';
   static const category = 'category';
   static const customer = 'customer';

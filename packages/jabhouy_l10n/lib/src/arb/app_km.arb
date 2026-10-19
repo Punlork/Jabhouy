@@ -1263,5 +1263,28 @@
   "priceRemove": "លុបតម្លៃនេះ",
   "@priceRemove": {
     "description": "Accessible label of the remove price row button"
+  },
+  "itemListHeader": "ទំនិញ {count} មុខ · ក–អ",
+  "@itemListHeader": {
+    "description": "Header above the Home item list",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemListShowGrid": "បង្ហាញជាក្រឡា",
+  "@itemListShowGrid": {
+    "description": "Accessible label of the grid toggle"
+  },
+  "itemListShowList": "បង្ហាញជាបញ្ជី",
+  "@itemListShowList": {
+    "description": "Accessible label of the list toggle"
+  },
+  "itemListEmpty": "មិនទាន់មានទំនិញ",
+  "@itemListEmpty": {
+    "description": "Home list with no items"
+  },
+  "itemSearchHint": "ស្វែងរកឈ្មោះទំនិញ",
+  "@itemSearchHint": {
+    "description": "Hint in the Home search field"
   }
 }

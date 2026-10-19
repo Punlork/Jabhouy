@@ -27,6 +27,7 @@ Set<String> _allowedAuthenticated(FeatureFlags flags) {
   return {
     AppRoutes.home.toPath,
     '${AppRoutes.home.toPath}${AppRoutes.formShop.toPath}',
+    '${AppRoutes.home.toPath}${AppRoutes.formItem.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.formLoaner.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.profile.toPath}',

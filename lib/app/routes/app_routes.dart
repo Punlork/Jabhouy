@@ -1,5 +1,7 @@
 // ignore_for_file: inference_failure_on_instance_creation
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
@@ -11,12 +13,14 @@ import 'package:jabhouy/home/home.dart';
 import 'package:jabhouy/home/views/home_page.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/settings/settings.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// The router itself; its redirect rules live in [authRedirect].
 ///
@@ -25,6 +29,9 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 /// stays here is the wiring, which is the app shell's job by definition.
 class AppRouter {
   const AppRouter._();
+
+  /// Home's list-or-grid choice, remembered on the phone.
+  static const _itemGridKey = 'item_list_grid';
 
   static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
 
@@ -56,6 +63,17 @@ class AppRouter {
                 ),
                 BlocProvider(
                   create: (context) => SignoutBloc(getIt<AuthService>()),
+                ),
+                BlocProvider(
+                  create: (context) => ItemListCubit(
+                    getIt<ItemRepository>(),
+                    getIt<CurrentShop>(),
+                    grid: getIt<SharedPreferences>().getBool(_itemGridKey) ??
+                        false,
+                    onGridChanged: (grid) => unawaited(
+                      getIt<SharedPreferences>().setBool(_itemGridKey, grid),
+                    ),
+                  ),
                 ),
                 BlocProvider(
                   create: (context) => CategoryBloc(
@@ -113,6 +131,26 @@ class AppRouter {
                   activeCategory: activeCategory,
                   shop: shop,
                   category: category,
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.formItem.toPath,
+            name: AppRoutes.formItem,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              final existingItem = extra['existingItem'] as Item?;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider(
+                  create: (_) => ItemFormCubit(
+                    getIt<ItemRepository>(),
+                    existing: existingItem,
+                  )..load(),
+                  child: const ItemFormPage(),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

@@ -1,0 +1,154 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'item_list_cubit.dart';
+
+// **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$ItemListStateCWProxy {
+  ItemListState loading(bool loading);
+
+  ItemListState items(List<Item> items);
+
+  ItemListState categories(List<ItemCategory> categories);
+
+  ItemListState missingCount(int missingCount);
+
+  ItemListState query(String query);
+
+  ItemListState categoryId(String? categoryId);
+
+  ItemListState missingOnly(bool missingOnly);
+
+  ItemListState grid(bool grid);
+
+  ItemListState canEdit(bool canEdit);
+
+  /// Creates a new instance with the provided field values.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ItemListState(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// ItemListState(...).copyWith(id: 12, name: "My name")
+  /// ```
+  ItemListState call({
+    bool loading,
+    List<Item> items,
+    List<ItemCategory> categories,
+    int missingCount,
+    String query,
+    String? categoryId,
+    bool missingOnly,
+    bool grid,
+    bool canEdit,
+  });
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfItemListState.copyWith(...)` or call `instanceOfItemListState.copyWith.fieldName(value)` for a single field.
+class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
+  const _$ItemListStateCWProxyImpl(this._value);
+
+  final ItemListState _value;
+
+  @override
+  ItemListState loading(bool loading) => call(loading: loading);
+
+  @override
+  ItemListState items(List<Item> items) => call(items: items);
+
+  @override
+  ItemListState categories(List<ItemCategory> categories) =>
+      call(categories: categories);
+
+  @override
+  ItemListState missingCount(int missingCount) =>
+      call(missingCount: missingCount);
+
+  @override
+  ItemListState query(String query) => call(query: query);
+
+  @override
+  ItemListState categoryId(String? categoryId) => call(categoryId: categoryId);
+
+  @override
+  ItemListState missingOnly(bool missingOnly) => call(missingOnly: missingOnly);
+
+  @override
+  ItemListState grid(bool grid) => call(grid: grid);
+
+  @override
+  ItemListState canEdit(bool canEdit) => call(canEdit: canEdit);
+
+  /// Creates a new instance with the provided field values.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ItemListState(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// ItemListState(...).copyWith(id: 12, name: "My name")
+  /// ```
+  @override
+  ItemListState call({
+    Object? loading = const $CopyWithPlaceholder(),
+    Object? items = const $CopyWithPlaceholder(),
+    Object? categories = const $CopyWithPlaceholder(),
+    Object? missingCount = const $CopyWithPlaceholder(),
+    Object? query = const $CopyWithPlaceholder(),
+    Object? categoryId = const $CopyWithPlaceholder(),
+    Object? missingOnly = const $CopyWithPlaceholder(),
+    Object? grid = const $CopyWithPlaceholder(),
+    Object? canEdit = const $CopyWithPlaceholder(),
+  }) {
+    return ItemListState(
+      loading: loading == const $CopyWithPlaceholder() || loading == null
+          ? _value.loading
+          // ignore: cast_nullable_to_non_nullable
+          : loading as bool,
+      items: items == const $CopyWithPlaceholder() || items == null
+          ? _value.items
+          // ignore: cast_nullable_to_non_nullable
+          : items as List<Item>,
+      categories:
+          categories == const $CopyWithPlaceholder() || categories == null
+          ? _value.categories
+          // ignore: cast_nullable_to_non_nullable
+          : categories as List<ItemCategory>,
+      missingCount:
+          missingCount == const $CopyWithPlaceholder() || missingCount == null
+          ? _value.missingCount
+          // ignore: cast_nullable_to_non_nullable
+          : missingCount as int,
+      query: query == const $CopyWithPlaceholder() || query == null
+          ? _value.query
+          // ignore: cast_nullable_to_non_nullable
+          : query as String,
+      categoryId: categoryId == const $CopyWithPlaceholder()
+          ? _value.categoryId
+          // ignore: cast_nullable_to_non_nullable
+          : categoryId as String?,
+      missingOnly:
+          missingOnly == const $CopyWithPlaceholder() || missingOnly == null
+          ? _value.missingOnly
+          // ignore: cast_nullable_to_non_nullable
+          : missingOnly as bool,
+      grid: grid == const $CopyWithPlaceholder() || grid == null
+          ? _value.grid
+          // ignore: cast_nullable_to_non_nullable
+          : grid as bool,
+      canEdit: canEdit == const $CopyWithPlaceholder() || canEdit == null
+          ? _value.canEdit
+          // ignore: cast_nullable_to_non_nullable
+          : canEdit as bool,
+    );
+  }
+}
+
+extension $ItemListStateCopyWith on ItemListState {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfItemListState.copyWith(...)` or `instanceOfItemListState.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$ItemListStateCWProxy get copyWith => _$ItemListStateCWProxyImpl(this);
+}

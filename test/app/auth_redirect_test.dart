@@ -29,6 +29,8 @@ void main() {
   test('authenticated on an allowed path stays', () {
     expect(authRedirect(signedIn, home, flags), isNull);
     expect(authRedirect(signedIn, settings, flags), isNull);
+    final itemForm = '$home${AppRoutes.formItem.toPath}';
+    expect(authRedirect(signedIn, itemForm, flags), isNull);
   });
 
   test('income diagnostics is reachable only with income and diagnostics on', () {

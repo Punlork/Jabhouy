@@ -1,0 +1,100 @@
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_shop/src/data/item_repository.dart';
+import 'package:jabhouy_shop/src/models/item.dart';
+
+part 'item_list_state.dart';
+part 'item_list_cubit.g.dart';
+
+/// Home's item list: the Current Shop's Items, narrowed by search, a
+/// category or the missing-price chip, with list or grid layout.
+class ItemListCubit extends Cubit<ItemListState> {
+  ItemListCubit(
+    this._repository,
+    this._scope, {
+    bool grid = false,
+    this.onGridChanged,
+  }) : super(
+         ItemListState(
+           grid: grid,
+           canEdit: _scope.role?.canEditPrices ?? false,
+         ),
+       );
+
+  final ItemRepository _repository;
+  final ShopScope _scope;
+
+  /// Lets the app remember the layout; this package keeps no storage.
+  final ValueChanged<bool>? onGridChanged;
+
+  final _subscriptions = <StreamSubscription<Object?>>[];
+  StreamSubscription<List<Item>>? _items;
+
+  /// Starts reading once the Current Shop is known (after sign-in).
+  void start() {
+    if (_scope.shopId == null || _subscriptions.isNotEmpty) return;
+    emit(state.copyWith(canEdit: _scope.role?.canEditPrices ?? false));
+    _subscriptions
+      ..add(
+        _repository.watchCategories().listen(
+          (categories) => emit(state.copyWith(categories: categories)),
+        ),
+      )
+      ..add(
+        _repository.watchMissingPriceCount().listen(
+          (count) => emit(state.copyWith(missingCount: count)),
+        ),
+      );
+    _watchItems();
+  }
+
+  /// On sign-out: drops the Shop's data; [start] reads again later.
+  Future<void> stop() async {
+    await _items?.cancel();
+    _items = null;
+    for (final s in _subscriptions) {
+      await s.cancel();
+    }
+    _subscriptions.clear();
+    emit(ItemListState(grid: state.grid));
+  }
+
+  void search(String query) {
+    emit(state.copyWith(query: query));
+    _watchItems();
+  }
+
+  /// No arguments is `ទាំងអស់`.
+  void filter({String? categoryId, bool missingOnly = false}) {
+    emit(state.copyWith(categoryId: categoryId, missingOnly: missingOnly));
+    _watchItems();
+  }
+
+  void toggleGrid() {
+    emit(state.copyWith(grid: !state.grid));
+    onGridChanged?.call(state.grid);
+  }
+
+  void _watchItems() {
+    if (_subscriptions.isEmpty) return;
+    unawaited(_items?.cancel());
+    _items = _repository
+        .watchItems(
+          search: state.query.trim(),
+          categoryId: state.categoryId,
+          missingOnly: state.missingOnly,
+        )
+        .listen((items) => emit(state.copyWith(items: items, loading: false)));
+  }
+
+  @override
+  Future<void> close() async {
+    await stop();
+    return super.close();
+  }
+}

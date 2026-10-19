@@ -1969,6 +1969,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove this price'**
   String get priceRemove;
+
+  /// Header above the Home item list
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items · A–Z'**
+  String itemListHeader(Object count);
+
+  /// Accessible label of the grid toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show as grid'**
+  String get itemListShowGrid;
+
+  /// Accessible label of the list toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show as list'**
+  String get itemListShowList;
+
+  /// Home list with no items
+  ///
+  /// In en, this message translates to:
+  /// **'No items yet'**
+  String get itemListEmpty;
+
+  /// Hint in the Home search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search items'**
+  String get itemSearchHint;
 }
 
 class _AppLocalizationsDelegate

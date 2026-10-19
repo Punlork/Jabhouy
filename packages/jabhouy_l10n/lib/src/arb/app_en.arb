@@ -1315,5 +1315,28 @@
   "priceRemove": "Remove this price",
   "@priceRemove": {
     "description": "Accessible label of the remove price row button"
+  },
+  "itemListHeader": "{count} items · A–Z",
+  "@itemListHeader": {
+    "description": "Header above the Home item list",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemListShowGrid": "Show as grid",
+  "@itemListShowGrid": {
+    "description": "Accessible label of the grid toggle"
+  },
+  "itemListShowList": "Show as list",
+  "@itemListShowList": {
+    "description": "Accessible label of the list toggle"
+  },
+  "itemListEmpty": "No items yet",
+  "@itemListEmpty": {
+    "description": "Home list with no items"
+  },
+  "itemSearchHint": "Search items",
+  "@itemSearchHint": {
+    "description": "Hint in the Home search field"
   }
 }

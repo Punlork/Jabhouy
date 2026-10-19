@@ -1008,4 +1008,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceRemove => 'Remove this price';
+
+  @override
+  String itemListHeader(Object count) {
+    return '$count items · A–Z';
+  }
+
+  @override
+  String get itemListShowGrid => 'Show as grid';
+
+  @override
+  String get itemListShowList => 'Show as list';
+
+  @override
+  String get itemListEmpty => 'No items yet';
+
+  @override
+  String get itemSearchHint => 'Search items';
 }

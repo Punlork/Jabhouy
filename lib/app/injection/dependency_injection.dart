@@ -12,12 +12,14 @@ import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
   final apiService = ApiService();
   await apiService.cookies.initCookies();
+  getIt.registerSingleton(await SharedPreferences.getInstance());
   getIt
     // Read through the interface so a runtime source can replace this
     // one line; see FeatureFlags.

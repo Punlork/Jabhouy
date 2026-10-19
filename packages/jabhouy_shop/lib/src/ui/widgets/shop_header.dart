@@ -6,15 +6,16 @@ class ShopHeader extends StatelessWidget {
   const ShopHeader({
     required this.onSettingsPressed,
     required this.onSearchChanged,
-    required this.onFilterPressed,
     required this.searchController,
     required this.hasFilter,
+    this.onFilterPressed,
     this.searchHintText,
     super.key,
   });
   final VoidCallback onSettingsPressed;
   final ValueChanged<String?> onSearchChanged;
-  final VoidCallback onFilterPressed;
+  /// Null hides the filter button (the shop tab filters with chips).
+  final VoidCallback? onFilterPressed;
   final TextEditingController searchController;
   final bool hasFilter;
   final String? searchHintText;
@@ -68,14 +69,14 @@ class _SearchBar extends StatelessWidget {
   const _SearchBar({
     required this.controller,
     required this.onChanged,
-    required this.onFilterPressed,
     required this.onSettingsPressed,
     required this.hasFilter,
+    this.onFilterPressed,
     this.searchHintText,
   });
   final TextEditingController controller;
   final ValueChanged<String?> onChanged;
-  final VoidCallback onFilterPressed;
+  final VoidCallback? onFilterPressed;
   final VoidCallback onSettingsPressed;
   final bool hasFilter;
   final String? searchHintText;
@@ -132,6 +133,7 @@ class _SearchBar extends StatelessWidget {
               ),
             ),
           ),
+          if (onFilterPressed case final onFilterPressed?) ...[
           const SizedBox(width: 8),
           IconButtonWidget(
             svgAsset: AppAssets.actionFilter,
@@ -145,6 +147,7 @@ class _SearchBar extends StatelessWidget {
             onPressed: onFilterPressed,
             colorScheme: colorScheme,
           ),
+          ],
           const SizedBox(width: 8),
           _SettingsButton(onPressed: onSettingsPressed),
         ],

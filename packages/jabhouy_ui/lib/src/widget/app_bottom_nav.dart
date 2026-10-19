@@ -26,7 +26,9 @@ class AppBottomNav extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabChanged;
   final String actionLabel;
-  final VoidCallback onAction;
+
+  /// Null shows the button disabled.
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {

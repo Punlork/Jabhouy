@@ -993,4 +993,21 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get priceRemove => 'លុបតម្លៃនេះ';
+
+  @override
+  String itemListHeader(Object count) {
+    return 'ទំនិញ $count មុខ · ក–អ';
+  }
+
+  @override
+  String get itemListShowGrid => 'បង្ហាញជាក្រឡា';
+
+  @override
+  String get itemListShowList => 'បង្ហាញជាបញ្ជី';
+
+  @override
+  String get itemListEmpty => 'មិនទាន់មានទំនិញ';
+
+  @override
+  String get itemSearchHint => 'ស្វែងរកឈ្មោះទំនិញ';
 }
