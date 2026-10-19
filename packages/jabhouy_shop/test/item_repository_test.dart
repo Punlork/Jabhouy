@@ -73,6 +73,31 @@ void main() {
     expect(items.single.prices.first.selling, const Money(3000, Currency.khr));
   });
 
+  test('nicknames and a row barcode round-trip', () async {
+    final shop = repo('s1');
+    await shop.saveItem(
+      Item(
+        id: 'kulen',
+        name: 'ទឹកអូគូលេនធំ',
+        nicknames: const ['ទឹកធំ', 'Kulen'],
+        prices: [
+          PriceOption(
+            id: newId(),
+            unit: 'ដប',
+            currency: Currency.khr,
+            price: 3000,
+            barcode: '8851234567890',
+          ),
+          _option('កេះ', null, packQty: 24),
+        ],
+      ),
+    );
+
+    final item = (await shop.watchItems().first).single;
+    expect(item.nicknames, ['ទឹកធំ', 'Kulen']);
+    expect(item.prices.map((p) => p.barcode), ['8851234567890', null]);
+  });
+
   test('an empty price stays null and counts as missing', () async {
     final shop = repo('s1');
     await shop.saveItem(

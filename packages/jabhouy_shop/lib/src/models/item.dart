@@ -8,6 +8,7 @@ class PriceOption {
     required this.unit,
     required this.currency,
     this.packQty,
+    this.barcode,
     this.price,
     this.wholesale,
     this.cost,
@@ -17,6 +18,7 @@ class PriceOption {
   final String id;
   final String unit;
   final int? packQty;
+  final String? barcode;
   final Currency currency;
 
   /// Whole riel or cents.
@@ -38,6 +40,7 @@ class Item {
     required this.id,
     required this.name,
     required this.prices,
+    this.nicknames = const [],
     this.categoryId,
     this.photoUrl,
     this.note,
@@ -47,6 +50,9 @@ class Item {
 
   final String id;
   final String name;
+
+  /// Other names people use for it; search matches them too.
+  final List<String> nicknames;
   final String? categoryId;
   final String? photoUrl;
   final String? note;

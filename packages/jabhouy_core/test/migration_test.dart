@@ -62,6 +62,7 @@ void main() {
       'customer',
       'credit',
       'credit_item',
+      'recent_item',
     ]) {
       await old.customStatement('DROP TABLE $name');
     }
@@ -79,6 +80,40 @@ void main() {
     expect(await upgraded.select(upgraded.creditItemTable).get(), isEmpty);
     await upgraded.into(upgraded.itemTable).insert(
           ItemTableCompanion.insert(id: newId(), shopId: 's1', name: 'ទឹក'),
+        );
+  });
+
+  test('9 -> 10 adds nicknames, barcode and recent_item; items survive',
+      () async {
+    final dir = await Directory.systemTemp.createTemp('jabhouy_migration');
+    addTearDown(() => dir.delete(recursive: true));
+    final file = File('${dir.path}/db.sqlite');
+
+    final old = AppDatabase(NativeDatabase(file));
+    await old.into(old.itemTable).insert(
+          ItemTableCompanion.insert(id: 'coke', shopId: 's1', name: 'Coca-Cola'),
+        );
+    await old.customStatement('DROP TABLE recent_item');
+    await old.customStatement('ALTER TABLE item DROP COLUMN nicknames');
+    await old.customStatement('ALTER TABLE item_price DROP COLUMN barcode');
+    await old.customStatement('PRAGMA user_version = 9');
+    await old.close();
+
+    final upgraded = AppDatabase(NativeDatabase(file));
+    addTearDown(upgraded.close);
+
+    final items = await upgraded.select(upgraded.itemTable).get();
+    expect(items.single.name, 'Coca-Cola', reason: 'old rows survive');
+    expect(items.single.nicknames, '[]');
+    expect(await upgraded.select(upgraded.recentItemTable).get(), isEmpty);
+    await upgraded.into(upgraded.itemPriceTable).insert(
+          ItemPriceTableCompanion.insert(
+            id: newId(),
+            itemId: 'coke',
+            unit: 'ដប',
+            currency: 'KHR',
+            barcode: const Value('8851234567890'),
+          ),
         );
   });
 }

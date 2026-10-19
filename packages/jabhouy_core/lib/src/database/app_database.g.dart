@@ -5940,6 +5940,18 @@ class $ItemTableTable extends ItemTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _nicknamesMeta = const VerificationMeta(
+    'nicknames',
+  );
+  @override
+  late final GeneratedColumn<String> nicknames = GeneratedColumn<String>(
+    'nicknames',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
   static const VerificationMeta _categoryIdMeta = const VerificationMeta(
     'categoryId',
   );
@@ -5980,6 +5992,7 @@ class $ItemTableTable extends ItemTable
     deletedAt,
     id,
     name,
+    nicknames,
     categoryId,
     photoUrl,
     note,
@@ -6041,6 +6054,12 @@ class $ItemTableTable extends ItemTable
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('nicknames')) {
+      context.handle(
+        _nicknamesMeta,
+        nicknames.isAcceptableOrUnknown(data['nicknames']!, _nicknamesMeta),
+      );
+    }
     if (data.containsKey('category_id')) {
       context.handle(
         _categoryIdMeta,
@@ -6096,6 +6115,10 @@ class $ItemTableTable extends ItemTable
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      nicknames: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nicknames'],
+      )!,
       categoryId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}category_id'],
@@ -6125,6 +6148,9 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
   final DateTime? deletedAt;
   final String id;
   final String name;
+
+  /// Other names people use, as a JSON list of strings.
+  final String nicknames;
   final String? categoryId;
   final String? photoUrl;
   final String? note;
@@ -6136,6 +6162,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     this.deletedAt,
     required this.id,
     required this.name,
+    required this.nicknames,
     this.categoryId,
     this.photoUrl,
     this.note,
@@ -6156,6 +6183,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     }
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
+    map['nicknames'] = Variable<String>(nicknames);
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<String>(categoryId);
     }
@@ -6183,6 +6211,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           : Value(deletedAt),
       id: Value(id),
       name: Value(name),
+      nicknames: Value(nicknames),
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
@@ -6206,6 +6235,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      nicknames: serializer.fromJson<String>(json['nicknames']),
       categoryId: serializer.fromJson<String?>(json['categoryId']),
       photoUrl: serializer.fromJson<String?>(json['photoUrl']),
       note: serializer.fromJson<String?>(json['note']),
@@ -6222,6 +6252,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
+      'nicknames': serializer.toJson<String>(nicknames),
       'categoryId': serializer.toJson<String?>(categoryId),
       'photoUrl': serializer.toJson<String?>(photoUrl),
       'note': serializer.toJson<String?>(note),
@@ -6236,6 +6267,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     Value<DateTime?> deletedAt = const Value.absent(),
     String? id,
     String? name,
+    String? nicknames,
     Value<String?> categoryId = const Value.absent(),
     Value<String?> photoUrl = const Value.absent(),
     Value<String?> note = const Value.absent(),
@@ -6247,6 +6279,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     id: id ?? this.id,
     name: name ?? this.name,
+    nicknames: nicknames ?? this.nicknames,
     categoryId: categoryId.present ? categoryId.value : this.categoryId,
     photoUrl: photoUrl.present ? photoUrl.value : this.photoUrl,
     note: note.present ? note.value : this.note,
@@ -6260,6 +6293,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      nicknames: data.nicknames.present ? data.nicknames.value : this.nicknames,
       categoryId: data.categoryId.present
           ? data.categoryId.value
           : this.categoryId,
@@ -6278,6 +6312,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           ..write('deletedAt: $deletedAt, ')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('nicknames: $nicknames, ')
           ..write('categoryId: $categoryId, ')
           ..write('photoUrl: $photoUrl, ')
           ..write('note: $note')
@@ -6294,6 +6329,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     deletedAt,
     id,
     name,
+    nicknames,
     categoryId,
     photoUrl,
     note,
@@ -6309,6 +6345,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           other.deletedAt == this.deletedAt &&
           other.id == this.id &&
           other.name == this.name &&
+          other.nicknames == this.nicknames &&
           other.categoryId == this.categoryId &&
           other.photoUrl == this.photoUrl &&
           other.note == this.note);
@@ -6322,6 +6359,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
   final Value<DateTime?> deletedAt;
   final Value<String> id;
   final Value<String> name;
+  final Value<String> nicknames;
   final Value<String?> categoryId;
   final Value<String?> photoUrl;
   final Value<String?> note;
@@ -6334,6 +6372,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
     this.deletedAt = const Value.absent(),
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.nicknames = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.photoUrl = const Value.absent(),
     this.note = const Value.absent(),
@@ -6347,6 +6386,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
     this.deletedAt = const Value.absent(),
     required String id,
     required String name,
+    this.nicknames = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.photoUrl = const Value.absent(),
     this.note = const Value.absent(),
@@ -6362,6 +6402,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
     Expression<DateTime>? deletedAt,
     Expression<String>? id,
     Expression<String>? name,
+    Expression<String>? nicknames,
     Expression<String>? categoryId,
     Expression<String>? photoUrl,
     Expression<String>? note,
@@ -6375,6 +6416,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (nicknames != null) 'nicknames': nicknames,
       if (categoryId != null) 'category_id': categoryId,
       if (photoUrl != null) 'photo_url': photoUrl,
       if (note != null) 'note': note,
@@ -6390,6 +6432,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
     Value<DateTime?>? deletedAt,
     Value<String>? id,
     Value<String>? name,
+    Value<String>? nicknames,
     Value<String?>? categoryId,
     Value<String?>? photoUrl,
     Value<String?>? note,
@@ -6403,6 +6446,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
       deletedAt: deletedAt ?? this.deletedAt,
       id: id ?? this.id,
       name: name ?? this.name,
+      nicknames: nicknames ?? this.nicknames,
       categoryId: categoryId ?? this.categoryId,
       photoUrl: photoUrl ?? this.photoUrl,
       note: note ?? this.note,
@@ -6434,6 +6478,9 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (nicknames.present) {
+      map['nicknames'] = Variable<String>(nicknames.value);
+    }
     if (categoryId.present) {
       map['category_id'] = Variable<String>(categoryId.value);
     }
@@ -6459,6 +6506,7 @@ class ItemTableCompanion extends UpdateCompanion<ItemRow> {
           ..write('deletedAt: $deletedAt, ')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('nicknames: $nicknames, ')
           ..write('categoryId: $categoryId, ')
           ..write('photoUrl: $photoUrl, ')
           ..write('note: $note, ')
@@ -6510,6 +6558,17 @@ class $ItemPriceTableTable extends ItemPriceTable
     aliasedName,
     true,
     type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _barcodeMeta = const VerificationMeta(
+    'barcode',
+  );
+  @override
+  late final GeneratedColumn<String> barcode = GeneratedColumn<String>(
+    'barcode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _currencyMeta = const VerificationMeta(
@@ -6570,6 +6629,7 @@ class $ItemPriceTableTable extends ItemPriceTable
     itemId,
     unit,
     packQty,
+    barcode,
     currency,
     price,
     wholesale,
@@ -6613,6 +6673,12 @@ class $ItemPriceTableTable extends ItemPriceTable
       context.handle(
         _packQtyMeta,
         packQty.isAcceptableOrUnknown(data['pack_qty']!, _packQtyMeta),
+      );
+    }
+    if (data.containsKey('barcode')) {
+      context.handle(
+        _barcodeMeta,
+        barcode.isAcceptableOrUnknown(data['barcode']!, _barcodeMeta),
       );
     }
     if (data.containsKey('currency')) {
@@ -6672,6 +6738,10 @@ class $ItemPriceTableTable extends ItemPriceTable
         DriftSqlType.int,
         data['${effectivePrefix}pack_qty'],
       ),
+      barcode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}barcode'],
+      ),
       currency: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}currency'],
@@ -6706,6 +6776,9 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
   final String itemId;
   final String unit;
   final int? packQty;
+
+  /// Unique within a Shop, checked on the phone only (decision 41).
+  final String? barcode;
   final String currency;
 
   /// Whole riel or cents. Null means no price yet, never 0.
@@ -6718,6 +6791,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
     required this.itemId,
     required this.unit,
     this.packQty,
+    this.barcode,
     required this.currency,
     this.price,
     this.wholesale,
@@ -6732,6 +6806,9 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
     map['unit'] = Variable<String>(unit);
     if (!nullToAbsent || packQty != null) {
       map['pack_qty'] = Variable<int>(packQty);
+    }
+    if (!nullToAbsent || barcode != null) {
+      map['barcode'] = Variable<String>(barcode);
     }
     map['currency'] = Variable<String>(currency);
     if (!nullToAbsent || price != null) {
@@ -6755,6 +6832,9 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
       packQty: packQty == null && nullToAbsent
           ? const Value.absent()
           : Value(packQty),
+      barcode: barcode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(barcode),
       currency: Value(currency),
       price: price == null && nullToAbsent
           ? const Value.absent()
@@ -6777,6 +6857,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
       itemId: serializer.fromJson<String>(json['itemId']),
       unit: serializer.fromJson<String>(json['unit']),
       packQty: serializer.fromJson<int?>(json['packQty']),
+      barcode: serializer.fromJson<String?>(json['barcode']),
       currency: serializer.fromJson<String>(json['currency']),
       price: serializer.fromJson<int?>(json['price']),
       wholesale: serializer.fromJson<int?>(json['wholesale']),
@@ -6792,6 +6873,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
       'itemId': serializer.toJson<String>(itemId),
       'unit': serializer.toJson<String>(unit),
       'packQty': serializer.toJson<int?>(packQty),
+      'barcode': serializer.toJson<String?>(barcode),
       'currency': serializer.toJson<String>(currency),
       'price': serializer.toJson<int?>(price),
       'wholesale': serializer.toJson<int?>(wholesale),
@@ -6805,6 +6887,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
     String? itemId,
     String? unit,
     Value<int?> packQty = const Value.absent(),
+    Value<String?> barcode = const Value.absent(),
     String? currency,
     Value<int?> price = const Value.absent(),
     Value<int?> wholesale = const Value.absent(),
@@ -6815,6 +6898,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
     itemId: itemId ?? this.itemId,
     unit: unit ?? this.unit,
     packQty: packQty.present ? packQty.value : this.packQty,
+    barcode: barcode.present ? barcode.value : this.barcode,
     currency: currency ?? this.currency,
     price: price.present ? price.value : this.price,
     wholesale: wholesale.present ? wholesale.value : this.wholesale,
@@ -6827,6 +6911,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
       itemId: data.itemId.present ? data.itemId.value : this.itemId,
       unit: data.unit.present ? data.unit.value : this.unit,
       packQty: data.packQty.present ? data.packQty.value : this.packQty,
+      barcode: data.barcode.present ? data.barcode.value : this.barcode,
       currency: data.currency.present ? data.currency.value : this.currency,
       price: data.price.present ? data.price.value : this.price,
       wholesale: data.wholesale.present ? data.wholesale.value : this.wholesale,
@@ -6842,6 +6927,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
           ..write('itemId: $itemId, ')
           ..write('unit: $unit, ')
           ..write('packQty: $packQty, ')
+          ..write('barcode: $barcode, ')
           ..write('currency: $currency, ')
           ..write('price: $price, ')
           ..write('wholesale: $wholesale, ')
@@ -6857,6 +6943,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
     itemId,
     unit,
     packQty,
+    barcode,
     currency,
     price,
     wholesale,
@@ -6871,6 +6958,7 @@ class ItemPriceRow extends DataClass implements Insertable<ItemPriceRow> {
           other.itemId == this.itemId &&
           other.unit == this.unit &&
           other.packQty == this.packQty &&
+          other.barcode == this.barcode &&
           other.currency == this.currency &&
           other.price == this.price &&
           other.wholesale == this.wholesale &&
@@ -6883,6 +6971,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
   final Value<String> itemId;
   final Value<String> unit;
   final Value<int?> packQty;
+  final Value<String?> barcode;
   final Value<String> currency;
   final Value<int?> price;
   final Value<int?> wholesale;
@@ -6894,6 +6983,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
     this.itemId = const Value.absent(),
     this.unit = const Value.absent(),
     this.packQty = const Value.absent(),
+    this.barcode = const Value.absent(),
     this.currency = const Value.absent(),
     this.price = const Value.absent(),
     this.wholesale = const Value.absent(),
@@ -6906,6 +6996,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
     required String itemId,
     required String unit,
     this.packQty = const Value.absent(),
+    this.barcode = const Value.absent(),
     required String currency,
     this.price = const Value.absent(),
     this.wholesale = const Value.absent(),
@@ -6921,6 +7012,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
     Expression<String>? itemId,
     Expression<String>? unit,
     Expression<int>? packQty,
+    Expression<String>? barcode,
     Expression<String>? currency,
     Expression<int>? price,
     Expression<int>? wholesale,
@@ -6933,6 +7025,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
       if (itemId != null) 'item_id': itemId,
       if (unit != null) 'unit': unit,
       if (packQty != null) 'pack_qty': packQty,
+      if (barcode != null) 'barcode': barcode,
       if (currency != null) 'currency': currency,
       if (price != null) 'price': price,
       if (wholesale != null) 'wholesale': wholesale,
@@ -6947,6 +7040,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
     Value<String>? itemId,
     Value<String>? unit,
     Value<int?>? packQty,
+    Value<String?>? barcode,
     Value<String>? currency,
     Value<int?>? price,
     Value<int?>? wholesale,
@@ -6959,6 +7053,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
       itemId: itemId ?? this.itemId,
       unit: unit ?? this.unit,
       packQty: packQty ?? this.packQty,
+      barcode: barcode ?? this.barcode,
       currency: currency ?? this.currency,
       price: price ?? this.price,
       wholesale: wholesale ?? this.wholesale,
@@ -6982,6 +7077,9 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
     }
     if (packQty.present) {
       map['pack_qty'] = Variable<int>(packQty.value);
+    }
+    if (barcode.present) {
+      map['barcode'] = Variable<String>(barcode.value);
     }
     if (currency.present) {
       map['currency'] = Variable<String>(currency.value);
@@ -7011,6 +7109,7 @@ class ItemPriceTableCompanion extends UpdateCompanion<ItemPriceRow> {
           ..write('itemId: $itemId, ')
           ..write('unit: $unit, ')
           ..write('packQty: $packQty, ')
+          ..write('barcode: $barcode, ')
           ..write('currency: $currency, ')
           ..write('price: $price, ')
           ..write('wholesale: $wholesale, ')
@@ -8975,6 +9074,271 @@ class CreditItemTableCompanion extends UpdateCompanion<CreditItemRow> {
   }
 }
 
+class $RecentItemTableTable extends RecentItemTable
+    with TableInfo<$RecentItemTableTable, RecentItemRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecentItemTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _shopIdMeta = const VerificationMeta('shopId');
+  @override
+  late final GeneratedColumn<String> shopId = GeneratedColumn<String>(
+    'shop_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
+    'item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _viewedAtMeta = const VerificationMeta(
+    'viewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> viewedAt = GeneratedColumn<DateTime>(
+    'viewed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [shopId, itemId, viewedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recent_item';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RecentItemRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('shop_id')) {
+      context.handle(
+        _shopIdMeta,
+        shopId.isAcceptableOrUnknown(data['shop_id']!, _shopIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_shopIdMeta);
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    if (data.containsKey('viewed_at')) {
+      context.handle(
+        _viewedAtMeta,
+        viewedAt.isAcceptableOrUnknown(data['viewed_at']!, _viewedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_viewedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {shopId, itemId};
+  @override
+  RecentItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecentItemRow(
+      shopId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shop_id'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_id'],
+      )!,
+      viewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}viewed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $RecentItemTableTable createAlias(String alias) {
+    return $RecentItemTableTable(attachedDatabase, alias);
+  }
+}
+
+class RecentItemRow extends DataClass implements Insertable<RecentItemRow> {
+  final String shopId;
+  final String itemId;
+  final DateTime viewedAt;
+  const RecentItemRow({
+    required this.shopId,
+    required this.itemId,
+    required this.viewedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['shop_id'] = Variable<String>(shopId);
+    map['item_id'] = Variable<String>(itemId);
+    map['viewed_at'] = Variable<DateTime>(viewedAt);
+    return map;
+  }
+
+  RecentItemTableCompanion toCompanion(bool nullToAbsent) {
+    return RecentItemTableCompanion(
+      shopId: Value(shopId),
+      itemId: Value(itemId),
+      viewedAt: Value(viewedAt),
+    );
+  }
+
+  factory RecentItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecentItemRow(
+      shopId: serializer.fromJson<String>(json['shopId']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+      viewedAt: serializer.fromJson<DateTime>(json['viewedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'shopId': serializer.toJson<String>(shopId),
+      'itemId': serializer.toJson<String>(itemId),
+      'viewedAt': serializer.toJson<DateTime>(viewedAt),
+    };
+  }
+
+  RecentItemRow copyWith({
+    String? shopId,
+    String? itemId,
+    DateTime? viewedAt,
+  }) => RecentItemRow(
+    shopId: shopId ?? this.shopId,
+    itemId: itemId ?? this.itemId,
+    viewedAt: viewedAt ?? this.viewedAt,
+  );
+  RecentItemRow copyWithCompanion(RecentItemTableCompanion data) {
+    return RecentItemRow(
+      shopId: data.shopId.present ? data.shopId.value : this.shopId,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      viewedAt: data.viewedAt.present ? data.viewedAt.value : this.viewedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecentItemRow(')
+          ..write('shopId: $shopId, ')
+          ..write('itemId: $itemId, ')
+          ..write('viewedAt: $viewedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(shopId, itemId, viewedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecentItemRow &&
+          other.shopId == this.shopId &&
+          other.itemId == this.itemId &&
+          other.viewedAt == this.viewedAt);
+}
+
+class RecentItemTableCompanion extends UpdateCompanion<RecentItemRow> {
+  final Value<String> shopId;
+  final Value<String> itemId;
+  final Value<DateTime> viewedAt;
+  final Value<int> rowid;
+  const RecentItemTableCompanion({
+    this.shopId = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.viewedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecentItemTableCompanion.insert({
+    required String shopId,
+    required String itemId,
+    required DateTime viewedAt,
+    this.rowid = const Value.absent(),
+  }) : shopId = Value(shopId),
+       itemId = Value(itemId),
+       viewedAt = Value(viewedAt);
+  static Insertable<RecentItemRow> custom({
+    Expression<String>? shopId,
+    Expression<String>? itemId,
+    Expression<DateTime>? viewedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (shopId != null) 'shop_id': shopId,
+      if (itemId != null) 'item_id': itemId,
+      if (viewedAt != null) 'viewed_at': viewedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecentItemTableCompanion copyWith({
+    Value<String>? shopId,
+    Value<String>? itemId,
+    Value<DateTime>? viewedAt,
+    Value<int>? rowid,
+  }) {
+    return RecentItemTableCompanion(
+      shopId: shopId ?? this.shopId,
+      itemId: itemId ?? this.itemId,
+      viewedAt: viewedAt ?? this.viewedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (shopId.present) {
+      map['shop_id'] = Variable<String>(shopId.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<String>(itemId.value);
+    }
+    if (viewedAt.present) {
+      map['viewed_at'] = Variable<DateTime>(viewedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecentItemTableCompanion(')
+          ..write('shopId: $shopId, ')
+          ..write('itemId: $itemId, ')
+          ..write('viewedAt: $viewedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8997,6 +9361,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CustomerTableTable customerTable = $CustomerTableTable(this);
   late final $CreditTableTable creditTable = $CreditTableTable(this);
   late final $CreditItemTableTable creditItemTable = $CreditItemTableTable(
+    this,
+  );
+  late final $RecentItemTableTable recentItemTable = $RecentItemTableTable(
     this,
   );
   late final Index outboxDrainIdx = Index(
@@ -9024,6 +9391,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     customerTable,
     creditTable,
     creditItemTable,
+    recentItemTable,
     outboxDrainIdx,
   ];
 }
@@ -12419,6 +12787,7 @@ typedef $$ItemTableTableCreateCompanionBuilder =
       Value<DateTime?> deletedAt,
       required String id,
       required String name,
+      Value<String> nicknames,
       Value<String?> categoryId,
       Value<String?> photoUrl,
       Value<String?> note,
@@ -12433,6 +12802,7 @@ typedef $$ItemTableTableUpdateCompanionBuilder =
       Value<DateTime?> deletedAt,
       Value<String> id,
       Value<String> name,
+      Value<String> nicknames,
       Value<String?> categoryId,
       Value<String?> photoUrl,
       Value<String?> note,
@@ -12480,6 +12850,11 @@ class $$ItemTableTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nicknames => $composableBuilder(
+    column: $table.nicknames,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12543,6 +12918,11 @@ class $$ItemTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get nicknames => $composableBuilder(
+    column: $table.nicknames,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get categoryId => $composableBuilder(
     column: $table.categoryId,
     builder: (column) => ColumnOrderings(column),
@@ -12588,6 +12968,9 @@ class $$ItemTableTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get nicknames =>
+      $composableBuilder(column: $table.nicknames, builder: (column) => column);
 
   GeneratedColumn<String> get categoryId => $composableBuilder(
     column: $table.categoryId,
@@ -12636,6 +13019,7 @@ class $$ItemTableTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String> nicknames = const Value.absent(),
                 Value<String?> categoryId = const Value.absent(),
                 Value<String?> photoUrl = const Value.absent(),
                 Value<String?> note = const Value.absent(),
@@ -12648,6 +13032,7 @@ class $$ItemTableTableTableManager
                 deletedAt: deletedAt,
                 id: id,
                 name: name,
+                nicknames: nicknames,
                 categoryId: categoryId,
                 photoUrl: photoUrl,
                 note: note,
@@ -12662,6 +13047,7 @@ class $$ItemTableTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String id,
                 required String name,
+                Value<String> nicknames = const Value.absent(),
                 Value<String?> categoryId = const Value.absent(),
                 Value<String?> photoUrl = const Value.absent(),
                 Value<String?> note = const Value.absent(),
@@ -12674,6 +13060,7 @@ class $$ItemTableTableTableManager
                 deletedAt: deletedAt,
                 id: id,
                 name: name,
+                nicknames: nicknames,
                 categoryId: categoryId,
                 photoUrl: photoUrl,
                 note: note,
@@ -12707,6 +13094,7 @@ typedef $$ItemPriceTableTableCreateCompanionBuilder =
       required String itemId,
       required String unit,
       Value<int?> packQty,
+      Value<String?> barcode,
       required String currency,
       Value<int?> price,
       Value<int?> wholesale,
@@ -12720,6 +13108,7 @@ typedef $$ItemPriceTableTableUpdateCompanionBuilder =
       Value<String> itemId,
       Value<String> unit,
       Value<int?> packQty,
+      Value<String?> barcode,
       Value<String> currency,
       Value<int?> price,
       Value<int?> wholesale,
@@ -12754,6 +13143,11 @@ class $$ItemPriceTableTableFilterComposer
 
   ColumnFilters<int> get packQty => $composableBuilder(
     column: $table.packQty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get barcode => $composableBuilder(
+    column: $table.barcode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12812,6 +13206,11 @@ class $$ItemPriceTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get barcode => $composableBuilder(
+    column: $table.barcode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get currency => $composableBuilder(
     column: $table.currency,
     builder: (column) => ColumnOrderings(column),
@@ -12858,6 +13257,9 @@ class $$ItemPriceTableTableAnnotationComposer
 
   GeneratedColumn<int> get packQty =>
       $composableBuilder(column: $table.packQty, builder: (column) => column);
+
+  GeneratedColumn<String> get barcode =>
+      $composableBuilder(column: $table.barcode, builder: (column) => column);
 
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
@@ -12912,6 +13314,7 @@ class $$ItemPriceTableTableTableManager
                 Value<String> itemId = const Value.absent(),
                 Value<String> unit = const Value.absent(),
                 Value<int?> packQty = const Value.absent(),
+                Value<String?> barcode = const Value.absent(),
                 Value<String> currency = const Value.absent(),
                 Value<int?> price = const Value.absent(),
                 Value<int?> wholesale = const Value.absent(),
@@ -12923,6 +13326,7 @@ class $$ItemPriceTableTableTableManager
                 itemId: itemId,
                 unit: unit,
                 packQty: packQty,
+                barcode: barcode,
                 currency: currency,
                 price: price,
                 wholesale: wholesale,
@@ -12936,6 +13340,7 @@ class $$ItemPriceTableTableTableManager
                 required String itemId,
                 required String unit,
                 Value<int?> packQty = const Value.absent(),
+                Value<String?> barcode = const Value.absent(),
                 required String currency,
                 Value<int?> price = const Value.absent(),
                 Value<int?> wholesale = const Value.absent(),
@@ -12947,6 +13352,7 @@ class $$ItemPriceTableTableTableManager
                 itemId: itemId,
                 unit: unit,
                 packQty: packQty,
+                barcode: barcode,
                 currency: currency,
                 price: price,
                 wholesale: wholesale,
@@ -13922,6 +14328,170 @@ typedef $$CreditItemTableTableProcessedTableManager =
       CreditItemRow,
       PrefetchHooks Function()
     >;
+typedef $$RecentItemTableTableCreateCompanionBuilder =
+    RecentItemTableCompanion Function({
+      required String shopId,
+      required String itemId,
+      required DateTime viewedAt,
+      Value<int> rowid,
+    });
+typedef $$RecentItemTableTableUpdateCompanionBuilder =
+    RecentItemTableCompanion Function({
+      Value<String> shopId,
+      Value<String> itemId,
+      Value<DateTime> viewedAt,
+      Value<int> rowid,
+    });
+
+class $$RecentItemTableTableFilterComposer
+    extends Composer<_$AppDatabase, $RecentItemTableTable> {
+  $$RecentItemTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get viewedAt => $composableBuilder(
+    column: $table.viewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RecentItemTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $RecentItemTableTable> {
+  $$RecentItemTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get viewedAt => $composableBuilder(
+    column: $table.viewedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RecentItemTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RecentItemTableTable> {
+  $$RecentItemTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get shopId =>
+      $composableBuilder(column: $table.shopId, builder: (column) => column);
+
+  GeneratedColumn<String> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get viewedAt =>
+      $composableBuilder(column: $table.viewedAt, builder: (column) => column);
+}
+
+class $$RecentItemTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RecentItemTableTable,
+          RecentItemRow,
+          $$RecentItemTableTableFilterComposer,
+          $$RecentItemTableTableOrderingComposer,
+          $$RecentItemTableTableAnnotationComposer,
+          $$RecentItemTableTableCreateCompanionBuilder,
+          $$RecentItemTableTableUpdateCompanionBuilder,
+          (
+            RecentItemRow,
+            BaseReferences<_$AppDatabase, $RecentItemTableTable, RecentItemRow>,
+          ),
+          RecentItemRow,
+          PrefetchHooks Function()
+        > {
+  $$RecentItemTableTableTableManager(
+    _$AppDatabase db,
+    $RecentItemTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RecentItemTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecentItemTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecentItemTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> shopId = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<DateTime> viewedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RecentItemTableCompanion(
+                shopId: shopId,
+                itemId: itemId,
+                viewedAt: viewedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String shopId,
+                required String itemId,
+                required DateTime viewedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => RecentItemTableCompanion.insert(
+                shopId: shopId,
+                itemId: itemId,
+                viewedAt: viewedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RecentItemTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RecentItemTableTable,
+      RecentItemRow,
+      $$RecentItemTableTableFilterComposer,
+      $$RecentItemTableTableOrderingComposer,
+      $$RecentItemTableTableAnnotationComposer,
+      $$RecentItemTableTableCreateCompanionBuilder,
+      $$RecentItemTableTableUpdateCompanionBuilder,
+      (
+        RecentItemRow,
+        BaseReferences<_$AppDatabase, $RecentItemTableTable, RecentItemRow>,
+      ),
+      RecentItemRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13958,4 +14528,6 @@ class $AppDatabaseManager {
       $$CreditTableTableTableManager(_db, _db.creditTable);
   $$CreditItemTableTableTableManager get creditItemTable =>
       $$CreditItemTableTableTableManager(_db, _db.creditItemTable);
+  $$RecentItemTableTableTableManager get recentItemTable =>
+      $$RecentItemTableTableTableManager(_db, _db.recentItemTable);
 }

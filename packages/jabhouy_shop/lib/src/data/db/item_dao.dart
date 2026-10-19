@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
@@ -63,6 +65,7 @@ class ItemDao {
               id: item.id,
               shopId: shopId,
               name: item.name,
+              nicknames: Value(jsonEncode(item.nicknames)),
               categoryId: Value(item.categoryId),
               photoUrl: Value(item.photoUrl),
               note: Value(item.note),
@@ -83,6 +86,7 @@ class ItemDao {
                 itemId: item.id,
                 unit: option.unit,
                 packQty: Value(option.packQty),
+                barcode: Value(option.barcode),
                 currency: option.currency.name.toUpperCase(),
                 price: Value(option.price),
                 wholesale: Value(option.wholesale),
@@ -220,6 +224,7 @@ class ItemDao {
   static Item _item(ItemRow row, List<PriceOption> prices) => Item(
     id: row.id,
     name: row.name,
+    nicknames: (jsonDecode(row.nicknames) as List).cast<String>(),
     categoryId: row.categoryId,
     photoUrl: row.photoUrl,
     note: row.note,
@@ -232,6 +237,7 @@ class ItemDao {
     id: row.id,
     unit: row.unit,
     packQty: row.packQty,
+    barcode: row.barcode,
     currency: Currency.values.byName(row.currency.toLowerCase()),
     price: row.price,
     wholesale: row.wholesale,

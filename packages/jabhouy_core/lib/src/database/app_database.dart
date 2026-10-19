@@ -175,6 +175,9 @@ class ItemTable extends Table with SyncedColumns {
 
   TextColumn get id => text()();
   TextColumn get name => text()();
+
+  /// Other names people use, as a JSON list of strings.
+  TextColumn get nicknames => text().withDefault(const Constant('[]'))();
   TextColumn get categoryId => text().nullable()();
   TextColumn get photoUrl => text().nullable()();
   TextColumn get note => text().nullable()();
@@ -193,6 +196,9 @@ class ItemPriceTable extends Table {
   TextColumn get itemId => text()();
   TextColumn get unit => text()();
   IntColumn get packQty => integer().nullable()();
+
+  /// Unique within a Shop, checked on the phone only (decision 41).
+  TextColumn get barcode => text().nullable()();
   TextColumn get currency => text()();
 
   /// Whole riel or cents. Null means no price yet, never 0.
@@ -203,6 +209,20 @@ class ItemPriceTable extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+}
+
+/// Items this phone opened, per Shop; never synced (decision 46).
+@DataClassName('RecentItemRow')
+class RecentItemTable extends Table {
+  @override
+  String get tableName => 'recent_item';
+
+  TextColumn get shopId => text()();
+  TextColumn get itemId => text()();
+  DateTimeColumn get viewedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {shopId, itemId};
 }
 
 @DataClassName('CustomerRow')
@@ -285,6 +305,7 @@ class CreditItemTable extends Table {
     CustomerTable,
     CreditTable,
     CreditItemTable,
+    RecentItemTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -294,7 +315,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// The ids of [type] rows that still have a job in the outbox.
   ///
@@ -360,6 +381,17 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(table);
           }
         }
+
+        // From below 9 the tables above were just created with these
+        // columns already, so only a schema-9 file adds them.
+        if (from == 9) {
+          await m.addColumn(itemTable, itemTable.nicknames);
+          await m.addColumn(itemPriceTable, itemPriceTable.barcode);
+        }
+
+        if (from < 10) {
+          await m.createTable(recentItemTable);
+        }
       },
     );
   }
@@ -386,6 +418,7 @@ class AppDatabase extends _$AppDatabase {
       for (final table in _redesignTableList) {
         await delete(table).go();
       }
+      await delete(recentItemTable).go();
       // Or the next account to sign in would skip its first pull.
       await delete(syncCursors).go();
     });
