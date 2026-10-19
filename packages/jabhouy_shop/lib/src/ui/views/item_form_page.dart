@@ -31,6 +31,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
     ...?_cubit.existing?.prices.map(PriceRowDraft.from),
   ];
 
+  /// The one price row open for editing; the rest show as summaries.
+  /// A single row (a new item, or an item with one price) starts open.
+  late String? _openRowId = _rows.length == 1 ? _rows.single.id : null;
+
   /// Scroll targets for the first problem: `name`, `rows`, or a row id.
   final _keys = <String, GlobalKey>{};
   GlobalKey _keyFor(String id) => _keys.putIfAbsent(id, GlobalKey.new);
@@ -94,12 +98,25 @@ class _ItemFormPageState extends State<ItemFormPage> {
       listenWhen: (a, b) => a.status != b.status || a.problems != b.problems,
       listener: (context, state) {
         if (state.status == ItemFormStatus.ready && _rows.isEmpty) {
-          setState(() => _rows.add(_emptyRow(state)));
+          final row = _emptyRow(state);
+          setState(() {
+            _rows.add(row);
+            _openRowId = row.id;
+          });
         }
         if (state.status == ItemFormStatus.saved) {
           Navigator.of(context).maybePop();
         }
-        if (state.problems.isNotEmpty) _showFirstProblem(state.problems);
+        if (state.problems.isNotEmpty) {
+          // Open the first row with a problem so its message shows.
+          final bad = _rows.where(
+            (r) => state.problems.keys.any((k) => k.startsWith('${r.id}.')),
+          );
+          if (bad.isNotEmpty) setState(() => _openRowId = bad.first.id);
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _showFirstProblem(state.problems),
+          );
+        }
       },
       builder: (context, state) {
         final loading = state.status == ItemFormStatus.loading;
@@ -335,8 +352,6 @@ class _ItemFormPageState extends State<ItemFormPage> {
           style: AppTextTheme.sectionTitle.copyWith(color: t.textPrimary),
         ),
         const SizedBox(height: 10),
-        const PriceRowHeader(),
-        const SizedBox(height: AppSizes.fieldGap),
         for (final (i, row) in _rows.indexed)
           Container(
             key: _keyFor(row.id),
@@ -345,30 +360,54 @@ class _ItemFormPageState extends State<ItemFormPage> {
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: t.dividerStrong)),
             ),
-            child: PriceRowEditor(
-              key: ValueKey(row.id),
-              initial: row,
-              settings: state.settings,
-              problems: {
-                for (final MapEntry(:key, :value) in state.problems.entries)
-                  if (key.startsWith('${row.id}.'))
-                    key.substring(row.id.length + 1): value,
-              },
-              unitChips: state.units,
-              unitHint: i == 0 && category.isNotEmpty
-                  ? l10n.priceUnitsFor(category.first.name)
-                  : null,
-              onChanged: (draft) =>
-                  _rows[_rows.indexWhere((r) => r.id == draft.id)] = draft,
-              onRemove: _rows.length > 1
-                  ? () => setState(() => _rows.removeAt(i))
-                  : null,
-            ),
+            child: row.id != _openRowId
+                ? PriceRowSummary(
+                    draft: row,
+                    hasProblem: state.problems.keys.any(
+                      (k) => k.startsWith('${row.id}.'),
+                    ),
+                    onTap: () => setState(() => _openRowId = row.id),
+                  )
+                // Column labels belong to the open row's fields only.
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const PriceRowHeader(),
+                      const SizedBox(height: AppSizes.fieldGap),
+                      PriceRowEditor(
+                        key: ValueKey(row.id),
+                        initial: row,
+                        settings: state.settings,
+                        problems: {
+                          for (final MapEntry(:key, :value)
+                              in state.problems.entries)
+                            if (key.startsWith('${row.id}.'))
+                              key.substring(row.id.length + 1): value,
+                        },
+                        unitChips: state.units,
+                        unitHint: category.isNotEmpty
+                            ? l10n.priceUnitsFor(category.first.name)
+                            : null,
+                        onChanged: (draft) =>
+                            _rows[_rows.indexWhere((r) => r.id == draft.id)] =
+                                draft,
+                        onRemove: _rows.length > 1
+                            ? () => setState(() => _rows.removeAt(i))
+                            : null,
+                      ),
+                    ],
+                  ),
           ),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: InkWell(
-            onTap: () => setState(() => _rows.add(_emptyRow(state))),
+            onTap: () {
+              final row = _emptyRow(state);
+              setState(() {
+                _rows.add(row);
+                _openRowId = row.id;
+              });
+            },
             child: SizedBox(
               height: AppSizes.minTapTarget,
               child: Row(

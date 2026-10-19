@@ -288,6 +288,99 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
   }
 }
 
+/// A price row that is not being edited, as one tappable line:
+/// `1 កេះ · ×12   12,222 ៛  ✎`, then wholesale and cost when set.
+class PriceRowSummary extends StatelessWidget {
+  const PriceRowSummary({
+    required this.draft,
+    required this.onTap,
+    this.hasProblem = false,
+    super.key,
+  });
+
+  final PriceRowDraft draft;
+  final VoidCallback onTap;
+
+  /// Outlined in red: the row holds a save-time problem.
+  final bool hasProblem;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final t = context.tokens;
+    final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
+    final pack = draft.packQty.trim().isEmpty ? '' : ' · ×${draft.packQty}';
+    final unit = draft.unit.trim().isEmpty ? '—' : draft.unit.trim();
+    final extras = [
+      for (final (label, text) in [
+        (l10n.priceWholesaleLabel, draft.wholesale),
+        (l10n.priceCostShort, draft.cost),
+      ])
+        if (Money.tryParse(text, draft.currency) case final money?)
+          '$label ${money.format()}',
+    ];
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: AppSizes.minTapTarget),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        decoration: hasProblem
+            ? BoxDecoration(
+                border: Border.all(color: t.dangerText, width: 2),
+                borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+              )
+            : null,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            text: '1 $unit',
+                            children: [
+                              TextSpan(
+                                text: pack,
+                                style: TextStyle(
+                                  color: t.textMuted,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                          style: AppTextTheme.body.copyWith(
+                            color: t.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      PriceDisplay(
+                        price: Money.tryParse(draft.price, draft.currency),
+                        // Unused: the summary shows no converted line.
+                        khrPerUsd: 0,
+                        showConverted: false,
+                      ),
+                    ],
+                  ),
+                  if (extras.isNotEmpty) Text(extras.join(' · '), style: muted),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.edit_outlined, size: 18, color: t.textMuted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Secondary price field (canvas ៣ខ): an underline, label inside, the
 /// row's currency at the end. 44 tall so it stays a valid tap target.
 class _QuietField extends StatelessWidget {
