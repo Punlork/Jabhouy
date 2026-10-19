@@ -1,0 +1,113 @@
+# Every push to dev: analyze and test, build the development APK, and send
+# it to the testers' Telegram chat.
+#
+# Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DEV_DOTENV (.env.dev), and
+# the ANDROID_KEYSTORE_* ones the release workflow already uses.
+
+name: Dev build to Telegram
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+# A newer push replaces a build still running; only the latest is sent.
+concurrency:
+  group: dev-telegram
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Check, build and send
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # No .fvm/ on the runner: use the SDK flutter-action puts on PATH.
+      MELOS_SDK_PATH: auto
+      ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/release-keystore.jks
+      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The same Flutter as local builds, so the analyzer baseline holds.
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Restore env files
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.DEV_DOTENV }}" ]; then
+            echo "Missing DEV_DOTENV secret."
+            exit 1
+          fi
+          printf '%s' "${{ secrets.DEV_DOTENV }}" > .env.dev
+          # Declared as an asset; the development flavor reads .env.dev.
+          touch .env
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: dart run melos run analyze
+
+      - name: Test
+        run: dart run melos run test
+
+      - name: Restore Android keystore
+        shell: bash
+        run: |
+          umask 077
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+
+      # Split per ABI: Telegram bots upload at most 50 MB, and the single
+      # APK is larger. arm64 covers current Android phones.
+      - name: Build development APK
+        run: >
+          flutter build apk --release --split-per-abi
+          --flavor development -t lib/main_development.dart
+          --dart-define-from-file=config/features/development.json
+
+      - name: Send to Telegram
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          APK="build/app/outputs/flutter-apk/app-arm64-v8a-development-release.apk"
+          if [ ! -f "$APK" ]; then
+            echo "APK not found:"; ls build/app/outputs/flutter-apk; exit 1
+          fi
+          SIZE=$(stat -c %s "$APK")
+          if [ "$SIZE" -gt 52428800 ]; then
+            echo "APK is $SIZE bytes, over Telegram's 50 MB bot limit."; exit 1
+          fi
+          VERSION="$(grep '^version:' pubspec.yaml | head -n 1 | awk '{print $2}')"
+          SHORT="${GITHUB_SHA::7}"
+          SUBJECT="$(git log -1 --pretty=%s)"
+          NAME="Jabhouy-dev-${VERSION%%+*}-${SHORT}.apk"
+          cp "$APK" "$NAME"
+          CAPTION="Jabhouy dev ${VERSION} · ${SHORT}
+          ${SUBJECT}"
+          curl --fail-with-body -sS \
+            -F chat_id="$TELEGRAM_CHAT_ID" \
+            -F document=@"$NAME" \
+            -F caption="${CAPTION:0:1000}" \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" > /dev/null
+          echo "Sent $NAME ($SIZE bytes)."
