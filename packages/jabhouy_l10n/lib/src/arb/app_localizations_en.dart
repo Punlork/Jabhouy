@@ -704,7 +704,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceCost => 'Cost price';
 
   @override
-  String get priceAdd => 'Add price';
+  String get priceAdd => 'Add item price';
 
   @override
   String get priceAddExample => 'e.g. case ×24, sack';

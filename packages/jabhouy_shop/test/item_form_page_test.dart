@@ -87,7 +87,7 @@ void main() {
     await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
     await tester.enterText(openField(0), 'ដប');
     await tester.enterText(openField(2), '3000');
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃ'));
+    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
     await tester.pumpAndSettle();
     await tester.enterText(openField(0), 'កេះ');
     await tester.enterText(openField(1), '24');
@@ -138,7 +138,7 @@ void main() {
       );
     });
     await pumpForm(tester);
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃ'));
+    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
     await tester.pumpAndSettle();
 
     // The new row is the open one, and it carries the chips.
@@ -171,7 +171,7 @@ void main() {
     );
     expect(find.byIcon(Icons.expand_less_rounded), findsOneWidget);
 
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃ'));
+    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
     await tester.pumpAndSettle();
     expect(headers, findsNWidgets(2));
     expect(find.byType(PriceRowEditor), findsOneWidget, reason: 'one open');
@@ -194,7 +194,7 @@ void main() {
     await pumpForm(tester);
     await tester.enterText(openField(0), 'កេះ');
     await tester.enterText(openField(1), '0');
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃ'));
+    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
     await save(tester);

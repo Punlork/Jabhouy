@@ -907,7 +907,7 @@
   "@priceCost": {
     "description": "Label for the cost price"
   },
-  "priceAdd": "Add price",
+  "priceAdd": "Add item price",
   "@priceAdd": {
     "description": "Button that adds a price row"
   },

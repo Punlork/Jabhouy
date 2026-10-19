@@ -855,7 +855,7 @@
   "@priceCost": {
     "description": "Label for the cost price"
   },
-  "priceAdd": "បន្ថែមតម្លៃ",
+  "priceAdd": "បន្ថែមតម្លៃទំនិញ",
   "@priceAdd": {
     "description": "Button that adds a price row"
   },

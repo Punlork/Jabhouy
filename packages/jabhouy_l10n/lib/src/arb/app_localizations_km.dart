@@ -690,7 +690,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get priceCost => 'តម្លៃដើម';
 
   @override
-  String get priceAdd => 'បន្ថែមតម្លៃ';
+  String get priceAdd => 'បន្ថែមតម្លៃទំនិញ';
 
   @override
   String get priceAddExample => 'ឧ. កេះ ×24, បេ';

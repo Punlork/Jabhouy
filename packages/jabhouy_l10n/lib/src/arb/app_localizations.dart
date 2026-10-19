@@ -1397,7 +1397,7 @@ abstract class AppLocalizations {
   /// Button that adds a price row
   ///
   /// In en, this message translates to:
-  /// **'Add price'**
+  /// **'Add item price'**
   String get priceAdd;
 
   /// Example after the add price button
