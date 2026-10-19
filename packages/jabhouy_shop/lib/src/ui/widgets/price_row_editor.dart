@@ -337,12 +337,17 @@ class PriceRowSummary extends StatelessWidget {
               )
             : null,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Baseline: unit and price differ in size and script, so
+                  // centring their boxes leaves them visibly off.
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
                     children: [
                       Expanded(
                         child: Text.rich(
@@ -377,9 +382,17 @@ class PriceRowSummary extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(
-              expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-              color: t.textSecondary,
+            // Centred on the first line (price 17 px × 1.5), not on both.
+            SizedBox(
+              height: 26,
+              child: Center(
+                child: Icon(
+                  expanded
+                      ? Icons.expand_less_rounded
+                      : Icons.expand_more_rounded,
+                  color: t.textSecondary,
+                ),
+              ),
             ),
           ],
         ),
