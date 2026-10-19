@@ -70,79 +70,107 @@ class ItemDetailsSheet extends StatelessWidget {
     };
     const buttonSize = Size.fromHeight(52);
 
+    // Header and buttons stay put; only the prices scroll, so edit and
+    // delete stay in reach however many prices an Item has.
     return AppBottomSheet(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: t.border,
-                  borderRadius: BorderRadius.circular(2),
+      scrollable: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: t.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                _Header(item: item, categoryName: categoryName),
+              ],
             ),
-            const SizedBox(height: 16),
-            _Header(item: item, categoryName: categoryName),
-            const SizedBox(height: 8),
-            if (item.prices.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: PriceDisplay(
-                  price: null,
-                  khrPerUsd: 0,
-                  showConverted: false,
-                ),
-              ),
-            for (final (i, option) in item.prices.indexed)
-              _PriceBlock(
-                option: option,
-                settings: settings,
-                divider: i < item.prices.length - 1,
-              ),
-            if (editedLine != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  editedLine,
-                  style: AppTextTheme.hint.copyWith(color: t.textMuted),
-                ),
-              ),
-            if (canEdit) ...[
-              const SizedBox(height: 16),
-              Row(
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: onEdit,
-                      style: FilledButton.styleFrom(minimumSize: buttonSize),
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: Text(l10n.priceEdit),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _confirmDelete(context),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: t.dangerText,
-                        side: BorderSide(color: t.dangerBorder),
-                        minimumSize: buttonSize,
+                  if (item.prices.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: PriceDisplay(
+                        price: null,
+                        khrPerUsd: 0,
+                        showConverted: false,
                       ),
-                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      label: Text(l10n.delete),
                     ),
-                  ),
+                  for (final (i, option) in item.prices.indexed)
+                    _PriceBlock(
+                      option: option,
+                      settings: settings,
+                      divider: i < item.prices.length - 1,
+                    ),
+                  if (editedLine != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 4),
+                      child: Text(
+                        editedLine,
+                        style: AppTextTheme.hint.copyWith(color: t.textMuted),
+                      ),
+                    ),
                 ],
               ),
-            ],
-          ],
-        ),
+            ),
+          ),
+          if (canEdit)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: t.divider)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: onEdit,
+                        style: FilledButton.styleFrom(minimumSize: buttonSize),
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: Text(l10n.priceEdit),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _confirmDelete(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: t.dangerText,
+                          side: BorderSide(color: t.dangerBorder),
+                          minimumSize: buttonSize,
+                        ),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                        ),
+                        label: Text(l10n.delete),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            const SizedBox(height: 16),
+        ],
       ),
     );
   }
@@ -249,8 +277,10 @@ class _PriceBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Baseline: unit and the larger price line up as text.
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
               Expanded(
                 child: Text.rich(

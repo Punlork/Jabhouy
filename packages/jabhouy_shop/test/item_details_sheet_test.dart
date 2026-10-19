@@ -92,4 +92,59 @@ void main() {
     await pumpSheet(tester, canEdit: false, editorName: 'ដារ៉ា');
     expect(find.text('កែចុងក្រោយ 19 តុលា 2026 ដោយ ដារ៉ា'), findsOneWidget);
   });
+
+  testWidgets('with many prices, header and buttons stay; prices scroll',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final many = Item(
+      id: 'many',
+      name: 'Many',
+      prices: [
+        for (var i = 0; i < 12; i++)
+          PriceOption(
+            id: 'p$i',
+            unit: 'u$i',
+            currency: Currency.khr,
+            price: 1000 + i,
+          ),
+      ],
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        locale: const Locale('km'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => ItemDetailsSheet(
+                item: many,
+                settings: const PriceSettings(),
+                canEdit: true,
+                onEdit: () {},
+                onDelete: () {},
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    final screen = tester.getRect(find.byType(MaterialApp));
+    bool onScreen(Finder f) => screen.contains(tester.getCenter(f));
+    expect(onScreen(find.text('កែតម្លៃ')), isTrue, reason: 'buttons fixed');
+
+    await tester.drag(find.text('1 u3'), const Offset(0, -300));
+    await tester.pumpAndSettle();
+    expect(onScreen(find.text('Many')), isTrue, reason: 'header fixed');
+    expect(onScreen(find.text('កែតម្លៃ')), isTrue);
+    expect(find.text('1 u11'), findsOneWidget, reason: 'last price reached');
+  });
 }
