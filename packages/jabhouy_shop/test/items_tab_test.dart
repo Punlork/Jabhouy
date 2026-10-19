@@ -62,7 +62,7 @@ void main() {
         ),
       );
       await repo.saveItem(
-        Item(id: 'rice', name: 'អង្ករ', prices: [_option('បេ', null)]),
+        Item(id: 'rice', name: 'អង្ករផ្កាម្លិះ', prices: [_option('បេ', null)]),
       );
     });
     opened.clear();
@@ -114,7 +114,7 @@ void main() {
     await tester.tap(find.text('មិនទាន់មានតម្លៃ').first);
     await settle(tester);
 
-    expect(find.text('អង្ករ'), findsOneWidget);
+    expect(find.text('អង្ករផ្កាម្លិះ'), findsOneWidget);
     expect(find.text('Coca-Cola'), findsNothing);
     await close(tester);
   });

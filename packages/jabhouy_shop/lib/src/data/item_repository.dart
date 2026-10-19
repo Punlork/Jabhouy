@@ -4,6 +4,23 @@ import 'package:jabhouy_shop/src/data/db/item_dao.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 
+/// Plan §3.2's starter categories and their usual units.
+/// shortcut: names await the shop families (§9); the server seeds real
+/// Shops (Phase 2b), so only the stand-in Shop uses this list.
+const starterCategories = [
+  ('ភេសជ្ជៈ', ['ដប', 'កំប៉ុង', 'កេះ']),
+  ('អង្ករ', ['គីឡូ', 'បេ']),
+  ('មី', ['កញ្ចប់', 'កេស']),
+  ('សាប៊ូ/អនាម័យ', ['ដុំ', 'ដប', 'កញ្ចប់']),
+  ('នំ/ចំណី', <String>[]),
+  ('ទឹកដោះគោ', <String>[]),
+  ('ស្រា/ស្រាបៀរ', <String>[]),
+  ('គ្រឿងទេស', <String>[]),
+  ('ប្រេងឆា', <String>[]),
+  ('បារី', <String>[]),
+  ('ផ្សេងៗ', <String>[]),
+];
+
 /// Items, their Price options, categories and units for the Current Shop.
 /// Writes go to Drift first, then the outbox, then a sync is requested
 /// when online. The stand-in Shop (`ShopScope.syncs` false) queues nothing.
@@ -83,6 +100,27 @@ class ItemRepository {
   Future<String?> lastUsedCategoryId() => _dao.lastUsedCategoryId(_shopId);
 
   Future<PriceSettings> priceSettings() => _dao.priceSettings(_shopId);
+
+  /// Gives the stand-in Shop the starter categories when it has none. A
+  /// server Shop is seeded by the server, so it is left alone.
+  Future<void> seedStarterCategories() async {
+    if (_scope.syncs) return;
+    if ((await _dao.watchCategories(_shopId).first).isNotEmpty) return;
+    final now = _clock();
+    for (final (i, (name, units)) in starterCategories.indexed) {
+      await _dao.saveCategory(
+        _shopId,
+        ItemCategory(
+          id: newId(),
+          name: name,
+          sortOrder: i,
+          units: [for (final unit in units) CategoryUnit(unit: unit)],
+        ),
+        now: now,
+        userId: _scope.userId,
+      );
+    }
+  }
 
   /// Visible units for the form's chips, most used first.
   Future<List<String>> unitsFor(String categoryId) =>

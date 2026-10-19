@@ -482,3 +482,4 @@ The updated body (§3.1b, Phase 3a, new §5.1/§5.3 details, canvas ១–១ឃ
 49. A duplicate item name is a warning, not an error (canvas ៤គ): `មានទំនិញឈ្មោះនេះរួចហើយ · មើល · ឬរក្សាទុកជាទំនិញថ្មី`.
 
 Open: the unknown-barcode sheet (§3.1b attach / create) is not on the canvas; decide before building the scan flow.
+50. Until the server seeds Shops (Phase 2b) and issue 16 can create categories, the stand-in Shop (`syncs == false`) gets §3.2's 11 starter categories on the phone when it has none. A server Shop is never seeded by the phone.

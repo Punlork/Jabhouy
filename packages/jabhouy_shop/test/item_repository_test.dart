@@ -287,6 +287,34 @@ void main() {
     expect(saved.khrPerUsd, 4100);
   });
 
+  test('the stand-in shop gets the starter categories once', () async {
+    final shop = repo('local-u1', syncs: false);
+    await shop.seedStarterCategories();
+    await shop.seedStarterCategories();
+
+    final categories = await shop.watchCategories().first;
+    expect(categories.map((c) => c.name).toList(), [
+      for (final (name, _) in starterCategories) name,
+    ]);
+    final drinks = categories.firstWhere((c) => c.name == 'ភេសជ្ជៈ');
+    expect(
+      drinks.units.map((u) => u.unit),
+      unorderedEquals(['ដប', 'កំប៉ុង', 'កេះ']),
+    );
+    expect(await jobs(), isEmpty);
+  });
+
+  test('a shop with categories, or a server shop, is never seeded', () async {
+    final local = repo('local-u1', syncs: false);
+    await local.saveCategory(const ItemCategory(id: 'mine', name: 'Mine'));
+    await local.seedStarterCategories();
+    expect(await local.watchCategories().first, hasLength(1));
+
+    final server = repo('s1');
+    await server.seedStarterCategories();
+    expect(await server.watchCategories().first, isEmpty);
+  });
+
   test('a syncing shop queues a job per write', () async {
     final shop = repo('s1');
     await shop.saveItem(

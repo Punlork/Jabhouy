@@ -39,6 +39,8 @@ class ItemListCubit extends Cubit<ItemListState> {
   void start() {
     if (_scope.shopId == null || _subscriptions.isNotEmpty) return;
     emit(state.copyWith(canEdit: _scope.role?.canEditPrices ?? false));
+    // The watch below picks the categories up once they are written.
+    unawaited(_repository.seedStarterCategories());
     _subscriptions
       ..add(
         _repository.watchCategories().listen(
