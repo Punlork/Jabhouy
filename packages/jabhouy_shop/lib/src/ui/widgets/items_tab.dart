@@ -30,10 +30,11 @@ class _ItemsTabState extends State<ItemsTab>
     if (!mounted) return;
     final state = cubit.state;
     final category = state.categories.where((c) => c.id == item.categoryId);
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => ItemDetailsSheet(
+    await showAppSheet<void>(
+      context,
+      initialSize: 0.55,
+      builder: (sheetContext, controller) => ItemDetailsSheet(
+        scrollController: controller,
         item: item,
         categoryName: category.isEmpty ? null : category.first.name,
         settings: state.settings,

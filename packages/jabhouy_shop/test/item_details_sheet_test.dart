@@ -120,10 +120,11 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => TextButton(
-            onPressed: () => showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) => ItemDetailsSheet(
+            onPressed: () => showAppSheet<void>(
+              context,
+              initialSize: 0.55,
+              builder: (_, controller) => ItemDetailsSheet(
+                scrollController: controller,
                 item: many,
                 settings: const PriceSettings(),
                 canEdit: true,

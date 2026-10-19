@@ -15,6 +15,7 @@ class ItemDetailsSheet extends StatelessWidget {
     required this.onDelete,
     this.categoryName,
     this.editorName,
+    this.scrollController,
     super.key,
   });
 
@@ -29,6 +30,9 @@ class ItemDetailsSheet extends StatelessWidget {
 
   /// The Member who saved last; null shows the date alone.
   final String? editorName;
+
+  /// From showAppSheet, so scrolling the prices grows the sheet.
+  final ScrollController? scrollController;
 
   Future<void> _confirmDelete(BuildContext context) async {
     final l10n = context.l10n;
@@ -70,135 +74,89 @@ class ItemDetailsSheet extends StatelessWidget {
     };
     const buttonSize = Size.fromHeight(52);
 
-    // Header and buttons stay put; only the prices scroll, so edit and
-    // delete stay in reach however many prices an Item has.
-    return AppBottomSheet(
-      scrollable: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    // The standard sheet: header and buttons stay put, the prices scroll,
+    // and scrolling grows the sheet first (see showAppSheet).
+    return AppSheet(
+      header: _Header(item: item, categoryName: categoryName),
+      scrollController: scrollController,
+      footer: canEdit
+          ? Row(
               children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: t.border,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onEdit,
+                    style: FilledButton.styleFrom(minimumSize: buttonSize),
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    label: Text(l10n.priceEdit),
                   ),
                 ),
-                const SizedBox(height: 16),
-                _Header(item: item, categoryName: categoryName),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _confirmDelete(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: t.dangerText,
+                      side: BorderSide(color: t.dangerBorder),
+                      minimumSize: buttonSize,
+                    ),
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    label: Text(l10n.delete),
+                  ),
+                ),
               ],
+            )
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (item.prices.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: PriceDisplay(
+                price: null,
+                khrPerUsd: 0,
+                showConverted: false,
+              ),
             ),
-          ),
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+          for (final (i, option) in item.prices.indexed)
+            _PriceBlock(
+              option: option,
+              settings: settings,
+              divider: i < item.prices.length - 1,
+            ),
+          if (item.note case final note? when note.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (item.prices.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: PriceDisplay(
-                        price: null,
-                        khrPerUsd: 0,
-                        showConverted: false,
-                      ),
-                    ),
-                  for (final (i, option) in item.prices.indexed)
-                    _PriceBlock(
-                      option: option,
-                      settings: settings,
-                      divider: i < item.prices.length - 1,
-                    ),
-                  if (item.note case final note? when note.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.noteLabel,
-                            style: AppTextTheme.hint.copyWith(
-                              color: t.textMuted,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            note,
-                            style: AppTextTheme.body.copyWith(
-                              color: t.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (editedLine != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 4),
-                      child: Text(
-                        editedLine,
-                        style: AppTextTheme.hint.copyWith(color: t.textMuted),
-                      ),
-                    ),
+                  Text(
+                    l10n.noteLabel,
+                    style: AppTextTheme.hint.copyWith(color: t.textMuted),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    note,
+                    style: AppTextTheme.body.copyWith(color: t.textPrimary),
+                  ),
                 ],
               ),
             ),
-          ),
-          if (canEdit)
-            DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: t.divider)),
+          if (editedLine != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              child: Text(
+                editedLine,
+                style: AppTextTheme.hint.copyWith(color: t.textMuted),
               ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: onEdit,
-                        style: FilledButton.styleFrom(minimumSize: buttonSize),
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                        label: Text(l10n.priceEdit),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _confirmDelete(context),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: t.dangerText,
-                          side: BorderSide(color: t.dangerBorder),
-                          minimumSize: buttonSize,
-                        ),
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          size: 18,
-                        ),
-                        label: Text(l10n.delete),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            const SizedBox(height: 16),
+            ),
         ],
       ),
     );
   }
 }
 
-/// Thumbnail, name and category tag, with the close button.
+/// Thumbnail, name and category tag; AppSheet adds the close button.
 class _Header extends StatelessWidget {
   const _Header({required this.item, this.categoryName});
 
@@ -259,11 +217,6 @@ class _Header extends StatelessWidget {
               ],
             ],
           ),
-        ),
-        IconButton(
-          onPressed: () => Navigator.of(context).maybePop(),
-          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          icon: Icon(Icons.close_rounded, color: t.textSecondary),
         ),
       ],
     );

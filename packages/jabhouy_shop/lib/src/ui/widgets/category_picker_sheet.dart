@@ -12,13 +12,14 @@ Future<String?> showCategoryPicker(
   required List<ItemCategory> categories,
   required Future<String> Function(String name) onCreate,
   String? selectedId,
-}) => showModalBottomSheet<String>(
-  context: context,
-  isScrollControlled: true,
-  builder: (_) => _CategoryPickerSheet(
+}) => showAppSheet<String>(
+  context,
+  initialSize: 0.7,
+  builder: (_, controller) => _CategoryPickerSheet(
     categories: [...categories.where((c) => !c.hidden)],
     selectedId: selectedId,
     onCreate: onCreate,
+    scrollController: controller,
   ),
 );
 
@@ -27,11 +28,13 @@ class _CategoryPickerSheet extends StatefulWidget {
     required this.categories,
     required this.onCreate,
     this.selectedId,
+    this.scrollController,
   });
 
   final List<ItemCategory> categories;
   final Future<String> Function(String name) onCreate;
   final String? selectedId;
+  final ScrollController? scrollController;
 
   @override
   State<_CategoryPickerSheet> createState() => _CategoryPickerSheetState();
@@ -61,85 +64,82 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
       for (final c in widget.categories)
         if (c.name.toLowerCase().contains(query)) c,
     ];
-    return Padding(
-      // Keeps the search field above the keyboard.
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: AppSheet(
-        title: l10n.category,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // White with a border (canvas ៥), not Home's muted search.
-            TextField(
-              onChanged: (v) => setState(() => _query = v),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: l10n.categorySearch,
-                prefixIcon: Icon(Icons.search_rounded, color: t.textMuted),
-              ),
+    return AppSheet(
+      scrollController: widget.scrollController,
+      title: l10n.category,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // White with a border (canvas ៥), not Home's muted search.
+          TextField(
+            onChanged: (v) => setState(() => _query = v),
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: l10n.categorySearch,
+              prefixIcon: Icon(Icons.search_rounded, color: t.textMuted),
             ),
-            const SizedBox(height: 8),
-            for (final category in shown)
-              InkWell(
-                onTap: () => Navigator.pop(context, category.id),
-                child: Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: t.divider)),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          category.name,
-                          style: AppTextTheme.body.copyWith(
-                            color: t.textPrimary,
-                            fontWeight: category.id == widget.selectedId
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      if (category.id == widget.selectedId)
-                        Icon(Icons.check_rounded, color: t.textPrimary),
-                    ],
-                  ),
-                ),
-              ),
+          ),
+          const SizedBox(height: 8),
+          for (final category in shown)
             InkWell(
-              onTap: _create,
-              child: SizedBox(
+              onTap: () => Navigator.pop(context, category.id),
+              child: Container(
                 height: 52,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: t.divider)),
+                ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: t.surfaceSubtle,
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      child: Icon(
-                        Icons.add_rounded,
-                        size: 18,
-                        color: t.textPrimary,
+                    Expanded(
+                      child: Text(
+                        category.name,
+                        style: AppTextTheme.body.copyWith(
+                          color: t.textPrimary,
+                          fontWeight: category.id == widget.selectedId
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      l10n.categoryNew,
-                      style: AppTextTheme.body.copyWith(
-                        color: t.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    if (category.id == widget.selectedId)
+                      Icon(Icons.check_rounded, color: t.textPrimary),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-          ],
-        ),
+          InkWell(
+            onTap: _create,
+            child: SizedBox(
+              height: 52,
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: t.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      Icons.add_rounded,
+                      size: 18,
+                      color: t.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    l10n.categoryNew,
+                    style: AppTextTheme.body.copyWith(
+                      color: t.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
       ),
     );
   }

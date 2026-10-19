@@ -59,4 +59,47 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ជ្រើសទំនិញ'), findsNothing);
   });
+
+  testWidgets('showAppSheet opens part way and grows as its content scrolls',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showAppSheet<void>(
+              context,
+              initialSize: 0.5,
+              builder: (context, controller) => AppSheet(
+                title: 'ទំនិញ',
+                scrollController: controller,
+                footer: const Text('footer'),
+                child: Column(
+                  children: [
+                    for (var i = 0; i < 40; i++)
+                      SizedBox(height: 48, child: Text('row $i')),
+                  ],
+                ),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    double sheetHeight() => tester.getSize(find.byType(AppSheet)).height;
+    expect(sheetHeight(), closeTo(400, 40), reason: 'half of 800');
+    expect(find.text('footer').hitTestable(), findsOneWidget);
+
+    await tester.drag(find.text('row 2'), const Offset(0, -300));
+    await tester.pumpAndSettle();
+    expect(sheetHeight(), greaterThan(600), reason: 'it grew first');
+    expect(find.text('ទំនិញ').hitTestable(), findsOneWidget);
+    expect(find.text('footer').hitTestable(), findsOneWidget);
+  });
 }
