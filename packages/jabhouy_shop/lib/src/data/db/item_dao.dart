@@ -196,27 +196,29 @@ class ItemDao {
   }
 
   /// The Shop's price settings; the table's defaults until a row exists.
-  Future<PriceSettings> priceSettings(String shopId) =>
-      watchPriceSettings(shopId).first;
+  /// A plain query, not `watch…().first`: a watch never settles under
+  /// a widget test's fake clock, and one read needs no stream.
+  Future<PriceSettings> priceSettings(String shopId) async =>
+      _settings(await _settingsQuery(shopId).getSingleOrNull());
 
   Stream<PriceSettings> watchPriceSettings(String shopId) =>
-      (_db.select(
-        _db.shopSettingsTable,
-      )..where((s) => s.shopId.equals(shopId))).watchSingleOrNull().map(
-        (row) => row == null
-            ? const PriceSettings()
-            : PriceSettings(
-                useWholesale: row.useWholesalePrice,
-                useCost: row.useCostPrice,
-                currency: Currency.values.byName(
-                  row.defaultCurrency.toLowerCase(),
-                ),
-                khrPerUsd: row.khrPerUsd,
-                showConverted: row.showConverted,
-                rateUpdatedAt: row.rateUpdatedAt,
-                rateUpdatedBy: row.rateUpdatedBy,
-              ),
-      );
+      _settingsQuery(shopId).watchSingleOrNull().map(_settings);
+
+  SimpleSelectStatement<$ShopSettingsTableTable, ShopSettingsRow>
+  _settingsQuery(String shopId) =>
+      _db.select(_db.shopSettingsTable)..where((s) => s.shopId.equals(shopId));
+
+  static PriceSettings _settings(ShopSettingsRow? row) => row == null
+      ? const PriceSettings()
+      : PriceSettings(
+          useWholesale: row.useWholesalePrice,
+          useCost: row.useCostPrice,
+          currency: Currency.values.byName(row.defaultCurrency.toLowerCase()),
+          khrPerUsd: row.khrPerUsd,
+          showConverted: row.showConverted,
+          rateUpdatedAt: row.rateUpdatedAt,
+          rateUpdatedBy: row.rateUpdatedBy,
+        );
 
   Future<void> savePriceSettings(
     String shopId,
