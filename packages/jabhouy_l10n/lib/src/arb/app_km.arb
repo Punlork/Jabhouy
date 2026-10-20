@@ -1425,5 +1425,31 @@
     "placeholders": {
       "count": {}
     }
+  },
+  "itemRecentLabel": "ទើបមើល",
+  "@itemRecentLabel": {
+    "description": "Accessible label of the recently viewed pills"
+  },
+  "itemSearchResults": "លទ្ធផល {count}",
+  "@itemSearchResults": {
+    "description": "Header above search results",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemOtherName": "ឈ្មោះផ្សេង៖",
+  "@itemOtherName": {
+    "description": "Before the nickname a search matched"
+  },
+  "itemNotFound": "រកមិនឃើញទំនិញដែលចង់បាន?",
+  "@itemNotFound": {
+    "description": "Card under search results"
+  },
+  "itemAddNamed": "បន្ថែម «{name}»",
+  "@itemAddNamed": {
+    "description": "Opens Add item with the searched name",
+    "placeholders": {
+      "name": {}
+    }
   }
 }

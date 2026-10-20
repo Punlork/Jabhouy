@@ -13,7 +13,7 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 /// Expects an [ItemFormCubit] above it; edits when the cubit has
 /// `existing`. Pops once saved.
 class ItemFormPage extends StatefulWidget {
-  const ItemFormPage({this.scanBarcode, this.barcode, super.key});
+  const ItemFormPage({this.scanBarcode, this.barcode, this.name, super.key});
 
   /// Opens the scanner for a row's barcode; null hides the button (flag
   /// off).
@@ -21,6 +21,9 @@ class ItemFormPage extends StatefulWidget {
 
   /// A scanned code nobody uses yet: a new Item's first row starts with it.
   final String? barcode;
+
+  /// The name a search found nothing for: a new Item starts with it.
+  final String? name;
 
   static const nameKey = Key('item-form-name');
 
@@ -31,7 +34,9 @@ class ItemFormPage extends StatefulWidget {
 class _ItemFormPageState extends State<ItemFormPage> {
   late final _cubit = context.read<ItemFormCubit>();
   late final _id = _cubit.existing?.id ?? newId();
-  late final _name = TextEditingController(text: _cubit.existing?.name);
+  late final _name = TextEditingController(
+    text: _cubit.existing?.name ?? widget.name,
+  );
   late final _note = TextEditingController(text: _cubit.existing?.note);
   late final _nicknames = [...?_cubit.existing?.nicknames];
   late final List<PriceRowDraft> _rows = [

@@ -154,6 +154,7 @@ class AppRouter {
                   child: ItemFormPage(
                     scanBarcode: scan ? scanBarcode : null,
                     barcode: extra['barcode'] as String?,
+                    name: extra['name'] as String?,
                   ),
                 ),
                 transitionsBuilder: _rightToLeftTransition,

@@ -2185,6 +2185,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'+{count} more'**
   String itemMorePrices(Object count);
+
+  /// Accessible label of the recently viewed pills
+  ///
+  /// In en, this message translates to:
+  /// **'Recently viewed'**
+  String get itemRecentLabel;
+
+  /// Header above search results
+  ///
+  /// In en, this message translates to:
+  /// **'Results {count}'**
+  String itemSearchResults(Object count);
+
+  /// Before the nickname a search matched
+  ///
+  /// In en, this message translates to:
+  /// **'Also called:'**
+  String get itemOtherName;
+
+  /// Card under search results
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t find the item?'**
+  String get itemNotFound;
+
+  /// Opens Add item with the searched name
+  ///
+  /// In en, this message translates to:
+  /// **'Add “{name}”'**
+  String itemAddNamed(Object name);
 }
 
 class _AppLocalizationsDelegate

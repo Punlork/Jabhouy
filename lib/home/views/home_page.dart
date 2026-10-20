@@ -81,7 +81,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget _pageFor(HomeTab tab) => switch (tab) {
-        HomeTab.shop => ItemsTab(onEditItem: _openItemForm),
+        HomeTab.shop => ItemsTab(
+          onEditItem: _openItemForm,
+          onAddItem: (name) => _openItemForm(null, null, name),
+          chromeVisible: _chromeVisible,
+        ),
         HomeTab.loaner => const LoanerView(),
         HomeTab.income => const IncomeView(),
       };
@@ -214,11 +218,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   /// Adds an Item, or edits [item] (from the details sheet). A [barcode]
-  /// no Item uses yet starts the new Item's first price row.
-  void _openItemForm([Item? item, String? barcode]) {
+  /// no Item uses yet starts the new Item's first price row; a [name]
+  /// (from a search) fills the new Item's name.
+  void _openItemForm([Item? item, String? barcode, String? name]) {
     context.pushNamed(
       AppRoutes.formItem,
-      extra: {'existingItem': item, 'barcode': barcode},
+      extra: {'existingItem': item, 'barcode': barcode, 'name': name},
     );
   }
 

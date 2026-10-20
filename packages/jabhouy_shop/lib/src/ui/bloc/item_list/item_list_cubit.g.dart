@@ -11,6 +11,10 @@ abstract class _$ItemListStateCWProxy {
 
   ItemListState items(List<Item> items);
 
+  ItemListState nicknameMatches(Map<String, String> nicknameMatches);
+
+  ItemListState recent(List<Item> recent);
+
   ItemListState categories(List<ItemCategory> categories);
 
   ItemListState missingCount(int missingCount);
@@ -38,6 +42,8 @@ abstract class _$ItemListStateCWProxy {
   ItemListState call({
     bool loading,
     List<Item> items,
+    Map<String, String> nicknameMatches,
+    List<Item> recent,
     List<ItemCategory> categories,
     int missingCount,
     String query,
@@ -61,6 +67,13 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
 
   @override
   ItemListState items(List<Item> items) => call(items: items);
+
+  @override
+  ItemListState nicknameMatches(Map<String, String> nicknameMatches) =>
+      call(nicknameMatches: nicknameMatches);
+
+  @override
+  ItemListState recent(List<Item> recent) => call(recent: recent);
 
   @override
   ItemListState categories(List<ItemCategory> categories) =>
@@ -100,6 +113,8 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
   ItemListState call({
     Object? loading = const $CopyWithPlaceholder(),
     Object? items = const $CopyWithPlaceholder(),
+    Object? nicknameMatches = const $CopyWithPlaceholder(),
+    Object? recent = const $CopyWithPlaceholder(),
     Object? categories = const $CopyWithPlaceholder(),
     Object? missingCount = const $CopyWithPlaceholder(),
     Object? query = const $CopyWithPlaceholder(),
@@ -118,6 +133,16 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
           ? _value.items
           // ignore: cast_nullable_to_non_nullable
           : items as List<Item>,
+      nicknameMatches:
+          nicknameMatches == const $CopyWithPlaceholder() ||
+              nicknameMatches == null
+          ? _value.nicknameMatches
+          // ignore: cast_nullable_to_non_nullable
+          : nicknameMatches as Map<String, String>,
+      recent: recent == const $CopyWithPlaceholder() || recent == null
+          ? _value.recent
+          // ignore: cast_nullable_to_non_nullable
+          : recent as List<Item>,
       categories:
           categories == const $CopyWithPlaceholder() || categories == null
           ? _value.categories

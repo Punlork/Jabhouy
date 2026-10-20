@@ -1113,4 +1113,23 @@ class AppLocalizationsKm extends AppLocalizations {
   String itemMorePrices(Object count) {
     return '+$count ទៀត';
   }
+
+  @override
+  String get itemRecentLabel => 'ទើបមើល';
+
+  @override
+  String itemSearchResults(Object count) {
+    return 'លទ្ធផល $count';
+  }
+
+  @override
+  String get itemOtherName => 'ឈ្មោះផ្សេង៖';
+
+  @override
+  String get itemNotFound => 'រកមិនឃើញទំនិញដែលចង់បាន?';
+
+  @override
+  String itemAddNamed(Object name) {
+    return 'បន្ថែម «$name»';
+  }
 }

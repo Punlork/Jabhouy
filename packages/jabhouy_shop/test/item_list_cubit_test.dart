@@ -98,6 +98,38 @@ void main() {
     expect((await settled(list)).items.map((i) => i.id), ['coke']);
   });
 
+  test('a search shows which nickname matched, without re-reading rows',
+      () async {
+    await repo.saveItem(
+      Item(
+        id: 'water',
+        name: 'ទឹកអូគូលេនធំ',
+        nicknames: const ['ទឹកធំ'],
+        prices: [_option('ដប', 1000)],
+      ),
+    );
+    final list = cubit()..start();
+    await settled(list);
+
+    list.search('ទឹកធំ');
+    final state = list.state; // synchronous: no new database read
+    expect(state.items.map((i) => i.id), ['water']);
+    expect(state.nicknameMatches, {'water': 'ទឹកធំ'});
+
+    list.search('');
+    expect(list.state.nicknameMatches, isEmpty);
+    expect(list.state.items, hasLength(3));
+  });
+
+  test('recently viewed items follow what the sheet records', () async {
+    final list = cubit()..start();
+    expect((await settled(list)).recent, isEmpty);
+
+    await list.viewed('rice');
+    await list.viewed('coke');
+    expect((await settled(list)).recent.map((i) => i.id), ['coke', 'rice']);
+  });
+
   test('a viewer never gets the missing-price chip', () async {
     final list = cubit(withScope: _Scope(role: MemberRole.viewer))..start();
     expect((await settled(list)).canEdit, isFalse);

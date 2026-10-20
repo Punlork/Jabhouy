@@ -36,13 +36,17 @@ PriceOption _option(String unit, int? price, {int? packQty}) => PriceOption(
 void main() {
   late AppDatabase db;
   late ItemRepository repo;
+  late VoidCallback rebuild;
   final opened = <String>[];
+  final added = <String>[];
+  var chromeVisible = true;
 
   Future<void> pumpTab(
     WidgetTester tester, {
     MemberRole role = MemberRole.owner,
     bool grid = false,
   }) async {
+    chromeVisible = true;
     db = AppDatabase(NativeDatabase.memory());
     final connectivity = _MockConnectivity();
     when(() => connectivity.isOnline).thenAnswer((_) async => false);
@@ -65,9 +69,15 @@ void main() {
         Item(id: 'rice', name: 'អង្ករផ្កាម្លិះ', prices: [_option('បេ', null)]),
       );
       // Quick add: a name only, priced later.
-      await repo.saveItem(const Item(id: 'sugar', name: 'ស្ករ', prices: []));
+      await repo.saveItem(const Item(
+          id: 'sugar',
+          name: 'ស្ករ',
+          nicknames: ['ស្ករស'],
+          prices: [],
+        ));
     });
     opened.clear();
+    added.clear();
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
@@ -77,7 +87,16 @@ void main() {
         home: Scaffold(
           body: BlocProvider(
             create: (_) => ItemListCubit(repo, scope, grid: grid)..start(),
-            child: ItemsTab(onEditItem: (item) => opened.add(item.id)),
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = () => setState(() {});
+                return ItemsTab(
+                  onEditItem: (item) => opened.add(item.id),
+                  onAddItem: added.add,
+                  chromeVisible: chromeVisible,
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -135,6 +154,57 @@ void main() {
     expect(find.text('អង្ករផ្កាម្លិះ'), findsOneWidget);
     expect(find.text('ស្ករ'), findsOneWidget, reason: 'no price is missing');
     expect(find.text('Coca-Cola'), findsNothing);
+    await close(tester);
+  });
+
+  testWidgets('recently viewed pills: none on a fresh install, then one tap', (
+    tester,
+  ) async {
+    await pumpTab(tester);
+    expect(find.byTooltip('ទើបមើល'), findsNothing);
+    expect(find.byIcon(Icons.schedule), findsNothing);
+
+    await tester.tap(find.text('Coca-Cola'));
+    await settle(tester);
+    await tester.tapAt(const Offset(10, 10)); // dismiss the sheet
+    await settle(tester);
+    expect(find.byIcon(Icons.schedule), findsOneWidget);
+    expect(find.text('3,000 ៛'), findsNWidgets(2), reason: 'row and pill');
+
+    chromeVisible = false;
+    rebuild();
+    await settle(tester);
+    expect(find.text('ទំនិញ 3 មុខ · ក–អ').hitTestable(), findsNothing);
+    await close(tester);
+  });
+
+  testWidgets('searching shows the nickname and offers Add with the query', (
+    tester,
+  ) async {
+    await pumpTab(tester);
+    tester.element(find.byType(ItemsTab)).read<ItemListCubit>().search('ស្ករស');
+    await settle(tester);
+
+    expect(find.text('លទ្ធផល 1'), findsOneWidget);
+    expect(find.textContaining('ឈ្មោះផ្សេង៖', findRichText: true), findsOneWidget);
+    expect(find.text('រកមិនឃើញទំនិញដែលចង់បាន?'), findsOneWidget);
+
+    await tester.tap(find.text('បន្ថែម «ស្ករស»'));
+    expect(added, ['ស្ករស']);
+
+    tester.element(find.byType(ItemsTab)).read<ItemListCubit>().search('zzzz');
+    await settle(tester);
+    expect(find.text('លទ្ធផល 0'), findsOneWidget);
+    expect(find.text('បន្ថែម «zzzz»'), findsOneWidget, reason: 'no results');
+    await close(tester);
+  });
+
+  testWidgets('a viewer is not offered Add', (tester) async {
+    await pumpTab(tester, role: MemberRole.viewer);
+    tester.element(find.byType(ItemsTab)).read<ItemListCubit>().search('zzzz');
+    await settle(tester);
+
+    expect(find.textContaining('បន្ថែម'), findsNothing);
     await close(tester);
   });
 

@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_shop/src/data/item_repository.dart';
+import 'package:jabhouy_shop/src/logic/item_search.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 
 part 'item_list_state.dart';
@@ -35,6 +36,9 @@ class ItemListCubit extends Cubit<ItemListState> {
   final _subscriptions = <StreamSubscription<Object?>>[];
   StreamSubscription<List<Item>>? _items;
 
+  /// The category/chip-filtered Items; a search ranks these in memory.
+  List<Item> _filtered = const [];
+
   /// Starts reading once the Current Shop is known (after sign-in).
   void start() {
     if (_scope.shopId == null || _subscriptions.isNotEmpty) return;
@@ -54,6 +58,11 @@ class ItemListCubit extends Cubit<ItemListState> {
         ),
       )
       ..add(
+        _repository.watchRecentItems().listen(
+          (items) => emit(state.copyWith(recent: items)),
+        ),
+      )
+      ..add(
         _repository.watchMissingPriceCount().listen(
           (count) => emit(state.copyWith(missingCount: count)),
         ),
@@ -69,12 +78,12 @@ class ItemListCubit extends Cubit<ItemListState> {
       await s.cancel();
     }
     _subscriptions.clear();
+    _filtered = const [];
     emit(ItemListState(grid: state.grid));
   }
 
   void search(String query) {
-    emit(state.copyWith(query: query));
-    _watchItems();
+    emit(_withSearch(state.copyWith(query: query)));
   }
 
   /// No arguments is `ទាំងអស់`.
@@ -109,11 +118,28 @@ class ItemListCubit extends Cubit<ItemListState> {
     unawaited(_items?.cancel());
     _items = _repository
         .watchItems(
-          search: state.query.trim(),
           categoryId: state.categoryId,
           missingOnly: state.missingOnly,
         )
-        .listen((items) => emit(state.copyWith(items: items, loading: false)));
+        .listen((items) {
+          _filtered = items;
+          emit(_withSearch(state.copyWith(loading: false)));
+        });
+  }
+
+  /// [next] with `items` and `nicknameMatches` for its query.
+  ItemListState _withSearch(ItemListState next) {
+    if (normalizeSearch(next.query).isEmpty) {
+      return next.copyWith(items: _filtered, nicknameMatches: const {});
+    }
+    final hits = searchItems(_filtered, next.query);
+    return next.copyWith(
+      items: [for (final hit in hits) hit.item],
+      nicknameMatches: {
+        for (final hit in hits)
+          if (hit.matchedNickname case final nickname?) hit.item.id: nickname,
+      },
+    );
   }
 
   @override

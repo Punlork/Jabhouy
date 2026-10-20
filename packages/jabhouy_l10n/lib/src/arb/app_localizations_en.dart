@@ -1129,4 +1129,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String itemMorePrices(Object count) {
     return '+$count more';
   }
+
+  @override
+  String get itemRecentLabel => 'Recently viewed';
+
+  @override
+  String itemSearchResults(Object count) {
+    return 'Results $count';
+  }
+
+  @override
+  String get itemOtherName => 'Also called:';
+
+  @override
+  String get itemNotFound => 'Can\'t find the item?';
+
+  @override
+  String itemAddNamed(Object name) {
+    return 'Add “$name”';
+  }
 }

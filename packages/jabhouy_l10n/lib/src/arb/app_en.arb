@@ -1477,5 +1477,31 @@
     "placeholders": {
       "count": {}
     }
+  },
+  "itemRecentLabel": "Recently viewed",
+  "@itemRecentLabel": {
+    "description": "Accessible label of the recently viewed pills"
+  },
+  "itemSearchResults": "Results {count}",
+  "@itemSearchResults": {
+    "description": "Header above search results",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemOtherName": "Also called:",
+  "@itemOtherName": {
+    "description": "Before the nickname a search matched"
+  },
+  "itemNotFound": "Can't find the item?",
+  "@itemNotFound": {
+    "description": "Card under search results"
+  },
+  "itemAddNamed": "Add “{name}”",
+  "@itemAddNamed": {
+    "description": "Opens Add item with the searched name",
+    "placeholders": {
+      "name": {}
+    }
   }
 }

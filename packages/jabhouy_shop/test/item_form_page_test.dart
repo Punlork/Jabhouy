@@ -43,6 +43,7 @@ void main() {
     WidgetTester tester, {
     Future<String?> Function(BuildContext)? scan,
     String? barcode,
+    String? name,
   }) async {
     await tester.binding.setSurfaceSize(const Size(390, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -54,7 +55,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider(
           create: (_) => ItemFormCubit(repo)..load(),
-          child: ItemFormPage(scanBarcode: scan, barcode: barcode),
+          child: ItemFormPage(scanBarcode: scan, barcode: barcode, name: name),
         ),
       ),
     );
@@ -115,6 +116,13 @@ void main() {
     await save(tester);
 
     expect(await savedBarcode(tester), '885');
+  });
+
+  testWidgets('an item added from a search starts with the typed name', (
+    tester,
+  ) async {
+    await pumpForm(tester, name: 'ទឹកធំ');
+    expect(find.text('ទឹកធំ'), findsOneWidget);
   });
 
   testWidgets('ដប + កេះ ×24 in one form saves one item with two prices',

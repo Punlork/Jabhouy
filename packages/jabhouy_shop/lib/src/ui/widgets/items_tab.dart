@@ -4,18 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
+import 'package:jabhouy_shop/src/logic/item_search.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 import 'package:jabhouy_shop/src/ui/bloc/item_list/item_list_cubit.dart';
 import 'package:jabhouy_shop/src/ui/widgets/item_details_sheet.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-/// Home's shop tab (canvas ១, ១ក): filter chips, the list header with the
-/// grid toggle, and every Item with one line per Price option. A tap
-/// opens the details sheet; its `កែតម្លៃ` calls [onEditItem].
+/// Home's shop tab (canvas ១, ១ក): filter chips, recently viewed pills,
+/// the list header with the grid toggle, and every Item with one line per
+/// Price option. A tap opens the details sheet; its `កែតម្លៃ` calls
+/// [onEditItem]. While searching, the pills give way to `លទ្ធផល n` and the
+/// results come as a list, ending in a card whose button calls [onAddItem]
+/// with the query.
 class ItemsTab extends StatefulWidget {
-  const ItemsTab({required this.onEditItem, super.key});
+  const ItemsTab({
+    required this.onEditItem,
+    required this.onAddItem,
+    this.chromeVisible = true,
+    super.key,
+  });
 
   final ValueChanged<Item> onEditItem;
+  final ValueChanged<String> onAddItem;
+
+  /// False while Home scrolls its search row away: the pills and list
+  /// header follow it, the chips stay (decision 43).
+  final bool chromeVisible;
 
   @override
   State<ItemsTab> createState() => _ItemsTabState();
@@ -41,6 +55,8 @@ class _ItemsTabState extends State<ItemsTab>
     return BlocBuilder<ItemListCubit, ItemListState>(
       builder: (context, state) {
         final all = state.categoryId == null && !state.missingOnly;
+        final query = state.query.trim();
+        final searching = normalizeSearch(query).isNotEmpty;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -67,32 +83,49 @@ class _ItemsTabState extends State<ItemsTab>
                     ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 8, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.itemListHeader(state.items.length),
-                      style: AppTextTheme.hint.copyWith(
-                        color: t.textSecondary,
-                        fontWeight: FontWeight.w700,
+            ClipRect(
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                heightFactor: widget.chromeVisible ? 1 : 0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!searching && state.recent.isNotEmpty)
+                      _RecentPills(items: state.recent, onTap: _openItem),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 8, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              searching
+                                  ? l10n.itemSearchResults(state.items.length)
+                                  : l10n.itemListHeader(state.items.length),
+                              style: AppTextTheme.hint.copyWith(
+                                color: t.textSecondary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: cubit.toggleGrid,
+                            tooltip: state.grid
+                                ? l10n.itemListShowList
+                                : l10n.itemListShowGrid,
+                            icon: Icon(
+                              state.grid
+                                  ? Icons.view_agenda_outlined
+                                  : Icons.grid_view_rounded,
+                              color: t.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: cubit.toggleGrid,
-                    tooltip: state.grid
-                        ? l10n.itemListShowList
-                        : l10n.itemListShowGrid,
-                    icon: Icon(
-                      state.grid
-                          ? Icons.view_agenda_outlined
-                          : Icons.grid_view_rounded,
-                      color: t.textSecondary,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -104,19 +137,28 @@ class _ItemsTabState extends State<ItemsTab>
                     // A scroll view, so an empty list can still be pulled.
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
+                        padding: _listPadding,
                         children: [
-                          const SizedBox(height: 160),
-                          Center(
-                            child: Text(
-                              l10n.itemListEmpty,
-                              style: AppTextTheme.body.copyWith(
-                                color: t.textMuted,
+                          if (searching && state.canEdit)
+                            _NotFoundCard(
+                              query: query,
+                              onAdd: () => widget.onAddItem(query),
+                            )
+                          else ...[
+                            const SizedBox(height: 160),
+                            Center(
+                              child: Text(
+                                l10n.itemListEmpty,
+                                style: AppTextTheme.body.copyWith(
+                                  color: t.textMuted,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
                       )
-                    : state.grid
+                    // Results are few, and the not-found card needs full width.
+                    : state.grid && !searching
                     ? MasonryGridView.count(
                         controller: controller,
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -148,11 +190,22 @@ class _ItemsTabState extends State<ItemsTab>
                                   _ItemRow(
                                     item: item,
                                     divider: i < state.items.length - 1,
+                                    matchedNickname:
+                                        state.nicknameMatches[item.id],
+                                    query: query,
                                     onTap: () => _openItem(item),
                                   ),
                               ],
                             ),
                           ),
+                          if (searching && state.canEdit)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: _NotFoundCard(
+                                query: query,
+                                onAdd: () => widget.onAddItem(query),
+                              ),
+                            ),
                         ],
                       ),
               ),
@@ -172,10 +225,14 @@ class _ItemRow extends StatelessWidget {
     required this.item,
     required this.divider,
     required this.onTap,
+    this.matchedNickname,
+    this.query = '',
   });
 
   final Item item;
   final bool divider;
+  final String? matchedNickname;
+  final String query;
   final VoidCallback onTap;
 
   @override
@@ -204,11 +261,163 @@ class _ItemRow extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (matchedNickname case final nickname?)
+                    _NicknameLine(nickname: nickname, query: query),
                   if (item.prices.isEmpty)
                     const _PriceLine(null)
                   else
                     ..._priceLines(context, item),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// `ឈ្មោះផ្សេង៖ ទឹកធំ` with the typed part in bold.
+class _NicknameLine extends StatelessWidget {
+  const _NicknameLine({required this.nickname, required this.query});
+
+  final String nickname;
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final style = AppTextTheme.hint.copyWith(color: t.textMuted);
+    final q = normalizeSearch(query);
+    // A fuzzy match has no exact stretch to bold.
+    final at = nickname.toLowerCase().indexOf(q);
+    final end = at + q.length;
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Text.rich(
+        TextSpan(
+          style: style,
+          children: [
+            TextSpan(text: '${context.l10n.itemOtherName} '),
+            if (at < 0)
+              TextSpan(text: nickname)
+            else ...[
+              TextSpan(text: nickname.substring(0, at)),
+              TextSpan(
+                text: nickname.substring(at, end),
+                style: TextStyle(
+                  color: t.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              TextSpan(text: nickname.substring(end)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Canvas ១ក: recently viewed Items, one tap from their details.
+class _RecentPills extends StatelessWidget {
+  const _RecentPills({required this.items, required this.onTap});
+
+  final List<Item> items;
+  final ValueChanged<Item> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return SizedBox(
+      height: 56,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, i) {
+          final item = items[i];
+          final price = item.prices.firstOrNull?.selling?.format();
+          return Semantics(
+            label: context.l10n.itemRecentLabel,
+            child: Material(
+              color: t.surface,
+              shape: StadiumBorder(side: BorderSide(color: t.divider)),
+              child: InkWell(
+                customBorder: const StadiumBorder(),
+                onTap: () => onTap(item),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.schedule, size: 14, color: t.textMuted),
+                      const SizedBox(width: 6),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 84),
+                        child: Text(
+                          item.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextTheme.hint.copyWith(
+                            color: t.textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (price != null) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          price,
+                          style: AppTextTheme.hint.copyWith(
+                            color: t.textPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Under the results: not what you meant? Add it with the typed name.
+class _NotFoundCard extends StatelessWidget {
+  const _NotFoundCard({required this.query, required this.onAdd});
+
+  final String query;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: Border.all(color: t.divider),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.l10n.itemNotFound,
+              textAlign: TextAlign.center,
+              style: AppTextTheme.body.copyWith(color: t.textSecondary),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: onAdd,
+              child: Text(
+                context.l10n.itemAddNamed(query),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

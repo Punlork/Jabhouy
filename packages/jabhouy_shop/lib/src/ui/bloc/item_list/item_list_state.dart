@@ -5,6 +5,8 @@ class ItemListState extends Equatable {
   const ItemListState({
     this.loading = true,
     this.items = const [],
+    this.nicknameMatches = const {},
+    this.recent = const [],
     this.categories = const [],
     this.missingCount = 0,
     this.query = '',
@@ -17,6 +19,12 @@ class ItemListState extends Equatable {
 
   final bool loading;
   final List<Item> items;
+
+  /// Item id → the nickname a search matched, for `ឈ្មោះផ្សេង៖`.
+  final Map<String, String> nicknameMatches;
+
+  /// Recently viewed Items, newest first.
+  final List<Item> recent;
   final List<ItemCategory> categories;
 
   /// Items with a missing selling price, for the warning chip.
@@ -34,6 +42,8 @@ class ItemListState extends Equatable {
   List<Object?> get props => [
     loading,
     items,
+    nicknameMatches,
+    recent,
     categories,
     missingCount,
     query,

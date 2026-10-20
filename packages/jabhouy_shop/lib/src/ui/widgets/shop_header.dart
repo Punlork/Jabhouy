@@ -26,29 +26,16 @@ class ShopHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(color: colorScheme.outlineVariant),
-        ),
-      ),
-      child: Column(
-        children: [
-          _SearchBar(
-            hasFilter: hasFilter,
-            controller: searchController,
-            onChanged: onSearchChanged,
-            onFilterPressed: onFilterPressed,
-            onScanPressed: onScanPressed,
-            onSettingsPressed: onSettingsPressed,
-            searchHintText: searchHintText,
-          ),
-          const SizedBox(height: 4),
-        ],
+      padding: const EdgeInsets.fromLTRB(16, 14, 8, 12),
+      child: _SearchBar(
+        hasFilter: hasFilter,
+        controller: searchController,
+        onChanged: onSearchChanged,
+        onFilterPressed: onFilterPressed,
+        onScanPressed: onScanPressed,
+        onSettingsPressed: onSettingsPressed,
+        searchHintText: searchHintText,
       ),
     );
   }
@@ -63,12 +50,17 @@ class _SettingsButton extends StatelessWidget {
     return IconButtonWidget(
       svgAsset: AppAssets.actionSettings,
       color: Theme.of(context).colorScheme.onSurfaceVariant,
+      backgroundColor: Colors.transparent,
       tooltip: AppLocalizations.of(context).settings,
       onPressed: onPressed,
       colorScheme: Theme.of(context).colorScheme,
     );
   }
 }
+
+/// Canvas ១: a 54 px search field and scan button, 16 px corners.
+const _fieldHeight = 54.0;
+const _fieldRadius = 16.0;
 
 class _SearchBar extends StatelessWidget {
   const _SearchBar({
@@ -94,11 +86,14 @@ class _SearchBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return SizedBox(
-      height: 40,
+      height: _fieldHeight,
       child: Row(
         children: [
           Expanded(
-            child: CustomTextFormField(
+            // A Row would leave the field at its natural height.
+            child: SizedBox.fromSize(
+              size: const Size.fromHeight(_fieldHeight),
+              child: CustomTextFormField(
               controller: controller,
               hintText: searchHintText ?? l10n.searchItems,
               labelText: '',
@@ -114,41 +109,53 @@ class _SearchBar extends StatelessWidget {
               useCustomBorder: false,
               decoration: InputDecoration(
                 prefixIconColor: colorScheme.onSurfaceVariant,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                // The field only grows to its text and padding, so pad it to 54.
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 15,
+                ),
                 hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w300,
                     ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(_fieldRadius),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(_fieldRadius),
                   borderSide: BorderSide.none,
                 ),
                 disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(_fieldRadius),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(_fieldRadius),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
                 fillColor: colorScheme.surfaceContainerHigh,
               ),
             ),
+            ),
           ),
           if (onScanPressed case final onScanPressed?) ...[
             const SizedBox(width: 8),
-            IconButtonWidget(
-              icon: Icons.qr_code_scanner_rounded,
-              color: colorScheme.onSurfaceVariant,
-              backgroundColor: colorScheme.surfaceContainerHigh,
-              tooltip: l10n.scanTitle,
-              onPressed: onScanPressed,
-              colorScheme: colorScheme,
+            Tooltip(
+              message: l10n.scanTitle,
+              child: IconButton(
+                onPressed: onScanPressed,
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 24),
+                style: IconButton.styleFrom(
+                  foregroundColor: colorScheme.surface,
+                  backgroundColor: colorScheme.onSurface,
+                  fixedSize: const Size.square(_fieldHeight),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(_fieldRadius),
+                  ),
+                ),
+              ),
             ),
           ],
           if (onFilterPressed case final onFilterPressed?) ...[
