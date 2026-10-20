@@ -25,6 +25,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
+  final _isBarcodeScanEnabled =
+      getIt<FeatureFlags>().isEnabled(Feature.barcodeScan);
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
   late final PageController _pageController;
@@ -211,9 +213,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  /// Adds an Item, or edits [item] (from the details sheet).
-  void _openItemForm([Item? item]) {
-    context.pushNamed(AppRoutes.formItem, extra: {'existingItem': item});
+  /// Adds an Item, or edits [item] (from the details sheet). A [barcode]
+  /// no Item uses yet starts the new Item's first price row.
+  void _openItemForm([Item? item, String? barcode]) {
+    context.pushNamed(
+      AppRoutes.formItem,
+      extra: {'existingItem': item, 'barcode': barcode},
+    );
+  }
+
+  /// Scan → the match's details, or Add item with the unknown code.
+  Future<void> _scanItem() async {
+    final result = await findByBarcode(
+      context,
+      context.read<ItemListCubit>().itemsWithBarcode,
+    );
+    if (!mounted) return;
+    switch (result) {
+      case final Item item:
+        await showItemDetails(context, item, onEdit: _openItemForm);
+      case final String code:
+        _openItemForm(null, code);
+    }
   }
 
   void _openLoanerForm() {
@@ -409,6 +430,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         bool hasFilter = false,
                         String? searchHintText,
                         bool withFilter = true,
+                        VoidCallback? onScanPressed,
                       }) {
                         return ShopHeader(
                           hasFilter: hasFilter,
@@ -416,6 +438,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           onSettingsPressed: _openSettingsPage,
                           onSearchChanged: _onSearchChanged,
                           onFilterPressed: withFilter ? _showFilterSheet : null,
+                          onScanPressed: onScanPressed,
                           searchController: _searchController,
                         );
                       }
@@ -425,6 +448,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         HomeTab.shop => buildShopHeader(
                             searchHintText: context.l10n.itemSearchHint,
                             withFilter: false,
+                            onScanPressed:
+                                _isBarcodeScanEnabled ? _scanItem : null,
                           ),
                         HomeTab.loaner => BlocBuilder<LoanerBloc, LoanerState>(
                             builder: (context, state) {

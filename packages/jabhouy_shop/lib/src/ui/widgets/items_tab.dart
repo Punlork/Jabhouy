@@ -26,34 +26,8 @@ class _ItemsTabState extends State<ItemsTab>
   @override
   bool get wantKeepAlive => true;
 
-  Future<void> _openItem(Item item) async {
-    final cubit = context.read<ItemListCubit>();
-    unawaited(cubit.viewed(item.id));
-    final editorName = await cubit.editorName(item.updatedBy);
-    if (!mounted) return;
-    final state = cubit.state;
-    final category = state.categories.where((c) => c.id == item.categoryId);
-    await showAppSheet<void>(
-      context,
-      initialSize: 0.55,
-      builder: (sheetContext, controller) => ItemDetailsSheet(
-        scrollController: controller,
-        item: item,
-        categoryName: category.isEmpty ? null : category.first.name,
-        settings: state.settings,
-        canEdit: state.canEdit,
-        editorName: editorName,
-        onEdit: () {
-          Navigator.pop(sheetContext);
-          widget.onEditItem(item);
-        },
-        onDelete: () {
-          Navigator.pop(sheetContext);
-          cubit.delete(item.id);
-        },
-      ),
-    );
-  }
+  Future<void> _openItem(Item item) =>
+      showItemDetails(context, item, onEdit: widget.onEditItem);
 
   @override
   Widget build(BuildContext context) {
@@ -372,4 +346,39 @@ class _Thumbnail extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Shows [item]'s details sheet (canvas ២) and records it as viewed.
+/// Needs an [ItemListCubit] above [context]; Home's scan uses it too.
+Future<void> showItemDetails(
+  BuildContext context,
+  Item item, {
+  required ValueChanged<Item> onEdit,
+}) async {
+  final cubit = context.read<ItemListCubit>();
+  unawaited(cubit.viewed(item.id));
+  final editorName = await cubit.editorName(item.updatedBy);
+  if (!context.mounted) return;
+  final state = cubit.state;
+  final category = state.categories.where((c) => c.id == item.categoryId);
+  await showAppSheet<void>(
+    context,
+    initialSize: 0.55,
+    builder: (sheetContext, controller) => ItemDetailsSheet(
+      scrollController: controller,
+      item: item,
+      categoryName: category.isEmpty ? null : category.first.name,
+      settings: state.settings,
+      canEdit: state.canEdit,
+      editorName: editorName,
+      onEdit: () {
+        Navigator.pop(sheetContext);
+        onEdit(item);
+      },
+      onDelete: () {
+        Navigator.pop(sheetContext);
+        cubit.delete(item.id);
+      },
+    ),
+  );
 }

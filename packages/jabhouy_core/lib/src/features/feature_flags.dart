@@ -24,6 +24,10 @@ enum Feature {
   /// Rows written under the fake shop id do not sync after switching; the
   /// release clean start wipes them anyway.
   serverShops,
+
+  /// Barcode scanning: Home's scan button, the scan result, and the price
+  /// row's barcode button (decision 44). Off until proven on a real phone.
+  barcodeScan,
 }
 
 /// Answers whether a [Feature] is on.
@@ -56,6 +60,8 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
           const bool.fromEnvironment('FEATURE_GOOGLE_SIGN_IN'),
         Feature.serverShops =>
           const bool.fromEnvironment('FEATURE_SERVER_SHOPS'),
+        Feature.barcodeScan =>
+          const bool.fromEnvironment('FEATURE_BARCODE_SCAN'),
       };
 }
 

@@ -60,6 +60,7 @@ class PriceRowEditor extends StatefulWidget {
     required this.settings,
     required this.onChanged,
     this.onRemove,
+    this.onScan,
     this.problems = const {},
     this.unitChips = const [],
     this.unitHint,
@@ -72,6 +73,9 @@ class PriceRowEditor extends StatefulWidget {
 
   /// Null hides the remove button (the only row).
   final VoidCallback? onRemove;
+
+  /// Reads a barcode for this row; null hides the button (flag off).
+  final Future<String?> Function()? onScan;
 
   /// This row's problems, keyed by field: `price`, `packQty`, ….
   final Map<String, FormProblem> problems;
@@ -119,6 +123,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     Currency? currency,
     String? wholesale,
     String? cost,
+    String? barcode,
   }) {
     _draft = PriceRowDraft(
       id: _draft.id,
@@ -128,7 +133,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
       price: price ?? _draft.price,
       wholesale: wholesale ?? _draft.wholesale,
       cost: cost ?? _draft.cost,
-      barcode: _draft.barcode,
+      barcode: barcode ?? _draft.barcode,
     );
     widget.onChanged(_draft);
   }
@@ -142,7 +147,10 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     // The remove button sits on this line: on the price line it left the
     // price field too narrow to read.
     final showQuiet =
-        settings.useWholesale || settings.useCost || widget.onRemove != null;
+        settings.useWholesale ||
+        settings.useCost ||
+        widget.onRemove != null ||
+        widget.onScan != null;
     // Each message sits under the line its field is on.
     List<Widget> errorsFor(List<String> fields) => [
       for (final field in fields)
@@ -255,6 +263,19 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                   ),
                 ),
               if (!settings.useWholesale && !settings.useCost) const Spacer(),
+              if (widget.onScan case final scan?) ...[
+                const SizedBox(width: _gap),
+                _BarcodeButton(
+                  attached: _draft.barcode?.isNotEmpty ?? false,
+                  hasError: problems.containsKey('barcode'),
+                  onPressed: () async {
+                    final code = await scan();
+                    if (code != null && mounted) {
+                      setState(() => _update(barcode: code));
+                    }
+                  },
+                ),
+              ],
               if (widget.onRemove != null)
                 IconButton(
                   onPressed: widget.onRemove,
@@ -465,6 +486,49 @@ class _QuietField extends StatelessWidget {
             style: muted.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 44×44 barcode button (canvas ៤ខ): outlined with none, dark once a
+/// code is attached, red when that code is used by another Item.
+class _BarcodeButton extends StatelessWidget {
+  const _BarcodeButton({
+    required this.attached,
+    required this.hasError,
+    required this.onPressed,
+  });
+
+  final bool attached;
+  final bool hasError;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final fg = hasError
+        ? t.dangerText
+        : attached
+        ? t.onPrimary
+        : t.textPrimary;
+    return SizedBox.square(
+      dimension: 44,
+      child: IconButton(
+        onPressed: onPressed,
+        tooltip: context.l10n.scanTitle,
+        style: IconButton.styleFrom(
+          backgroundColor: attached && !hasError ? t.textPrimary : t.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: hasError
+                ? BorderSide(color: t.dangerText, width: 2)
+                : attached
+                ? BorderSide.none
+                : BorderSide(color: t.border),
+          ),
+        ),
+        icon: Icon(Icons.qr_code_scanner_rounded, size: 20, color: fg),
       ),
     );
   }

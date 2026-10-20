@@ -33,6 +33,7 @@ dependencies:
     path: ../jabhouy_sync
   jabhouy_ui:
     path: ../jabhouy_ui
+  mobile_scanner: ^7.4.2
   shimmer: ^3.0.0
   stream_transform: ^2.1.1
   transparent_image: ^2.0.1

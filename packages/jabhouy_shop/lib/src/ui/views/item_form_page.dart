@@ -13,7 +13,14 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 /// Expects an [ItemFormCubit] above it; edits when the cubit has
 /// `existing`. Pops once saved.
 class ItemFormPage extends StatefulWidget {
-  const ItemFormPage({super.key});
+  const ItemFormPage({this.scanBarcode, this.barcode, super.key});
+
+  /// Opens the scanner for a row's barcode; null hides the button (flag
+  /// off).
+  final Future<String?> Function(BuildContext context)? scanBarcode;
+
+  /// A scanned code nobody uses yet: a new Item's first row starts with it.
+  final String? barcode;
 
   static const nameKey = Key('item-form-name');
 
@@ -46,8 +53,11 @@ class _ItemFormPageState extends State<ItemFormPage> {
     super.dispose();
   }
 
-  PriceRowDraft _emptyRow(ItemFormState state) =>
-      PriceRowDraft(id: newId(), currency: state.settings.currency);
+  PriceRowDraft _emptyRow(ItemFormState state) => PriceRowDraft(
+    id: newId(),
+    currency: state.settings.currency,
+    barcode: widget.barcode,
+  );
 
   void _save(ItemFormState state) {
     FocusScope.of(context).unfocus();
@@ -403,6 +413,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
                               _rows[_rows.indexWhere((r) => r.id == draft.id)] =
                                   draft,
                         ),
+                        onScan: switch (widget.scanBarcode) {
+                          final scan? => () => scan(context),
+                          null => null,
+                        },
                         onRemove: _rows.length > 1
                             ? () => setState(() => _rows.removeAt(i))
                             : null,

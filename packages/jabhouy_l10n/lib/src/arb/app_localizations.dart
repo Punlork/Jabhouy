@@ -1676,6 +1676,48 @@ abstract class AppLocalizations {
   /// **'Units'**
   String get categoryUnits;
 
+  /// Title of the barcode scanner and the scan buttons' tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get scanTitle;
+
+  /// Scan result line when the barcode matches
+  ///
+  /// In en, this message translates to:
+  /// **'Found · {code}'**
+  String scanFound(Object code);
+
+  /// Scan result line when no item has the barcode
+  ///
+  /// In en, this message translates to:
+  /// **'Not found · {code}'**
+  String scanNotFound(Object code);
+
+  /// Under the price option the scanned barcode belongs to
+  ///
+  /// In en, this message translates to:
+  /// **'This barcode'**
+  String get scanThisBarcode;
+
+  /// Scan result button opening the item details
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get scanDetails;
+
+  /// Scan result button that scans again
+  ///
+  /// In en, this message translates to:
+  /// **'Scan next'**
+  String get scanNext;
+
+  /// Scanner message when the camera is denied or fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the camera'**
+  String get scanCameraError;
+
   /// Link to invite and members
   ///
   /// In en, this message translates to:

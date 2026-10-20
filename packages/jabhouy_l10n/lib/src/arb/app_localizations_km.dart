@@ -842,6 +842,31 @@ class AppLocalizationsKm extends AppLocalizations {
   String get categoryUnits => 'ពាក្យកាត់';
 
   @override
+  String get scanTitle => 'ស្កេនបាកូដ';
+
+  @override
+  String scanFound(Object code) {
+    return 'រកឃើញ · $code';
+  }
+
+  @override
+  String scanNotFound(Object code) {
+    return 'រកមិនឃើញ · $code';
+  }
+
+  @override
+  String get scanThisBarcode => 'បាកូដនេះ';
+
+  @override
+  String get scanDetails => 'មើលលម្អិត';
+
+  @override
+  String get scanNext => 'ស្កេនបន្ទាប់';
+
+  @override
+  String get scanCameraError => 'មិនអាចបើកកាមេរ៉ាបានទេ';
+
+  @override
   String get settingsMembers => 'សមាជិក និងសិទ្ធិ';
 
   @override

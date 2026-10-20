@@ -9,6 +9,7 @@ class ShopHeader extends StatelessWidget {
     required this.searchController,
     required this.hasFilter,
     this.onFilterPressed,
+    this.onScanPressed,
     this.searchHintText,
     super.key,
   });
@@ -16,6 +17,9 @@ class ShopHeader extends StatelessWidget {
   final ValueChanged<String?> onSearchChanged;
   /// Null hides the filter button (the shop tab filters with chips).
   final VoidCallback? onFilterPressed;
+
+  /// Null hides the scan button (other tabs, or the flag off).
+  final VoidCallback? onScanPressed;
   final TextEditingController searchController;
   final bool hasFilter;
   final String? searchHintText;
@@ -39,6 +43,7 @@ class ShopHeader extends StatelessWidget {
             controller: searchController,
             onChanged: onSearchChanged,
             onFilterPressed: onFilterPressed,
+            onScanPressed: onScanPressed,
             onSettingsPressed: onSettingsPressed,
             searchHintText: searchHintText,
           ),
@@ -72,11 +77,13 @@ class _SearchBar extends StatelessWidget {
     required this.onSettingsPressed,
     required this.hasFilter,
     this.onFilterPressed,
+    this.onScanPressed,
     this.searchHintText,
   });
   final TextEditingController controller;
   final ValueChanged<String?> onChanged;
   final VoidCallback? onFilterPressed;
+  final VoidCallback? onScanPressed;
   final VoidCallback onSettingsPressed;
   final bool hasFilter;
   final String? searchHintText;
@@ -133,6 +140,17 @@ class _SearchBar extends StatelessWidget {
               ),
             ),
           ),
+          if (onScanPressed case final onScanPressed?) ...[
+            const SizedBox(width: 8),
+            IconButtonWidget(
+              icon: Icons.qr_code_scanner_rounded,
+              color: colorScheme.onSurfaceVariant,
+              backgroundColor: colorScheme.surfaceContainerHigh,
+              tooltip: l10n.scanTitle,
+              onPressed: onScanPressed,
+              colorScheme: colorScheme,
+            ),
+          ],
           if (onFilterPressed case final onFilterPressed?) ...[
           const SizedBox(width: 8),
           IconButtonWidget(

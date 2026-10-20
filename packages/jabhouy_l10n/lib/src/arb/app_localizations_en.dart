@@ -857,6 +857,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryUnits => 'Units';
 
   @override
+  String get scanTitle => 'Scan barcode';
+
+  @override
+  String scanFound(Object code) {
+    return 'Found · $code';
+  }
+
+  @override
+  String scanNotFound(Object code) {
+    return 'Not found · $code';
+  }
+
+  @override
+  String get scanThisBarcode => 'This barcode';
+
+  @override
+  String get scanDetails => 'View details';
+
+  @override
+  String get scanNext => 'Scan next';
+
+  @override
+  String get scanCameraError => 'Could not open the camera';
+
+  @override
   String get settingsMembers => 'Members and roles';
 
   @override

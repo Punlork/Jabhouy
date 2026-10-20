@@ -107,6 +107,31 @@ class ItemDao {
     );
   }
 
+  /// Live Items in [shopId] with a Price option carrying [barcode], each
+  /// with all its options. Several only after an offline duplicate.
+  Future<List<Item>> itemsWithBarcode(String shopId, String barcode) {
+    final owners = _db.selectOnly(_db.itemPriceTable)
+      ..addColumns([_db.itemPriceTable.itemId])
+      ..where(_db.itemPriceTable.barcode.equals(barcode));
+    final query =
+        _db.select(_db.itemTable).join([
+            leftOuterJoin(
+              _db.itemPriceTable,
+              _db.itemPriceTable.itemId.equalsExp(_db.itemTable.id),
+            ),
+          ])
+          ..where(
+            _db.itemTable.shopId.equals(shopId) &
+                _db.itemTable.deletedAt.isNull() &
+                _db.itemTable.id.isInQuery(owners),
+          )
+          ..orderBy([
+            OrderingTerm.asc(_db.itemTable.name),
+            OrderingTerm.asc(_db.itemPriceTable.sortOrder),
+          ]);
+    return query.get().then(_itemsFrom);
+  }
+
   /// Barcode → name of another live Item in [shopId] using it.
   Future<Map<String, String>> barcodeOwners(
     String shopId,

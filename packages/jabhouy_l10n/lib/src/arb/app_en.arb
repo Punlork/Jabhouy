@@ -1110,6 +1110,40 @@
   "@categoryUnits": {
     "description": "Units heading and add-unit chip in the category sheet"
   },
+  "scanTitle": "Scan barcode",
+  "@scanTitle": {
+    "description": "Title of the barcode scanner and the scan buttons' tooltip"
+  },
+  "scanFound": "Found · {code}",
+  "@scanFound": {
+    "description": "Scan result line when the barcode matches",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "scanNotFound": "Not found · {code}",
+  "@scanNotFound": {
+    "description": "Scan result line when no item has the barcode",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "scanThisBarcode": "This barcode",
+  "@scanThisBarcode": {
+    "description": "Under the price option the scanned barcode belongs to"
+  },
+  "scanDetails": "View details",
+  "@scanDetails": {
+    "description": "Scan result button opening the item details"
+  },
+  "scanNext": "Scan next",
+  "@scanNext": {
+    "description": "Scan result button that scans again"
+  },
+  "scanCameraError": "Could not open the camera",
+  "@scanCameraError": {
+    "description": "Scanner message when the camera is denied or fails"
+  },
   "settingsMembers": "Members and roles",
   "@settingsMembers": {
     "description": "Link to invite and members"

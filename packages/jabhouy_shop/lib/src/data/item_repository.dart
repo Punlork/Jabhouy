@@ -121,6 +121,10 @@ class ItemRepository {
 
   static const _viewerReadOnly = AppException('A viewer cannot edit.');
 
+  /// What a scan opens: every live Item with this barcode, offline.
+  Future<List<Item>> itemsWithBarcode(String barcode) =>
+      _dao.itemsWithBarcode(_shopId, barcode);
+
   Future<Map<String, String>> barcodeOwners(
     Iterable<String> barcodes, {
     required String exceptItemId,

@@ -39,7 +39,11 @@ void main() {
     );
   });
 
-  Future<void> pumpForm(WidgetTester tester) async {
+  Future<void> pumpForm(
+    WidgetTester tester, {
+    Future<String?> Function(BuildContext)? scan,
+    String? barcode,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(390, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -50,7 +54,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider(
           create: (_) => ItemFormCubit(repo)..load(),
-          child: const ItemFormPage(),
+          child: ItemFormPage(scanBarcode: scan, barcode: barcode),
         ),
       ),
     );
@@ -71,6 +75,47 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
   }
+
+  Future<String?> savedBarcode(WidgetTester tester) async {
+    final items = await tester.runAsync(() => repo.watchItems().first);
+    return items!.single.prices.single.barcode;
+  }
+
+  Future<void> fillCoke(WidgetTester tester) async {
+    await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
+    await tester.enterText(openField(0), 'ដប');
+    await tester.enterText(openField(2), '3000');
+  }
+
+  testWidgets('the row barcode button scans a code into its row', (
+    tester,
+  ) async {
+    await pumpForm(tester, scan: (_) async => '885');
+    await fillCoke(tester);
+
+    await tester.tap(find.byTooltip('ស្កេនបាកូដ'));
+    await tester.pumpAndSettle();
+    await save(tester);
+
+    expect(await savedBarcode(tester), '885');
+  });
+
+  testWidgets('without a scanner the row has no barcode button', (
+    tester,
+  ) async {
+    await pumpForm(tester);
+    expect(find.byTooltip('ស្កេនបាកូដ'), findsNothing);
+  });
+
+  testWidgets('an item added from a scan starts with its barcode', (
+    tester,
+  ) async {
+    await pumpForm(tester, barcode: '885');
+    await fillCoke(tester);
+    await save(tester);
+
+    expect(await savedBarcode(tester), '885');
+  });
 
   testWidgets('ដប + កេះ ×24 in one form saves one item with two prices',
       (tester) async {

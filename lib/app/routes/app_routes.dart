@@ -143,6 +143,7 @@ class AppRouter {
               GlobalContext.currentContext = context;
               final extra = state.extra! as Map<String, dynamic>;
               final existingItem = extra['existingItem'] as Item?;
+              final scan = getIt<FeatureFlags>().isEnabled(Feature.barcodeScan);
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: BlocProvider(
@@ -150,7 +151,10 @@ class AppRouter {
                     getIt<ItemRepository>(),
                     existing: existingItem,
                   )..load(),
-                  child: const ItemFormPage(),
+                  child: ItemFormPage(
+                    scanBarcode: scan ? scanBarcode : null,
+                    barcode: extra['barcode'] as String?,
+                  ),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );

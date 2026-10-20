@@ -205,6 +205,46 @@ void main() {
     });
   });
 
+  test(
+    'a scanned barcode finds every live item using it in this shop',
+    () async {
+      final shop = repo('s1');
+      PriceOption coded(String unit, String? code) => PriceOption(
+        id: newId(),
+        unit: unit,
+        currency: Currency.khr,
+        price: 3000,
+        barcode: code,
+      );
+      await shop.saveItem(
+        Item(
+          id: 'water',
+          name: 'ទឹក',
+          prices: [coded('ដប', '885'), coded('កេះ', null)],
+        ),
+      );
+      await shop.saveItem(
+        Item(id: 'dup', name: 'ទឹក២', prices: [coded('ដប', '885')]),
+      );
+      await shop.saveItem(
+        Item(id: 'gone', name: 'ចាស់', prices: [coded('ដប', '885')]),
+      );
+      await shop.deleteItem('gone');
+      await repo('s2').saveItem(
+        Item(id: 'other', name: 'ផ្សេង', prices: [coded('ដប', '885')]),
+      );
+
+      final found = await shop.itemsWithBarcode('885');
+      expect([for (final i in found) i.id], ['water', 'dup']);
+      expect(
+        found.first.prices,
+        hasLength(2),
+        reason: 'every row, for the sheet',
+      );
+      expect(await shop.itemsWithBarcode('000'), isEmpty);
+    },
+  );
+
   test('delete leaves a tombstone and hides the item', () async {
     final shop = repo('s1');
     await shop.saveItem(

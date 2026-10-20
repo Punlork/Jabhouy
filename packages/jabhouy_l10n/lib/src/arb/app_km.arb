@@ -1058,6 +1058,40 @@
   "@categoryUnits": {
     "description": "Units heading and add-unit chip in the category sheet"
   },
+  "scanTitle": "ស្កេនបាកូដ",
+  "@scanTitle": {
+    "description": "Title of the barcode scanner and the scan buttons' tooltip"
+  },
+  "scanFound": "រកឃើញ · {code}",
+  "@scanFound": {
+    "description": "Scan result line when the barcode matches",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "scanNotFound": "រកមិនឃើញ · {code}",
+  "@scanNotFound": {
+    "description": "Scan result line when no item has the barcode",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "scanThisBarcode": "បាកូដនេះ",
+  "@scanThisBarcode": {
+    "description": "Under the price option the scanned barcode belongs to"
+  },
+  "scanDetails": "មើលលម្អិត",
+  "@scanDetails": {
+    "description": "Scan result button opening the item details"
+  },
+  "scanNext": "ស្កេនបន្ទាប់",
+  "@scanNext": {
+    "description": "Scan result button that scans again"
+  },
+  "scanCameraError": "មិនអាចបើកកាមេរ៉ាបានទេ",
+  "@scanCameraError": {
+    "description": "Scanner message when the camera is denied or fails"
+  },
   "settingsMembers": "សមាជិក និងសិទ្ធិ",
   "@settingsMembers": {
     "description": "Link to invite and members"

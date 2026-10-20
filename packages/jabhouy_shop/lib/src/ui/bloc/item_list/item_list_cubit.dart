@@ -85,6 +85,10 @@ class ItemListCubit extends Cubit<ItemListState> {
 
   Future<void> delete(String id) => _repository.deleteItem(id);
 
+  /// Every live Item with a scanned barcode, for the scan result.
+  Future<List<Item>> itemsWithBarcode(String code) =>
+      _repository.itemsWithBarcode(code);
+
   /// The details sheet opened [id]: it joins Recently viewed.
   Future<void> viewed(String id) => _repository.recordView(id);
 
