@@ -36,6 +36,7 @@ class AppSheet extends StatelessWidget {
     this.title,
     this.header,
     this.footer,
+    this.pinned,
     this.scrollController,
     super.key,
   }) : assert(title != null || header != null, 'a title or a header');
@@ -46,6 +47,10 @@ class AppSheet extends StatelessWidget {
   final Widget? header;
   final Widget child;
   final Widget? footer;
+
+  /// Stays under the title while [child] scrolls, e.g. a search field. Full
+  /// width: it pads itself.
+  final Widget? pinned;
 
   /// From [showAppSheet], so scrolling the content resizes the sheet.
   final ScrollController? scrollController;
@@ -94,6 +99,7 @@ class AppSheet extends StatelessWidget {
               ],
             ),
           ),
+          if (pinned case final pinned?) pinned,
           // Fills the sheet, so a short body still leaves the footer at
           // the bottom rather than floating mid-sheet.
           Expanded(
