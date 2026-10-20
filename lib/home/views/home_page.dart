@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/credit/credit.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/home/home_tabs.dart';
 import 'package:jabhouy/income/income.dart';
@@ -89,7 +90,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           onAddItem: (name) => _openItemForm(null, null, name),
           chromeVisible: _chromeVisible,
         ),
-        HomeTab.loaner => const LoanerView(),
+        HomeTab.loaner => const CreditView(),
         HomeTab.income => const IncomeView(),
       };
 
@@ -245,16 +246,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
-  void _openLoanerForm() {
-    context.pushNamed(
-      AppRoutes.formLoaner,
-      extra: {
-        'loanerBloc': context.read<LoanerBloc>(),
-        'customerBloc': context.read<CustomerBloc>(),
-      },
-    );
-  }
-
   void _seedIncomeDemoData(AppState appState) {
     if (appState.deviceRole.isSub) {
       showErrorSnackBar(null, context.l10n.mainDeviceRoleRequired);
@@ -284,8 +275,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         );
       case HomeTab.loaner:
         return _BottomActionConfig(
+          // No onPressed until the new form (issue 30): the old one
+          // records loans the new list cannot show.
           label: context.l10n.creditAdd,
-          onPressed: _openLoanerForm,
         );
       case HomeTab.income:
         if (kReleaseMode) {
@@ -342,6 +334,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.read<LoanerBloc>().add(LoadLoaners());
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<ItemListCubit>().start();
+    context.read<CreditListCubit>().start();
     _syncNotices ??= getIt<SyncEngine>().notices.listen((notice) {
       // A removed Member's data is already gone; the list just empties.
       if (notice == SyncNotice.noPermission && mounted) {
@@ -384,6 +377,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           _hasLoadedProtectedData = false;
           getIt<SyncCoordinator>().stop();
           context.read<ItemListCubit>().stop();
+          context.read<CreditListCubit>().stop();
         }
       },
       child: BlocBuilder<AuthBloc, AuthState>(
@@ -466,13 +460,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             onScanPressed:
                                 _isBarcodeScanEnabled ? _scanItem : null,
                           ),
-                        HomeTab.loaner => BlocBuilder<LoanerBloc, LoanerState>(
-                            builder: (context, state) {
-                              return buildShopHeader(
-                                hasFilter: state.asLoaded?.hasFilter ?? false,
-                              );
-                            },
-                          ),
+                        // The Credit tab carries its own search (canvas ៧).
+                        HomeTab.loaner => const SizedBox.shrink(),
                         HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
                             builder: (context, state) {
                               final loaded = state.asLoaded;

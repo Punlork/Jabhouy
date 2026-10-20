@@ -14,13 +14,14 @@ CreditLine _line(String name, int qty, int price, [Currency c = Currency.khr]) =
     );
 
 Credit _credit({
+  String customer = 'u',
   List<CreditLine> lines = const [],
   int? amount,
   Currency currency = Currency.khr,
   int rate = 4000,
 }) => Credit(
   id: 'c',
-  customerId: 'u',
+  customerId: customer,
   currency: currency,
   khrPerUsd: rate,
   takenAt: DateTime.utc(2026, 10, 20),
@@ -69,14 +70,15 @@ void main() {
 
   test('the summary converts each Credit with its own snapshot', () {
     final a = _credit(amount: 400000); // 4,000 rate -> $100.00
-    final b = _credit(amount: 410000, rate: 4100); // -> $100.00
-    final unknown = _credit();
+    final b = _credit(customer: 'v', amount: 410000, rate: 4100); // -> $100.00
+    final unknown = _credit(customer: 'w');
+    final again = _credit(customer: 'v', amount: 1000);
 
-    final summary = summarize([a, b, unknown], Currency.khr);
+    final summary = summarize([a, b, unknown, again], Currency.khr);
 
-    expect(summary.total, const Money(810000, Currency.khr));
-    expect(summary.other, const Money(20000, Currency.usd));
-    expect(summary.count, 3);
-    expect(summary.unknownCount, 1);
+    expect(summary.total, const Money(811000, Currency.khr));
+    expect(summary.other, const Money(20025, Currency.usd));
+    expect(summary.people, 3, reason: 'v counted once');
+    expect(summary.peopleWithoutAmount, 1);
   });
 }

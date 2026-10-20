@@ -1523,5 +1523,23 @@
   "signInOr": "or",
   "@signInOr": {
     "description": "Between the Google button and the password form"
+  },
+  "creditSummaryPeople": "{count} unpaid",
+  "@creditSummaryPeople": {
+    "description": "Credit summary: people with an unpaid Credit",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "creditSummaryUnknown": "{count} with no amount yet",
+  "@creditSummaryUnknown": {
+    "description": "Credit summary: people whose unpaid Credit has no amount",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "creditListEmpty": "No credits yet",
+  "@creditListEmpty": {
+    "description": "Empty Credit list"
   }
 }

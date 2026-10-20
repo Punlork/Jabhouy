@@ -1147,4 +1147,17 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get signInOr => 'ឬ';
+
+  @override
+  String creditSummaryPeople(Object count) {
+    return 'មិនទាន់សង $count នាក់';
+  }
+
+  @override
+  String creditSummaryUnknown(Object count) {
+    return '$count នាក់មិនទាន់មានចំនួន';
+  }
+
+  @override
+  String get creditListEmpty => 'មិនទាន់មានការជំពាក់';
 }

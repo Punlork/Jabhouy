@@ -2245,6 +2245,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'or'**
   String get signInOr;
+
+  /// Credit summary: people with an unpaid Credit
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unpaid'**
+  String creditSummaryPeople(Object count);
+
+  /// Credit summary: people whose unpaid Credit has no amount
+  ///
+  /// In en, this message translates to:
+  /// **'{count} with no amount yet'**
+  String creditSummaryUnknown(Object count);
+
+  /// Empty Credit list
+  ///
+  /// In en, this message translates to:
+  /// **'No credits yet'**
+  String get creditListEmpty;
 }
 
 class _AppLocalizationsDelegate

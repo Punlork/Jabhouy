@@ -1163,4 +1163,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInOr => 'or';
+
+  @override
+  String creditSummaryPeople(Object count) {
+    return '$count unpaid';
+  }
+
+  @override
+  String creditSummaryUnknown(Object count) {
+    return '$count with no amount yet';
+  }
+
+  @override
+  String get creditListEmpty => 'No credits yet';
 }

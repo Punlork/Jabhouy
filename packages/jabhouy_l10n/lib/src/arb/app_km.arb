@@ -1471,5 +1471,23 @@
   "signInOr": "ឬ",
   "@signInOr": {
     "description": "Between the Google button and the password form"
+  },
+  "creditSummaryPeople": "មិនទាន់សង {count} នាក់",
+  "@creditSummaryPeople": {
+    "description": "Credit summary: people with an unpaid Credit",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "creditSummaryUnknown": "{count} នាក់មិនទាន់មានចំនួន",
+  "@creditSummaryUnknown": {
+    "description": "Credit summary: people whose unpaid Credit has no amount",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "creditListEmpty": "មិនទាន់មានការជំពាក់",
+  "@creditListEmpty": {
+    "description": "Empty Credit list"
   }
 }

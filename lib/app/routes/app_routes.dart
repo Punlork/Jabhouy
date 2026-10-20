@@ -8,6 +8,7 @@ import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/credit/credit.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/home/home.dart';
 import 'package:jabhouy/home/views/home_page.dart';
@@ -74,6 +75,10 @@ class AppRouter {
                       getIt<SharedPreferences>().setBool(_itemGridKey, grid),
                     ),
                   ),
+                ),
+                BlocProvider(
+                  create: (context) =>
+                      CreditListCubit(getIt<CreditRepository>()),
                 ),
                 BlocProvider(
                   create: (context) => CategoryBloc(

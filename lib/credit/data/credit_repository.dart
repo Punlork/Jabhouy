@@ -30,6 +30,9 @@ class CreditRepository {
   final ConnectivityService _connectivity;
   final DateTime Function() _clock;
 
+  /// False until the Current Shop is known (after sign-in).
+  bool get ready => _scope.shopId != null;
+
   String get _shopId => _scope.shopId!;
   bool get _isViewer => _scope.role == MemberRole.viewer;
 

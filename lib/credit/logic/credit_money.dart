@@ -42,8 +42,8 @@ class CreditSummary {
   const CreditSummary({
     required this.total,
     required this.other,
-    required this.count,
-    required this.unknownCount,
+    required this.people,
+    required this.peopleWithoutAmount,
   });
 
   /// Known amounts in the shop's default currency.
@@ -52,10 +52,12 @@ class CreditSummary {
   /// The same Credits in the other currency, each converted with its own
   /// rate, so it is not just [total] converted again.
   final Money other;
-  final int count;
 
-  /// Credits with no amount yet.
-  final int unknownCount;
+  /// Customers with an unpaid Credit.
+  final int people;
+
+  /// Customers with an unpaid Credit that has no amount yet.
+  final int peopleWithoutAmount;
 }
 
 /// Sums [unpaid] in [currency] and the other currency, each Credit
@@ -64,13 +66,13 @@ CreditSummary summarize(Iterable<Credit> unpaid, Currency currency) {
   final otherCurrency = currency == Currency.khr ? Currency.usd : Currency.khr;
   var total = 0;
   var other = 0;
-  var count = 0;
-  var unknown = 0;
+  final people = <String>{};
+  final unknown = <String>{};
   for (final credit in unpaid) {
-    count++;
+    people.add(credit.customerId);
     final inDefault = amountIn(credit, currency);
     if (inDefault == null) {
-      unknown++;
+      unknown.add(credit.customerId);
       continue;
     }
     total += inDefault.amount;
@@ -79,7 +81,7 @@ CreditSummary summarize(Iterable<Credit> unpaid, Currency currency) {
   return CreditSummary(
     total: Money(total, currency),
     other: Money(other, otherCurrency),
-    count: count,
-    unknownCount: unknown,
+    people: people.length,
+    peopleWithoutAmount: unknown.length,
   );
 }
