@@ -47,13 +47,13 @@ class _SettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButtonWidget(
-      svgAsset: AppAssets.actionSettings,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-      backgroundColor: Colors.transparent,
-      tooltip: AppLocalizations.of(context).settings,
+    // Canvas ១: a 48 × 54 target around a 24 px gear.
+    return IconButton(
       onPressed: onPressed,
-      colorScheme: Theme.of(context).colorScheme,
+      tooltip: AppLocalizations.of(context).settings,
+      icon: const Icon(Icons.settings_outlined, size: 24),
+      color: Theme.of(context).colorScheme.onSurface,
+      constraints: const BoxConstraints.tightFor(width: 48, height: 54),
     );
   }
 }
