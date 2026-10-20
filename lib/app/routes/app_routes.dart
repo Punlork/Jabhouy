@@ -167,6 +167,44 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: AppRoutes.formCredit.toPath,
+            name: AppRoutes.formCredit,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider(
+                  create: (_) => CreditFormCubit(
+                    getIt<CreditRepository>(),
+                    existing: extra['existingCredit'] as Credit?,
+                  )..load(),
+                  child: CreditFormPage(
+                    pickCustomer: (context, selectedId) => showCustomerPicker(
+                      context,
+                      getIt<CreditRepository>(),
+                      selectedId: selectedId,
+                    ),
+                    pickItems:
+                        (
+                          context, {
+                          required currency,
+                          required khrPerUsd,
+                          required initial,
+                        }) => showItemPicker(
+                          context,
+                          getIt<ItemRepository>(),
+                          currency: currency,
+                          khrPerUsd: khrPerUsd,
+                          initial: initial,
+                        ),
+                  ),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
             path: AppRoutes.formLoaner.toPath,
             name: AppRoutes.formLoaner,
             pageBuilder: (BuildContext context, GoRouterState state) {

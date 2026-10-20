@@ -15,6 +15,7 @@ class AppRoutes {
   static const formShop = 'form_shop';
   static const formItem = 'form_item';
   static const formLoaner = 'form_loaner';
+  static const formCredit = 'form_credit';
   static const category = 'category';
   static const customer = 'customer';
   static const profile = 'profile';

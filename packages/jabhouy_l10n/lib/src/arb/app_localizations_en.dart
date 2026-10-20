@@ -1182,4 +1182,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditEditButton => 'Edit';
+
+  @override
+  String get creditItemsHint =>
+      'Pick from the price list to work out the amount automatically';
+
+  @override
+  String get creditPickDate => 'Pick a date';
+
+  @override
+  String get creditNoteHint => 'Place or other details';
+
+  @override
+  String get creditChooseCustomer => 'Choose a customer';
 }

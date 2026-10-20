@@ -1549,5 +1549,21 @@
   "creditEditButton": "Edit",
   "@creditEditButton": {
     "description": "Edit button on the Credit details sheet"
+  },
+  "creditItemsHint": "Pick from the price list to work out the amount automatically",
+  "@creditItemsHint": {
+    "description": "Hint under the items heading on the Credit form"
+  },
+  "creditPickDate": "Pick a date",
+  "@creditPickDate": {
+    "description": "Empty due-date button on the Credit form"
+  },
+  "creditNoteHint": "Place or other details",
+  "@creditNoteHint": {
+    "description": "Placeholder of the Credit note"
+  },
+  "creditChooseCustomer": "Choose a customer",
+  "@creditChooseCustomer": {
+    "description": "Error when a Credit is saved without a customer"
   }
 }

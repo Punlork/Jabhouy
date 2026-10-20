@@ -1166,4 +1166,17 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get creditEditButton => 'កែ';
+
+  @override
+  String get creditItemsHint =>
+      'ជ្រើសពីបញ្ជីតម្លៃ ដើម្បីគណនាចំនួនទឹកប្រាក់ដោយស្វ័យប្រវត្តិ';
+
+  @override
+  String get creditPickDate => 'ជ្រើសថ្ងៃ';
+
+  @override
+  String get creditNoteHint => 'ទីតាំង ឬព័ត៌មានផ្សេងៗ';
+
+  @override
+  String get creditChooseCustomer => 'សូមជ្រើសរើសអតិថិជន';
 }

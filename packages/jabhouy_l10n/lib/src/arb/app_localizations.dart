@@ -2275,6 +2275,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get creditEditButton;
+
+  /// Hint under the items heading on the Credit form
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from the price list to work out the amount automatically'**
+  String get creditItemsHint;
+
+  /// Empty due-date button on the Credit form
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get creditPickDate;
+
+  /// Placeholder of the Credit note
+  ///
+  /// In en, this message translates to:
+  /// **'Place or other details'**
+  String get creditNoteHint;
+
+  /// Error when a Credit is saved without a customer
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a customer'**
+  String get creditChooseCustomer;
 }
 
 class _AppLocalizationsDelegate

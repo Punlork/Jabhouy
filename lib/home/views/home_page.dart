@@ -91,7 +91,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           chromeVisible: _chromeVisible,
         ),
         HomeTab.loaner => CreditView(
-          onOpen: (credit) => showCreditDetails(context, credit),
+          onOpen: (credit) =>
+              showCreditDetails(context, credit, onEdit: _openCreditForm),
         ),
         HomeTab.income => const IncomeView(),
       };
@@ -223,6 +224,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
+  /// Adds a Credit, or edits [credit] (from its details sheet).
+  void _openCreditForm([Credit? credit]) {
+    context.pushNamed(
+      AppRoutes.formCredit,
+      extra: {'existingCredit': credit},
+    );
+  }
+
   /// Adds an Item, or edits [item] (from the details sheet). A [barcode]
   /// no Item uses yet starts the new Item's first price row; a [name]
   /// (from a search) fills the new Item's name.
@@ -277,9 +286,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         );
       case HomeTab.loaner:
         return _BottomActionConfig(
-          // No onPressed until the new form (issue 30): the old one
-          // records loans the new list cannot show.
           label: context.l10n.creditAdd,
+          onPressed: _openCreditForm,
         );
       case HomeTab.income:
         if (kReleaseMode) {

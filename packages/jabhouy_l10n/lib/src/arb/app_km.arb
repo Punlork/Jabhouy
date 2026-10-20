@@ -1497,5 +1497,21 @@
   "creditEditButton": "កែ",
   "@creditEditButton": {
     "description": "Edit button on the Credit details sheet"
+  },
+  "creditItemsHint": "ជ្រើសពីបញ្ជីតម្លៃ ដើម្បីគណនាចំនួនទឹកប្រាក់ដោយស្វ័យប្រវត្តិ",
+  "@creditItemsHint": {
+    "description": "Hint under the items heading on the Credit form"
+  },
+  "creditPickDate": "ជ្រើសថ្ងៃ",
+  "@creditPickDate": {
+    "description": "Empty due-date button on the Credit form"
+  },
+  "creditNoteHint": "ទីតាំង ឬព័ត៌មានផ្សេងៗ",
+  "@creditNoteHint": {
+    "description": "Placeholder of the Credit note"
+  },
+  "creditChooseCustomer": "សូមជ្រើសរើសអតិថិជន",
+  "@creditChooseCustomer": {
+    "description": "Error when a Credit is saved without a customer"
   }
 }
