@@ -7,10 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/credit/credit.dart';
-import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/home/home_tabs.dart';
 import 'package:jabhouy/income/income.dart';
-import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
@@ -90,7 +88,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           onAddItem: (name) => _openItemForm(null, null, name),
           chromeVisible: _chromeVisible,
         ),
-        HomeTab.loaner => CreditView(
+        HomeTab.credit => CreditView(
           onOpen: (credit) =>
               showCreditDetails(context, credit, onEdit: _openCreditForm),
         ),
@@ -116,8 +114,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     switch (_selectedTab) {
       case HomeTab.shop:
         context.read<ItemListCubit>().search(value ?? '');
-      case HomeTab.loaner:
-        context.read<LoanerBloc>().add(LoadLoaners(searchQuery: value));
+      case HomeTab.credit:
+        // The Credit tab carries its own search (canvas ៧).
+        break;
       case HomeTab.income:
         context.read<IncomeBloc>().add(LoadIncomeDashboard(searchQuery: value));
     }
@@ -148,37 +147,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
           ),
         );
-      case HomeTab.loaner:
-        showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          builder: (_) => MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: context.read<LoanerBloc>()),
-              BlocProvider.value(value: context.read<CustomerBloc>()),
-            ],
-            child: Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: LoanerFilterSheet(
-                initialFromDate: context.read<LoanerBloc>().state.asLoaded?.fromDate,
-                initialToDate: context.read<LoanerBloc>().state.asLoaded?.toDate,
-                initialLoanerFilter: context.read<LoanerBloc>().state.asLoaded?.loanerFilter,
-                onApply: (fromDate, toDate, loanerFilter) => context.read<LoanerBloc>().add(
-                      LoadLoaners(
-                        fromDate: fromDate,
-                        toDate: toDate,
-                        loanerFilter: loanerFilter,
-                      ),
-                    ),
-              ),
-            ),
-          ),
-        );
+      case HomeTab.credit:
+        break;
       case HomeTab.income:
         showModalBottomSheet<void>(
           context: context,
@@ -217,7 +187,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.pushNamed(
       AppRoutes.settings,
       extra: {
-        'customerBloc': context.read<CustomerBloc>(),
         if (_isIncomeEnabled) 'incomeBloc': context.read<IncomeBloc>(),
         'signoutBloc': context.read<SignoutBloc>(),
       },
@@ -284,7 +253,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           label: context.l10n.itemAdd,
           onPressed: _openItemForm,
         );
-      case HomeTab.loaner:
+      case HomeTab.credit:
         return _BottomActionConfig(
           label: context.l10n.creditAdd,
           onPressed: _openCreditForm,
@@ -341,7 +310,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (_hasLoadedProtectedData) return;
 
     _hasLoadedProtectedData = true;
-    context.read<LoanerBloc>().add(LoadLoaners());
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<ItemListCubit>().start();
     context.read<CreditListCubit>().start();
@@ -352,7 +320,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
     });
     context.read<CategoryBloc>().add(CategoryGetEvent());
-    context.read<CustomerBloc>().add(LoadCustomers());
     // With background sync the loads above only read the phone; this is
     // what brings the lists up to date.
     if (_isBackgroundSyncEnabled) getIt<SyncCoordinator>().start();
@@ -471,7 +438,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 _isBarcodeScanEnabled ? _scanItem : null,
                           ),
                         // The Credit tab carries its own search (canvas ៧).
-                        HomeTab.loaner => const SizedBox.shrink(),
+                        HomeTab.credit => const SizedBox.shrink(),
                         HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
                             builder: (context, state) {
                               final loaded = state.asLoaded;
@@ -489,7 +456,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               Expanded(
                 child: MultiBlocProvider(
                   providers: [
-                    BlocProvider.value(value: context.read<LoanerBloc>()),
                     if (_isIncomeEnabled) BlocProvider.value(value: context.read<IncomeBloc>()),
                   ],
                   child: TabScrollManager(
@@ -524,7 +490,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         icon: Icons.storefront_outlined,
                         label: context.l10n.shop,
                       ),
-                    HomeTab.loaner => AppNavTab(
+                    HomeTab.credit => AppNavTab(
                         icon: Icons.menu_book_outlined,
                         label: context.l10n.credit,
                       ),

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
-import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
@@ -215,14 +214,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         ? null
                         : l10n.categoriesCount(categories.length),
                     onTap: _openCategoriesUnits,
-                  ),
-                ),
-                _Row(
-                  icon: Icons.people_outline_rounded,
-                  title: l10n.customers,
-                  onTap: () => context.pushNamed(
-                    AppRoutes.customer,
-                    extra: {'customerBloc': context.read<CustomerBloc>()},
                   ),
                 ),
               ],

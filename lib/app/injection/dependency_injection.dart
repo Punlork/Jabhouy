@@ -3,9 +3,7 @@ import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/app/service/database/database_connection.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/credit/credit.dart';
-import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/income/income.dart';
-import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
@@ -70,10 +68,6 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => ShopApi(getIt<ApiService>()))
     ..registerLazySingleton(() => CategoryDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => CategoryApi(getIt<ApiService>()))
-    ..registerLazySingleton(() => CustomerDao(getIt<AppDatabase>()))
-    ..registerLazySingleton(() => CustomerApi(getIt<ApiService>()))
-    ..registerLazySingleton(() => LoanerDao(getIt<AppDatabase>()))
-    ..registerLazySingleton(() => LoanerApi(getIt<ApiService>()))
     ..registerLazySingleton(() => IncomeDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => IncomeApi(getIt<ApiService>()))
     ..registerLazySingleton(() => CreditDao(getIt<AppDatabase>()))
@@ -86,9 +80,6 @@ Future<void> setupDependencies() async {
       final shop = ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>());
       final category =
           CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>());
-      final customer =
-          CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>());
-      final loaner = LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>());
       final items = getIt<ItemDao>();
       final credits = getIt<CreditDao>();
       final shopSync = getIt<ShopSyncApi>();
@@ -98,8 +89,6 @@ Future<void> setupDependencies() async {
         transport: AdapterSyncTransport([
           shop,
           category,
-          customer,
-          loaner,
           ItemSyncAdapter(items, shopSync, shopId),
           ItemCategorySyncAdapter(items, shopSync, shopId),
           ShopSettingsSyncAdapter(items, shopSync),
@@ -114,7 +103,7 @@ Future<void> setupDependencies() async {
           ),
         ]),
         // Income pulls through PullRemoteNotificationsUseCase instead.
-        pullAdapters: [shop, category, customer, loaner],
+        pullAdapters: [shop, category],
         // Categories first, so an item's category is already here.
         changesSource: shopSync,
         changeAppliers: [
@@ -166,30 +155,6 @@ Future<void> setupDependencies() async {
         getIt<CurrentShop>(),
         getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
-      ),
-    )
-    ..registerLazySingleton<LoanerRepository>(
-      () => DefaultLoanerRepository(
-        getIt<LoanerDao>(),
-        getIt<LoanerApi>(),
-        getIt<SyncEngine>(),
-        getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
-      ),
-    )
-    ..registerLazySingleton(
-      () => RefreshLoanersUseCase(
-        getIt<LoanerRepository>(),
-        getIt<CustomerRepository>(),
-      ),
-    )
-    ..registerLazySingleton<CustomerRepository>(
-      () => DefaultCustomerRepository(
-        getIt<CustomerDao>(),
-        getIt<CustomerApi>(),
-        getIt<SyncEngine>(),
-        getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton(
@@ -261,21 +226,6 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
-    ..registerFactory(
-      () => LoanerBloc(
-        getIt<LoanerRepository>(),
-        getIt<RefreshLoanersUseCase>(),
-        getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
-      ),
-    )
-    ..registerFactory(
-      () => CustomerBloc(
-        getIt<CustomerRepository>(),
-        getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
-      ),
-    )
     ..registerFactory(
       () => IncomeBloc(
         getIt<IncomeService>(),

@@ -9,11 +9,9 @@ import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/credit/credit.dart';
-import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/home/home.dart';
 import 'package:jabhouy/home/views/home_page.dart';
 import 'package:jabhouy/income/income.dart';
-import 'package:jabhouy/loaner/loaner.dart';
 import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/settings/settings.dart';
@@ -83,21 +81,6 @@ class AppRouter {
                 BlocProvider(
                   create: (context) => CategoryBloc(
                     getIt<CategoryRepository>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) => LoanerBloc(
-                    getIt<LoanerRepository>(),
-                    getIt<RefreshLoanersUseCase>(),
-                    getIt<ConnectivityService>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) => CustomerBloc(
-                    getIt<CustomerRepository>(),
-                    getIt<ConnectivityService>(),
                     flags: getIt<FeatureFlags>(),
                   ),
                 ),
@@ -205,26 +188,6 @@ class AppRouter {
             },
           ),
           GoRoute(
-            path: AppRoutes.formLoaner.toPath,
-            name: AppRoutes.formLoaner,
-            pageBuilder: (BuildContext context, GoRouterState state) {
-              GlobalContext.currentContext = context;
-              final extra = state.extra! as Map<String, dynamic>;
-              final existingLoaner = extra['existingLoaner'] as LoanerModel?;
-              final loanerBloc = extra['loanerBloc'] as LoanerBloc;
-              final customerBloc = extra['customerBloc'] as CustomerBloc;
-              return CustomTransitionPage(
-                key: state.pageKey,
-                child: LoanerFormPage(
-                  loanerBloc: loanerBloc,
-                  customerBloc: customerBloc,
-                  existingLoaner: existingLoaner,
-                ),
-                transitionsBuilder: _rightToLeftTransition,
-              );
-            },
-          ),
-          GoRoute(
             path: AppRoutes.category.toPath,
             name: AppRoutes.category,
             pageBuilder: (BuildContext context, GoRouterState state) {
@@ -238,20 +201,6 @@ class AppRouter {
                   category: category,
                   shop: shop,
                 ),
-                transitionsBuilder: _rightToLeftTransition,
-              );
-            },
-          ),
-          GoRoute(
-            path: AppRoutes.customer.toPath,
-            name: AppRoutes.customer,
-            pageBuilder: (BuildContext context, GoRouterState state) {
-              final extra = state.extra! as Map<String, dynamic>;
-              GlobalContext.currentContext = context;
-              final customer = extra['customerBloc'] as CustomerBloc;
-              return CustomTransitionPage(
-                key: state.pageKey,
-                child: CustomerPage(customerBloc: customer),
                 transitionsBuilder: _rightToLeftTransition,
               );
             },
@@ -284,7 +233,6 @@ class AppRouter {
             name: AppRoutes.settings,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final customerBloc = extra?['customerBloc'] as CustomerBloc? ?? context.read<CustomerBloc>();
               final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
               final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ?? context.read<SignoutBloc>();
               GlobalContext.currentContext = context;
@@ -293,7 +241,6 @@ class AppRouter {
                 key: state.pageKey,
                 child: MultiBlocProvider(
                   providers: [
-                    BlocProvider.value(value: customerBloc),
                     if (incomeBloc != null) BlocProvider.value(value: incomeBloc),
                     BlocProvider.value(value: signoutBloc),
                     // Shared with the Prices & currency screen, so its

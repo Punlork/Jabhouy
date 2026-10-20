@@ -25,7 +25,6 @@ Set<String> _allowedAuthenticated(FeatureFlags flags) {
     AppRoutes.home.toPath,
     '${AppRoutes.home.toPath}${AppRoutes.formShop.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.formItem.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.formLoaner.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.formCredit.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.profile.toPath}',
@@ -33,7 +32,6 @@ Set<String> _allowedAuthenticated(FeatureFlags flags) {
     '${AppRoutes.home.toPath}${AppRoutes.priceSettings.toPath}',
     '${AppRoutes.home.toPath}${AppRoutes.categoriesUnits.toPath}',
     if (diagnostics) '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.customer.toPath}',
     // Left out when income is off, so the redirect sends a stale link home
     // instead of to a page with no bloc.
     if (flags.isEnabled(Feature.income) && diagnostics)

@@ -1,6 +1,6 @@
 # Jabhouy
 
-Flutter app for a small shop: inventory, customer loans, and bank-notification income tracking, offline-first.
+Flutter app for a small shop: inventory, customer credit, and bank-notification income tracking, offline-first.
 Read [ARCHITECTURE.md](ARCHITECTURE.md) before changing structure; [docs/ARCHITECTURE_RESTRUCTURE.md](docs/ARCHITECTURE_RESTRUCTURE.md) records why it is shaped this way.
 
 ## Commands
@@ -15,7 +15,7 @@ fvm dart run melos run run:dev   # also run:prod
 fvm dart run melos run build:prod   # release APK (production flavor), as CI builds it
 ```
 
-A single test: `fvm flutter test test/loaner/loaner_model_test.dart`, or `cd packages/jabhouy_sync && fvm dart test`.
+A single test: `fvm flutter test test/credit/credit_repository_test.dart`, or `cd packages/jabhouy_sync && fvm dart test`.
 Translations live in `packages/jabhouy_l10n/lib/src/arb`; `fvm flutter gen-l10n` inside that package regenerates them.
 
 The analyzer baseline is 3 issues and zero errors, all in `lib/home/` and `lib/app/constant/app_flavor.dart`.
@@ -36,8 +36,8 @@ Anything beyond those is new.
 - A synced entity needs a `SyncEntityType`, a DAO, a `FeatureSyncAdapter`, and an entry in the `AdapterSyncTransport` list in `lib/app/injection/dependency_injection.dart`.
 - Adapters re-read the row and build the request body on every attempt. Keep it that way: it is how a queued job recovers after a client-side fix.
 - New code returns `Result<T>` (`Ok`/`Err`). `ApiResponse` remains only in auth, profile and one file in `lib/app`.
-- Date-only API fields use `DateTime.toIsoDate()` from `jabhouy_core`, which keeps the local day. Loans' `createdAt` is one.
-- Loan JSON nests the customer (`"customer": {"id": …}`) with no flat `customerId`.
+- Date-only API fields use `DateTime.toIsoDate()` from `jabhouy_core`, which keeps the local day. A Credit's `dueDate` is one.
+- Credit JSON nests the customer (`"customer": {"id": …}`) with no flat `customerId`.
 - Schema changes: edit `AppDatabase` in `jabhouy_core`, bump `schemaVersion` (11 now) with a migration, then `melos run gen`.
 
 ## Generated code
@@ -54,8 +54,8 @@ Anything beyond those is new.
 
 ## Conventions
 
-- Import feature barrels (`package:jabhouy/loaner/loaner.dart`) rather than deep paths, except where a comment explains a deep import keeps Flutter out of `logic/`.
-- Nested routes receive blocs and models through GoRouter `extra` maps. Reuse the keys `AppRouter` reads: `shop`, `category`, `customerBloc`, `loanerBloc`, `incomeBloc`, `signoutBloc`, `existingItem`, `existingLoaner`, `activeCategory`, `onAdd`.
+- Import feature barrels (`package:jabhouy/credit/credit.dart`) rather than deep paths, except where a comment explains a deep import keeps Flutter out of `logic/`.
+- Nested routes receive blocs and models through GoRouter `extra` maps. Reuse the keys `AppRouter` reads: `shop`, `category`, `incomeBloc`, `signoutBloc`, `existingItem`, `existingCredit`, `activeCategory`, `onAdd`.
 - Some income actions are guarded by `kReleaseMode` on purpose. Keep those guards.
 - `iPad (wireless)` belongs to a tester. Never choose it as a run target.
 - Keep answers short and ask one clarifying question at a time.

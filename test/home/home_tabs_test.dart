@@ -6,17 +6,17 @@ void main() {
   test('income off hides its tab and keeps the others in their slots', () {
     final tabs = visibleHomeTabs(const FixedFeatureFlags({}));
 
-    expect(tabs, [HomeTab.shop, HomeTab.loaner]);
-    // Shop and loaner read their scroll controller by slot, so these must
+    expect(tabs, [HomeTab.shop, HomeTab.credit]);
+    // Shop and credit read their scroll controller by slot, so these must
     // not move when a tab disappears.
     expect(HomeTab.shop.index, 0);
-    expect(HomeTab.loaner.index, 1);
+    expect(HomeTab.credit.index, 1);
   });
 
   test('income on shows every tab, income last', () {
     final tabs = visibleHomeTabs(const FixedFeatureFlags({Feature.income}));
 
-    expect(tabs, [HomeTab.shop, HomeTab.loaner, HomeTab.income]);
+    expect(tabs, [HomeTab.shop, HomeTab.credit, HomeTab.income]);
     expect(HomeTab.income.index, 2);
   });
 }
