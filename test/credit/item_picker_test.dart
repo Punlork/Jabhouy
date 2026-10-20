@@ -153,7 +153,7 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('a \$ option converts into the Credit\'s riel', (tester) async {
+  testWidgets(r"a $ option converts into the Credit's riel", (tester) async {
     await open(tester);
 
     await tester.tap(plusOf(r'$7.50'));

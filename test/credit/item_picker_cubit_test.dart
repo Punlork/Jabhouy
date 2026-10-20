@@ -114,9 +114,9 @@ void main() {
   test('search and category narrow the items, not the choice', () async {
     final c = cubit();
     await settled(c);
-    c.setQty('p3', 5);
-
-    c.search('coca');
+    c
+      ..setQty('p3', 5)
+      ..search('coca');
     expect(c.state.items.map((i) => i.id), ['coke']);
     expect(c.state.lines.map((l) => l.priceId), ['p3'], reason: 'kept');
 
@@ -129,7 +129,7 @@ void main() {
   });
 
   test('lines already on the Credit keep their snapshot and id', () async {
-    final old = CreditLine(
+    const old = CreditLine(
       id: 'line-1',
       priceId: 'p1',
       name: 'Coke (old name)',
@@ -138,7 +138,7 @@ void main() {
       currency: Currency.khr,
       unitPrice: 2500, // the price then; now 3,000
     );
-    final gone = CreditLine(
+    const gone = CreditLine(
       id: 'line-2',
       name: 'ទំនិញលុបហើយ',
       unit: 'ដប',
