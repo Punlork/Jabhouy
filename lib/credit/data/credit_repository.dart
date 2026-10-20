@@ -36,6 +36,9 @@ class CreditRepository {
   String get _shopId => _scope.shopId!;
   bool get _isViewer => _scope.role == MemberRole.viewer;
 
+  /// Owner and editor delete; a viewer only records (decision 14).
+  bool get canDelete => !_isViewer;
+
   /// Credits newest first; [search] narrows by customer name.
   Stream<List<Credit>> watchCredits({
     CreditFilter filter = CreditFilter.unpaid,
