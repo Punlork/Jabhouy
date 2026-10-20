@@ -16,7 +16,6 @@ import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -26,8 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
-  final _isBarcodeScanEnabled =
-      getIt<FeatureFlags>().isEnabled(Feature.barcodeScan);
+  final _isBarcodeScanEnabled = getIt<FeatureFlags>().isEnabled(Feature.barcodeScan);
   late final List<ScrollController> _scrollControllers;
   int _selectedIndex = 0;
   late final PageController _pageController;
@@ -37,8 +35,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   HomeTab get _selectedTab => _tabs[_selectedIndex];
   bool get _isIncomeEnabled => _tabs.contains(HomeTab.income);
-  final _isBackgroundSyncEnabled =
-      getIt<FeatureFlags>().isEnabled(Feature.backgroundSync);
+  final _isBackgroundSyncEnabled = getIt<FeatureFlags>().isEnabled(Feature.backgroundSync);
 
   /// The search header slides away while scrolling down a list and comes
   /// back on any scroll up. Category chips live in the tab, so they stay
@@ -74,8 +71,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     if (_scrollRun <= -_chromeScrollThreshold) {
       _setChromeVisible(true);
-    } else if (_scrollRun >= _chromeScrollThreshold &&
-        _searchController.text.isEmpty) {
+    } else if (_scrollRun >= _chromeScrollThreshold && _searchController.text.isEmpty) {
       // A search in progress keeps its field on screen.
       _setChromeVisible(false);
     }
@@ -83,27 +79,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget _pageFor(HomeTab tab) => switch (tab) {
-        HomeTab.shop => ItemsTab(
-          onEditItem: _openItemForm,
-          onAddItem: (name) => _openItemForm(null, null, name),
-          chromeVisible: _chromeVisible,
-        ),
-        HomeTab.credit => CreditView(
-          onOpen: (credit) =>
-              showCreditDetails(context, credit, onEdit: _openCreditForm),
-        ),
-        HomeTab.income => const IncomeView(),
-      };
+    HomeTab.shop => ItemsTab(
+      onEditItem: _openItemForm,
+      onAddItem: (name) => _openItemForm(null, null, name),
+      chromeVisible: _chromeVisible,
+    ),
+    HomeTab.credit => CreditView(onOpen: (credit) => showCreditDetails(context, credit, onEdit: _openCreditForm)),
+    HomeTab.income => const IncomeView(),
+  };
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) {
       final controller = _scrollControllers[_tabs[index].index];
       if (!controller.hasClients) return;
-      controller.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      controller.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       _selectedIndex = index;
     }
@@ -128,9 +117,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         showModalBottomSheet<void>(
           context: context,
           isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
           builder: (_) => MultiBlocProvider(
             providers: [
               BlocProvider.value(value: context.read<CategoryBloc>()),
@@ -139,11 +126,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             child: FilterSheet(
               initialCategoryFilter: context.read<ShopBloc>().state.asLoaded?.categoryFilter,
               onApply: (category) => context.read<ShopBloc>().add(
-                    ShopGetItemsEvent(
-                      categoryFilter: category,
-                      clearCategoryFilter: category == null,
-                    ),
-                  ),
+                ShopGetItemsEvent(categoryFilter: category, clearCategoryFilter: category == null),
+              ),
             ),
           ),
         );
@@ -153,15 +137,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         showModalBottomSheet<void>(
           context: context,
           isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
           builder: (_) => BlocProvider.value(
             value: context.read<IncomeBloc>(),
             child: Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
               child: IncomeFilterSheet(
                 initialFromDate: context.read<IncomeBloc>().state.asLoaded?.fromDate,
                 initialToDate: context.read<IncomeBloc>().state.asLoaded?.toDate,
@@ -169,13 +149,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 initialRecordFilter:
                     context.read<IncomeBloc>().state.asLoaded?.recordFilter ?? NotificationRecordFilter.all,
                 onApply: (fromDate, toDate, bankFilter, recordFilter) => context.read<IncomeBloc>().add(
-                      LoadIncomeDashboard(
-                        fromDate: fromDate,
-                        toDate: toDate,
-                        bankFilter: bankFilter,
-                        recordFilter: recordFilter,
-                      ),
-                    ),
+                  LoadIncomeDashboard(
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    bankFilter: bankFilter,
+                    recordFilter: recordFilter,
+                  ),
+                ),
               ),
             ),
           ),
@@ -195,28 +175,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   /// Adds a Credit, or edits [credit] (from its details sheet).
   void _openCreditForm([Credit? credit]) {
-    context.pushNamed(
-      AppRoutes.formCredit,
-      extra: {'existingCredit': credit},
-    );
+    context.pushNamed(AppRoutes.formCredit, extra: {'existingCredit': credit});
   }
 
   /// Adds an Item, or edits [item] (from the details sheet). A [barcode]
   /// no Item uses yet starts the new Item's first price row; a [name]
   /// (from a search) fills the new Item's name.
   void _openItemForm([Item? item, String? barcode, String? name]) {
-    context.pushNamed(
-      AppRoutes.formItem,
-      extra: {'existingItem': item, 'barcode': barcode, 'name': name},
-    );
+    context.pushNamed(AppRoutes.formItem, extra: {'existingItem': item, 'barcode': barcode, 'name': name});
   }
 
   /// Scan → the match's details, or Add item with the unknown code.
   Future<void> _scanItem() async {
-    final result = await findByBarcode(
-      context,
-      context.read<ItemListCubit>().itemsWithBarcode,
-    );
+    final result = await findByBarcode(context, context.read<ItemListCubit>().itemsWithBarcode);
     if (!mounted) return;
     switch (result) {
       case final Item item:
@@ -239,32 +210,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
 
     context.read<IncomeBloc>().add(
-          SeedIncomeDemoData(
-            context.l10n.demoDataAdded,
-            context.l10n.anotherMainDeviceActive,
-          ),
-        );
+      SeedIncomeDemoData(context.l10n.demoDataAdded, context.l10n.anotherMainDeviceActive),
+    );
   }
 
   _BottomActionConfig? _buildBottomActionConfig(AppState appState) {
     switch (_selectedTab) {
       case HomeTab.shop:
-        return _BottomActionConfig(
-          label: context.l10n.itemAdd,
-          onPressed: _openItemForm,
-        );
+        return _BottomActionConfig(label: context.l10n.itemAdd, onPressed: _openItemForm);
       case HomeTab.credit:
-        return _BottomActionConfig(
-          label: context.l10n.creditAdd,
-          onPressed: _openCreditForm,
-        );
+        return _BottomActionConfig(label: context.l10n.creditAdd, onPressed: _openCreditForm);
       case HomeTab.income:
         if (kReleaseMode) {
           return _BottomActionConfig(
             label: context.l10n.refreshStatus,
-            onPressed: () => context.read<IncomeBloc>().add(
-                  const RefreshIncomeTrackingStatus(),
-                ),
+            onPressed: () => context.read<IncomeBloc>().add(const RefreshIncomeTrackingStatus()),
           );
         }
 
@@ -284,9 +244,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     super.initState();
     _pageController = PageController(initialPage: _selectedIndex);
     // One per slot, not per visible tab: see HomeTab.
-    _scrollControllers = [
-      for (final _ in HomeTab.values) ScrollController(),
-    ];
+    _scrollControllers = [for (final _ in HomeTab.values) ScrollController()];
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final authState = context.read<AuthBloc>().state;
@@ -360,9 +318,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) {
           if (authState is! Authenticated) {
-            return const Scaffold(
-              body: SizedBox.expand(),
-            );
+            return const Scaffold(body: SizedBox.expand());
           }
 
           return _buildAuthenticatedScaffold(context);
@@ -432,43 +388,47 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       return switch (_selectedTab) {
                         // Filtering is the chips under the header.
                         HomeTab.shop => buildShopHeader(
-                            searchHintText: context.l10n.itemSearchHint,
-                            withFilter: false,
-                            onScanPressed:
-                                _isBarcodeScanEnabled ? _scanItem : null,
-                          ),
+                          searchHintText: context.l10n.itemSearchHint,
+                          withFilter: false,
+                          onScanPressed: _isBarcodeScanEnabled ? _scanItem : null,
+                        ),
                         // The Credit tab carries its own search (canvas ៧).
                         HomeTab.credit => const SizedBox.shrink(),
                         HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
-                            builder: (context, state) {
-                              final loaded = state.asLoaded;
-                              return buildShopHeader(
-                                hasFilter: loaded?.hasFilter ?? false,
-                                searchHintText: context.l10n.searchIncome,
-                              );
-                            },
-                          ),
+                          builder: (context, state) {
+                            final loaded = state.asLoaded;
+                            return buildShopHeader(
+                              hasFilter: loaded?.hasFilter ?? false,
+                              searchHintText: context.l10n.searchIncome,
+                            );
+                          },
+                        ),
                       };
                     },
                   ),
                 ),
               ),
               Expanded(
-                child: MultiBlocProvider(
-                  providers: [
-                    if (_isIncomeEnabled) BlocProvider.value(value: context.read<IncomeBloc>()),
-                  ],
-                  child: TabScrollManager(
-                    controllers: _scrollControllers,
-                    child: NotificationListener<ScrollUpdateNotification>(
-                      onNotification: _onPageScroll,
-                      child: PageView(
-                        controller: _pageController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [for (final tab in _tabs) _pageFor(tab)],
+                child: Builder(
+                  builder: (context) {
+                    Widget content = TabScrollManager(
+                      controllers: _scrollControllers,
+                      child: NotificationListener<ScrollUpdateNotification>(
+                        onNotification: _onPageScroll,
+                        child: PageView(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [for (final tab in _tabs) _pageFor(tab)],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+
+                    if (_isIncomeEnabled) {
+                      content = BlocProvider.value(value: context.read<IncomeBloc>(), child: content);
+                    }
+
+                    return content;
+                  },
                 ),
               ),
             ],
@@ -478,26 +438,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           mainAxisSize: MainAxisSize.min,
           children: [
             if (_isBackgroundSyncEnabled)
-              SyncIndicator(
-                engine: getIt<SyncEngine>(),
-                connectivity: getIt<ConnectivityService>(),
-              ),
+              SyncIndicator(engine: getIt<SyncEngine>(), connectivity: getIt<ConnectivityService>()),
             AppBottomNav(
               tabs: [
                 for (final tab in _tabs)
                   switch (tab) {
-                    HomeTab.shop => AppNavTab(
-                        icon: Icons.storefront_outlined,
-                        label: context.l10n.shop,
-                      ),
-                    HomeTab.credit => AppNavTab(
-                        icon: Icons.menu_book_outlined,
-                        label: context.l10n.credit,
-                      ),
+                    HomeTab.shop => AppNavTab(icon: Icons.storefront_outlined, label: context.l10n.shop),
+                    HomeTab.credit => AppNavTab(icon: Icons.menu_book_outlined, label: context.l10n.credit),
                     HomeTab.income => AppNavTab(
-                        icon: Icons.account_balance_wallet_outlined,
-                        label: context.l10n.income,
-                      ),
+                      icon: Icons.account_balance_wallet_outlined,
+                      label: context.l10n.income,
+                    ),
                   },
               ],
               selectedIndex: _selectedIndex,
@@ -517,10 +468,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 }
 
 class _BottomActionConfig {
-  const _BottomActionConfig({
-    required this.label,
-    this.onPressed,
-  });
+  const _BottomActionConfig({required this.label, this.onPressed});
 
   final String label;
   final VoidCallback? onPressed;
