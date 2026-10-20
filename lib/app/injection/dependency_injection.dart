@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/app/service/database/database_connection.dart';
 import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy/credit/credit.dart';
 import 'package:jabhouy/customer/customer.dart';
 import 'package:jabhouy/income/income.dart';
 import 'package:jabhouy/loaner/loaner.dart';
@@ -75,6 +76,7 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => LoanerApi(getIt<ApiService>()))
     ..registerLazySingleton(() => IncomeDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => IncomeApi(getIt<ApiService>()))
+    ..registerLazySingleton(() => CreditDao(getIt<AppDatabase>()))
     // The server for Shop-scoped data. To go live (jabhouy-api #3–#8),
     // register an HTTP `ShopSyncApi` here instead; nothing else changes.
     ..registerLazySingleton<ShopSyncApi>(InMemoryShopSyncApi.new)
@@ -88,6 +90,7 @@ Future<void> setupDependencies() async {
           CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>());
       final loaner = LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>());
       final items = getIt<ItemDao>();
+      final credits = getIt<CreditDao>();
       final shopSync = getIt<ShopSyncApi>();
       String shopId() => getIt<CurrentShop>().shopId!;
       return SyncEngine(
@@ -100,6 +103,8 @@ Future<void> setupDependencies() async {
           ItemSyncAdapter(items, shopSync, shopId),
           ItemCategorySyncAdapter(items, shopSync, shopId),
           ShopSettingsSyncAdapter(items, shopSync),
+          CreditCustomerSyncAdapter(credits, shopSync, shopId),
+          CreditSyncAdapter(credits, shopSync, shopId),
           // Registered even when Feature.income is off: a job queued
           // before the flag flipped would otherwise be rejected for good.
           IncomeSyncAdapter(
@@ -114,13 +119,23 @@ Future<void> setupDependencies() async {
         changesSource: shopSync,
         changeAppliers: [
           ItemCategoryChangeApplier(items),
+          CreditCustomerChangeApplier(credits),
           ItemChangeApplier(items),
+          CreditChangeApplier(credits),
           ShopSettingsChangeApplier(items),
         ],
       );
     })
     ..registerLazySingleton(
       () => SyncCoordinator(getIt<SyncEngine>(), getIt<ConnectivityService>()),
+    )
+    ..registerLazySingleton(
+      () => CreditRepository(
+        getIt<CreditDao>(),
+        getIt<CurrentShop>(),
+        getIt<SyncEngine>(),
+        getIt<ConnectivityService>(),
+      ),
     )
     ..registerLazySingleton<IncomeRepository>(
       () => DefaultIncomeRepository(

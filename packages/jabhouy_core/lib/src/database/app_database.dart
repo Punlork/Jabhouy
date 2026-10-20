@@ -445,6 +445,11 @@ class AppDatabase extends _$AppDatabase {
       categoryTable.id,
     );
     final creditIds = await ids(creditTable, creditTable.shopId, creditTable.id);
+    final customerIds = await ids(
+      customerTable,
+      customerTable.shopId,
+      customerTable.id,
+    );
     await (delete(itemPriceTable)..where((t) => t.itemId.isIn(itemIds))).go();
     await (delete(
       categoryUnitTable,
@@ -474,7 +479,11 @@ class AppDatabase extends _$AppDatabase {
           t.entityType.equalsValue(SyncEntityType.item) &
               t.localId.isIn(itemIds) |
           t.entityType.equalsValue(SyncEntityType.itemCategory) &
-              t.localId.isIn(categoryIds),
+              t.localId.isIn(categoryIds) |
+          t.entityType.equalsValue(SyncEntityType.credit) &
+              t.localId.isIn(creditIds) |
+          t.entityType.equalsValue(SyncEntityType.creditCustomer) &
+              t.localId.isIn(customerIds),
     )).go();
   });
 

@@ -208,6 +208,8 @@ class _FailedJobsSheet extends StatelessWidget {
           SyncEntityType.item => l10n.shop,
           SyncEntityType.itemCategory => l10n.category,
           SyncEntityType.shopSettings => l10n.settings,
+          SyncEntityType.creditCustomer => l10n.customers,
+          SyncEntityType.credit => l10n.loaner,
         };
 
     return SafeArea(

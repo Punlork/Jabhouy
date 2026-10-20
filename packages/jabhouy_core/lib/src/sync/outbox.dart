@@ -19,6 +19,12 @@ enum SyncEntityType {
 
   /// The Shop's price and currency settings; one row per Shop.
   shopSettings,
+
+  /// Redesign Customer (schema 9 `customer`); `customer` is the old table's.
+  creditCustomer,
+
+  /// Redesign Credit with its items; `loaner` is the old table's.
+  credit,
 }
 
 /// What an outbox job will do to the server.
