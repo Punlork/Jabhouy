@@ -84,12 +84,11 @@ class ItemRepository {
   /// The last 10 opened Items, newest first, for RecentPills.
   Stream<List<Item>> watchRecentItems() => _dao.watchRecentItems(_shopId);
 
-  /// Pull to refresh: sends queued changes now.
-  /// shortcut: pushes only; pulling Items from the server lands with
-  /// issue 11 (`/shops/:id/changes`).
+  /// Pull to refresh: sends queued changes, then reads the Shop's
+  /// `/changes` from where this phone left off.
   Future<void> pullLatest() async {
     if (!_scope.syncs || !await _connectivity.isOnline) return;
-    await _engine.drain();
+    await _engine.pullShop(_shopId);
   }
 
   Stream<List<ItemCategory>> watchCategories() => _dao.watchCategories(_shopId);

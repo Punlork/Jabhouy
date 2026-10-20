@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,6 +33,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   int _selectedIndex = 0;
   late final PageController _pageController;
   bool _hasLoadedProtectedData = false;
+  StreamSubscription<SyncNotice>? _syncNotices;
   final _tabs = visibleHomeTabs(getIt<FeatureFlags>());
 
   HomeTab get _selectedTab => _tabs[_selectedIndex];
@@ -339,6 +342,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.read<LoanerBloc>().add(LoadLoaners());
     context.read<ShopBloc>().add(ShopGetItemsEvent());
     context.read<ItemListCubit>().start();
+    _syncNotices ??= getIt<SyncEngine>().notices.listen((notice) {
+      // A removed Member's data is already gone; the list just empties.
+      if (notice == SyncNotice.noPermission && mounted) {
+        showErrorSnackBar(context, context.l10n.syncNoPermission);
+      }
+    });
     context.read<CategoryBloc>().add(CategoryGetEvent());
     context.read<CustomerBloc>().add(LoadCustomers());
     // With background sync the loads above only read the phone; this is
@@ -351,6 +360,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
+    _syncNotices?.cancel();
     for (final controller in _scrollControllers) {
       controller.dispose();
     }

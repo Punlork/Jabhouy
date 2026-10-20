@@ -4,7 +4,18 @@ import 'package:drift/drift.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_sync/src/backoff.dart';
 import 'package:jabhouy_sync/src/feature_pull_adapter.dart';
+import 'package:jabhouy_sync/src/shop_api.dart';
 import 'package:jabhouy_sync/src/transport.dart';
+
+/// Something the seller should be told about, from a server rule.
+enum SyncNotice {
+  /// A queued write was refused: the role no longer allows it
+  /// (`syncNoPermission`). The phone now shows the server's copy.
+  noPermission,
+
+  /// The Member was removed from the Shop; its data left the phone.
+  shopRemoved,
+}
 
 /// What the engine is doing, for the sync indicator.
 ///
@@ -75,11 +86,16 @@ class SyncEngine {
     List<FeaturePullAdapter> pullAdapters = const [],
     this.pullInterval = const Duration(minutes: 15),
     this.forcedPullFloor = const Duration(seconds: 10),
+    ChangesSource? changesSource,
+    List<ChangeApplier> changeAppliers = const [],
+    this.changesPageSize = 200,
   })  : _db = database,
         _transport = transport,
         _pullAdapters = {
           for (final adapter in pullAdapters) adapter.entityType: adapter,
         },
+        _changes = changesSource,
+        _appliers = changeAppliers,
         _diagnostics = diagnostics,
         _clock = clock,
         _recentLimit = recentKeyLimit;
@@ -93,6 +109,20 @@ class SyncEngine {
   final BackoffPolicy backoff;
 
   final Map<SyncEntityType, FeaturePullAdapter> _pullAdapters;
+
+  final ChangesSource? _changes;
+
+  /// Applied in this order, so a parent (category) lands before its
+  /// children (items).
+  final List<ChangeApplier> _appliers;
+
+  /// Rows asked of `/changes` per request.
+  final int changesPageSize;
+
+  final _notices = StreamController<SyncNotice>.broadcast();
+
+  /// Server rules the seller should hear about.
+  Stream<SyncNotice> get notices => _notices.stream;
 
   /// How long a pull stays fresh. One seller on usually one phone makes
   /// almost every change on this device, so this only bounds how old
@@ -349,6 +379,80 @@ class SyncEngine {
     }
   }
 
+  /// Pulls [shopId]'s `/changes` from its saved cursor until the server
+  /// says there is no more, applying each page and moving the cursor in
+  /// one transaction, so a crash re-reads a page rather than skipping it.
+  /// Drains first, so the server has this phone's writes. A no-op without
+  /// a [ChangesSource].
+  Future<void> pullShop(String shopId) => _exclusively(() async {
+        final source = _changes;
+        if (source == null) return;
+        await _drainOnce();
+        unawaited(_publish());
+        for (var page = 0; page < _maxChangePages; page++) {
+          final since = await _cursorOf(shopId);
+          switch (await source.changes(
+            shopId,
+            since: since,
+            limit: changesPageSize,
+          )) {
+            case Err(:final error):
+              if (error is ShopApiException && error.code == 'not_member') {
+                await _removeShop(shopId);
+              } else {
+                _diagnostics.log(
+                  'changes failed',
+                  data: {'shopId': shopId, 'error': error.message},
+                );
+              }
+              return;
+            case Ok(:final value):
+              await _db.transaction(() async {
+                for (final applier in _appliers) {
+                  final rows = value.rows[applier.entityType];
+                  if (rows == null || rows.isEmpty) continue;
+                  await applier.apply(
+                    shopId,
+                    rows,
+                    skipIds: await _db.queuedLocalIds(applier.entityType),
+                  );
+                }
+                await _setCursor(shopId, value.cursor);
+              });
+              _diagnostics.log(
+                'pulled changes',
+                data: {'shopId': shopId, 'cursor': value.cursor},
+              );
+              // A server that says "more" without moving would loop.
+              if (!value.hasMore || value.cursor <= since) return;
+          }
+        }
+      });
+
+  /// A server that never says it is done is cut off after this many pages.
+  static const _maxChangePages = 500;
+
+  Future<int> _cursorOf(String shopId) async {
+    final row = await (_db.select(_db.shopSyncCursors)
+          ..where((t) => t.shopId.equals(shopId)))
+        .getSingleOrNull();
+    return row?.seq ?? 0;
+  }
+
+  Future<void> _setCursor(String shopId, int seq) =>
+      _db.into(_db.shopSyncCursors).insertOnConflictUpdate(
+            ShopSyncCursorsCompanion.insert(
+              shopId: shopId,
+              seq: Value(seq),
+            ),
+          );
+
+  Future<void> _removeShop(String shopId) async {
+    await _db.wipeShop(shopId);
+    _diagnostics.log('shop removed', data: {'shopId': shopId});
+    _notices.add(SyncNotice.shopRemoved);
+  }
+
   Future<bool> _isOlderThan(SyncEntityType type, Duration age) async {
     final cursor = await (_db.select(_db.syncCursors)
           ..where((t) => t.entityType.equalsValue(type)))
@@ -421,6 +525,26 @@ class SyncEngine {
         // hardcoded ApiResponse(success: true) and lost the row.
         await _reschedule(entry, error);
         return false;
+
+      case SyncPushDropped(:final reason, :final shopId):
+        // Decision 11: drop it, show the server's copy, never retry. The
+        // pull skipped this row while it was queued, so start the Shop
+        // over from seq 0 to fetch it again.
+        await _delete(entry);
+        _diagnostics.log(
+          'dropped',
+          data: {'id': entry.id, 'reason': reason.name},
+        );
+        if (reason == SyncDropReason.notMember) {
+          await _removeShop(shopId);
+        } else {
+          if (reason == SyncDropReason.forbiddenRole) {
+            _notices.add(SyncNotice.noPermission);
+          }
+          await _setCursor(shopId, 0);
+          unawaited(pullShop(shopId));
+        }
+        return true;
 
       case SyncPushRejected(:final error):
         // Keep the job and its reason rather than dropping it, and park it:

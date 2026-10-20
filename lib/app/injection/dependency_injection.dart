@@ -75,6 +75,9 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => LoanerApi(getIt<ApiService>()))
     ..registerLazySingleton(() => IncomeDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => IncomeApi(getIt<ApiService>()))
+    // The server for Shop-scoped data. To go live (jabhouy-api #3–#8),
+    // register an HTTP `ShopSyncApi` here instead; nothing else changes.
+    ..registerLazySingleton<ShopSyncApi>(InMemoryShopSyncApi.new)
     // One engine for the whole app: the outbox is one queue, and ordering
     // a shop item after its category only works if both drain together.
     ..registerLazySingleton(() {
@@ -84,6 +87,9 @@ Future<void> setupDependencies() async {
       final customer =
           CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>());
       final loaner = LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>());
+      final items = getIt<ItemDao>();
+      final shopSync = getIt<ShopSyncApi>();
+      String shopId() => getIt<CurrentShop>().shopId!;
       return SyncEngine(
         database: getIt<AppDatabase>(),
         transport: AdapterSyncTransport([
@@ -91,6 +97,9 @@ Future<void> setupDependencies() async {
           category,
           customer,
           loaner,
+          ItemSyncAdapter(items, shopSync, shopId),
+          ItemCategorySyncAdapter(items, shopSync, shopId),
+          ShopSettingsSyncAdapter(items, shopSync),
           // Registered even when Feature.income is off: a job queued
           // before the flag flipped would otherwise be rejected for good.
           IncomeSyncAdapter(
@@ -101,6 +110,13 @@ Future<void> setupDependencies() async {
         ]),
         // Income pulls through PullRemoteNotificationsUseCase instead.
         pullAdapters: [shop, category, customer, loaner],
+        // Categories first, so an item's category is already here.
+        changesSource: shopSync,
+        changeAppliers: [
+          ItemCategoryChangeApplier(items),
+          ItemChangeApplier(items),
+          ShopSettingsChangeApplier(items),
+        ],
       );
     })
     ..registerLazySingleton(

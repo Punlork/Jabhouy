@@ -9339,6 +9339,213 @@ class RecentItemTableCompanion extends UpdateCompanion<RecentItemRow> {
   }
 }
 
+class $ShopSyncCursorsTable extends ShopSyncCursors
+    with TableInfo<$ShopSyncCursorsTable, ShopSyncCursorRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShopSyncCursorsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _shopIdMeta = const VerificationMeta('shopId');
+  @override
+  late final GeneratedColumn<String> shopId = GeneratedColumn<String>(
+    'shop_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _seqMeta = const VerificationMeta('seq');
+  @override
+  late final GeneratedColumn<int> seq = GeneratedColumn<int>(
+    'seq',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [shopId, seq];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shop_sync_cursors';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ShopSyncCursorRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('shop_id')) {
+      context.handle(
+        _shopIdMeta,
+        shopId.isAcceptableOrUnknown(data['shop_id']!, _shopIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_shopIdMeta);
+    }
+    if (data.containsKey('seq')) {
+      context.handle(
+        _seqMeta,
+        seq.isAcceptableOrUnknown(data['seq']!, _seqMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {shopId};
+  @override
+  ShopSyncCursorRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShopSyncCursorRow(
+      shopId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shop_id'],
+      )!,
+      seq: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seq'],
+      )!,
+    );
+  }
+
+  @override
+  $ShopSyncCursorsTable createAlias(String alias) {
+    return $ShopSyncCursorsTable(attachedDatabase, alias);
+  }
+}
+
+class ShopSyncCursorRow extends DataClass
+    implements Insertable<ShopSyncCursorRow> {
+  final String shopId;
+  final int seq;
+  const ShopSyncCursorRow({required this.shopId, required this.seq});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['shop_id'] = Variable<String>(shopId);
+    map['seq'] = Variable<int>(seq);
+    return map;
+  }
+
+  ShopSyncCursorsCompanion toCompanion(bool nullToAbsent) {
+    return ShopSyncCursorsCompanion(shopId: Value(shopId), seq: Value(seq));
+  }
+
+  factory ShopSyncCursorRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShopSyncCursorRow(
+      shopId: serializer.fromJson<String>(json['shopId']),
+      seq: serializer.fromJson<int>(json['seq']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'shopId': serializer.toJson<String>(shopId),
+      'seq': serializer.toJson<int>(seq),
+    };
+  }
+
+  ShopSyncCursorRow copyWith({String? shopId, int? seq}) =>
+      ShopSyncCursorRow(shopId: shopId ?? this.shopId, seq: seq ?? this.seq);
+  ShopSyncCursorRow copyWithCompanion(ShopSyncCursorsCompanion data) {
+    return ShopSyncCursorRow(
+      shopId: data.shopId.present ? data.shopId.value : this.shopId,
+      seq: data.seq.present ? data.seq.value : this.seq,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShopSyncCursorRow(')
+          ..write('shopId: $shopId, ')
+          ..write('seq: $seq')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(shopId, seq);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShopSyncCursorRow &&
+          other.shopId == this.shopId &&
+          other.seq == this.seq);
+}
+
+class ShopSyncCursorsCompanion extends UpdateCompanion<ShopSyncCursorRow> {
+  final Value<String> shopId;
+  final Value<int> seq;
+  final Value<int> rowid;
+  const ShopSyncCursorsCompanion({
+    this.shopId = const Value.absent(),
+    this.seq = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShopSyncCursorsCompanion.insert({
+    required String shopId,
+    this.seq = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : shopId = Value(shopId);
+  static Insertable<ShopSyncCursorRow> custom({
+    Expression<String>? shopId,
+    Expression<int>? seq,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (shopId != null) 'shop_id': shopId,
+      if (seq != null) 'seq': seq,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShopSyncCursorsCompanion copyWith({
+    Value<String>? shopId,
+    Value<int>? seq,
+    Value<int>? rowid,
+  }) {
+    return ShopSyncCursorsCompanion(
+      shopId: shopId ?? this.shopId,
+      seq: seq ?? this.seq,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (shopId.present) {
+      map['shop_id'] = Variable<String>(shopId.value);
+    }
+    if (seq.present) {
+      map['seq'] = Variable<int>(seq.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShopSyncCursorsCompanion(')
+          ..write('shopId: $shopId, ')
+          ..write('seq: $seq, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -9364,6 +9571,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $RecentItemTableTable recentItemTable = $RecentItemTableTable(
+    this,
+  );
+  late final $ShopSyncCursorsTable shopSyncCursors = $ShopSyncCursorsTable(
     this,
   );
   late final Index outboxDrainIdx = Index(
@@ -9392,6 +9602,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     creditTable,
     creditItemTable,
     recentItemTable,
+    shopSyncCursors,
     outboxDrainIdx,
   ];
 }
@@ -14492,6 +14703,155 @@ typedef $$RecentItemTableTableProcessedTableManager =
       RecentItemRow,
       PrefetchHooks Function()
     >;
+typedef $$ShopSyncCursorsTableCreateCompanionBuilder =
+    ShopSyncCursorsCompanion Function({
+      required String shopId,
+      Value<int> seq,
+      Value<int> rowid,
+    });
+typedef $$ShopSyncCursorsTableUpdateCompanionBuilder =
+    ShopSyncCursorsCompanion Function({
+      Value<String> shopId,
+      Value<int> seq,
+      Value<int> rowid,
+    });
+
+class $$ShopSyncCursorsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShopSyncCursorsTable> {
+  $$ShopSyncCursorsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ShopSyncCursorsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShopSyncCursorsTable> {
+  $$ShopSyncCursorsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ShopSyncCursorsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShopSyncCursorsTable> {
+  $$ShopSyncCursorsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get shopId =>
+      $composableBuilder(column: $table.shopId, builder: (column) => column);
+
+  GeneratedColumn<int> get seq =>
+      $composableBuilder(column: $table.seq, builder: (column) => column);
+}
+
+class $$ShopSyncCursorsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ShopSyncCursorsTable,
+          ShopSyncCursorRow,
+          $$ShopSyncCursorsTableFilterComposer,
+          $$ShopSyncCursorsTableOrderingComposer,
+          $$ShopSyncCursorsTableAnnotationComposer,
+          $$ShopSyncCursorsTableCreateCompanionBuilder,
+          $$ShopSyncCursorsTableUpdateCompanionBuilder,
+          (
+            ShopSyncCursorRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ShopSyncCursorsTable,
+              ShopSyncCursorRow
+            >,
+          ),
+          ShopSyncCursorRow,
+          PrefetchHooks Function()
+        > {
+  $$ShopSyncCursorsTableTableManager(
+    _$AppDatabase db,
+    $ShopSyncCursorsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShopSyncCursorsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShopSyncCursorsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShopSyncCursorsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> shopId = const Value.absent(),
+                Value<int> seq = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShopSyncCursorsCompanion(
+                shopId: shopId,
+                seq: seq,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String shopId,
+                Value<int> seq = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShopSyncCursorsCompanion.insert(
+                shopId: shopId,
+                seq: seq,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ShopSyncCursorsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ShopSyncCursorsTable,
+      ShopSyncCursorRow,
+      $$ShopSyncCursorsTableFilterComposer,
+      $$ShopSyncCursorsTableOrderingComposer,
+      $$ShopSyncCursorsTableAnnotationComposer,
+      $$ShopSyncCursorsTableCreateCompanionBuilder,
+      $$ShopSyncCursorsTableUpdateCompanionBuilder,
+      (
+        ShopSyncCursorRow,
+        BaseReferences<_$AppDatabase, $ShopSyncCursorsTable, ShopSyncCursorRow>,
+      ),
+      ShopSyncCursorRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -14530,4 +14890,6 @@ class $AppDatabaseManager {
       $$CreditItemTableTableTableManager(_db, _db.creditItemTable);
   $$RecentItemTableTableTableManager get recentItemTable =>
       $$RecentItemTableTableTableManager(_db, _db.recentItemTable);
+  $$ShopSyncCursorsTableTableManager get shopSyncCursors =>
+      $$ShopSyncCursorsTableTableManager(_db, _db.shopSyncCursors);
 }

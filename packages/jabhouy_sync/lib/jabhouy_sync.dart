@@ -9,5 +9,7 @@ export 'src/backoff.dart';
 export 'src/feature_pull_adapter.dart';
 export 'src/feature_sync_adapter.dart';
 export 'src/fetch_every_page.dart';
+export 'src/in_memory_shop_api.dart';
+export 'src/shop_api.dart';
 export 'src/sync_engine.dart';
 export 'src/transport.dart';

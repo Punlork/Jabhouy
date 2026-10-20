@@ -116,4 +116,51 @@ void main() {
           ),
         );
   });
+
+  test('10 -> 11 adds shop_sync_cursors; rows survive', () async {
+    final dir = await Directory.systemTemp.createTemp('jabhouy_migration');
+    addTearDown(() => dir.delete(recursive: true));
+    final file = File('${dir.path}/db.sqlite');
+
+    final old = AppDatabase(NativeDatabase(file));
+    await old.into(old.itemTable).insert(
+          ItemTableCompanion.insert(id: 'coke', shopId: 's1', name: 'Coca-Cola'),
+        );
+    await old.customStatement('DROP TABLE shop_sync_cursors');
+    await old.customStatement('PRAGMA user_version = 10');
+    await old.close();
+
+    final upgraded = AppDatabase(NativeDatabase(file));
+    addTearDown(upgraded.close);
+
+    expect((await upgraded.select(upgraded.itemTable).get()).single.id, 'coke');
+    expect(await upgraded.select(upgraded.shopSyncCursors).get(), isEmpty);
+  });
+
+  test('wipeShop removes one Shop and leaves the other', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    for (final shop in ['s1', 's2']) {
+      await db.into(db.itemTable).insert(
+            ItemTableCompanion.insert(id: 'i-$shop', shopId: shop, name: shop),
+          );
+      await db.into(db.itemPriceTable).insert(
+            ItemPriceTableCompanion.insert(
+              id: 'p-$shop',
+              itemId: 'i-$shop',
+              unit: 'ដប',
+              currency: 'KHR',
+            ),
+          );
+      await db.into(db.shopSyncCursors).insert(
+            ShopSyncCursorsCompanion.insert(shopId: shop),
+          );
+    }
+
+    await db.wipeShop('s1');
+
+    expect((await db.select(db.itemTable).get()).map((i) => i.id), ['i-s2']);
+    expect((await db.select(db.itemPriceTable).get()).map((p) => p.id), ['p-s2']);
+    expect((await db.select(db.shopSyncCursors).get()).map((c) => c.shopId), ['s2']);
+  });
 }

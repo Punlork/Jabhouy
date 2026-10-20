@@ -225,6 +225,17 @@ class RecentItemTable extends Table {
   Set<Column> get primaryKey => {shopId, itemId};
 }
 
+/// How far this phone has pulled each Shop's `/changes`: the highest
+/// `seq` applied (decision 36). Not user data a pull may overwrite.
+@DataClassName('ShopSyncCursorRow')
+class ShopSyncCursors extends Table {
+  TextColumn get shopId => text()();
+  IntColumn get seq => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {shopId};
+}
+
 @DataClassName('CustomerRow')
 class CustomerTable extends Table with SyncedColumns {
   @override
@@ -306,6 +317,7 @@ class CreditItemTable extends Table {
     CreditTable,
     CreditItemTable,
     RecentItemTable,
+    ShopSyncCursors,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -315,7 +327,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   /// The ids of [type] rows that still have a job in the outbox.
   ///
@@ -392,6 +404,10 @@ class AppDatabase extends _$AppDatabase {
         if (from < 10) {
           await m.createTable(recentItemTable);
         }
+
+        if (from < 11) {
+          await m.createTable(shopSyncCursors);
+        }
       },
     );
   }
@@ -408,6 +424,60 @@ class AppDatabase extends _$AppDatabase {
         creditItemTable,
       ];
 
+  /// Forgets everything held for [shopId]: its rows, recents, queued jobs
+  /// and cursor. For a removed Member (decision 11); other Shops stay.
+  Future<void> wipeShop(String shopId) => transaction(() async {
+    Future<Set<String>> ids(
+      TableInfo<Table, Object?> table,
+      GeneratedColumn<String> shop,
+      GeneratedColumn<String> id,
+    ) async {
+      final query = selectOnly(table)
+        ..addColumns([id])
+        ..where(shop.equals(shopId));
+      return {for (final row in await query.get()) row.read(id)!};
+    }
+
+    final itemIds = await ids(itemTable, itemTable.shopId, itemTable.id);
+    final categoryIds = await ids(
+      categoryTable,
+      categoryTable.shopId,
+      categoryTable.id,
+    );
+    final creditIds = await ids(creditTable, creditTable.shopId, creditTable.id);
+    await (delete(itemPriceTable)..where((t) => t.itemId.isIn(itemIds))).go();
+    await (delete(
+      categoryUnitTable,
+    )..where((t) => t.categoryId.isIn(categoryIds))).go();
+    await (delete(
+      creditItemTable,
+    )..where((t) => t.creditId.isIn(creditIds))).go();
+    for (final table in <TableInfo<Table, Object?>>[
+      itemTable,
+      categoryTable,
+      customerTable,
+      creditTable,
+      memberTable,
+      shopSettingsTable,
+    ]) {
+      await customStatement(
+        'DELETE FROM ${table.actualTableName} WHERE shop_id = ?',
+        [shopId],
+      );
+    }
+    await (delete(recentItemTable)..where((t) => t.shopId.equals(shopId))).go();
+    await (delete(shopSyncCursors)..where((t) => t.shopId.equals(shopId))).go();
+    await (delete(outboxEntries)..where(
+      (t) =>
+          t.entityType.equalsValue(SyncEntityType.shopSettings) &
+              t.localId.equals(shopId) |
+          t.entityType.equalsValue(SyncEntityType.item) &
+              t.localId.isIn(itemIds) |
+          t.entityType.equalsValue(SyncEntityType.itemCategory) &
+              t.localId.isIn(categoryIds),
+    )).go();
+  });
+
   Future<void> clearUserData() async {
     await transaction(() async {
       await delete(bankNotifications).go();
@@ -421,6 +491,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(recentItemTable).go();
       // Or the next account to sign in would skip its first pull.
       await delete(syncCursors).go();
+      await delete(shopSyncCursors).go();
     });
   }
 }

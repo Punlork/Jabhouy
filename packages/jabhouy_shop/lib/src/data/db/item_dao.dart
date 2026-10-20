@@ -419,6 +419,187 @@ class ItemDao {
     return [for (final row in rows) row.read<String>('unit')];
   }
 
+  /// The live Item with [id] and its options, or null once deleted.
+  Future<Item?> liveItem(String id) async {
+    final query = _db.select(_db.itemTable).join([
+      leftOuterJoin(
+        _db.itemPriceTable,
+        _db.itemPriceTable.itemId.equalsExp(_db.itemTable.id),
+      ),
+    ])
+      ..where(_db.itemTable.id.equals(id) & _db.itemTable.deletedAt.isNull())
+      ..orderBy([OrderingTerm.asc(_db.itemPriceTable.sortOrder)]);
+    return (await query.get().then(_itemsFrom)).firstOrNull;
+  }
+
+  /// The live category with [id] and its units, or null once deleted.
+  Future<ItemCategory?> liveCategory(String id) async {
+    final row =
+        await (_db.select(_db.categoryTable)
+              ..where((c) => c.id.equals(id) & c.deletedAt.isNull()))
+            .getSingleOrNull();
+    if (row == null) return null;
+    final units = await (_db.select(
+      _db.categoryUnitTable,
+    )..where((u) => u.categoryId.equals(id))).get();
+    return ItemCategory(
+      id: row.id,
+      name: row.name,
+      sortOrder: row.sortOrder,
+      hidden: row.hidden,
+      units: [for (final u in units) CategoryUnit(unit: u.unit, hidden: u.hidden)],
+    );
+  }
+
+  /// Applies the server's Item rows (`/changes`): a row with `deletedAt`
+  /// hides the Item, any other replaces it and its options. Rows in
+  /// [skip] have a queued local edit and stay as they are.
+  Future<void> applyItems(
+    String shopId,
+    List<Map<String, Object?>> rows,
+    Set<String> skip,
+  ) async {
+    for (final row in rows) {
+      final id = row['id']! as String;
+      if (skip.contains(id)) continue;
+      final common = _serverColumns(row);
+      if (row['deletedAt'] != null) {
+        await (_db.update(_db.itemTable)..where((i) => i.id.equals(id))).write(
+          ItemTableCompanion(
+            deletedAt: common.deletedAt,
+            updatedAt: common.updatedAt,
+            updatedBy: common.updatedBy,
+            seq: common.seq,
+          ),
+        );
+        continue;
+      }
+      await _db.into(_db.itemTable).insertOnConflictUpdate(
+            ItemTableCompanion.insert(
+              id: id,
+              shopId: shopId,
+              name: row['name']! as String,
+              nicknames: Value(jsonEncode(row['nicknames'] ?? const [])),
+              categoryId: Value(row['categoryId'] as String?),
+              photoUrl: Value(row['photoUrl'] as String?),
+              note: Value(row['note'] as String?),
+              updatedAt: common.updatedAt,
+              updatedBy: common.updatedBy,
+              deletedAt: const Value(null),
+              seq: common.seq,
+            ),
+          );
+      await (_db.delete(_db.itemPriceTable)..where((p) => p.itemId.equals(id)))
+          .go();
+      for (final (i, price) in ((row['prices'] as List?) ?? const []).indexed) {
+        final p = price! as Map<String, Object?>;
+        await _db.into(_db.itemPriceTable).insert(
+              ItemPriceTableCompanion.insert(
+                id: p['id']! as String,
+                itemId: id,
+                unit: p['unit']! as String,
+                packQty: Value(p['packQty'] as int?),
+                barcode: Value(p['barcode'] as String?),
+                currency: p['currency']! as String,
+                price: Value(p['price'] as int?),
+                wholesale: Value(p['wholesale'] as int?),
+                cost: Value(p['cost'] as int?),
+                sortOrder: Value((p['sortOrder'] as int?) ?? i),
+              ),
+            );
+      }
+    }
+  }
+
+  /// Applies the server's category rows; units merge, never disappear
+  /// (decision 25).
+  Future<void> applyCategories(
+    String shopId,
+    List<Map<String, Object?>> rows,
+    Set<String> skip,
+  ) async {
+    for (final row in rows) {
+      final id = row['id']! as String;
+      if (skip.contains(id)) continue;
+      final common = _serverColumns(row);
+      if (row['deletedAt'] != null) {
+        await (_db.update(_db.categoryTable)..where((c) => c.id.equals(id)))
+            .write(
+          CategoryTableCompanion(
+            deletedAt: common.deletedAt,
+            updatedAt: common.updatedAt,
+            updatedBy: common.updatedBy,
+            seq: common.seq,
+          ),
+        );
+        continue;
+      }
+      await _db.into(_db.categoryTable).insertOnConflictUpdate(
+            CategoryTableCompanion.insert(
+              id: id,
+              shopId: shopId,
+              name: row['name']! as String,
+              sortOrder: Value((row['sortOrder'] as int?) ?? 0),
+              hidden: Value((row['hidden'] as bool?) ?? false),
+              updatedAt: common.updatedAt,
+              updatedBy: common.updatedBy,
+              deletedAt: const Value(null),
+              seq: common.seq,
+            ),
+          );
+      for (final unit in ((row['units'] as List?) ?? const [])) {
+        final u = unit! as Map<String, Object?>;
+        await _db.into(_db.categoryUnitTable).insertOnConflictUpdate(
+              CategoryUnitTableCompanion.insert(
+                categoryId: id,
+                unit: u['unit']! as String,
+                hidden: Value((u['hidden'] as bool?) ?? false),
+              ),
+            );
+      }
+    }
+  }
+
+  /// Applies the server's settings row; a queued local change wins.
+  Future<void> applySettings(
+    String shopId,
+    Map<String, Object?> row,
+    Set<String> skip,
+  ) async {
+    if (skip.contains(shopId)) return;
+    final common = _serverColumns(row);
+    await _db.into(_db.shopSettingsTable).insertOnConflictUpdate(
+          ShopSettingsTableCompanion.insert(
+            shopId: shopId,
+            useWholesalePrice: Value((row['useWholesalePrice'] as bool?) ?? false),
+            useCostPrice: Value((row['useCostPrice'] as bool?) ?? true),
+            defaultCurrency: Value((row['defaultCurrency'] as String?) ?? 'KHR'),
+            khrPerUsd: Value((row['khrPerUsd'] as int?) ?? 4000),
+            showConverted: Value((row['showConverted'] as bool?) ?? true),
+            updatedAt: common.updatedAt,
+            updatedBy: common.updatedBy,
+            seq: common.seq,
+          ),
+        );
+  }
+
+  /// `updatedAt`, `updatedBy`, `deletedAt` and `seq` as the server set them.
+  static ({
+    Value<DateTime?> updatedAt,
+    Value<String?> updatedBy,
+    Value<DateTime?> deletedAt,
+    Value<int> seq,
+  })
+  _serverColumns(Map<String, Object?> row) {
+    DateTime? time(Object? v) => v == null ? null : DateTime.parse(v as String);
+    return (
+      updatedAt: Value(time(row['updatedAt'])),
+      updatedBy: Value(row['updatedBy'] as String?),
+      deletedAt: Value(time(row['deletedAt'])),
+      seq: Value((row['seq'] as int?) ?? 0),
+    );
+  }
+
   /// Item + price rows, in query order, folded into Items.
   List<Item> _itemsFrom(List<TypedResult> rows) {
     final items = <String, (ItemRow, List<PriceOption>)>{};
