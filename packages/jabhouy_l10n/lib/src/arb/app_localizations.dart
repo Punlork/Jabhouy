@@ -2263,6 +2263,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No credits yet'**
   String get creditListEmpty;
+
+  /// Label of the amount box on the Credit details sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Amount due'**
+  String get creditAmountDue;
+
+  /// Edit button on the Credit details sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get creditEditButton;
 }
 
 class _AppLocalizationsDelegate

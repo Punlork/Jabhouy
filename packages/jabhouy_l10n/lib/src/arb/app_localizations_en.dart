@@ -1176,4 +1176,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditListEmpty => 'No credits yet';
+
+  @override
+  String get creditAmountDue => 'Amount due';
+
+  @override
+  String get creditEditButton => 'Edit';
 }

@@ -90,7 +90,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           onAddItem: (name) => _openItemForm(null, null, name),
           chromeVisible: _chromeVisible,
         ),
-        HomeTab.loaner => const CreditView(),
+        HomeTab.loaner => CreditView(
+          onOpen: (credit) => showCreditDetails(context, credit),
+        ),
         HomeTab.income => const IncomeView(),
       };
 

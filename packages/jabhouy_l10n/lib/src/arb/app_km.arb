@@ -1489,5 +1489,13 @@
   "creditListEmpty": "មិនទាន់មានការជំពាក់",
   "@creditListEmpty": {
     "description": "Empty Credit list"
+  },
+  "creditAmountDue": "ចំនួនត្រូវសង",
+  "@creditAmountDue": {
+    "description": "Label of the amount box on the Credit details sheet"
+  },
+  "creditEditButton": "កែ",
+  "@creditEditButton": {
+    "description": "Edit button on the Credit details sheet"
   }
 }

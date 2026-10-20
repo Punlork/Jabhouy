@@ -42,6 +42,16 @@ class CreditListCubit extends Cubit<CreditListState> {
     emit(const CreditListState());
   }
 
+  /// With its lines, for the details sheet; null once deleted.
+  Future<Credit?> credit(String id) => _repository.credit(id);
+
+  Future<void> markPaid(String id) => _repository.markPaid(id);
+
+  Future<void> delete(String id) => _repository.deleteCredit(id);
+
+  /// Owner and editor only (decision 14).
+  bool get canDelete => _repository.canDelete;
+
   void search(String query) => emit(_derive(state.copyWith(query: query)));
 
   void filter(CreditFilter filter) =>

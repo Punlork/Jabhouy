@@ -1541,5 +1541,13 @@
   "creditListEmpty": "No credits yet",
   "@creditListEmpty": {
     "description": "Empty Credit list"
+  },
+  "creditAmountDue": "Amount due",
+  "@creditAmountDue": {
+    "description": "Label of the amount box on the Credit details sheet"
+  },
+  "creditEditButton": "Edit",
+  "@creditEditButton": {
+    "description": "Edit button on the Credit details sheet"
   }
 }

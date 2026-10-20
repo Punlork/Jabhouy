@@ -6,4 +6,5 @@ export 'models/credit.dart';
 export 'ui/bloc/credit_list/credit_list_cubit.dart';
 export 'ui/bloc/customer_picker/customer_picker_cubit.dart';
 export 'ui/views/credit_view.dart';
+export 'ui/widgets/credit_details_sheet.dart';
 export 'ui/widgets/customer_picker_sheet.dart';

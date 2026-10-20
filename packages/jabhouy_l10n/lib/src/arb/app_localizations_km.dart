@@ -1160,4 +1160,10 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get creditListEmpty => 'មិនទាន់មានការជំពាក់';
+
+  @override
+  String get creditAmountDue => 'ចំនួនត្រូវសង';
+
+  @override
+  String get creditEditButton => 'កែ';
 }
