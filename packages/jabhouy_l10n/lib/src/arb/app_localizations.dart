@@ -2215,6 +2215,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add “{name}”'**
   String itemAddNamed(Object name);
+
+  /// Sign-in page title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get signInWelcome;
+
+  /// Sign-in page subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your shop prices'**
+  String get signInSubtitle;
+
+  /// Label of the sign-in account field
+  ///
+  /// In en, this message translates to:
+  /// **'Username or email'**
+  String get signInUsernameOrEmail;
+
+  /// Example in the sign-in account field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. dara or dara@gmail.com'**
+  String get signInUsernameOrEmailHint;
+
+  /// Between the Google button and the password form
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get signInOr;
 }
 
 class _AppLocalizationsDelegate

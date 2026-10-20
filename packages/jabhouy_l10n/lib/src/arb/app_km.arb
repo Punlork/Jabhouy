@@ -1451,5 +1451,25 @@
     "placeholders": {
       "name": {}
     }
+  },
+  "signInWelcome": "សូមស្វាគមន៍",
+  "@signInWelcome": {
+    "description": "Sign-in page title"
+  },
+  "signInSubtitle": "ចូលដើម្បីមើលតម្លៃហាងរបស់អ្នក",
+  "@signInSubtitle": {
+    "description": "Sign-in page subtitle"
+  },
+  "signInUsernameOrEmail": "ឈ្មោះអ្នកប្រើ ឬអ៊ីមែល",
+  "@signInUsernameOrEmail": {
+    "description": "Label of the sign-in account field"
+  },
+  "signInUsernameOrEmailHint": "ឧ. dara ឬ dara@gmail.com",
+  "@signInUsernameOrEmailHint": {
+    "description": "Example in the sign-in account field"
+  },
+  "signInOr": "ឬ",
+  "@signInOr": {
+    "description": "Between the Google button and the password form"
   }
 }

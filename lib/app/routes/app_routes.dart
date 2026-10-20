@@ -378,18 +378,6 @@ class AppRouter {
           );
         },
       ),
-      GoRoute(
-        path: AppRoutes.signup.toPath,
-        name: AppRoutes.signup,
-        pageBuilder: (BuildContext context, GoRouterState state) {
-          GlobalContext.currentContext = context;
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: const SignupPage(),
-            transitionsBuilder: _rightToLeftTransition,
-          );
-        },
-      ),
     ],
   );
 

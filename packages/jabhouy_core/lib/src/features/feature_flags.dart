@@ -16,7 +16,7 @@ enum Feature {
   /// The App diagnostics page and the income diagnostics behind it.
   diagnostics,
 
-  /// "Continue with Google" on the sign-in and sign-up pages.
+  /// "Continue with Google" on the sign-in page.
   googleSignIn,
 
   /// The signed-in user's Shops come from the API's `GET /me` instead of a

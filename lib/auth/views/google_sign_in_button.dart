@@ -7,7 +7,7 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-/// "Continue with Google", for the sign-in and sign-up pages.
+/// "Continue with Google" (canvas ១៣): the sign-in page's first action.
 ///
 /// Needs a [SigninBloc] above it; success arrives as [SigninSuccess] like a
 /// password sign-in. Hidden while [Feature.googleSignIn] is off.
@@ -22,20 +22,31 @@ class GoogleSignInButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return BlocBuilder<SigninBloc, SigninState>(
-      builder: (context, state) => OutlinedButton.icon(
+      builder: (context, state) => FilledButton(
         onPressed: state is SigninLoading
             ? null
             : () => context.read<SigninBloc>().add(const SigninWithGoogleRequested()),
-        icon: SvgPicture.string(_googleLogo, width: 20, height: 20),
-        label: Text(
-          context.l10n.continueWithGoogle,
-          style: AppTextTheme.body.copyWith(fontWeight: FontWeight.bold),
+        style: FilledButton.styleFrom(
+          backgroundColor: colorScheme.onSurface,
+          foregroundColor: colorScheme.surface,
+          minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
+          shape: const StadiumBorder(),
         ),
-        style: OutlinedButton.styleFrom(
-          backgroundColor: colorScheme.surface,
-          foregroundColor: colorScheme.onSurface,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // A white disc keeps the logo's colors readable on the dark pill.
+            CircleAvatar(
+              radius: 15,
+              backgroundColor: Colors.white,
+              child: SvgPicture.string(_googleLogo, width: 20, height: 20),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              context.l10n.continueWithGoogle,
+              style: AppTextTheme.body.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
       ),
     );

@@ -161,32 +161,6 @@ class AuthService extends BaseService {
     return response;
   }
 
-  Future<ApiResponse<User>> signup({
-    required String name,
-    required String email,
-    required String password,
-    String callbackURL = 'sad',
-  }) async {
-    final signupData = {
-      'username': name,
-      'name': name,
-      'email': email,
-      'password': password,
-    };
-
-    final response = await post(
-      '/sign-up/email',
-      body: signupData,
-      parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
-    );
-
-    if (response.success && response.data != null) {
-      await cacheUser(response.data!);
-    }
-
-    return response;
-  }
-
   Future<ApiResponse<User>> signin({
     required String username,
     required String password,

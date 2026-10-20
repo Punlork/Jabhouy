@@ -11,7 +11,6 @@ extension StringExtension on String {
 class AppRoutes {
   static const home = 'home';
   static const signin = 'signin';
-  static const signup = 'signup';
   static const chooseUsername = 'choose_username';
   static const formShop = 'form_shop';
   static const formItem = 'form_item';

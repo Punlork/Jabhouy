@@ -16,9 +16,9 @@ void main() {
     expect(authRedirect(signedOut, home, flags), signin);
   });
 
-  test('signed out on sign-in or sign-up stays', () {
+  test('signed out on sign-in stays; there is no sign-up page', () {
     expect(authRedirect(signedOut, signin, flags), isNull);
-    expect(authRedirect(signedOut, AppRoutes.signup.toPath, flags), isNull);
+    expect(authRedirect(signedOut, '/signup', flags), signin);
   });
 
   test('authenticated on an unknown path goes home', () {

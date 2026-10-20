@@ -1132,4 +1132,19 @@ class AppLocalizationsKm extends AppLocalizations {
   String itemAddNamed(Object name) {
     return 'បន្ថែម «$name»';
   }
+
+  @override
+  String get signInWelcome => 'សូមស្វាគមន៍';
+
+  @override
+  String get signInSubtitle => 'ចូលដើម្បីមើលតម្លៃហាងរបស់អ្នក';
+
+  @override
+  String get signInUsernameOrEmail => 'ឈ្មោះអ្នកប្រើ ឬអ៊ីមែល';
+
+  @override
+  String get signInUsernameOrEmailHint => 'ឧ. dara ឬ dara@gmail.com';
+
+  @override
+  String get signInOr => 'ឬ';
 }

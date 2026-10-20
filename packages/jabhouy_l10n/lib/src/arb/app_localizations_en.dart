@@ -1148,4 +1148,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String itemAddNamed(Object name) {
     return 'Add “$name”';
   }
+
+  @override
+  String get signInWelcome => 'Welcome';
+
+  @override
+  String get signInSubtitle => 'Sign in to see your shop prices';
+
+  @override
+  String get signInUsernameOrEmail => 'Username or email';
+
+  @override
+  String get signInUsernameOrEmailHint => 'e.g. dara or dara@gmail.com';
+
+  @override
+  String get signInOr => 'or';
 }

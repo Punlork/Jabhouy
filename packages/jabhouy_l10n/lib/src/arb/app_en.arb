@@ -1503,5 +1503,25 @@
     "placeholders": {
       "name": {}
     }
+  },
+  "signInWelcome": "Welcome",
+  "@signInWelcome": {
+    "description": "Sign-in page title"
+  },
+  "signInSubtitle": "Sign in to see your shop prices",
+  "@signInSubtitle": {
+    "description": "Sign-in page subtitle"
+  },
+  "signInUsernameOrEmail": "Username or email",
+  "@signInUsernameOrEmail": {
+    "description": "Label of the sign-in account field"
+  },
+  "signInUsernameOrEmailHint": "e.g. dara or dara@gmail.com",
+  "@signInUsernameOrEmailHint": {
+    "description": "Example in the sign-in account field"
+  },
+  "signInOr": "or",
+  "@signInOr": {
+    "description": "Between the Google button and the password form"
   }
 }

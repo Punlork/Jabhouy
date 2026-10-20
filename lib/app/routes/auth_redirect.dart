@@ -17,10 +17,7 @@ String? authRedirect(AuthState authState, String path, FeatureFlags flags) {
   return null;
 }
 
-final _allowedUnauthenticated = {
-  AppRoutes.signin.toPath,
-  AppRoutes.signup.toPath,
-};
+final _allowedUnauthenticated = {AppRoutes.signin.toPath};
 
 Set<String> _allowedAuthenticated(FeatureFlags flags) {
   final diagnostics = flags.isEnabled(Feature.diagnostics);

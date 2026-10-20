@@ -229,7 +229,6 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
-    ..registerFactory(() => SignupBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
     ..registerFactory(
       () => LoanerBloc(

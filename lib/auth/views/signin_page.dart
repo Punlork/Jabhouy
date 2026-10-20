@@ -26,31 +26,14 @@ class _SigninPageContent extends StatefulWidget {
   State<_SigninPageContent> createState() => _SigninPageContentState();
 }
 
-class _SigninPageContentState extends State<_SigninPageContent>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+class _SigninPageContentState extends State<_SigninPageContent> {
   final _username = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
 
   @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
-    );
-    _animationController.forward();
-  }
-
-  @override
   void dispose() {
-    _animationController.dispose();
     _username.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -75,180 +58,168 @@ class _SigninPageContentState extends State<_SigninPageContent>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
+    final t = context.tokens;
+    final googleOn = getIt<FeatureFlags>().isEnabled(Feature.googleSignIn);
 
+    // Canvas ១៣: light page, Google first, then the password form.
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primary,
-              colorScheme.primaryContainer,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 56, 24, 24),
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<SigninBloc, SigninState>(
+                listener: (context, state) {
+                  if (state is SigninSuccess) {
+                    context.read<AuthBloc>().add(AuthSignedIn(state.user));
+                  } else if (state is SigninFailure) {
+                    showErrorSnackBar(
+                      context,
+                      state.error ?? l10n.googleSignInFailed,
+                    );
+                  }
+                },
+              ),
+              BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is Authenticated) {
+                    if (state.isSessionTrusted) {
+                      showSuccessSnackBar(context, l10n.signinSuccessful);
+                    }
+                    context.goNamed(AppRoutes.home);
+                  }
+                },
+              ),
             ],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: MultiBlocListener(
-                  listeners: [
-                    BlocListener<SigninBloc, SigninState>(
-                      listener: (context, state) {
-                        if (state is SigninSuccess) {
-                          context
-                              .read<AuthBloc>()
-                              .add(AuthSignedIn(state.user));
-                        } else if (state is SigninFailure) {
-                          showErrorSnackBar(
-                            context,
-                            state.error ?? l10n.googleSignInFailed,
-                          );
-                        }
-                      },
-                    ),
-                    BlocListener<AuthBloc, AuthState>(
-                      listener: (context, state) {
-                        if (state is Authenticated) {
-                          if (state.isSessionTrusted) {
-                            showSuccessSnackBar(context, l10n.signinSuccessful);
-                          }
-                          context.goNamed(AppRoutes.home);
-                        }
-                      },
-                    ),
-                  ],
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const AppLogo(),
-                        const SizedBox(height: 40),
-                        Text(
-                          l10n.welcomeBack,
-                          style: AppTextTheme.headline.copyWith(
-                            color: colorScheme.onPrimary,
-                            fontWeight: FontWeight
-                                .bold, // Already w700, explicit for clarity
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.signInToContinue,
-                          style: AppTextTheme.body.copyWith(
-                            color: colorScheme.onPrimary.withValues(alpha: .8),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        CustomTextFormField(
-                          controller: _username,
-                          hintText: l10n.nameRequired(l10n.name),
-                          labelText: l10n.name,
-                          prefixIcon: Icons.person,
-                          action: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return l10n.pleaseEnterYourName;
-                            }
-
-                            return null;
-                          },
-                          keyboardType: TextInputType.name,
-                          decoration: const InputDecoration(
-                            labelStyle: AppTextTheme.body,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        CustomTextFormField(
-                          controller: _passwordController,
-                          hintText: l10n.enterYourPassword,
-                          labelText: l10n.password,
-                          prefixIcon: Icons.lock_rounded,
-                          obscureText: _obscurePassword,
-                          onVisibilityToggle: _togglePasswordVisibility,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return l10n.pleaseEnterYourPassword;
-                            }
-                            if (value.length < 6) {
-                              return l10n.passwordMinLength;
-                            }
-                            return null;
-                          },
-                          decoration: const InputDecoration(
-                            labelStyle: AppTextTheme.body, // Apply to label
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        BlocBuilder<SigninBloc, SigninState>(
-                          builder: (context, state) {
-                            return ElevatedButton(
-                              onPressed: state is SigninLoading
-                                  ? null
-                                  : () => _handleLogin(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: colorScheme.primary,
-                                foregroundColor: colorScheme.onPrimary,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 50,
-                                  vertical: 18,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 2,
-                              ),
-                              child: state is SigninLoading
-                                  ? SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: colorScheme.onPrimary,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text(
-                                      l10n.login,
-                                      style: AppTextTheme.body.copyWith(
-                                        color: colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        const GoogleSignInButton(),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () =>
-                                  context.pushNamed(AppRoutes.signup),
-                              style: TextButton.styleFrom(
-                                foregroundColor: colorScheme.onPrimary,
-                              ),
-                              child: Text(
-                                l10n.signUp,
-                                style: AppTextTheme.caption.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: t.textPrimary,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Icon(
+                        Icons.storefront_outlined,
+                        size: 36,
+                        color: t.surface,
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 14),
+                  Text(
+                    l10n.signInWelcome,
+                    textAlign: TextAlign.center,
+                    style: AppTextTheme.headline.copyWith(
+                      color: t.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    l10n.signInSubtitle,
+                    textAlign: TextAlign.center,
+                    style: AppTextTheme.label.copyWith(
+                      color: t.textSecondary,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  if (googleOn) ...[
+                    const GoogleSignInButton(),
+                    const SizedBox(height: 22),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: t.border)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            l10n.signInOr,
+                            style: AppTextTheme.hint.copyWith(
+                              color: t.textSecondary,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: t.border)),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                  ],
+                  LabeledField(
+                    label: l10n.signInUsernameOrEmail,
+                    child: TextFormField(
+                      controller: _username,
+                      style: AppTextTheme.body,
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: l10n.signInUsernameOrEmailHint,
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? l10n.pleaseEnterYourName
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  LabeledField(
+                    label: l10n.password,
+                    child: TextFormField(
+                      controller: _passwordController,
+                      style: AppTextTheme.body,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                          onPressed: _togglePasswordVisibility,
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: t.textSecondary,
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return l10n.pleaseEnterYourPassword;
+                        }
+                        if (value.length < 6) return l10n.passwordMinLength;
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  BlocBuilder<SigninBloc, SigninState>(
+                    builder: (context, state) => OutlinedButton(
+                      onPressed: state is SigninLoading
+                          ? null
+                          : () => _handleLogin(context),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: t.surface,
+                        foregroundColor: t.textPrimary,
+                        minimumSize:
+                            const Size.fromHeight(AppSizes.buttonHeight),
+                        side: BorderSide(color: t.textPrimary),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: state is SigninLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              l10n.login,
+                              style: AppTextTheme.body.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
