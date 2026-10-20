@@ -1,14 +1,14 @@
-# On demand (Actions › Run workflow): analyze and test, build the
-# development APK, and send it to the testers' Telegram chat.
+# Every push to dev (and on demand from Actions › Run workflow): analyze and
+# test, build the development APK, and send it to the testers' Telegram chat.
 #
 # Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DEV_DOTENV (.env.dev), and
 # the ANDROID_KEYSTORE_* ones the release workflow already uses.
 
 name: Dev build to Telegram
 
-# Manual for now: builds go out once the redesign is finished. To send
-# every push again, add `push: branches: [dev]` back.
 on:
+  push:
+    branches: [dev]
   workflow_dispatch:
 
 # A newer push replaces a build still running; only the latest is sent.
