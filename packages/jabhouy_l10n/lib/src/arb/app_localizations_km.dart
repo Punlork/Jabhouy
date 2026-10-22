@@ -699,6 +699,12 @@ class AppLocalizationsKm extends AppLocalizations {
   String get priceMissing => 'មិនទាន់មានតម្លៃ';
 
   @override
+  String get priceNew => 'តម្លៃថ្មី';
+
+  @override
+  String get priceDone => 'រួចរាល់';
+
+  @override
   String get priceEdit => 'កែតម្លៃ';
 
   @override

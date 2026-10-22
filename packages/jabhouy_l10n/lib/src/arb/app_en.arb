@@ -919,6 +919,14 @@
   "@priceMissing": {
     "description": "Shown instead of a missing price, never 0"
   },
+  "priceNew": "New price",
+  "@priceNew": {
+    "description": "Title of the price sheet when adding a price"
+  },
+  "priceDone": "Done",
+  "@priceDone": {
+    "description": "Button that closes the price sheet after editing a price"
+  },
   "priceEdit": "Edit price",
   "@priceEdit": {
     "description": "Primary button on the item details sheet"

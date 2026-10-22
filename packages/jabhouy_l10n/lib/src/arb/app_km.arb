@@ -867,6 +867,14 @@
   "@priceMissing": {
     "description": "Shown instead of a missing price, never 0"
   },
+  "priceNew": "តម្លៃថ្មី",
+  "@priceNew": {
+    "description": "Title of the price sheet when adding a price"
+  },
+  "priceDone": "រួចរាល់",
+  "@priceDone": {
+    "description": "Button that closes the price sheet after editing a price"
+  },
   "priceEdit": "កែតម្លៃ",
   "@priceEdit": {
     "description": "Primary button on the item details sheet"

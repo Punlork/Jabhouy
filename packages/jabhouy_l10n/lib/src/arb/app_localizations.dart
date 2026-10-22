@@ -1412,6 +1412,18 @@ abstract class AppLocalizations {
   /// **'No price yet'**
   String get priceMissing;
 
+  /// Title of the price sheet when adding a price
+  ///
+  /// In en, this message translates to:
+  /// **'New price'**
+  String get priceNew;
+
+  /// Button that closes the price sheet after editing a price
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get priceDone;
+
   /// Primary button on the item details sheet
   ///
   /// In en, this message translates to:

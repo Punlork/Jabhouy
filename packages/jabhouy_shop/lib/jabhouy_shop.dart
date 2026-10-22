@@ -44,6 +44,7 @@ export 'src/ui/widgets/filter_card_sheet.dart';
 export 'src/ui/widgets/item_details_sheet.dart';
 export 'src/ui/widgets/items_tab.dart';
 export 'src/ui/widgets/price_row_editor.dart';
+export 'src/ui/widgets/price_sheet.dart';
 export 'src/ui/widgets/scan_result_sheet.dart';
 export 'src/ui/widgets/shop_grid_builder.dart';
 export 'src/ui/widgets/shop_header.dart';

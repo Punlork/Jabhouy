@@ -713,6 +713,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceMissing => 'No price yet';
 
   @override
+  String get priceNew => 'New price';
+
+  @override
+  String get priceDone => 'Done';
+
+  @override
   String get priceEdit => 'Edit price';
 
   @override
