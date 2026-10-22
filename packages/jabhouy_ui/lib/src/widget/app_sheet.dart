@@ -28,6 +28,20 @@ Future<T?> showAppSheet<T>(
   ),
 );
 
+/// A sheet as tall as its content, up to 90% of the screen; it scrolls only
+/// past that, or when the keyboard takes the room. For forms that a fixed
+/// [showAppSheet] height would leave half empty. Build it with
+/// `AppSheet(fit: true)`.
+Future<T?> showFitSheet<T>(
+  BuildContext context, {
+  required WidgetBuilder builder,
+}) => showModalBottomSheet<T>(
+  context: context,
+  isScrollControlled: true,
+  useSafeArea: true,
+  builder: builder,
+);
+
 /// Redesign bottom sheet: drag handle, a title (or a custom [header]),
 /// close button, scrolling content and an optional footer that stays put.
 class AppSheet extends StatelessWidget {
@@ -38,6 +52,7 @@ class AppSheet extends StatelessWidget {
     this.footer,
     this.pinned,
     this.scrollController,
+    this.fit = false,
     super.key,
   }) : assert(title != null || header != null, 'a title or a header');
 
@@ -55,12 +70,16 @@ class AppSheet extends StatelessWidget {
   /// From [showAppSheet], so scrolling the content resizes the sheet.
   final ScrollController? scrollController;
 
+  /// Shrinks to the content instead of filling the sheet; see [showFitSheet].
+  final bool fit;
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     return AppBottomSheet(
       scrollable: false,
       child: Column(
+        mainAxisSize: fit ? MainAxisSize.min : MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
@@ -102,7 +121,8 @@ class AppSheet extends StatelessWidget {
           if (pinned case final pinned?) pinned,
           // Fills the sheet, so a short body still leaves the footer at
           // the bottom rather than floating mid-sheet.
-          Expanded(
+          Flexible(
+            fit: fit ? FlexFit.loose : FlexFit.tight,
             child: SingleChildScrollView(
               controller: scrollController,
               padding: const EdgeInsets.symmetric(

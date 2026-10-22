@@ -42,6 +42,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # Gradle's downloads and build cache; the APK build is the slow step.
+          cache: gradle
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -77,10 +79,12 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
 
       # Split per ABI: Telegram bots upload at most 50 MB, and the single
-      # APK is larger. arm64 covers current Android phones.
+      # APK is larger. arm64 covers current Android phones, and it is the
+      # only one sent, so the other ABIs are not compiled.
       - name: Build development APK
         run: >
           flutter build apk --release --split-per-abi
+          --target-platform android-arm64
           --flavor development -t lib/main_development.dart
           --dart-define-from-file=config/features/development.json
 

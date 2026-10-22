@@ -127,4 +127,18 @@ void main() {
       expect(find.text('≈ 30,000 ៛'), findsOneWidget);
     },
   );
+
+  testBothThemes(
+    'MoneyInput keeps its height while the first digit is typed and cleared',
+    () => input(Currency.khr),
+    (tester) async {
+      final empty = tester.getSize(find.byType(MoneyInput)).height;
+      await tester.enterText(find.byType(TextField), '3000');
+      await tester.pump();
+      expect(tester.getSize(find.byType(MoneyInput)).height, empty);
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pump();
+      expect(tester.getSize(find.byType(MoneyInput)).height, empty);
+    },
+  );
 }
