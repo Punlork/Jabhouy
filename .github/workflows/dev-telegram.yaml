@@ -78,6 +78,23 @@ jobs:
           umask 077
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
 
+      # Android installs an update only when its versionCode is higher than
+      # the installed one, and pubspec's number rarely moves. So each run adds
+      # its own: pubspec's build number x 10000 + the run number. It rises
+      # with every run, and with every pubspec bump.
+      - name: Compute build number
+        id: build
+        shell: bash
+        run: |
+          PUBSPEC="$(grep '^version:' pubspec.yaml | head -n 1 | awk '{print $2}')"
+          NAME="${PUBSPEC%%+*}"
+          BASE=1
+          if [[ "$PUBSPEC" == *+* ]]; then BASE="${PUBSPEC##*+}"; fi
+          NUMBER=$((BASE * 10000 + GITHUB_RUN_NUMBER))
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Building $NAME+$NUMBER"
+
       # Split per ABI: Telegram bots upload at most 50 MB, and the single
       # APK is larger. arm64 covers current Android phones, and it is the
       # only one sent, so the other ABIs are not compiled.
@@ -85,6 +102,8 @@ jobs:
         run: >
           flutter build apk --release --split-per-abi
           --target-platform android-arm64
+          --build-name=${{ steps.build.outputs.name }}
+          --build-number=${{ steps.build.outputs.number }}
           --flavor development -t lib/main_development.dart
           --dart-define-from-file=config/features/development.json
 
@@ -102,7 +121,7 @@ jobs:
           if [ "$SIZE" -gt 52428800 ]; then
             echo "APK is $SIZE bytes, over Telegram's 50 MB bot limit."; exit 1
           fi
-          VERSION="$(grep '^version:' pubspec.yaml | head -n 1 | awk '{print $2}')"
+          VERSION="${{ steps.build.outputs.name }}+${{ steps.build.outputs.number }}"
           SHORT="${GITHUB_SHA::7}"
           SUBJECT="$(git log -1 --pretty=%s)"
           NAME="Jabhouy-dev-${VERSION%%+*}-${SHORT}.apk"
