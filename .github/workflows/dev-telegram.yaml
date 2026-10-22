@@ -42,6 +42,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # Gradle's downloads and build cache; the APK build is the slow step.
+          cache: gradle
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
