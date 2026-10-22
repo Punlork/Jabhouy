@@ -699,6 +699,18 @@ class AppLocalizationsKm extends AppLocalizations {
   String get priceMissing => 'មិនទាន់មានតម្លៃ';
 
   @override
+  String get priceTapToEdit => 'ចុចលើតម្លៃដើម្បីកែ';
+
+  @override
+  String get priceNoneYet => 'អាចរក្សាទុកសិនបាន ហើយបន្ថែមតម្លៃពេលក្រោយ';
+
+  @override
+  String get priceNew => 'តម្លៃថ្មី';
+
+  @override
+  String get priceDone => 'រួចរាល់';
+
+  @override
   String get priceEdit => 'កែតម្លៃ';
 
   @override
@@ -797,6 +809,9 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get voiceListening => 'កំពុងស្តាប់…';
+
+  @override
+  String get voiceUnavailable => 'មិនអាចប្រើសំឡេងបានទេ';
 
   @override
   String get voiceUse => 'ប្រើអត្ថបទនេះ';

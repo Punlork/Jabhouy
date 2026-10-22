@@ -713,6 +713,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceMissing => 'No price yet';
 
   @override
+  String get priceTapToEdit => 'Tap a price to edit';
+
+  @override
+  String get priceNoneYet => 'You can save now and add prices later';
+
+  @override
+  String get priceNew => 'New price';
+
+  @override
+  String get priceDone => 'Done';
+
+  @override
   String get priceEdit => 'Edit price';
 
   @override
@@ -811,6 +823,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceListening => 'Listening…';
+
+  @override
+  String get voiceUnavailable => 'Voice input is not available on this phone';
 
   @override
   String get voiceUse => 'Use this text';

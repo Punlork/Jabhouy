@@ -63,13 +63,9 @@ class _ItemPickerSheet extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSizes.screenPadding,
                 ),
-                child: TextField(
+                child: MicSearchField(
+                  hintText: l10n.searchGoods,
                   onChanged: cubit.search,
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    hintText: l10n.searchGoods,
-                    prefixIcon: Icon(Icons.search_rounded, color: t.textMuted),
-                  ),
                 ),
               ),
               const SizedBox(height: 4),

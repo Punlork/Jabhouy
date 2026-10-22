@@ -20,6 +20,7 @@ dependencies:
   jabhouy_l10n:
     path: ../jabhouy_l10n
   path_provider: ^2.1.5
+  speech_to_text: ^7.5.0
 
 dev_dependencies:
   flutter_test:

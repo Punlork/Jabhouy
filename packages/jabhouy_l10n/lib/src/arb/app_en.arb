@@ -919,6 +919,22 @@
   "@priceMissing": {
     "description": "Shown instead of a missing price, never 0"
   },
+  "priceTapToEdit": "Tap a price to edit",
+  "@priceTapToEdit": {
+    "description": "Hint beside the price list title in the item form"
+  },
+  "priceNoneYet": "You can save now and add prices later",
+  "@priceNoneYet": {
+    "description": "Under the no-prices-yet card in the item form"
+  },
+  "priceNew": "New price",
+  "@priceNew": {
+    "description": "Title of the price sheet when adding a price"
+  },
+  "priceDone": "Done",
+  "@priceDone": {
+    "description": "Button that closes the price sheet after editing a price"
+  },
   "priceEdit": "Edit price",
   "@priceEdit": {
     "description": "Primary button on the item details sheet"
@@ -1051,6 +1067,10 @@
   "voiceListening": "Listening…",
   "@voiceListening": {
     "description": "Shown while voice input listens"
+  },
+  "voiceUnavailable": "Voice input is not available on this phone",
+  "@voiceUnavailable": {
+    "description": "Shown when the phone has no speech engine or the microphone is refused"
   },
   "voiceUse": "Use this text",
   "@voiceUse": {

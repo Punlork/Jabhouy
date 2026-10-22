@@ -1412,6 +1412,30 @@ abstract class AppLocalizations {
   /// **'No price yet'**
   String get priceMissing;
 
+  /// Hint beside the price list title in the item form
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a price to edit'**
+  String get priceTapToEdit;
+
+  /// Under the no-prices-yet card in the item form
+  ///
+  /// In en, this message translates to:
+  /// **'You can save now and add prices later'**
+  String get priceNoneYet;
+
+  /// Title of the price sheet when adding a price
+  ///
+  /// In en, this message translates to:
+  /// **'New price'**
+  String get priceNew;
+
+  /// Button that closes the price sheet after editing a price
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get priceDone;
+
   /// Primary button on the item details sheet
   ///
   /// In en, this message translates to:
@@ -1597,6 +1621,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Listening…'**
   String get voiceListening;
+
+  /// Shown when the phone has no speech engine or the microphone is refused
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input is not available on this phone'**
+  String get voiceUnavailable;
 
   /// Confirms the voice transcript
   ///

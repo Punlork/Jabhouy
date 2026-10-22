@@ -82,19 +82,37 @@ void main() {
     return items!.single.prices.single.barcode;
   }
 
-  Future<void> fillCoke(WidgetTester tester) async {
-    await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
-    await tester.enterText(openField(0), 'ដប');
-    await tester.enterText(openField(2), '3000');
+  Future<void> openAdd(WidgetTester tester) async {
+    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
+    await tester.pumpAndSettle();
+  }
+
+  /// Adds a price through the sheet.
+  Future<void> addPrice(
+    WidgetTester tester, {
+    required String unit,
+    String? count,
+    String? price,
+  }) async {
+    await openAdd(tester);
+    await tester.enterText(openField(0), unit);
+    if (count != null) await tester.enterText(openField(1), count);
+    if (price != null) await tester.enterText(openField(2), price);
+    await tester.tap(find.text('បន្ថែម'));
+    await tester.pumpAndSettle();
   }
 
   testWidgets('the row barcode button scans a code into its row', (
     tester,
   ) async {
     await pumpForm(tester, scan: (_) async => '885');
-    await fillCoke(tester);
-
+    await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
+    await openAdd(tester);
+    await tester.enterText(openField(0), 'ដប');
+    await tester.enterText(openField(2), '3000');
     await tester.tap(find.byTooltip('ស្កេនបាកូដ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('បន្ថែម'));
     await tester.pumpAndSettle();
     await save(tester);
 
@@ -105,6 +123,7 @@ void main() {
     tester,
   ) async {
     await pumpForm(tester);
+    await openAdd(tester);
     expect(find.byTooltip('ស្កេនបាកូដ'), findsNothing);
   });
 
@@ -112,7 +131,13 @@ void main() {
     tester,
   ) async {
     await pumpForm(tester, barcode: '885');
-    await fillCoke(tester);
+    await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
+    await tester.tap(find.byType(PriceRowSummary));
+    await tester.pumpAndSettle();
+    await tester.enterText(openField(0), 'ដប');
+    await tester.enterText(openField(2), '3000');
+    await tester.tap(find.text('រួចរាល់'));
+    await tester.pumpAndSettle();
     await save(tester);
 
     expect(await savedBarcode(tester), '885');
@@ -125,26 +150,29 @@ void main() {
     expect(find.text('ទឹកធំ'), findsOneWidget);
   });
 
-  testWidgets('ដប + កេះ ×24 in one form saves one item with two prices',
-      (tester) async {
+  testWidgets('ដប + កេះ ×24 in one form saves one item with two prices', (
+    tester,
+  ) async {
     await pumpForm(tester);
+    expect(find.text('ឧ. អង្ករផ្កាម្លិះ'), findsOneWidget);
+    expect(find.text('មិនទាន់មានតម្លៃ'), findsOneWidget, reason: 'no rows yet');
+
+    await openAdd(tester);
     // Unit, count and price line up at the design's 50 px.
     for (final field in [0, 1, 2]) {
       expect(tester.getSize(openField(field)).height, 50, reason: '$field');
     }
     // Empty fields show the design's examples.
-    for (final hint in ['ឧ. អង្ករផ្កាម្លិះ', 'ឧ. ដប', '1', 'ឧ. 3,000']) {
+    for (final hint in ['ឧ. ដប', '1', 'ឧ. 3,000']) {
       expect(find.text(hint), findsOneWidget, reason: hint);
     }
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pumpAndSettle();
 
     await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
-    await tester.enterText(openField(0), 'ដប');
-    await tester.enterText(openField(2), '3000');
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
-    await tester.pumpAndSettle();
-    await tester.enterText(openField(0), 'កេះ');
-    await tester.enterText(openField(1), '24');
-    await tester.enterText(openField(2), '60000');
+    await addPrice(tester, unit: 'ដប', price: '3000');
+    await addPrice(tester, unit: 'កេះ', count: '24', price: '60000');
+    expect(find.byType(PriceRowSummary), findsNWidgets(2));
     await save(tester);
 
     final items = await tester.runAsync(() => repo.watchItems().first);
@@ -156,8 +184,9 @@ void main() {
     await tester.runAsync(db.close);
   });
 
-  testWidgets('adding a nickname shows it as a chip and saves it',
-      (tester) async {
+  testWidgets('adding a nickname shows it as a chip and saves it', (
+    tester,
+  ) async {
     await pumpForm(tester);
 
     await tester.tap(find.textContaining('+ ឈ្មោះផ្សេង'));
@@ -168,7 +197,7 @@ void main() {
 
     expect(find.widgetWithText(InputChip, 'ទឹកធំ'), findsOneWidget);
     await tester.enterText(find.byKey(ItemFormPage.nameKey), 'ទឹកអូគូលេនធំ');
-    await tester.enterText(openField(0), 'ដប');
+    await addPrice(tester, unit: 'ដប');
     await save(tester);
 
     final items = await tester.runAsync(() => repo.watchItems().first);
@@ -176,13 +205,16 @@ void main() {
     await tester.runAsync(db.close);
   });
 
-  testWidgets('the open price row offers the unit chips', (tester) async {
+  testWidgets('the price sheet offers the unit chips', (tester) async {
     await tester.runAsync(() async {
       await repo.saveCategory(
         const ItemCategory(
           id: 'drinks',
           name: 'ភេសជ្ជៈ',
-          units: [CategoryUnit(unit: 'ដប'), CategoryUnit(unit: 'កេះ')],
+          units: [
+            CategoryUnit(unit: 'ដប'),
+            CategoryUnit(unit: 'កេះ'),
+          ],
         ),
       );
       // The form opens on the last used category.
@@ -191,91 +223,88 @@ void main() {
       );
     });
     await pumpForm(tester);
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
-    await tester.pumpAndSettle();
+    await openAdd(tester);
 
-    // The new row is the open one, and it carries the chips.
+    // The price sheet carries the chips.
     await tester.tap(
       find.descendant(
         of: find.byType(PriceRowEditor),
         matching: find.text('កេះ'),
       ),
     );
+    await tester.tap(find.text('បន្ថែម'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
     await save(tester);
 
     final items = await tester.runAsync(() => repo.watchItems().first);
     final coke = items!.firstWhere((i) => i.name == 'Coca-Cola');
-    expect(coke.prices.single.unit, 'កេះ', reason: 'row 1 left empty');
+    expect(coke.prices.single.unit, 'កេះ');
     await tester.runAsync(db.close);
   });
 
-  testWidgets('each price has a header that opens and closes its row',
-      (tester) async {
+  testWidgets('a price shows as a row; tapping it edits, លុប removes it', (
+    tester,
+  ) async {
     await pumpForm(tester);
-    await tester.enterText(openField(0), 'ដប');
-    await tester.enterText(openField(2), '3000');
-    await tester.pump();
-    // The open row's header follows what is typed.
-    final headers = find.byType(PriceRowSummary);
-    expect(
-      find.descendant(of: headers.first, matching: find.text('3,000 ៛')),
-      findsOneWidget,
+    await addPrice(tester, unit: 'ដប', price: '3000');
+
+    expect(find.byType(PriceRowSummary), findsOneWidget);
+    expect(find.text('3,000 ៛'), findsOneWidget);
+    expect(find.text('មិនទាន់មានតម្លៃ'), findsNothing);
+
+    await tester.tap(find.byType(PriceRowSummary));
+    await tester.pumpAndSettle();
+    expect(find.text('កែតម្លៃ'), findsOneWidget);
+    await tester.enterText(openField(2), '3500');
+    await tester.tap(find.text('រួចរាល់'));
+    await tester.pumpAndSettle();
+    expect(find.text('3,500 ៛'), findsOneWidget);
+
+    await tester.tap(find.byType(PriceRowSummary));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('លុបតម្លៃនេះ'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PriceRowSummary), findsNothing);
+    expect(find.text('មិនទាន់មានតម្លៃ'), findsOneWidget);
+    await tester.runAsync(db.close);
+  });
+
+  testWidgets('saving a barcode another item uses reopens that price', (
+    tester,
+  ) async {
+    await tester.runAsync(
+      () => repo.saveItem(
+        const Item(
+          id: 'old',
+          name: 'Old',
+          prices: [
+            PriceOption(
+              id: 'p',
+              unit: 'ដប',
+              currency: Currency.khr,
+              barcode: '885',
+            ),
+          ],
+        ),
+      ),
     );
-    expect(find.byIcon(Icons.expand_less_rounded), findsOneWidget);
-
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
-    await tester.pumpAndSettle();
-    expect(headers, findsNWidgets(2));
-    expect(find.byType(PriceRowEditor), findsOneWidget, reason: 'one open');
-
-    // Close the new row: nothing is open.
-    await tester.tap(headers.last);
-    await tester.pumpAndSettle();
-    expect(find.byType(PriceRowEditor), findsNothing);
-    expect(find.byIcon(Icons.expand_more_rounded), findsNWidgets(2));
-
-    // Reopen the first: its text is kept.
-    await tester.tap(headers.first);
-    await tester.pumpAndSettle();
-    expect(find.byType(PriceRowEditor), findsOneWidget);
-    expect(find.text('3,000'), findsOneWidget);
-    await tester.runAsync(db.close);
-  });
-
-  testWidgets('saving opens the first row with a problem', (tester) async {
-    await pumpForm(tester);
-    await tester.enterText(openField(0), 'កេះ');
-    await tester.enterText(openField(1), '0');
-    await tester.tap(find.textContaining('បន្ថែមតម្លៃទំនិញ'));
-    await tester.pumpAndSettle();
+    await pumpForm(tester, barcode: '885');
     await tester.enterText(find.byKey(ItemFormPage.nameKey), 'Coca-Cola');
     await save(tester);
 
-    expect(find.text('ចំនួនត្រូវធំជាង ០'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byType(PriceRowEditor),
-        matching: find.text('កេះ'),
-      ),
-      findsOneWidget,
-      reason: 'the bad row is open',
-    );
+    expect(find.text('បាកូដនេះប្រើរួចហើយសម្រាប់ «Old»'), findsOneWidget);
+    expect(find.text('កែតម្លៃ'), findsOneWidget, reason: 'the sheet is open');
     await tester.runAsync(db.close);
   });
 
-  testWidgets('saving with problems shows each message and writes nothing',
-      (tester) async {
+  testWidgets('saving with no name shows the message and writes nothing', (
+    tester,
+  ) async {
     await pumpForm(tester);
-
-    await tester.enterText(openField(0), 'កេះ');
-    await tester.enterText(openField(1), '0');
-    await tester.enterText(openField(2), '3000.5');
     await save(tester);
 
     expect(find.text('សូមបញ្ចូលឈ្មោះទំនិញ'), findsOneWidget);
-    expect(find.text('ចំនួនត្រូវធំជាង ០'), findsOneWidget);
-    expect(find.text('តម្លៃរៀលមិនអាចមានទសភាគ'), findsOneWidget);
     final items = await tester.runAsync(() => repo.watchItems().first);
     expect(items, isEmpty);
     await tester.runAsync(db.close);

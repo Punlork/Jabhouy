@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
@@ -38,16 +39,21 @@ class _MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          builder: (context, child) => Overlay(
-            initialEntries: [
-              OverlayEntry(
-                builder: (context) => Debugger.builder(
-                  context,
-                  AppUpgrader(child: child!),
+          builder: (context, child) {
+            final app = Overlay(
+              initialEntries: [
+                OverlayEntry(
+                  builder: (context) => Debugger.builder(
+                    context,
+                    AppUpgrader(child: child!),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+            return getIt<FeatureFlags>().isEnabled(Feature.voiceInput)
+                ? VoiceScope(service: DeviceSpeechService(), child: app)
+                : app;
+          },
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerDelegate: AppRouter.router.routerDelegate,

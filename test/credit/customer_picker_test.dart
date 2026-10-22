@@ -152,7 +152,7 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('✎ renames; deleting a customer with credits is refused', (
+  testWidgets('⋯ renames; a customer with credits has no delete', (
     tester,
   ) async {
     await open(tester);
@@ -166,9 +166,7 @@ void main() {
 
     await tester.tap(find.byTooltip('កែសម្រួលអតិថិជន').first);
     await pump(tester);
-    await tester.tap(find.text('លុប'));
-    await pump(tester);
-    expect(find.text('ពូ បុល ២'), findsOneWidget, reason: 'has a Credit');
+    expect(find.text('លុប'), findsNothing, reason: 'has a Credit');
     expect(
       find.text('មិនអាចលុបបានទេ ព្រោះអតិថិជននេះនៅមានការជំពាក់'),
       findsOneWidget,

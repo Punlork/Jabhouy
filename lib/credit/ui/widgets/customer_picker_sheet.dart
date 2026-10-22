@@ -9,17 +9,20 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 /// The customer picker (canvas ១១): search, every Customer with what they
 /// owe, `បន្ថែមអតិថិជនថ្មី`, and ✎ to rename or delete one. Returns the
-/// Customer that was tapped, or the one just added.
+/// Customer that was tapped, or the one just added. With [manage] (Settings)
+/// a tap edits the Customer and the sheet stays open.
 Future<CreditCustomer?> showCustomerPicker(
   BuildContext context,
   CreditRepository repository, {
   String? selectedId,
+  bool manage = false,
 }) => showAppSheet<CreditCustomer>(
   context,
   initialSize: 0.7,
   builder: (_, controller) => BlocProvider(
     create: (_) => CustomerPickerCubit(repository)..start(),
     child: _CustomerPickerSheet(
+      manage: manage,
       selectedId: selectedId,
       scrollController: controller,
     ),
@@ -27,8 +30,13 @@ Future<CreditCustomer?> showCustomerPicker(
 );
 
 class _CustomerPickerSheet extends StatelessWidget {
-  const _CustomerPickerSheet({this.selectedId, this.scrollController});
+  const _CustomerPickerSheet({
+    required this.manage,
+    this.selectedId,
+    this.scrollController,
+  });
 
+  final bool manage;
   final String? selectedId;
   final ScrollController? scrollController;
 
@@ -40,17 +48,19 @@ class _CustomerPickerSheet extends StatelessWidget {
     );
     if (edit == null || !context.mounted) return;
     if (await cubit.save(edit.name) case Ok(:final value)) {
-      if (context.mounted) Navigator.pop(context, value);
+      if (context.mounted && !manage) Navigator.pop(context, value);
     }
   }
 
-  Future<void> _edit(BuildContext context, CreditCustomer customer) async {
+  Future<void> _edit(BuildContext context, CustomerBalance balance) async {
+    final customer = balance.customer;
     final cubit = context.read<CustomerPickerCubit>();
     final edit = await showDialog<_Edit>(
       context: context,
       builder: (_) => _CustomerDialog(
         existing: customer,
         canDelete: cubit.canDelete,
+        hasCredits: balance.creditCount > 0,
       ),
     );
     if (edit == null || !context.mounted) return;
@@ -76,21 +86,20 @@ class _CustomerPickerSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // White with a border (canvas ១១), like the category picker.
-            TextField(
+            MicSearchField(
+              hintText: l10n.searchCustomers,
               onChanged: cubit.search,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: l10n.searchCustomers,
-                prefixIcon: Icon(Icons.search_rounded, color: t.textMuted),
-              ),
             ),
             const SizedBox(height: 8),
             for (final balance in state.customers)
               _CustomerRow(
                 balance: balance,
                 selected: balance.customer.id == selectedId,
-                onTap: () => Navigator.pop(context, balance.customer),
-                onEdit: () => _edit(context, balance.customer),
+                manage: manage,
+                onTap: () => manage
+                    ? _edit(context, balance)
+                    : Navigator.pop(context, balance.customer),
+                onEdit: () => _edit(context, balance),
               ),
             InkWell(
               onTap: () => _add(context),
@@ -135,12 +144,14 @@ class _CustomerRow extends StatelessWidget {
   const _CustomerRow({
     required this.balance,
     required this.selected,
+    required this.manage,
     required this.onTap,
     required this.onEdit,
   });
 
   final CustomerBalance balance;
   final bool selected;
+  final bool manage;
   final VoidCallback onTap;
   final VoidCallback onEdit;
 
@@ -172,27 +183,40 @@ class _CustomerRow extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                balance.customer.name,
-                style: AppTextTheme.body.copyWith(
-                  color: t.textPrimary,
-                  fontWeight: FontWeight.w600,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      balance.customer.name,
+                      style: AppTextTheme.body.copyWith(
+                        color: t.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (text != null)
+                      Text(
+                        text,
+                        style: AppTextTheme.hint.copyWith(
+                          color: balance.owed != null
+                              ? t.dangerText
+                              : t.textMuted,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
-            if (text != null) ...[
-              const SizedBox(width: 8),
-              Text(
-                text,
-                style: AppTextTheme.hint.copyWith(color: t.textMuted),
-              ),
-            ],
             if (selected) Icon(Icons.check_rounded, color: t.textPrimary),
-            IconButton(
-              onPressed: onEdit,
-              tooltip: context.l10n.editCustomer,
-              icon: Icon(Icons.edit_outlined, size: 20, color: t.textMuted),
-            ),
+            if (manage)
+              Icon(Icons.chevron_right_rounded, color: t.textMuted)
+            else
+              IconButton(
+                onPressed: onEdit,
+                tooltip: context.l10n.editCustomer,
+                icon: Icon(Icons.more_horiz_rounded, color: t.textMuted),
+              ),
           ],
         ),
       ),
@@ -210,10 +234,15 @@ class _Edit {
 
 /// Add (no [existing]) or rename a Customer; `លុប` only when [canDelete].
 class _CustomerDialog extends StatefulWidget {
-  const _CustomerDialog({this.existing, this.canDelete = false});
+  const _CustomerDialog({
+    this.existing,
+    this.canDelete = false,
+    this.hasCredits = false,
+  });
 
   final CreditCustomer? existing;
   final bool canDelete;
+  final bool hasCredits;
 
   @override
   State<_CustomerDialog> createState() => _CustomerDialogState();
@@ -240,19 +269,61 @@ class _CustomerDialogState extends State<_CustomerDialog> {
       title: Text(
         widget.existing == null ? l10n.addCustomer : l10n.editCustomer,
       ),
-      content: TextField(
-        controller: _name,
-        autofocus: true,
-        decoration: InputDecoration(hintText: l10n.customerName),
-        onSubmitted: (_) => _save(),
-      ),
-      actions: [
-        if (widget.existing != null && widget.canDelete)
-          TextButton(
-            onPressed: () => Navigator.pop(context, const _Edit('', delete: true)),
-            child: Text(l10n.delete),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _name,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.customerName,
+              suffixIcon: MicButton(
+                fieldLabel: l10n.customerName,
+                onText: (text) => _name.text = text,
+              ),
+            ),
+            onSubmitted: (_) => _save(),
           ),
-        TextButton(onPressed: _save, child: Text(l10n.save)),
+          if (widget.existing != null && widget.canDelete)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: widget.hasCredits
+                  ? Text(
+                      l10n.customerHasCredits,
+                      style: AppTextTheme.hint.copyWith(
+                        color: context.tokens.textMuted,
+                      ),
+                    )
+                  : TextButton.icon(
+                      onPressed: () =>
+                          Navigator.pop(context, const _Edit('', delete: true)),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.tokens.dangerText,
+                      ),
+                      icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                      label: Text(l10n.delete),
+                    ),
+            ),
+        ],
+      ),
+      // Two equal buttons side by side; Delete sits under the field.
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+      actions: [
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.cancel),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton(onPressed: _save, child: Text(l10n.save)),
+            ),
+          ],
+        ),
       ],
     );
   }

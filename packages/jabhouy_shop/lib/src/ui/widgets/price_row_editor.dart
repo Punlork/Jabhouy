@@ -3,6 +3,7 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 import 'package:jabhouy_shop/src/models/item_draft.dart';
+import 'package:jabhouy_shop/src/ui/widgets/unit_picker_sheet.dart';
 import 'package:jabhouy_shop/src/ui/widgets/whole_number_input.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
@@ -21,6 +22,9 @@ const _unitFlex = 2;
 const _priceFlex = 5;
 const _countWidth = 64.0;
 const _gap = 8.0;
+
+/// Chips shown in the form; the rest are behind `ទាំងអស់ ›`.
+const _unitChipLimit = 5;
 
 /// Column labels shown once above the first [PriceRowEditor].
 class PriceRowHeader extends StatelessWidget {
@@ -137,6 +141,11 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     );
     widget.onChanged(_draft);
   }
+
+  void _pickUnit(String unit) => setState(() {
+    _unit.text = unit;
+    _update(unit: unit);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -289,12 +298,23 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
         if (widget.unitChips.isNotEmpty) ...[
           const SizedBox(height: 12),
           QuickPickChips(
-            options: widget.unitChips,
+            options: widget.unitChips.take(_unitChipLimit).toList(),
             selected: _draft.unit,
-            onPick: (unit) => setState(() {
-              _unit.text = unit;
-              _update(unit: unit);
-            }),
+            onPick: _pickUnit,
+            trailing: widget.unitChips.length > _unitChipLimit
+                ? PickChip(
+                    label: '${l10n.all} ›',
+                    selected: false,
+                    onTap: () async {
+                      final unit = await showUnitPicker(
+                        context,
+                        units: widget.unitChips,
+                        selected: _draft.unit,
+                      );
+                      if (unit != null && mounted) _pickUnit(unit);
+                    },
+                  )
+                : null,
           ),
           if (widget.unitHint != null) ...[
             const SizedBox(height: AppSizes.fieldGap),
@@ -309,22 +329,21 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
   }
 }
 
-/// A price row's header: `1 កេះ · ×12   12,222 ៛  ▾`, then wholesale and
-/// cost when set. Tapping it opens or closes the row.
+/// One row of the form's price list (canvas ៣): the unit badge, the price
+/// with `ដុំ` and `ដើម` under it when set, a barcode mark and `›`. Tapping
+/// it opens the price sheet.
 class PriceRowSummary extends StatelessWidget {
   const PriceRowSummary({
     required this.draft,
+    required this.khrPerUsd,
     required this.onTap,
-    this.expanded = false,
     this.hasProblem = false,
     super.key,
   });
 
   final PriceRowDraft draft;
+  final int khrPerUsd;
   final VoidCallback onTap;
-
-  /// The row's fields show below this header.
-  final bool expanded;
 
   /// Outlined in red: the row holds a save-time problem.
   final bool hasProblem;
@@ -334,9 +353,10 @@ class PriceRowSummary extends StatelessWidget {
     final l10n = context.l10n;
     final t = context.tokens;
     final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
+    final qty = parseWholeNumber(draft.packQty);
     final extras = [
       for (final (label, text) in [
-        (l10n.priceWholesaleLabel, draft.wholesale),
+        (l10n.priceWholesaleShort, draft.wholesale),
         (l10n.priceCostShort, draft.cost),
       ])
         if (Money.tryParse(text, draft.currency) case final money?)
@@ -345,10 +365,9 @@ class PriceRowSummary extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSizes.radiusInput),
       child: Container(
         constraints: const BoxConstraints(minHeight: AppSizes.minTapTarget),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: hasProblem
             ? BoxDecoration(
                 border: Border.all(color: t.dangerText, width: 2),
@@ -356,55 +375,50 @@ class PriceRowSummary extends StatelessWidget {
               )
             : null,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            Container(
+              constraints: const BoxConstraints(minWidth: 64),
+              height: 46,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: t.surfaceSubtle,
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Baseline: unit and price differ in size and script, so
-                  // centring their boxes leaves them visibly off.
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          unitLabel(
-                            draft.unit,
-                            parseWholeNumber(draft.packQty),
-                          ),
-                          style: AppTextTheme.body.copyWith(
-                            color: t.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      PriceDisplay(
-                        price: Money.tryParse(draft.price, draft.currency),
-                        // Unused: the summary shows no converted line.
-                        khrPerUsd: 0,
-                        showConverted: false,
-                      ),
-                    ],
+                  Text(
+                    draft.unit.trim().isEmpty ? '—' : draft.unit.trim(),
+                    style: AppTextTheme.body.copyWith(
+                      color: t.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  if (extras.isNotEmpty) Text(extras.join(' · '), style: muted),
+                  if (qty != null && qty > 1) Text('×$qty', style: muted),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            // Centred on the first line (price 17 px × 1.5), not on both.
-            SizedBox(
-              height: 26,
-              child: Center(
-                child: Icon(
-                  expanded
-                      ? Icons.expand_less_rounded
-                      : Icons.expand_more_rounded,
-                  color: t.textSecondary,
-                ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  PriceDisplay(
+                    price: Money.tryParse(draft.price, draft.currency),
+                    khrPerUsd: khrPerUsd,
+                    showConverted: true,
+                  ),
+                  if (extras.isNotEmpty)
+                    Text(extras.join(' · '), style: muted),
+                ],
               ),
             ),
+            if (draft.barcode?.isNotEmpty ?? false) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.qr_code_2_rounded, size: 16, color: t.textMuted),
+            ],
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_rounded, color: t.textMuted),
           ],
         ),
       ),
