@@ -7,4 +7,6 @@ Blocked by: 15
 - Pick a photo in the item form; keep it on the phone, queue the upload, set `photoUrl` once the server has it.
 - Agree the upload endpoint with Sokheng and add it to the API contract (#2 has `photoUrl` but no upload route).
 
+- New canvas puts an 88 px photo tile left of the name field in the item form (`បន្ថែមរូបថត`; the item's first letter when it has no photo). Build the tile together with this ticket.
+
 **Done when:** a photo added offline shows on the phone at once and reaches the server after reconnecting; the item saves even if the upload fails.

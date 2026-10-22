@@ -1,6 +1,6 @@
 # P3c Step 3: Item form and sheet copy against the new canvas
 
-Status: open
+Status: done (audit only, no code change; photo tile moves to 24)
 Blocked by: 33
 
 Check these against canvas `៤`, `៤ក`, `៣`, `២`, `៥` and build only the gaps. Several may already match; note which in a comment.
@@ -13,3 +13,15 @@ Check these against canvas `៤`, `៤ក`, `៣`, `២`, `៥` and build only t
 - Boards marked `🗑 លុប` (Rows A–F, Variants underline) are discarded options. Do not build them.
 
 **Done when:** each bullet is either confirmed as already matching (with the file that shows it) or built; analyze at baseline; all tests green.
+
+## Comments
+
+Checked against canvas ២, ៣, ៤, ៤ក, ៥ in `packages/jabhouy_shop/lib/src/ui/`:
+
+- Name field with mic, `ឈ្មោះផ្សេង` chips with `✕` and `+ ឈ្មោះផ្សេង (ឧ. ទឹកធំ, Kulen)`: match (`views/item_form_page.dart`, `_nameSection`).
+- Category chips (chosen first, five at most), `ទាំងអស់ ›` opening the category sheet, and the two hints (`categoryHint`, `categorySuggested`): match (`_categorySection`).
+- Note with mic and placeholder, full-width `រក្សាទុក` that is never disabled: match.
+- Item details sheet: `លក់ដុំ` and `ដើម` lines, `≈` for the other currency, last edited line, `កែតម្លៃ` and red `លុប` for editors only: match (`widgets/item_details_sheet.dart`). Cost is shown to every Member, as decision 2 says; the canvas's `(មើលឃើញតែម្ចាស់ហាង)` label is wrong.
+- **Gap:** the 88 px photo tile left of the name field (`បន្ថែមរូបថត`, or the item's initial). The form has no photo at all today. That is issue 24 (offline photo); a tile that does nothing would mislead, so it waits for 24.
+- Dashed borders (nickname and price add buttons) are drawn solid or outlined; already a noted `shortcut:` for nicknames.
+- Discarded boards (Rows A–F, Variants underline): not built.
