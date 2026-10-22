@@ -19,6 +19,7 @@ class CustomTextFormField extends StatefulWidget {
     this.focusNode,
     this.floatingLabelBehavior,
     this.onChanged,
+    this.onFieldSubmitted,
     this.useCustomBorder = true,
     this.maxLines = 1,
     this.onCleared,
@@ -39,6 +40,9 @@ class CustomTextFormField extends StatefulWidget {
   /// Null inherits the enclosing `Form`'s mode.
   final AutovalidateMode? autovalidateMode;
   final void Function(String?)? onChanged;
+
+  /// The keyboard's action key was pressed.
+  final ValueChanged<String>? onFieldSubmitted;
   final VoidCallback? onVisibilityToggle;
   final bool showClearButton;
   final FocusNode? focusNode;
@@ -219,6 +223,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       decoration: mergedDecoration,
       validator: widget.validator,
       onChanged: widget.onChanged,
+      onFieldSubmitted: widget.onFieldSubmitted,
       maxLines: widget.maxLines,
     );
   }

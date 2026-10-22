@@ -146,6 +146,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
           body: loading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                   children: [
                     _nameSection(state),
@@ -206,6 +208,12 @@ class _ItemFormPageState extends State<ItemFormPage> {
           child: TextField(
             key: ItemFormPage.nameKey,
             controller: _name,
+            // A new item typed from scratch: straight to the name.
+            autofocus:
+                _cubit.existing == null &&
+                widget.name == null &&
+                widget.barcode == null,
+            textInputAction: TextInputAction.next,
             onChanged: _cubit.nameChanged,
             decoration: InputDecoration(
               hintText: l10n.itemNameHint,
@@ -417,9 +425,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
             Expanded(
               child: Text(
                 l10n.priceSection,
-                style: AppTextTheme.sectionTitle.copyWith(
-                  color: t.textPrimary,
-                ),
+                style: AppTextTheme.sectionTitle.copyWith(color: t.textPrimary),
               ),
             ),
             if (_rows.isNotEmpty)

@@ -30,16 +30,19 @@ class MicButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final service = VoiceScope.maybeOf(context);
     if (service == null) return const SizedBox.shrink();
-    return IconButton(
-      onPressed: () async {
-        final text = await showVoiceSheet(
-          context,
-          service: service,
-          fieldLabel: fieldLabel,
-        );
-        if (text != null) onText(text);
-      },
-      icon: Icon(Icons.mic_none_rounded, color: context.tokens.textMuted),
+    // Not a stop for the keyboard's Next key.
+    return ExcludeFocus(
+      child: IconButton(
+        onPressed: () async {
+          final text = await showVoiceSheet(
+            context,
+            service: service,
+            fieldLabel: fieldLabel,
+          );
+          if (text != null) onText(text);
+        },
+        icon: Icon(Icons.mic_none_rounded, color: context.tokens.textMuted),
+      ),
     );
   }
 }

@@ -37,6 +37,8 @@ class PriceRowEditor extends StatefulWidget {
     this.problems = const {},
     this.unitChips = const [],
     this.unitHint,
+    this.autofocus = false,
+    this.onSubmit,
     super.key,
   });
 
@@ -56,6 +58,12 @@ class PriceRowEditor extends StatefulWidget {
   /// Unit suggestions; the form passes them to its first row only.
   final List<String> unitChips;
   final String? unitHint;
+
+  /// Puts the cursor in the unit field when the editor opens.
+  final bool autofocus;
+
+  /// The keyboard's Done key on the last field.
+  final VoidCallback? onSubmit;
 
   @override
   State<PriceRowEditor> createState() => _PriceRowEditorState();
@@ -124,6 +132,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     final settings = widget.settings;
     // The remove button sits on this line: on the price line it left the
     // price field too narrow to read.
+    final hasSecondary = settings.useWholesale || settings.useCost;
     final showQuiet =
         settings.useWholesale ||
         settings.useCost ||
@@ -154,6 +163,8 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _unit,
+                    autofocus: widget.autofocus,
+                    textInputAction: TextInputAction.next,
                     onChanged: (v) => _update(unit: v),
                     decoration: InputDecoration(
                       hintText: l10n.priceUnitHint,
@@ -177,6 +188,7 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                     label: '${l10n.priceCount} ${l10n.optional}',
                     child: TextField(
                       controller: _packQty,
+                      textInputAction: TextInputAction.next,
                       onChanged: (v) => _update(packQty: v),
                       keyboardType: TextInputType.number,
                       inputFormatters: const [WholeNumberFormatter()],
@@ -211,24 +223,27 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
         ...errorsFor(['unit', 'packQty']),
         if (widget.unitChips.isNotEmpty) ...[
           const SizedBox(height: 12),
-          QuickPickChips(
-            options: widget.unitChips.take(_unitChipLimit).toList(),
-            selected: _draft.unit,
-            onPick: _pickUnit,
-            trailing: widget.unitChips.length > _unitChipLimit
-                ? PickChip(
-                    label: '${l10n.all} ›',
-                    selected: false,
-                    onTap: () async {
-                      final unit = await showUnitPicker(
-                        context,
-                        units: widget.unitChips,
-                        selected: _draft.unit,
-                      );
-                      if (unit != null && mounted) _pickUnit(unit);
-                    },
-                  )
-                : null,
+          // Not stops for the keyboard's Next key.
+          ExcludeFocus(
+            child: QuickPickChips(
+              options: widget.unitChips.take(_unitChipLimit).toList(),
+              selected: _draft.unit,
+              onPick: _pickUnit,
+              trailing: widget.unitChips.length > _unitChipLimit
+                  ? PickChip(
+                      label: '${l10n.all} ›',
+                      selected: false,
+                      onTap: () async {
+                        final unit = await showUnitPicker(
+                          context,
+                          units: widget.unitChips,
+                          selected: _draft.unit,
+                        );
+                        if (unit != null && mounted) _pickUnit(unit);
+                      },
+                    )
+                  : null,
+            ),
           ),
           if (widget.unitHint != null) ...[
             const SizedBox(height: AppSizes.fieldGap),
@@ -246,6 +261,10 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
           currency: _draft.currency,
           khrPerUsd: settings.khrPerUsd,
           hintText: l10n.priceSellingHint,
+          textInputAction: hasSecondary
+              ? TextInputAction.next
+              : TextInputAction.done,
+          onSubmitted: hasSecondary ? null : widget.onSubmit,
           onText: (text, currency) => setState(() {
             if (currency != _draft.currency) _convertSecondary(currency);
             _update(
@@ -270,6 +289,10 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                     currency: _draft.currency,
                     controller: _wholesale,
                     hasError: problems.containsKey('wholesale'),
+                    textInputAction: settings.useCost
+                        ? TextInputAction.next
+                        : TextInputAction.done,
+                    onSubmitted: settings.useCost ? null : widget.onSubmit,
                     onChanged: (v) => _update(wholesale: v),
                   ),
                 ),
@@ -283,6 +306,8 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
                     currency: _draft.currency,
                     controller: _cost,
                     hasError: problems.containsKey('cost'),
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: widget.onSubmit,
                     onChanged: (v) => _update(cost: v),
                   ),
                 ),
@@ -434,6 +459,8 @@ class _QuietField extends StatelessWidget {
     required this.controller,
     required this.hasError,
     required this.onChanged,
+    required this.textInputAction,
+    required this.onSubmitted,
   });
 
   final String label;
@@ -442,6 +469,8 @@ class _QuietField extends StatelessWidget {
   final TextEditingController controller;
   final bool hasError;
   final ValueChanged<String> onChanged;
+  final TextInputAction textInputAction;
+  final VoidCallback? onSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -474,6 +503,8 @@ class _QuietField extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 onChanged: onChanged,
+                textInputAction: textInputAction,
+                onSubmitted: onSubmitted == null ? null : (_) => onSubmitted!(),
                 keyboardType: moneyKeyboard(currency),
                 inputFormatters: moneyFormatters(currency),
                 style: AppTextTheme.hint.copyWith(color: t.textPrimary),

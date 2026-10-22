@@ -15,6 +15,7 @@ void main() {
       currency: Currency.khr,
     ),
     bool isNew = false,
+    PriceSettings settings = const PriceSettings(),
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(800, 1600);
@@ -32,7 +33,7 @@ void main() {
               context,
               initial: initial,
               isNew: isNew,
-              settings: const PriceSettings(),
+              settings: settings,
             ),
             child: const Text('open'),
           ),
@@ -100,5 +101,56 @@ void main() {
     await open(tester, isNew: true);
     // The test screen is 1600 tall; the form needs well under half.
     expect(tester.getSize(find.byType(AppSheet)).height, lessThan(800));
+  });
+
+  testWidgets('keyboard: Next walks unit → count → price → wholesale → cost, '
+      'Done on the last one adds the row', (tester) async {
+    await open(
+      tester,
+      isNew: true,
+      settings: const PriceSettings(useWholesale: true),
+    );
+    // A new price opens with the cursor in the unit field.
+    expect(
+      tester.widget<TextField>(find.byType(TextField).first).autofocus,
+      isTrue,
+    );
+
+    await tester.enterText(find.byType(TextField).at(0), 'ដប');
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).at(1), '12');
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).at(2), '3000');
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).at(3), '2800');
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).at(4), '2500');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    expect(result, isA<PriceSaved>());
+    final draft = (result! as PriceSaved).draft;
+    expect(
+      (draft.unit, draft.packQty, draft.price, draft.wholesale, draft.cost),
+      ('ដប', '12', '3,000', '2,800', '2,500'),
+    );
+  });
+
+  testWidgets('keyboard: Done on the price adds the row when it is the last '
+      'field', (tester) async {
+    await open(
+      tester,
+      isNew: true,
+      settings: const PriceSettings(useCost: false),
+    );
+    await tester.enterText(find.byType(TextField).at(0), 'ដប');
+    await tester.enterText(find.byType(TextField).at(2), '3000');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(result, isA<PriceSaved>());
   });
 }

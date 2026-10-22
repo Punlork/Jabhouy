@@ -139,6 +139,8 @@ class _PriceSheetState extends State<_PriceSheet> {
             problems: _problems,
             unitChips: widget.unitChips,
             unitHint: widget.unitHint,
+            autofocus: widget.isNew,
+            onSubmit: _confirm,
             onScan: widget.onScan,
             onChanged: (draft) => setState(() => _draft = draft),
           ),
