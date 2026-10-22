@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:jabhouy/app/constant/app_flavor.dart';
 import 'package:jabhouy/app/injection/dependency_injection.dart';
@@ -16,9 +17,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 ///    tab readers.
 ///
 /// Production builds intentionally initialize nothing: no buffers are
-/// allocated and no overlay ships. To hand a gated overlay to external
-/// testers, prefer a `--profile` build (where the plain [DebuggerConfig]
-/// works fully) over switching to [DebuggerConfig.gated] here.
+/// allocated and no overlay ships. The development flavor also runs in
+/// release (the CI dev APK is one), where the plain [DebuggerConfig] would
+/// disable itself, so it takes a gate that starts unlocked.
 class AppDebugger {
   const AppDebugger._();
 
@@ -51,10 +52,19 @@ class AppDebugger {
   }
 
   static Future<DebuggerConfig> _configFor(AppFlavor flavor) async {
-    // Every non-production flavor gets the same thing: an ungated config,
-    // which disables itself in release builds. The flavor still decides
-    // *whether* to initialize at all — that check lives in [initialize].
-    return DebuggerConfig(appVersion: await _appVersion());
+    // The flavor still decides *whether* to initialize at all — that check
+    // lives in [initialize]. Only the development flavor gets here.
+    final version = await _appVersion();
+    if (!kReleaseMode) return DebuggerConfig(appVersion: version);
+    // shortcut: the gate starts unlocked, so every dev release shows the
+    // bubble; the dev backend holds no real data. Use a tap gate (the
+    // version label) before sharing a dev build outside the team.
+    return DebuggerConfig.gated(
+      gate: SecretGestureGate(initiallyUnlocked: true),
+      captureNetworkBodies: true,
+      captureStorage: true,
+      appVersion: version,
+    );
   }
 
   static Future<String?> _appVersion() async {
