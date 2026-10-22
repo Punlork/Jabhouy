@@ -32,10 +32,9 @@ Future<PriceSheetResult?> showPriceSheet(
   String? unitHint,
   Future<String?> Function()? onScan,
   Map<String, FormProblem> problems = const {},
-}) => showAppSheet<PriceSheetResult>(
+}) => showFitSheet<PriceSheetResult>(
   context,
-  initialSize: 0.85,
-  builder: (_, controller) => _PriceSheet(
+  builder: (_) => _PriceSheet(
     initial: initial,
     settings: settings,
     isNew: isNew,
@@ -43,7 +42,6 @@ Future<PriceSheetResult?> showPriceSheet(
     unitHint: unitHint,
     onScan: onScan,
     problems: problems,
-    scrollController: controller,
   ),
 );
 
@@ -56,7 +54,6 @@ class _PriceSheet extends StatefulWidget {
     required this.unitHint,
     required this.onScan,
     required this.problems,
-    required this.scrollController,
   });
 
   final PriceRowDraft initial;
@@ -66,7 +63,6 @@ class _PriceSheet extends StatefulWidget {
   final String? unitHint;
   final Future<String?> Function()? onScan;
   final Map<String, FormProblem> problems;
-  final ScrollController scrollController;
 
   @override
   State<_PriceSheet> createState() => _PriceSheetState();
@@ -100,7 +96,7 @@ class _PriceSheetState extends State<_PriceSheet> {
     final l10n = context.l10n;
     final t = context.tokens;
     return AppSheet(
-      scrollController: widget.scrollController,
+      fit: true,
       header: Row(
         children: [
           Container(

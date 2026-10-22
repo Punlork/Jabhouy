@@ -93,4 +93,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(result, isA<PriceDeleted>());
   });
+
+  testWidgets('the sheet is as tall as its form, not a fixed share', (
+    tester,
+  ) async {
+    await open(tester, isNew: true);
+    // The test screen is 1600 tall; the form needs well under half.
+    expect(tester.getSize(find.byType(AppSheet)).height, lessThan(800));
+  });
 }
