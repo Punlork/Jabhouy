@@ -18,4 +18,5 @@ Blocked by: 15
 - New strings `priceNew` (`តម្លៃថ្មី`) and `priceDone` (`រួចរាល់`).
 - Barcode-in-use is only known to the cubit at save time, so it is not checked in the sheet; 33 reopens the sheet of that row with the message.
 - The canvas says `ឯកតា`; the app keeps `ពាក្យកាត់` (user's call, issue 16).
-- Not verified: the look on a device; the `ដុំ` / `ដើម` row still uses today's `PriceRowEditor` layout, not the exact canvas one.
+- Layout follows canvas ៤ក: labels over `លក់ជា` / `ចំនួន`, unit chips under that row, `តម្លៃលក់` on its own full-width row, then `ដុំ` / `ដើម` as muted boxes beside the scan button. This lives in `PriceRowEditor` (only the sheet uses it now); `PriceRowHeader` is gone.
+- Not verified on a device.

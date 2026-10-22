@@ -18,42 +18,11 @@ String problemText(AppLocalizations l10n, FormProblem problem) =>
       ProblemKind.barcodeUsed => l10n.priceBarcodeUsed(problem.itemName ?? ''),
     };
 
-const _unitFlex = 2;
-const _priceFlex = 5;
-const _countWidth = 64.0;
+const _countWidth = 70.0;
 const _gap = 8.0;
 
 /// Chips shown in the form; the rest are behind `ទាំងអស់ ›`.
 const _unitChipLimit = 5;
-
-/// Column labels shown once above the first [PriceRowEditor].
-class PriceRowHeader extends StatelessWidget {
-  const PriceRowHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final style = AppTextTheme.hint.copyWith(color: context.tokens.textMuted);
-    return Row(
-      children: [
-        Expanded(
-          flex: _unitFlex,
-          child: Text(l10n.priceUnit, style: style),
-        ),
-        const SizedBox(width: _gap),
-        SizedBox(
-          width: _countWidth,
-          child: Text(l10n.priceCount, style: style),
-        ),
-        const SizedBox(width: _gap),
-        Expanded(
-          flex: _priceFlex,
-          child: Text(l10n.priceSelling, style: style),
-        ),
-      ],
-    );
-  }
-}
 
 /// One Price option being typed: unit, optional pack count, selling price,
 /// and a quiet line with wholesale and cost when the Shop uses them.
@@ -178,71 +147,117 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: _unitFlex,
-              child: TextField(
-                controller: _unit,
-                onChanged: (v) => _update(unit: v),
-                decoration: InputDecoration(
-                  hintText: l10n.priceUnitHint,
-                  error: problems.containsKey('unit') ? const SizedBox() : null,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _FieldLabel(l10n.priceUnit),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: _unit,
+                    onChanged: (v) => _update(unit: v),
+                    decoration: InputDecoration(
+                      hintText: l10n.priceUnitHint,
+                      error: problems.containsKey('unit')
+                          ? const SizedBox()
+                          : null,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: _gap),
             SizedBox(
               width: _countWidth,
-              child: Semantics(
-                label: '${l10n.priceCount} ${l10n.optional}',
-                child: TextField(
-                  controller: _packQty,
-                  onChanged: (v) => _update(packQty: v),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: const [WholeNumberFormatter()],
-                  decoration: InputDecoration(
-                    hintText: l10n.priceCountHint,
-                    // prefixText only shows while focused; this always does.
-                    prefixIcon: Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 12),
-                      child: Text(
-                        '×',
-                        style: AppTextTheme.body.copyWith(color: t.textMuted),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _FieldLabel(l10n.priceCount),
+                  const SizedBox(height: 4),
+                  Semantics(
+                    label: '${l10n.priceCount} ${l10n.optional}',
+                    child: TextField(
+                      controller: _packQty,
+                      onChanged: (v) => _update(packQty: v),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: const [WholeNumberFormatter()],
+                      decoration: InputDecoration(
+                        hintText: l10n.priceCountHint,
+                        // prefixText only shows while focused; this always does.
+                        prefixIcon: Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 12),
+                          child: Text(
+                            '×',
+                            style: AppTextTheme.body.copyWith(
+                              color: t.textMuted,
+                            ),
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 13,
+                        ),
+                        error: problems.containsKey('packQty')
+                            ? const SizedBox()
+                            : null,
                       ),
                     ),
-                    prefixIconConstraints: const BoxConstraints(),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 13,
-                    ),
-                    error: problems.containsKey('packQty')
-                        ? const SizedBox()
-                        : null,
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(width: _gap),
-            Expanded(
-              flex: _priceFlex,
-              child: MoneyInput(
-                value: Money.tryParse(_draft.price, _draft.currency),
-                currency: _draft.currency,
-                khrPerUsd: settings.khrPerUsd,
-                hintText: l10n.priceSellingHint,
-                onText: (text, currency) => setState(() {
-                  if (currency != _draft.currency) _convertSecondary(currency);
-                  _update(
-                    price: text,
-                    currency: currency,
-                    wholesale: _wholesale.text,
-                    cost: _cost.text,
-                  );
-                }),
-                hasError: problems.containsKey('price'),
+                ],
               ),
             ),
           ],
         ),
-        ...errorsFor(['unit', 'packQty', 'price']),
+        ...errorsFor(['unit', 'packQty']),
+        if (widget.unitChips.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          QuickPickChips(
+            options: widget.unitChips.take(_unitChipLimit).toList(),
+            selected: _draft.unit,
+            onPick: _pickUnit,
+            trailing: widget.unitChips.length > _unitChipLimit
+                ? PickChip(
+                    label: '${l10n.all} ›',
+                    selected: false,
+                    onTap: () async {
+                      final unit = await showUnitPicker(
+                        context,
+                        units: widget.unitChips,
+                        selected: _draft.unit,
+                      );
+                      if (unit != null && mounted) _pickUnit(unit);
+                    },
+                  )
+                : null,
+          ),
+          if (widget.unitHint != null) ...[
+            const SizedBox(height: AppSizes.fieldGap),
+            Text(
+              widget.unitHint!,
+              style: AppTextTheme.hint.copyWith(color: t.textMuted),
+            ),
+          ],
+        ],
+        const SizedBox(height: 16),
+        _FieldLabel(l10n.priceSelling),
+        const SizedBox(height: 4),
+        MoneyInput(
+          value: Money.tryParse(_draft.price, _draft.currency),
+          currency: _draft.currency,
+          khrPerUsd: settings.khrPerUsd,
+          hintText: l10n.priceSellingHint,
+          onText: (text, currency) => setState(() {
+            if (currency != _draft.currency) _convertSecondary(currency);
+            _update(
+              price: text,
+              currency: currency,
+              wholesale: _wholesale.text,
+              cost: _cost.text,
+            );
+          }),
+          hasError: problems.containsKey('price'),
+        ),
+        ...errorsFor(['price']),
         if (showQuiet) ...[
           const SizedBox(height: _gap),
           Row(
@@ -295,38 +310,22 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
           ),
         ],
         ...errorsFor(['wholesale', 'cost', 'barcode']),
-        if (widget.unitChips.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          QuickPickChips(
-            options: widget.unitChips.take(_unitChipLimit).toList(),
-            selected: _draft.unit,
-            onPick: _pickUnit,
-            trailing: widget.unitChips.length > _unitChipLimit
-                ? PickChip(
-                    label: '${l10n.all} ›',
-                    selected: false,
-                    onTap: () async {
-                      final unit = await showUnitPicker(
-                        context,
-                        units: widget.unitChips,
-                        selected: _draft.unit,
-                      );
-                      if (unit != null && mounted) _pickUnit(unit);
-                    },
-                  )
-                : null,
-          ),
-          if (widget.unitHint != null) ...[
-            const SizedBox(height: AppSizes.fieldGap),
-            Text(
-              widget.unitHint!,
-              style: AppTextTheme.hint.copyWith(color: t.textMuted),
-            ),
-          ],
-        ],
       ],
     );
   }
+}
+
+/// A 12 px muted label over a sheet field.
+class _FieldLabel extends StatelessWidget {
+  const _FieldLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text,
+    style: AppTextTheme.hint.copyWith(color: context.tokens.textMuted),
+  );
 }
 
 /// One row of the form's price list (canvas ៣): the unit badge, the price
@@ -408,8 +407,7 @@ class PriceRowSummary extends StatelessWidget {
                     khrPerUsd: khrPerUsd,
                     showConverted: true,
                   ),
-                  if (extras.isNotEmpty)
-                    Text(extras.join(' · '), style: muted),
+                  if (extras.isNotEmpty) Text(extras.join(' · '), style: muted),
                 ],
               ),
             ),
@@ -426,7 +424,7 @@ class PriceRowSummary extends StatelessWidget {
   }
 }
 
-/// Secondary price field (canvas ៣ខ): an underline, label inside, the
+/// Secondary price field (canvas ៤ក): a muted box, label inside, the
 /// row's currency at the end. 44 tall so it stays a valid tap target.
 class _QuietField extends StatelessWidget {
   const _QuietField({
@@ -453,16 +451,11 @@ class _QuietField extends StatelessWidget {
       height: AppSizes.minTapTarget,
       // Centres the baseline-aligned row vertically in the 44 px box.
       alignment: AlignmentDirectional.centerStart,
-      padding: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: hasError
-              ? BorderSide(color: t.dangerText, width: 2)
-              : BorderSide(
-                  color: t.textMuted.withValues(alpha: 0.5),
-                  width: 1.5,
-                ),
-        ),
+        color: t.surfaceSubtle,
+        borderRadius: BorderRadius.circular(10),
+        border: hasError ? Border.all(color: t.dangerText, width: 2) : null,
       ),
       // Baseline, not centre: Khmer and Latin glyphs sit at different
       // heights, so centring the boxes leaves the number looking off.
