@@ -8,7 +8,10 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 void main() {
   late PriceRowDraft last;
 
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    List<String> unitChips = const [],
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
@@ -19,6 +22,7 @@ void main() {
           body: PriceRowEditor(
             initial: const PriceRowDraft(id: 'r', currency: Currency.khr),
             settings: const PriceSettings(useWholesale: true),
+            unitChips: unitChips,
             onChanged: (d) => last = d,
           ),
         ),
@@ -50,5 +54,22 @@ void main() {
     expect(find.text('1.00'), findsOneWidget);
     expect(last.currency, Currency.usd);
     expect((last.wholesale, last.cost), ('2.00', '1.00'));
+  });
+
+  testWidgets('five unit chips, the rest behind ទាំងអស់ ›', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 1600);
+    addTearDown(tester.view.reset);
+    await pump(tester, unitChips: [for (var i = 1; i <= 7; i++) 'u$i']);
+
+    expect(find.text('u5'), findsOneWidget);
+    expect(find.text('u6'), findsNothing);
+
+    await tester.tap(find.text('ទាំងអស់ ›'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('u7'));
+    await tester.pumpAndSettle();
+
+    expect(last.unit, 'u7');
   });
 }

@@ -3,6 +3,7 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_shop/src/models/item.dart';
 import 'package:jabhouy_shop/src/models/item_draft.dart';
+import 'package:jabhouy_shop/src/ui/widgets/unit_picker_sheet.dart';
 import 'package:jabhouy_shop/src/ui/widgets/whole_number_input.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
@@ -21,6 +22,9 @@ const _unitFlex = 2;
 const _priceFlex = 5;
 const _countWidth = 64.0;
 const _gap = 8.0;
+
+/// Chips shown in the form; the rest are behind `ទាំងអស់ ›`.
+const _unitChipLimit = 5;
 
 /// Column labels shown once above the first [PriceRowEditor].
 class PriceRowHeader extends StatelessWidget {
@@ -137,6 +141,11 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
     );
     widget.onChanged(_draft);
   }
+
+  void _pickUnit(String unit) => setState(() {
+    _unit.text = unit;
+    _update(unit: unit);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -289,12 +298,23 @@ class _PriceRowEditorState extends State<PriceRowEditor> {
         if (widget.unitChips.isNotEmpty) ...[
           const SizedBox(height: 12),
           QuickPickChips(
-            options: widget.unitChips,
+            options: widget.unitChips.take(_unitChipLimit).toList(),
             selected: _draft.unit,
-            onPick: (unit) => setState(() {
-              _unit.text = unit;
-              _update(unit: unit);
-            }),
+            onPick: _pickUnit,
+            trailing: widget.unitChips.length > _unitChipLimit
+                ? PickChip(
+                    label: '${l10n.all} ›',
+                    selected: false,
+                    onTap: () async {
+                      final unit = await showUnitPicker(
+                        context,
+                        units: widget.unitChips,
+                        selected: _draft.unit,
+                      );
+                      if (unit != null && mounted) _pickUnit(unit);
+                    },
+                  )
+                : null,
           ),
           if (widget.unitHint != null) ...[
             const SizedBox(height: AppSizes.fieldGap),
