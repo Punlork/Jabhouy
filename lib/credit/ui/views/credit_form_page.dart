@@ -151,6 +151,10 @@ class _CreditFormPageState extends State<CreditFormPage> {
                         maxLines: 2,
                         decoration: InputDecoration(
                           hintText: l10n.creditNoteHint,
+                          suffixIcon: MicButton(
+                            fieldLabel: l10n.noteLabel,
+                            onText: (text) => _note.text = text,
+                          ),
                         ),
                       ),
                     ),

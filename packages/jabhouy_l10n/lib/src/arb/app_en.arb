@@ -1052,6 +1052,10 @@
   "@voiceListening": {
     "description": "Shown while voice input listens"
   },
+  "voiceUnavailable": "Voice input is not available on this phone",
+  "@voiceUnavailable": {
+    "description": "Shown when the phone has no speech engine or the microphone is refused"
+  },
   "voiceUse": "Use this text",
   "@voiceUse": {
     "description": "Confirms the voice transcript"

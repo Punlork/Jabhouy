@@ -28,6 +28,10 @@ enum Feature {
   /// Barcode scanning: Home's scan button, the scan result, and the price
   /// row's barcode button (decision 44). Off until proven on a real phone.
   barcodeScan,
+
+  /// Mic buttons on free-text fields and the voice sheet (decision 44).
+  /// Off until Khmer dictation is proven on a real Android phone.
+  voiceInput,
 }
 
 /// Answers whether a [Feature] is on.
@@ -62,6 +66,8 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
           const bool.fromEnvironment('FEATURE_SERVER_SHOPS'),
         Feature.barcodeScan =>
           const bool.fromEnvironment('FEATURE_BARCODE_SCAN'),
+        Feature.voiceInput =>
+          const bool.fromEnvironment('FEATURE_VOICE_INPUT'),
       };
 }
 

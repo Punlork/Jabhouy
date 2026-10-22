@@ -86,13 +86,9 @@ class _CustomerPickerSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // White with a border (canvas ១១), like the category picker.
-            TextField(
+            MicSearchField(
+              hintText: l10n.searchCustomers,
               onChanged: cubit.search,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: l10n.searchCustomers,
-                prefixIcon: Icon(Icons.search_rounded, color: t.textMuted),
-              ),
             ),
             const SizedBox(height: 8),
             for (final balance in state.customers)
@@ -280,7 +276,13 @@ class _CustomerDialogState extends State<_CustomerDialog> {
           TextField(
             controller: _name,
             autofocus: true,
-            decoration: InputDecoration(hintText: l10n.customerName),
+            decoration: InputDecoration(
+              hintText: l10n.customerName,
+              suffixIcon: MicButton(
+                fieldLabel: l10n.customerName,
+                onText: (text) => _name.text = text,
+              ),
+            ),
             onSubmitted: (_) => _save(),
           ),
           if (widget.existing != null && widget.canDelete)

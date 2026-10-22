@@ -799,6 +799,9 @@ class AppLocalizationsKm extends AppLocalizations {
   String get voiceListening => 'កំពុងស្តាប់…';
 
   @override
+  String get voiceUnavailable => 'មិនអាចប្រើសំឡេងបានទេ';
+
+  @override
   String get voiceUse => 'ប្រើអត្ថបទនេះ';
 
   @override

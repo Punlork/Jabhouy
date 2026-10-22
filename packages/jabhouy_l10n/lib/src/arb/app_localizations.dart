@@ -1598,6 +1598,12 @@ abstract class AppLocalizations {
   /// **'Listening…'**
   String get voiceListening;
 
+  /// Shown when the phone has no speech engine or the microphone is refused
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input is not available on this phone'**
+  String get voiceUnavailable;
+
   /// Confirms the voice transcript
   ///
   /// In en, this message translates to:

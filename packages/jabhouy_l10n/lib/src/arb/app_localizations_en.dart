@@ -813,6 +813,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceListening => 'Listening…';
 
   @override
+  String get voiceUnavailable => 'Voice input is not available on this phone';
+
+  @override
   String get voiceUse => 'Use this text';
 
   @override

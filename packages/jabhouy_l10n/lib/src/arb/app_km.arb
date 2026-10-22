@@ -1000,6 +1000,10 @@
   "@voiceListening": {
     "description": "Shown while voice input listens"
   },
+  "voiceUnavailable": "មិនអាចប្រើសំឡេងបានទេ",
+  "@voiceUnavailable": {
+    "description": "Shown when the phone has no speech engine or the microphone is refused"
+  },
   "voiceUse": "ប្រើអត្ថបទនេះ",
   "@voiceUse": {
     "description": "Confirms the voice transcript"

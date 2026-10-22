@@ -165,6 +165,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
                         maxLines: 2,
                         decoration: InputDecoration(
                           hintText: l10n.itemNoteHint,
+                          suffixIcon: MicButton(
+                            fieldLabel: l10n.noteLabel,
+                            onText: (text) => _note.text = text,
+                          ),
                         ),
                       ),
                     ),
@@ -209,6 +213,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
             decoration: InputDecoration(
               hintText: l10n.itemNameHint,
               error: nameProblem == null ? null : const SizedBox(),
+              suffixIcon: MicButton(
+                fieldLabel: l10n.itemName,
+                onText: (text) {
+                  _name.text = text;
+                  _cubit.nameChanged(text);
+                },
+              ),
             ),
           ),
         ),

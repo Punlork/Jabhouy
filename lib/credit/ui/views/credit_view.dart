@@ -52,6 +52,13 @@ class _CreditViewState extends State<CreditView>
                 controller: _search,
                 hintText: l10n.searchCustomers,
                 onChanged: cubit.search,
+                trailing: MicButton(
+                  fieldLabel: l10n.searchCustomers,
+                  onText: (text) {
+                    _search.text = text;
+                    cubit.search(text);
+                  },
+                ),
               ),
             ),
             Expanded(
