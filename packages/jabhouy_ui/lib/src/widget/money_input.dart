@@ -111,16 +111,18 @@ class _MoneyInputState extends State<MoneyInput> {
             ),
           ),
         ),
-        if (_money != null) ...[
-          const SizedBox(height: AppSizes.fieldGap),
-          Text(
-            _money!
-                .convertTo(other, khrPerUsd: widget.khrPerUsd)
-                .formatApprox(),
-            textAlign: TextAlign.end,
-            style: AppTextTheme.hint.copyWith(color: t.textMuted),
-          ),
-        ],
+        // Always drawn, blank until there is a price, so the form below
+        // does not jump when the first digit is typed or the field cleared.
+        const SizedBox(height: AppSizes.fieldGap),
+        Text(
+          _money == null
+              ? ' '
+              : _money!
+                    .convertTo(other, khrPerUsd: widget.khrPerUsd)
+                    .formatApprox(),
+          textAlign: TextAlign.end,
+          style: AppTextTheme.hint.copyWith(color: t.textMuted),
+        ),
       ],
     );
   }

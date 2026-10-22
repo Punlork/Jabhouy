@@ -424,7 +424,7 @@ class PriceRowSummary extends StatelessWidget {
   }
 }
 
-/// Secondary price field (canvas ៤ក): a muted box, label inside, the
+/// Secondary price field: a thin outline, label inside, the
 /// row's currency at the end. 44 tall so it stays a valid tap target.
 class _QuietField extends StatelessWidget {
   const _QuietField({
@@ -453,9 +453,12 @@ class _QuietField extends StatelessWidget {
       alignment: AlignmentDirectional.centerStart,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: t.surfaceSubtle,
         borderRadius: BorderRadius.circular(10),
-        border: hasError ? Border.all(color: t.dangerText, width: 2) : null,
+        // Quiet on purpose: wholesale and cost are secondary to the price.
+        border: Border.all(
+          color: hasError ? t.dangerText : t.divider,
+          width: hasError ? 2 : 1,
+        ),
       ),
       // Baseline, not centre: Khmer and Latin glyphs sit at different
       // heights, so centring the boxes leaves the number looking off.
