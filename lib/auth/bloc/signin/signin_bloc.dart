@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
 
@@ -54,8 +55,14 @@ class SigninBloc extends Bloc<SigninEvent, SigninState> {
       } else {
         emit(SigninFailure(response.message));
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
       // The page shows its own message: Google's errors are not for users.
+      // The debug overlay (dev builds) keeps the real reason.
+      Debugger.error(
+        'Google sign-in: $error',
+        tag: 'auth',
+        stackTrace: stackTrace,
+      );
       emit(const SigninFailure());
     }
   }

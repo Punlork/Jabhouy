@@ -111,6 +111,8 @@ class _CreditFormPageState extends State<CreditFormPage> {
           body: loading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                   children: [
                     _customer(state),
@@ -312,6 +314,7 @@ class _CreditFormPageState extends State<CreditFormPage> {
               : Money(state.amount!, state.currency),
           currency: state.currency,
           khrPerUsd: state.khrPerUsd,
+          textInputAction: TextInputAction.next,
           onText: (text, currency) =>
               _cubit.setTyped(Money.tryParse(text, currency)?.amount, currency),
         ),

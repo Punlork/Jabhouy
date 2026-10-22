@@ -170,6 +170,8 @@ class _SigninPageContentState extends State<_SigninPageContent> {
                     child: TextFormField(
                       controller: _passwordController,
                       style: AppTextTheme.body,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _handleLogin(context),
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         suffixIcon: IconButton(

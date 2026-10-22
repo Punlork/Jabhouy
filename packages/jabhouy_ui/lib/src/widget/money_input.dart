@@ -20,6 +20,8 @@ class MoneyInput extends StatefulWidget {
     this.hasError = false,
     this.hintText,
     this.value,
+    this.textInputAction,
+    this.onSubmitted,
     super.key,
   });
 
@@ -40,6 +42,10 @@ class MoneyInput extends StatefulWidget {
   /// A red border with no text, for a form that shows the message itself.
   final bool hasError;
   final String? hintText;
+
+  /// The keyboard's action key; [onSubmitted] runs when it is pressed.
+  final TextInputAction? textInputAction;
+  final VoidCallback? onSubmitted;
 
   @override
   State<MoneyInput> createState() => _MoneyInputState();
@@ -93,6 +99,10 @@ class _MoneyInputState extends State<MoneyInput> {
         TextField(
           controller: _controller,
           onChanged: _onText,
+          textInputAction: widget.textInputAction,
+          onSubmitted: widget.onSubmitted == null
+              ? null
+              : (_) => widget.onSubmitted!(),
           keyboardType: moneyKeyboard(_currency),
           inputFormatters: moneyFormatters(_currency),
           style: AppTextTheme.body.copyWith(color: t.textPrimary),

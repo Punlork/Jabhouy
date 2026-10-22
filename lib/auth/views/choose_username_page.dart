@@ -108,6 +108,7 @@ class _ChooseUsernamePageState extends State<ChooseUsernamePage> {
                     labelText: l10n.username,
                     prefixIcon: Icons.alternate_email,
                     action: TextInputAction.done,
+                    onFieldSubmitted: (_) => _save(),
                     validator: (value) =>
                         AuthService.isValidUsername((value ?? '').trim()) ? null : l10n.usernameRules,
                   ),
