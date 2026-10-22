@@ -919,6 +919,14 @@
   "@priceMissing": {
     "description": "Shown instead of a missing price, never 0"
   },
+  "priceTapToEdit": "Tap a price to edit",
+  "@priceTapToEdit": {
+    "description": "Hint beside the price list title in the item form"
+  },
+  "priceNoneYet": "You can save now and add prices later",
+  "@priceNoneYet": {
+    "description": "Under the no-prices-yet card in the item form"
+  },
   "priceNew": "New price",
   "@priceNew": {
     "description": "Title of the price sheet when adding a price"

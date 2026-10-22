@@ -1412,6 +1412,18 @@ abstract class AppLocalizations {
   /// **'No price yet'**
   String get priceMissing;
 
+  /// Hint beside the price list title in the item form
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a price to edit'**
+  String get priceTapToEdit;
+
+  /// Under the no-prices-yet card in the item form
+  ///
+  /// In en, this message translates to:
+  /// **'You can save now and add prices later'**
+  String get priceNoneYet;
+
   /// Title of the price sheet when adding a price
   ///
   /// In en, this message translates to:

@@ -6,6 +6,7 @@ import 'package:jabhouy_shop/src/models/item_draft.dart';
 import 'package:jabhouy_shop/src/ui/bloc/item_form/item_form_cubit.dart';
 import 'package:jabhouy_shop/src/ui/widgets/category_picker_sheet.dart';
 import 'package:jabhouy_shop/src/ui/widgets/price_row_editor.dart';
+import 'package:jabhouy_shop/src/ui/widgets/price_sheet.dart';
 import 'package:jabhouy_shop/src/ui/widgets/text_prompt_dialog.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
@@ -42,10 +43,6 @@ class _ItemFormPageState extends State<ItemFormPage> {
   late final List<PriceRowDraft> _rows = [
     ...?_cubit.existing?.prices.map(PriceRowDraft.from),
   ];
-
-  /// The one price row open for editing; the rest show as summaries.
-  /// A single row (a new item, or an item with one price) starts open.
-  late String? _openRowId = _rows.length == 1 ? _rows.single.id : null;
 
   /// Scroll targets for the first problem: `name`, `rows`, or a row id.
   final _keys = <String, GlobalKey>{};
@@ -112,12 +109,11 @@ class _ItemFormPageState extends State<ItemFormPage> {
     return BlocConsumer<ItemFormCubit, ItemFormState>(
       listenWhen: (a, b) => a.status != b.status || a.problems != b.problems,
       listener: (context, state) {
-        if (state.status == ItemFormStatus.ready && _rows.isEmpty) {
-          final row = _emptyRow(state);
-          setState(() {
-            _rows.add(row);
-            _openRowId = row.id;
-          });
+        // A scan starts the item with its barcode on a row.
+        if (state.status == ItemFormStatus.ready &&
+            _rows.isEmpty &&
+            widget.barcode != null) {
+          setState(() => _rows.add(_emptyRow(state)));
         }
         if (state.status == ItemFormStatus.saved) {
           Navigator.of(context).maybePop();
@@ -127,10 +123,11 @@ class _ItemFormPageState extends State<ItemFormPage> {
           final bad = _rows.where(
             (r) => state.problems.keys.any((k) => k.startsWith('${r.id}.')),
           );
-          if (bad.isNotEmpty) setState(() => _openRowId = bad.first.id);
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _showFirstProblem(state.problems),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _showFirstProblem(state.problems);
+            if (bad.isNotEmpty) _openPrice(state, row: bad.first);
+          });
         }
       },
       builder: (context, state) {
@@ -367,118 +364,158 @@ class _ItemFormPageState extends State<ItemFormPage> {
     );
   }
 
+  /// The price sheet for [row], or for a new row when [row] is null.
+  Future<void> _openPrice(ItemFormState state, {PriceRowDraft? row}) async {
+    final initial = row ?? _emptyRow(state);
+    final category = state.categories.where((c) => c.id == state.categoryId);
+    final result = await showPriceSheet(
+      context,
+      initial: initial,
+      isNew: row == null,
+      settings: state.settings,
+      unitChips: state.units,
+      unitHint: category.isNotEmpty
+          ? context.l10n.priceUnitsFor(category.first.name)
+          : null,
+      onScan: switch (widget.scanBarcode) {
+        final scan? => () => scan(context),
+        null => null,
+      },
+      problems: {
+        for (final MapEntry(:key, :value) in state.problems.entries)
+          if (key.startsWith('${initial.id}.'))
+            key.substring(initial.id.length + 1): value,
+      },
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      switch (result) {
+        case PriceSaved(:final draft):
+          final at = _rows.indexWhere((r) => r.id == draft.id);
+          if (at < 0) {
+            _rows.add(draft);
+          } else {
+            _rows[at] = draft;
+          }
+        case PriceDeleted():
+          _rows.removeWhere((r) => r.id == initial.id);
+      }
+    });
+  }
+
   Widget _priceSection(ItemFormState state) {
     final l10n = context.l10n;
     final t = context.tokens;
-    final category = state.categories.where((c) => c.id == state.categoryId);
     return Column(
       key: _keyFor('rows'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.priceSection,
-          style: AppTextTheme.sectionTitle.copyWith(color: t.textPrimary),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              child: Text(
+                l10n.priceSection,
+                style: AppTextTheme.sectionTitle.copyWith(
+                  color: t.textPrimary,
+                ),
+              ),
+            ),
+            if (_rows.isNotEmpty)
+              Text(
+                l10n.priceTapToEdit,
+                style: AppTextTheme.hint.copyWith(color: t.textMuted),
+              ),
+          ],
         ),
         const SizedBox(height: 10),
-        for (final (i, row) in _rows.indexed)
-          Container(
-            key: _keyFor(row.id),
-            margin: const EdgeInsets.only(bottom: 14),
-            padding: const EdgeInsets.only(bottom: 14),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: t.dividerStrong)),
-            ),
-            child: row.id != _openRowId
-                ? PriceRowSummary(
-                    draft: row,
-                    hasProblem: state.problems.keys.any(
-                      (k) => k.startsWith('${row.id}.'),
-                    ),
-                    onTap: () => setState(() => _openRowId = row.id),
-                  )
-                // The header stays on top to close the row; column labels
-                // belong to the open row's fields only.
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: t.surface,
+            borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          ),
+          child: _rows.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      PriceRowSummary(
-                        draft: row,
-                        expanded: true,
-                        onTap: () => setState(() => _openRowId = null),
-                      ),
-                      const SizedBox(height: 8),
-                      const PriceRowHeader(),
-                      const SizedBox(height: AppSizes.fieldGap),
-                      PriceRowEditor(
-                        key: ValueKey(row.id),
-                        initial: row,
-                        settings: state.settings,
-                        problems: {
-                          for (final MapEntry(:key, :value)
-                              in state.problems.entries)
-                            if (key.startsWith('${row.id}.'))
-                              key.substring(row.id.length + 1): value,
-                        },
-                        unitChips: state.units,
-                        unitHint: category.isNotEmpty
-                            ? l10n.priceUnitsFor(category.first.name)
-                            : null,
-                        // Rebuild so the header follows what is typed.
-                        onChanged: (draft) => setState(
-                          () =>
-                              _rows[_rows.indexWhere((r) => r.id == draft.id)] =
-                                  draft,
+                      Text(
+                        l10n.priceMissing,
+                        style: AppTextTheme.label.copyWith(
+                          color: t.textPrimary,
                         ),
-                        onScan: switch (widget.scanBarcode) {
-                          final scan? => () => scan(context),
-                          null => null,
-                        },
-                        onRemove: _rows.length > 1
-                            ? () => setState(() => _rows.removeAt(i))
-                            : null,
+                      ),
+                      Text(
+                        l10n.priceNoneYet,
+                        style: AppTextTheme.hint.copyWith(color: t.textMuted),
                       ),
                     ],
                   ),
-          ),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: InkWell(
-            onTap: () {
-              final row = _emptyRow(state);
-              setState(() {
-                _rows.add(row);
-                _openRowId = row.id;
-              });
-            },
-            child: SizedBox(
-              height: AppSizes.minTapTarget,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add_rounded, size: 18, color: t.textPrimary),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text.rich(
-                      TextSpan(
-                        text: '${l10n.priceAdd} ',
-                        children: [
-                          TextSpan(
-                            text: '(${l10n.priceAddExample})',
-                            style: TextStyle(
-                              color: t.textMuted,
-                              fontWeight: FontWeight.w400,
-                            ),
+                )
+              : Column(
+                  children: [
+                    for (final (i, row) in _rows.indexed)
+                      Container(
+                        key: _keyFor(row.id),
+                        decoration: BoxDecoration(
+                          border: i == _rows.length - 1
+                              ? null
+                              : Border(bottom: BorderSide(color: t.divider)),
+                        ),
+                        child: PriceRowSummary(
+                          draft: row,
+                          khrPerUsd: state.settings.khrPerUsd,
+                          hasProblem: state.problems.keys.any(
+                            (k) => k.startsWith('${row.id}.'),
                           ),
-                        ],
+                          onTap: () => _openPrice(state, row: row),
+                        ),
                       ),
-                      style: AppTextTheme.label.copyWith(
-                        color: t.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  ],
+                ),
+        ),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: () => _openPrice(state),
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              border: Border.all(color: t.border, width: 1.5),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add_rounded, size: 20, color: t.textPrimary),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      text: '${l10n.priceAdd} ',
+                      children: [
+                        TextSpan(
+                          text: '(${l10n.priceAddExample})',
+                          style: TextStyle(
+                            color: t.textMuted,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                    style: AppTextTheme.label.copyWith(
+                      color: t.textPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

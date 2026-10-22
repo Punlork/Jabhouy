@@ -867,6 +867,14 @@
   "@priceMissing": {
     "description": "Shown instead of a missing price, never 0"
   },
+  "priceTapToEdit": "ចុចលើតម្លៃដើម្បីកែ",
+  "@priceTapToEdit": {
+    "description": "Hint beside the price list title in the item form"
+  },
+  "priceNoneYet": "អាចរក្សាទុកសិនបាន ហើយបន្ថែមតម្លៃពេលក្រោយ",
+  "@priceNoneYet": {
+    "description": "Under the no-prices-yet card in the item form"
+  },
   "priceNew": "តម្លៃថ្មី",
   "@priceNew": {
     "description": "Title of the price sheet when adding a price"

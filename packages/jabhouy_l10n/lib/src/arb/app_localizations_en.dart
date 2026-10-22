@@ -713,6 +713,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceMissing => 'No price yet';
 
   @override
+  String get priceTapToEdit => 'Tap a price to edit';
+
+  @override
+  String get priceNoneYet => 'You can save now and add prices later';
+
+  @override
   String get priceNew => 'New price';
 
   @override

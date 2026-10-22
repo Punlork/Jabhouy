@@ -137,6 +137,8 @@ class _PriceSheetState extends State<_PriceSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const PriceRowHeader(),
+          const SizedBox(height: AppSizes.fieldGap),
           PriceRowEditor(
             initial: widget.initial,
             settings: widget.settings,

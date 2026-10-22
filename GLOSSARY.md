@@ -45,7 +45,7 @@ _Avoid_: Read-only user
 ## Shop
 
 **Item**:
-A thing the Shop sells, with one or more Price options.
+A thing the Shop sells, with zero or more Price options; an Item with none waits for a price.
 _Avoid_: Product, shop item
 
 **Price option**:
