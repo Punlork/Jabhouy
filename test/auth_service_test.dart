@@ -49,7 +49,7 @@ void main() {
     authService = AuthService(apiService, connectivityService);
 
     when(() => apiService.cookies).thenReturn(apiCookies);
-    when(() => apiService.baseUrl).thenReturn('example.com');
+    when(() => apiService.uri('')).thenReturn(Uri.https('example.com'));
     when(() => apiCookies.getCookieHeader(any())).thenReturn(null);
   });
 

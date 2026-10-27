@@ -106,7 +106,7 @@ class AuthService extends BaseService {
   Future<bool> get hasPersistedSession async {
     final cachedUser = await getCachedUser();
     final cookies = getIt<ApiService>().cookies;
-    final baseUrl = Uri.https(getIt<ApiService>().baseUrl);
+    final baseUrl = getIt<ApiService>().uri('');
     return cachedUser != null && cookies.getCookieHeader(baseUrl) != null;
   }
 
