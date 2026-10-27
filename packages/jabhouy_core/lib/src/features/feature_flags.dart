@@ -32,6 +32,11 @@ enum Feature {
   /// Mic buttons on free-text fields and the voice sheet (decision 44).
   /// Off until Khmer dictation is proven on a real Android phone.
   voiceInput,
+
+  /// Shop-scoped writes go to the API's user-scoped `/items`, `/credits`
+  /// routes instead of the in-memory stand-in, and nothing is pulled. For
+  /// running the app against a local API before `/shops/:id/…` exists.
+  userScopedApi,
 }
 
 /// Answers whether a [Feature] is on.
@@ -68,6 +73,8 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
           const bool.fromEnvironment('FEATURE_BARCODE_SCAN'),
         Feature.voiceInput =>
           const bool.fromEnvironment('FEATURE_VOICE_INPUT'),
+        Feature.userScopedApi =>
+          const bool.fromEnvironment('FEATURE_USER_SCOPED_API'),
       };
 }
 

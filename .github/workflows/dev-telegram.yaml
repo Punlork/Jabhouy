@@ -2,7 +2,11 @@
 # test, build the development APK, and send it to the testers' Telegram chat.
 #
 # Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DEV_DOTENV (.env.dev), and
-# the ANDROID_KEYSTORE_* ones the release workflow already uses.
+# the dev signing key: ANDROID_DEV_KEYSTORE_BASE64, _ALIAS, _PASSWORD and
+# _PRIVATE_KEY_PASSWORD. The dev APK must carry the dev key: its SHA-1 is the
+# one registered for com.pl.shop.management.dev in Google Cloud (Google
+# sign-in), and it is the key local builds use, so a CI APK and a local one
+# update each other without an uninstall.
 
 name: Dev build to Telegram
 
@@ -24,10 +28,10 @@ jobs:
     env:
       # No .fvm/ on the runner: use the SDK flutter-action puts on PATH.
       MELOS_SDK_PATH: auto
-      ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/release-keystore.jks
-      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD }}
+      ANDROID_DEV_KEYSTORE_PATH: ${{ github.workspace }}/android/dev-keystore.jks
+      ANDROID_DEV_KEYSTORE_ALIAS: ${{ secrets.ANDROID_DEV_KEYSTORE_ALIAS }}
+      ANDROID_DEV_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_DEV_KEYSTORE_PASSWORD }}
+      ANDROID_DEV_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_DEV_KEYSTORE_PRIVATE_KEY_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,11 +76,15 @@ jobs:
       - name: Test
         run: dart run melos run test
 
-      - name: Restore Android keystore
+      - name: Restore Android dev keystore
         shell: bash
         run: |
+          if [ -z "${{ secrets.ANDROID_DEV_KEYSTORE_BASE64 }}" ]; then
+            echo "Missing ANDROID_DEV_KEYSTORE_* secrets."
+            exit 1
+          fi
           umask 077
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+          echo "${{ secrets.ANDROID_DEV_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_DEV_KEYSTORE_PATH"
 
       # Android installs an update only when its versionCode is higher than
       # the installed one, and pubspec's number rarely moves. So each run adds

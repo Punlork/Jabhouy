@@ -184,6 +184,13 @@ class CreditRepository {
     return const Ok(null);
   }
 
+  /// Pull to refresh: sends queued changes, then reads the Shop's
+  /// `/changes` from where this phone left off.
+  Future<void> pullLatest() async {
+    if (!_scope.syncs || !await _connectivity.isOnline) return;
+    await _engine.pullShop(_shopId);
+  }
+
   Future<void> _queue(
     SyncEntityType type,
     String id,

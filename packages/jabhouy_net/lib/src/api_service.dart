@@ -22,7 +22,10 @@ class ApiService {
   factory ApiService() => _instance;
 
   ApiService._internal() : _client = http.Client() {
-    _baseUrl = _normalizeAuthority(dotenv.get('BASE_URL', fallback: ''));
+    final raw = dotenv.get('BASE_URL', fallback: '');
+    _baseUrl = _normalizeAuthority(raw);
+    // Only an explicit `http://` opts out of TLS: for the local API.
+    _secure = !raw.trim().startsWith('http://');
     assert(_baseUrl.isNotEmpty, 'BASE_URL env must be provided');
   }
 
@@ -42,10 +45,15 @@ class ApiService {
   static final _instance = ApiService._internal();
 
   String _baseUrl = '';
+  bool _secure = true;
   static const _timeout = Duration(seconds: 30);
   final http.Client _client;
 
   String get baseUrl => _baseUrl;
+
+  Uri uri(String endpoint, [Map<String, dynamic>? queryParameters]) => _secure
+      ? Uri.https(_baseUrl, endpoint, queryParameters)
+      : Uri.http(_baseUrl, endpoint, queryParameters);
 
   Future<ApiResponse<T>> get<T>(
     String endpoint, {
@@ -57,11 +65,7 @@ class ApiService {
   }) async {
     try {
       var tempHeaders = {...getHeaders(), 'Origin': _origin};
-      final uri = Uri.https(
-        _baseUrl,
-        endpoint,
-        queryParameters,
-      );
+      final uri = this.uri(endpoint, queryParameters);
 
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
@@ -101,7 +105,7 @@ class ApiService {
 
   /// Better Auth refuses a cookie-carrying request that changes something
   /// unless it names a trusted origin; the API's own URL is trusted.
-  String get _origin => 'https://$_baseUrl';
+  String get _origin => '${_secure ? 'https' : 'http'}://$_baseUrl';
 
   Future<ApiResponse<T>> post<T>(
     String endpoint, {
@@ -116,7 +120,7 @@ class ApiService {
   }) async {
     try {
       var tempHeaders = {...getHeaders(), 'Origin': _origin};
-      final uri = Uri.https(_baseUrl, endpoint);
+      final uri = this.uri(endpoint);
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
@@ -224,7 +228,7 @@ class ApiService {
 
       final encodeBody = json.encode(tempBody);
       var tempHeaders = {...getHeaders(), 'Origin': _origin};
-      final uri = Uri.https(_baseUrl, endpoint);
+      final uri = this.uri(endpoint);
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};
@@ -272,7 +276,7 @@ class ApiService {
   }) async {
     try {
       var tempHeaders = {...getHeaders(), 'Origin': _origin};
-      final uri = Uri.https(_baseUrl, endpoint);
+      final uri = this.uri(endpoint);
       final cookieHeader = cookies.getCookieHeader(uri);
       if (cookieHeader != null) tempHeaders['Cookie'] = cookieHeader;
       if (headers != null) tempHeaders = {...tempHeaders, ...headers};

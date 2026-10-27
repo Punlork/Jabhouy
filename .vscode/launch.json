@@ -5,6 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Local",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_local.dart",
+      "args": [
+        "--flavor",
+        "development",
+        "--dart-define-from-file=config/features/local.json"
+      ]
+    },
+    {
       "name": "Development",
       "request": "launch",
       "type": "dart",

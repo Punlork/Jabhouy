@@ -124,6 +124,7 @@ flutter:
   assets:
     - .env
     - .env.dev
+    - .env.local
     - assets/
     - assets/banks/
     - assets/icons/

@@ -11,10 +11,13 @@ import 'package:jabhouy_sync/jabhouy_sync.dart';
 /// engine's own window keeps it to at most one download per list per
 /// 15 minutes however often these fire.
 class SyncCoordinator {
-  SyncCoordinator(this._engine, this._connectivity);
+  SyncCoordinator(this._engine, this._connectivity, {this.syncedShopId});
 
   final SyncEngine _engine;
   final ConnectivityService _connectivity;
+
+  /// The Shop whose `/changes` to pull, or null when none syncs.
+  final String? Function()? syncedShopId;
 
   StreamSubscription<bool>? _connection;
   AppLifecycleListener? _lifecycle;
@@ -46,5 +49,7 @@ class SyncCoordinator {
     if (afterReconnect) await _engine.retryNow();
     // Drains first, then pulls whatever is stale.
     await _engine.pull();
+    final shopId = syncedShopId?.call();
+    if (shopId != null) await _engine.pullShop(shopId);
   }
 }
