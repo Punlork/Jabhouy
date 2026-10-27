@@ -99,7 +99,7 @@ void main() {
     expect(find.text('មាក់'), findsOneWidget);
     expect(find.text('មិនទាន់មានចំនួន'), findsOneWidget);
     expect(find.text('Hanuman 6'), findsOneWidget);
-    expect(find.text('14 តុលា 2026'), findsNWidgets(2));
+    expect(find.text('14 តុលា 2026 11:00 ព្រឹក'), findsNWidgets(2));
     expect(find.text('សងរួច'), findsOneWidget, reason: 'the chip only');
 
     await tester.tap(find.text('ទាំងអស់'));

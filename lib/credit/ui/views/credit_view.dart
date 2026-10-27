@@ -7,8 +7,8 @@ import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-/// The Credit tab (canvas ៧): customer search, the summary card, the
-/// chips, and one row per Credit. A tap calls [onOpen]; the details sheet
+/// The Credit tab (canvas ៧): the summary card, the chips, and one row per
+/// Credit; Home's header carries the customer search. A tap calls [onOpen]; the details sheet
 /// (issue 28) is what opens.
 class CreditView extends StatefulWidget {
   const CreditView({this.onOpen, super.key});
@@ -21,16 +21,8 @@ class CreditView extends StatefulWidget {
 
 class _CreditViewState extends State<CreditView>
     with AutomaticKeepAliveClientMixin {
-  final _search = TextEditingController();
-
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  void dispose() {
-    _search.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,96 +38,84 @@ class _CreditViewState extends State<CreditView>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-              child: SearchField(
-                controller: _search,
-                hintText: l10n.searchCustomers,
-                onChanged: cubit.search,
-                trailing: MicButton(
-                  fieldLabel: l10n.searchCustomers,
-                  onText: (text) {
-                    _search.text = text;
-                    cubit.search(text);
-                  },
-                ),
-              ),
-            ),
             Expanded(
-              child: ListView(
-                controller: controller,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                children: [
-                  if (summary != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: _SummaryCard(summary),
+              child: RefreshIndicator(
+                onRefresh: cubit.refresh,
+                child: ListView(
+                  controller: controller,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  children: [
+                    if (summary != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: _SummaryCard(summary),
+                      ),
+                    FilterChips(
+                      items: [
+                        FilterChipItem(
+                          label: l10n.creditUnpaid,
+                          selected: state.filter == CreditFilter.unpaid,
+                          onTap: () => cubit.filter(CreditFilter.unpaid),
+                        ),
+                        FilterChipItem(
+                          label: l10n.creditPaid,
+                          selected: state.filter == CreditFilter.paid,
+                          onTap: () => cubit.filter(CreditFilter.paid),
+                        ),
+                        FilterChipItem(
+                          label: l10n.all,
+                          selected: state.filter == CreditFilter.all,
+                          onTap: () => cubit.filter(CreditFilter.all),
+                        ),
+                      ],
                     ),
-                  FilterChips(
-                    items: [
-                      FilterChipItem(
-                        label: l10n.creditUnpaid,
-                        selected: state.filter == CreditFilter.unpaid,
-                        onTap: () => cubit.filter(CreditFilter.unpaid),
-                      ),
-                      FilterChipItem(
-                        label: l10n.creditPaid,
-                        selected: state.filter == CreditFilter.paid,
-                        onTap: () => cubit.filter(CreditFilter.paid),
-                      ),
-                      FilterChipItem(
-                        label: l10n.all,
-                        selected: state.filter == CreditFilter.all,
-                        onTap: () => cubit.filter(CreditFilter.all),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (state.loading)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 80),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (state.credits.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 80),
-                      child: Center(
-                        child: Text(
-                          l10n.creditListEmpty,
-                          style: AppTextTheme.body.copyWith(
-                            color: context.tokens.textMuted,
+                    const SizedBox(height: 8),
+                    if (state.loading)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 80),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (state.credits.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 80),
+                        child: Center(
+                          child: Text(
+                            l10n.creditListEmpty,
+                            style: AppTextTheme.body.copyWith(
+                              color: context.tokens.textMuted,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: context.tokens.surface,
+                            borderRadius: BorderRadius.circular(
+                              AppSizes.radiusCard,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              for (final (i, credit) in state.credits.indexed)
+                                _CreditRow(
+                                  credit: credit,
+                                  divider: i < state.credits.length - 1,
+                                  onTap: widget.onOpen == null
+                                      ? null
+                                      : () => widget.onOpen!(credit),
+                                ),
+                            ],
                           ),
                         ),
                       ),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: context.tokens.surface,
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.radiusCard,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            for (final (i, credit) in state.credits.indexed)
-                              _CreditRow(
-                                credit: credit,
-                                divider: i < state.credits.length - 1,
-                                onTap: widget.onOpen == null
-                                    ? null
-                                    : () => widget.onOpen!(credit),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  // Room for the nav bar and its floating button.
-                  const SizedBox(height: 160),
-                ],
+                    // Room for the nav bar and its floating button.
+                    const SizedBox(height: 160),
+                  ],
+                ),
               ),
             ),
           ],
@@ -290,7 +270,8 @@ class _CreditRow extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              l10n.formatDate(credit.takenAt.toPhnomPenh()),
+              '${l10n.formatDate(credit.takenAt.toPhnomPenh())}'
+              ' ${l10n.formatTime(credit.takenAt.toPhnomPenh())}',
               style: AppTextTheme.hint.copyWith(
                 color: t.textMuted,
                 fontSize: 13,

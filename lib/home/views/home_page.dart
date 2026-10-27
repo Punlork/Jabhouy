@@ -104,8 +104,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       case HomeTab.shop:
         context.read<ItemListCubit>().search(value ?? '');
       case HomeTab.credit:
-        // The Credit tab carries its own search (canvas ៧).
-        break;
+        context.read<CreditListCubit>().search(value ?? '');
       case HomeTab.income:
         context.read<IncomeBloc>().add(LoadIncomeDashboard(searchQuery: value));
     }
@@ -392,8 +391,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           withFilter: false,
                           onScanPressed: _isBarcodeScanEnabled ? _scanItem : null,
                         ),
-                        // The Credit tab carries its own search (canvas ៧).
-                        HomeTab.credit => const SizedBox.shrink(),
+                        HomeTab.credit => buildShopHeader(
+                          searchHintText: context.l10n.searchCustomers,
+                          withFilter: false,
+                        ),
                         HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
                           builder: (context, state) {
                             final loaded = state.asLoaded;
@@ -454,6 +455,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               selectedIndex: _selectedIndex,
               onTabChanged: (index) {
                 _setChromeVisible(true);
+                if (index != _selectedIndex) {
+                  // One search box serves every tab, so leaving a tab clears its search.
+                  _onSearchChanged('');
+                  _searchController.clear();
+                }
                 _onItemTapped(index);
                 setState(() => _selectedIndex = index);
               },

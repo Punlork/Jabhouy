@@ -52,6 +52,9 @@ class CreditListCubit extends Cubit<CreditListState> {
   /// Owner and editor only (decision 14).
   bool get canDelete => _repository.canDelete;
 
+  /// Pull to refresh.
+  Future<void> refresh() => _repository.pullLatest();
+
   void search(String query) => emit(_derive(state.copyWith(query: query)));
 
   void filter(CreditFilter filter) =>
