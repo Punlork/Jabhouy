@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/app/service/database/database_connection.dart';
+import 'package:jabhouy/app/service/user_scoped_shop_sync_api.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/credit/credit.dart';
 import 'package:jabhouy/income/income.dart';
@@ -73,7 +74,11 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => CreditDao(getIt<AppDatabase>()))
     // The server for Shop-scoped data. To go live (jabhouy-api #3–#8),
     // register an HTTP `ShopSyncApi` here instead; nothing else changes.
-    ..registerLazySingleton<ShopSyncApi>(InMemoryShopSyncApi.new)
+    ..registerLazySingleton<ShopSyncApi>(
+      () => getIt<FeatureFlags>().isEnabled(Feature.userScopedApi)
+          ? UserScopedShopSyncApi(getIt<ApiService>())
+          : InMemoryShopSyncApi(),
+    )
     // One engine for the whole app: the outbox is one queue, and ordering
     // a shop item after its category only works if both drain together.
     ..registerLazySingleton(() {
@@ -103,7 +108,11 @@ Future<void> setupDependencies() async {
           ),
         ]),
         // Income pulls through PullRemoteNotificationsUseCase instead.
-        pullAdapters: [shop, category],
+        // shop and category read the old `GET /items` and `/categories`
+        // shapes, which the user-scoped API has replaced.
+        pullAdapters: getIt<FeatureFlags>().isEnabled(Feature.userScopedApi)
+            ? const []
+            : [shop, category],
         // Categories first, so an item's category is already here.
         changesSource: shopSync,
         changeAppliers: [
@@ -116,7 +125,14 @@ Future<void> setupDependencies() async {
       );
     })
     ..registerLazySingleton(
-      () => SyncCoordinator(getIt<SyncEngine>(), getIt<ConnectivityService>()),
+      () => SyncCoordinator(
+        getIt<SyncEngine>(),
+        getIt<ConnectivityService>(),
+        syncedShopId: () {
+          final shop = getIt<CurrentShop>();
+          return shop.syncs ? shop.shopId : null;
+        },
+      ),
     )
     ..registerLazySingleton(
       () => CreditRepository(

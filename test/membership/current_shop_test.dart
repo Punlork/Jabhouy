@@ -77,6 +77,15 @@ void main() {
       meApiFor(const FixedFeatureFlags({Feature.serverShops}), api),
       isA<HttpMeApi>(),
     );
+    final local = meApiFor(
+      const FixedFeatureFlags({Feature.userScopedApi}),
+      api,
+    );
+    expect(CurrentShop(local).syncs, isTrue);
+    expect(
+      CurrentShop(meApiFor(const FixedFeatureFlags({}), api)).syncs,
+      isFalse,
+    );
   });
 
   test('viewers cannot edit prices', () {

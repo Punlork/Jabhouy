@@ -29,7 +29,10 @@ class CurrentShop implements ShopScope {
   String? get userId => _userId;
 
   @override
-  bool get syncs => _api is! FakeMeApi;
+  bool get syncs => switch (_api) {
+        FakeMeApi(:final syncs) => syncs,
+        _ => true,
+      };
 
   /// Every Shop the user belongs to, for the shop switcher.
   List<ShopMembership> get shops => _shops;

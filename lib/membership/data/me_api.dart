@@ -31,7 +31,10 @@ abstract interface class MeApi {
 /// Stands in for `GET /me` until the API has Shops: one Shop per user,
 /// with a fixed id so data stays put across launches.
 class FakeMeApi implements MeApi {
-  const FakeMeApi();
+  /// [syncs] queues writes for the user-scoped API, which needs no Shop.
+  const FakeMeApi({this.syncs = false});
+
+  final bool syncs;
 
   @override
   Future<Result<List<ShopMembership>>> shops(String userId) async => Ok([
@@ -47,7 +50,7 @@ class FakeMeApi implements MeApi {
 MeApi meApiFor(FeatureFlags flags, ApiService apiService) =>
     flags.isEnabled(Feature.serverShops)
         ? HttpMeApi(apiService)
-        : const FakeMeApi();
+        : FakeMeApi(syncs: flags.isEnabled(Feature.userScopedApi));
 
 /// The real `GET /me` (jabhouy-api #2).
 class HttpMeApi extends BaseService implements MeApi {
