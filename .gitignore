@@ -125,6 +125,5 @@ patrol_test/test_bundle.dart
 # Local dependency overrides (per-developer)
 pubspec_overrides.yaml
 
-# UX-review screenshots under .scratch
-.scratch/**/*.png
-.scratch/ux-review/
+# Local scratch: specs, issues, review notes
+.scratch/
