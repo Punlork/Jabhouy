@@ -11,6 +11,7 @@ class ShopHeader extends StatelessWidget {
     this.onFilterPressed,
     this.onScanPressed,
     this.searchHintText,
+    this.trailing,
     super.key,
   });
   final VoidCallback onSettingsPressed;
@@ -25,6 +26,9 @@ class ShopHeader extends StatelessWidget {
   final bool hasFilter;
   final String? searchHintText;
 
+  /// Sits just before the settings gear (the app puts sync status here).
+  final Widget? trailing;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,6 +41,7 @@ class ShopHeader extends StatelessWidget {
         onScanPressed: onScanPressed,
         onSettingsPressed: onSettingsPressed,
         searchHintText: searchHintText,
+        trailing: trailing,
       ),
     );
   }
@@ -72,6 +77,7 @@ class _SearchBar extends StatelessWidget {
     this.onFilterPressed,
     this.onScanPressed,
     this.searchHintText,
+    this.trailing,
   });
   final TextEditingController controller;
   final ValueChanged<String?> onChanged;
@@ -80,6 +86,7 @@ class _SearchBar extends StatelessWidget {
   final VoidCallback onSettingsPressed;
   final bool hasFilter;
   final String? searchHintText;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -171,6 +178,7 @@ class _SearchBar extends StatelessWidget {
               colorScheme: colorScheme,
             ),
           ],
+          ?trailing,
           const SizedBox(width: 8),
           _SettingsButton(onPressed: onSettingsPressed),
         ],

@@ -70,7 +70,7 @@ class _CreditViewState extends State<CreditView>
                 child: summary == null
                     ? const SizedBox(width: double.infinity)
                     : Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                         child: _SummaryCard(summary),
                       ),
               ),

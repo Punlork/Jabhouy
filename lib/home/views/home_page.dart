@@ -384,6 +384,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           onFilterPressed: withFilter ? _showFilterSheet : null,
                           onScanPressed: onScanPressed,
                           searchController: _searchController,
+                          trailing: _isBackgroundSyncEnabled
+                              ? SyncIndicator(engine: getIt<SyncEngine>(), connectivity: getIt<ConnectivityService>())
+                              : null,
                         );
                       }
 
@@ -441,8 +444,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_isBackgroundSyncEnabled)
-              SyncIndicator(engine: getIt<SyncEngine>(), connectivity: getIt<ConnectivityService>()),
             AppBottomNav(
               tabs: [
                 for (final tab in _tabs)
