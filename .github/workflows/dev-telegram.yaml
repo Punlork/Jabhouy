@@ -107,17 +107,6 @@ jobs:
           echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
           echo "Building $NAME+$NUMBER"
 
-      # TEMPORARY (measuring run): which NDKs and platforms the runner image
-      # already has, so ndkVersion can point at one instead of downloading
-      # NDK 27 and SDK Platform 31 on every run. Remove once decided.
-      - name: List preinstalled Android SDK parts (temporary)
-        shell: bash
-        run: |
-          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
-          echo "SDK root: $SDK"
-          echo "--- ndk ---";       ls "$SDK/ndk"       || true
-          echo "--- platforms ---"; ls "$SDK/platforms" || true
-
       # Split per ABI: Telegram bots upload at most 50 MB, and the single
       # APK is larger. arm64 covers current Android phones, and it is the
       # only one sent, so the other ABIs are not compiled.

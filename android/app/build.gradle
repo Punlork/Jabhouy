@@ -77,7 +77,9 @@ def fastDevBuild = System.getenv('FAST_DEV_BUILD') == 'true'
 android {
     namespace "com.pl.shop.management"
     compileSdkVersion flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    // 27.3 is preinstalled on the GitHub runner image; 27.0 had to be downloaded
+    // on every CI run. Same major version, so native builds stay equivalent.
+    ndkVersion = "27.3.13750724"
 
 
     compileOptions {
@@ -172,6 +174,9 @@ android {
     buildTypes {
         release {
             minifyEnabled !fastDevBuild
+            // Flutter's Gradle plugin turns this on for release; Android refuses it
+            // when code shrinking is off, so it follows the same switch.
+            shrinkResources !fastDevBuild
             proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
         debug {
