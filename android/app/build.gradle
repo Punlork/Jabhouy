@@ -69,6 +69,11 @@ if (project.hasProperty('dart-defines')) {
 // Missing means off, matching BuildTimeFeatureFlags.
 def isFeatureEnabled = { key -> dartDefines[key] == 'true' }
 
+// CI-only switch for the dev Telegram build: skips R8 and lint-vital, which
+// cost minutes and only matter for builds that ship. Unset everywhere else
+// (local builds, production), so those builds are unchanged.
+def fastDevBuild = System.getenv('FAST_DEV_BUILD') == 'true'
+
 android {
     namespace "com.pl.shop.management"
     compileSdkVersion flutter.compileSdkVersion
@@ -159,9 +164,14 @@ android {
         }
     }
 
+    lint {
+        // lint-vital re-runs on every release build; skipped for fast dev builds.
+        checkReleaseBuilds = !fastDevBuild
+    }
+
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled !fastDevBuild
             proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
         debug {
