@@ -135,7 +135,8 @@ void main() {
     await pump(tester);
     expect(find.text('25,000'), findsOneWidget, reason: 'the computed amount');
     expect(find.text('19,000'), findsOneWidget, reason: '5 × 3,800');
-    expect(find.text(r'≈ $6.25 · គណនាពីទំនិញ'), findsOneWidget);
+    expect(find.text(r'≈ $6.25'), findsOneWidget);
+    expect(find.text('គណនាពីទំនិញ'), findsOneWidget);
 
     await tester.tap(find.text('រក្សាទុក'));
     await pump(tester);
@@ -192,7 +193,7 @@ void main() {
     expect(find.text('ទឹក'), findsNothing);
     expect(find.text('19,000'), findsNWidgets(2), reason: 'line and amount');
 
-    await tester.tap(find.byTooltip(r'៛ / $'));
+    await tester.tap(find.text(r'$'));
     await pump(tester);
     expect(
       find.text('4.75'),

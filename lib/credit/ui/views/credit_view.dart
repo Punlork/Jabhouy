@@ -9,11 +9,15 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 /// The Credit tab (canvas ៧): the summary card, the chips, and one row per
 /// Credit; Home's header carries the customer search. A tap calls [onOpen]; the details sheet
-/// (issue 28) is what opens.
+/// (issue 28) is what opens. The chips stay pinned like the shop's; the
+/// summary card follows Home's header away while scrolling down.
 class CreditView extends StatefulWidget {
-  const CreditView({this.onOpen, super.key});
+  const CreditView({this.onOpen, this.chromeVisible = true, super.key});
 
   final ValueChanged<Credit>? onOpen;
+
+  /// False while Home scrolls its search row away; the summary follows it.
+  final bool chromeVisible;
 
   @override
   State<CreditView> createState() => _CreditViewState();
@@ -38,6 +42,39 @@ class _CreditViewState extends State<CreditView>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            FilterChips(
+              items: [
+                FilterChipItem(
+                  label: l10n.creditUnpaid,
+                  selected: state.filter == CreditFilter.unpaid,
+                  onTap: () => cubit.filter(CreditFilter.unpaid),
+                ),
+                FilterChipItem(
+                  label: l10n.creditPaid,
+                  selected: state.filter == CreditFilter.paid,
+                  onTap: () => cubit.filter(CreditFilter.paid),
+                ),
+                FilterChipItem(
+                  label: l10n.all,
+                  selected: state.filter == CreditFilter.all,
+                  onTap: () => cubit.filter(CreditFilter.all),
+                ),
+              ],
+            ),
+            ClipRect(
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                heightFactor: widget.chromeVisible ? 1 : 0,
+                child: summary == null
+                    ? const SizedBox(width: double.infinity)
+                    : Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: _SummaryCard(summary),
+                      ),
+              ),
+            ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: cubit.refresh,
@@ -46,30 +83,6 @@ class _CreditViewState extends State<CreditView>
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.zero,
                   children: [
-                    if (summary != null)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        child: _SummaryCard(summary),
-                      ),
-                    FilterChips(
-                      items: [
-                        FilterChipItem(
-                          label: l10n.creditUnpaid,
-                          selected: state.filter == CreditFilter.unpaid,
-                          onTap: () => cubit.filter(CreditFilter.unpaid),
-                        ),
-                        FilterChipItem(
-                          label: l10n.creditPaid,
-                          selected: state.filter == CreditFilter.paid,
-                          onTap: () => cubit.filter(CreditFilter.paid),
-                        ),
-                        FilterChipItem(
-                          label: l10n.all,
-                          selected: state.filter == CreditFilter.all,
-                          onTap: () => cubit.filter(CreditFilter.all),
-                        ),
-                      ],
-                    ),
                     const SizedBox(height: 8),
                     if (state.loading)
                       const Padding(

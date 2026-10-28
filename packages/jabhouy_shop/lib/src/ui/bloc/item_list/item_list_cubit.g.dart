@@ -27,6 +27,8 @@ abstract class _$ItemListStateCWProxy {
 
   ItemListState grid(bool grid);
 
+  ItemListState sort(ItemSort sort);
+
   ItemListState canEdit(bool canEdit);
 
   ItemListState settings(PriceSettings settings);
@@ -50,6 +52,7 @@ abstract class _$ItemListStateCWProxy {
     String? categoryId,
     bool missingOnly,
     bool grid,
+    ItemSort sort,
     bool canEdit,
     PriceSettings settings,
   });
@@ -96,6 +99,9 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
   ItemListState grid(bool grid) => call(grid: grid);
 
   @override
+  ItemListState sort(ItemSort sort) => call(sort: sort);
+
+  @override
   ItemListState canEdit(bool canEdit) => call(canEdit: canEdit);
 
   @override
@@ -121,6 +127,7 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
     Object? categoryId = const $CopyWithPlaceholder(),
     Object? missingOnly = const $CopyWithPlaceholder(),
     Object? grid = const $CopyWithPlaceholder(),
+    Object? sort = const $CopyWithPlaceholder(),
     Object? canEdit = const $CopyWithPlaceholder(),
     Object? settings = const $CopyWithPlaceholder(),
   }) {
@@ -170,6 +177,10 @@ class _$ItemListStateCWProxyImpl implements _$ItemListStateCWProxy {
           ? _value.grid
           // ignore: cast_nullable_to_non_nullable
           : grid as bool,
+      sort: sort == const $CopyWithPlaceholder() || sort == null
+          ? _value.sort
+          // ignore: cast_nullable_to_non_nullable
+          : sort as ItemSort,
       canEdit: canEdit == const $CopyWithPlaceholder() || canEdit == null
           ? _value.canEdit
           // ignore: cast_nullable_to_non_nullable

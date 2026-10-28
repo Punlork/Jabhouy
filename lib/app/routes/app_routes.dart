@@ -31,6 +31,7 @@ class AppRouter {
 
   /// Home's list-or-grid choice, remembered on the phone.
   static const _itemGridKey = 'item_list_grid';
+  static const _itemSortKey = 'item_list_sort';
 
   static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
 
@@ -71,6 +72,13 @@ class AppRouter {
                         false,
                     onGridChanged: (grid) => unawaited(
                       getIt<SharedPreferences>().setBool(_itemGridKey, grid),
+                    ),
+                    sort: ItemSort.values.asNameMap()[getIt<SharedPreferences>()
+                            .getString(_itemSortKey)] ??
+                        ItemSort.name,
+                    onSortChanged: (sort) => unawaited(
+                      getIt<SharedPreferences>()
+                          .setString(_itemSortKey, sort.name),
                     ),
                   ),
                 ),

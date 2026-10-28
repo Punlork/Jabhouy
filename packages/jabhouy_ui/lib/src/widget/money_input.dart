@@ -18,6 +18,7 @@ class MoneyInput extends StatefulWidget {
     this.onText,
     this.errorText,
     this.hasError = false,
+    this.readOnly = false,
     this.hintText,
     this.value,
     this.textInputAction,
@@ -41,6 +42,9 @@ class MoneyInput extends StatefulWidget {
 
   /// A red border with no text, for a form that shows the message itself.
   final bool hasError;
+
+  /// Shows a computed amount: the currency still switches, the text does not.
+  final bool readOnly;
   final String? hintText;
 
   /// The keyboard's action key; [onSubmitted] runs when it is pressed.
@@ -98,6 +102,7 @@ class _MoneyInputState extends State<MoneyInput> {
       children: [
         TextField(
           controller: _controller,
+          readOnly: widget.readOnly,
           onChanged: _onText,
           textInputAction: widget.textInputAction,
           onSubmitted: widget.onSubmitted == null

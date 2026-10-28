@@ -301,9 +301,7 @@ class _CreditFormPageState extends State<CreditFormPage> {
 
   Widget _amount(CreditFormState state) {
     final l10n = context.l10n;
-    final t = context.tokens;
     final total = state.total;
-    final other = state.currency == Currency.khr ? Currency.usd : Currency.khr;
     if (state.lines.isEmpty) {
       return LabeledField(
         label: l10n.amount,
@@ -321,73 +319,19 @@ class _CreditFormPageState extends State<CreditFormPage> {
       );
     }
     // With lines the amount is their sum and cannot be typed (decision 9).
-    final symbol = state.currency == Currency.khr ? '៛' : r'$';
     return LabeledField(
       label: l10n.amount,
-      hint: [
-        if (total != null)
-          total.convertTo(other, khrPerUsd: state.khrPerUsd).formatApprox(),
-        l10n.creditAmountHint,
-      ].join(' · '),
-      child: Container(
-        key: const ValueKey('computed-amount'),
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        decoration: BoxDecoration(
-          color: t.surface,
-          borderRadius: BorderRadius.circular(AppSizes.radiusInput),
-          border: Border.all(color: t.textPrimary),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                total?.formatNumber() ?? '',
-                style: AppTextTheme.title.copyWith(
-                  color: t.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Tooltip(
-              message: r'៛ / $',
-              child: InkWell(
-                onTap: () => _cubit.setCurrency(other),
-                borderRadius: BorderRadius.circular(9),
-                child: Container(
-                  height: 36,
-                  constraints: const BoxConstraints(minWidth: 44),
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    color: t.bg,
-                    border: Border.all(color: t.border),
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        symbol,
-                        style: AppTextTheme.title.copyWith(
-                          color: t.textPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 17,
-                        ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 16,
-                        color: t.textPrimary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      hint: l10n.creditAmountHint,
+      child: MoneyInput(
+        // The field reads its value once: a new total or currency resets it.
+        key: ValueKey('computed-amount-${state.currency}-${total?.amount}'),
+        value: total,
+        currency: state.currency,
+        khrPerUsd: state.khrPerUsd,
+        readOnly: true,
+        onText: (_, currency) {
+          if (currency != state.currency) _cubit.setCurrency(currency);
+        },
       ),
     );
   }

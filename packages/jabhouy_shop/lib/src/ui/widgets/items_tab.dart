@@ -102,12 +102,36 @@ class _ItemsTabState extends State<ItemsTab>
                             child: Text(
                               searching
                                   ? l10n.itemSearchResults(state.items.length)
-                                  : l10n.itemListHeader(state.items.length),
+                                  : l10n.itemListHeader(
+                                      state.items.length,
+                                      state.sort == ItemSort.name
+                                          ? l10n.itemSortName
+                                          : l10n.itemSortRecent,
+                                    ),
                               style: AppTextTheme.hint.copyWith(
                                 color: t.textSecondary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
+                          ),
+                          PopupMenuButton<ItemSort>(
+                            tooltip: l10n.itemSortTooltip,
+                            initialValue: state.sort,
+                            onSelected: cubit.setSort,
+                            icon: Icon(
+                              Icons.sort_rounded,
+                              color: t.textSecondary,
+                            ),
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: ItemSort.name,
+                                child: Text(l10n.itemSortName),
+                              ),
+                              PopupMenuItem(
+                                value: ItemSort.recent,
+                                child: Text(l10n.itemSortRecent),
+                              ),
+                            ],
                           ),
                           IconButton(
                             onPressed: cubit.toggleGrid,

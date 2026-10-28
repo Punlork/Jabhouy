@@ -1381,12 +1381,25 @@
   "@priceRemove": {
     "description": "Accessible label of the remove price row button"
   },
-  "itemListHeader": "{count} items · A–Z",
+  "itemListHeader": "{count} items · {sort}",
   "@itemListHeader": {
     "description": "Header above the Home item list",
     "placeholders": {
-      "count": {}
+      "count": {},
+      "sort": {}
     }
+  },
+  "itemSortTooltip": "Sort items",
+  "@itemSortTooltip": {
+    "description": "Accessible label of the sort menu on Home"
+  },
+  "itemSortName": "A–Z",
+  "@itemSortName": {
+    "description": "Sort option and header label: by name"
+  },
+  "itemSortRecent": "Newest first",
+  "@itemSortRecent": {
+    "description": "Sort option and header label: most recently added or edited first"
   },
   "itemListShowGrid": "Show as grid",
   "@itemListShowGrid": {

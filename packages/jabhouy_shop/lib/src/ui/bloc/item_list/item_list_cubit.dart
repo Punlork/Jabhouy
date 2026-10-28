@@ -20,9 +20,12 @@ class ItemListCubit extends Cubit<ItemListState> {
     this._scope, {
     bool grid = false,
     this.onGridChanged,
+    ItemSort sort = ItemSort.name,
+    this.onSortChanged,
   }) : super(
          ItemListState(
            grid: grid,
+           sort: sort,
            canEdit: _scope.role?.canEditPrices ?? false,
          ),
        );
@@ -32,6 +35,9 @@ class ItemListCubit extends Cubit<ItemListState> {
 
   /// Lets the app remember the layout; this package keeps no storage.
   final ValueChanged<bool>? onGridChanged;
+
+  /// Same for the sort order.
+  final ValueChanged<ItemSort>? onSortChanged;
 
   final _subscriptions = <StreamSubscription<Object?>>[];
   StreamSubscription<List<Item>>? _items;
@@ -79,7 +85,7 @@ class ItemListCubit extends Cubit<ItemListState> {
     }
     _subscriptions.clear();
     _filtered = const [];
-    emit(ItemListState(grid: state.grid));
+    emit(ItemListState(grid: state.grid, sort: state.sort));
   }
 
   void search(String query) {
@@ -113,6 +119,25 @@ class ItemListCubit extends Cubit<ItemListState> {
     onGridChanged?.call(state.grid);
   }
 
+  void setSort(ItemSort sort) {
+    if (sort == state.sort) return;
+    emit(state.copyWith(sort: sort));
+    onSortChanged?.call(sort);
+    _watchItems();
+  }
+
+  /// The DAO reads by name; `recent` re-orders in memory, no date last.
+  List<Item> _sorted(List<Item> items) => state.sort == ItemSort.name
+      ? items
+      : ([...items]..sort((a, b) {
+          final x = a.updatedAt;
+          final y = b.updatedAt;
+          if (x == null || y == null) {
+            return x == y ? 0 : (x == null ? 1 : -1);
+          }
+          return y.compareTo(x);
+        }));
+
   void _watchItems() {
     if (_subscriptions.isEmpty) return;
     unawaited(_items?.cancel());
@@ -122,7 +147,7 @@ class ItemListCubit extends Cubit<ItemListState> {
           missingOnly: state.missingOnly,
         )
         .listen((items) {
-          _filtered = items;
+          _filtered = _sorted(items);
           emit(_withSearch(state.copyWith(loading: false)));
         });
   }

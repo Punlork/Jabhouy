@@ -1,5 +1,8 @@
 part of 'item_list_cubit.dart';
 
+/// How Home orders the Items when there is no search; a search ranks by match.
+enum ItemSort { name, recent }
+
 @CopyWith()
 class ItemListState extends Equatable {
   const ItemListState({
@@ -13,6 +16,7 @@ class ItemListState extends Equatable {
     this.categoryId,
     this.missingOnly = false,
     this.grid = false,
+    this.sort = ItemSort.name,
     this.canEdit = false,
     this.settings = const PriceSettings(),
   });
@@ -33,6 +37,7 @@ class ItemListState extends Equatable {
   final String? categoryId;
   final bool missingOnly;
   final bool grid;
+  final ItemSort sort;
 
   /// Owner or editor: sees the missing-price chip.
   final bool canEdit;
@@ -50,6 +55,7 @@ class ItemListState extends Equatable {
     categoryId,
     missingOnly,
     grid,
+    sort,
     canEdit,
     settings,
   ];
