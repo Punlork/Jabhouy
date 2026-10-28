@@ -421,23 +421,25 @@ class ItemDao {
 
   /// The live Item with [id] and its options, or null once deleted.
   Future<Item?> liveItem(String id) async {
-    final query = _db.select(_db.itemTable).join([
-      leftOuterJoin(
-        _db.itemPriceTable,
-        _db.itemPriceTable.itemId.equalsExp(_db.itemTable.id),
-      ),
-    ])
-      ..where(_db.itemTable.id.equals(id) & _db.itemTable.deletedAt.isNull())
-      ..orderBy([OrderingTerm.asc(_db.itemPriceTable.sortOrder)]);
+    final query =
+        _db.select(_db.itemTable).join([
+            leftOuterJoin(
+              _db.itemPriceTable,
+              _db.itemPriceTable.itemId.equalsExp(_db.itemTable.id),
+            ),
+          ])
+          ..where(
+            _db.itemTable.id.equals(id) & _db.itemTable.deletedAt.isNull(),
+          )
+          ..orderBy([OrderingTerm.asc(_db.itemPriceTable.sortOrder)]);
     return (await query.get().then(_itemsFrom)).firstOrNull;
   }
 
   /// The live category with [id] and its units, or null once deleted.
   Future<ItemCategory?> liveCategory(String id) async {
-    final row =
-        await (_db.select(_db.categoryTable)
-              ..where((c) => c.id.equals(id) & c.deletedAt.isNull()))
-            .getSingleOrNull();
+    final row = await (_db.select(
+      _db.categoryTable,
+    )..where((c) => c.id.equals(id) & c.deletedAt.isNull())).getSingleOrNull();
     if (row == null) return null;
     final units = await (_db.select(
       _db.categoryUnitTable,
@@ -447,7 +449,9 @@ class ItemDao {
       name: row.name,
       sortOrder: row.sortOrder,
       hidden: row.hidden,
-      units: [for (final u in units) CategoryUnit(unit: u.unit, hidden: u.hidden)],
+      units: [
+        for (final u in units) CategoryUnit(unit: u.unit, hidden: u.hidden),
+      ],
     );
   }
 
@@ -474,7 +478,9 @@ class ItemDao {
         );
         continue;
       }
-      await _db.into(_db.itemTable).insertOnConflictUpdate(
+      await _db
+          .into(_db.itemTable)
+          .insertOnConflictUpdate(
             ItemTableCompanion.insert(
               id: id,
               shopId: shopId,
@@ -489,11 +495,14 @@ class ItemDao {
               seq: common.seq,
             ),
           );
-      await (_db.delete(_db.itemPriceTable)..where((p) => p.itemId.equals(id)))
-          .go();
+      await (_db.delete(
+        _db.itemPriceTable,
+      )..where((p) => p.itemId.equals(id))).go();
       for (final (i, price) in ((row['prices'] as List?) ?? const []).indexed) {
         final p = price! as Map<String, Object?>;
-        await _db.into(_db.itemPriceTable).insert(
+        await _db
+            .into(_db.itemPriceTable)
+            .insert(
               ItemPriceTableCompanion.insert(
                 id: p['id']! as String,
                 itemId: id,
@@ -523,8 +532,9 @@ class ItemDao {
       if (skip.contains(id)) continue;
       final common = _serverColumns(row);
       if (row['deletedAt'] != null) {
-        await (_db.update(_db.categoryTable)..where((c) => c.id.equals(id)))
-            .write(
+        await (_db.update(
+          _db.categoryTable,
+        )..where((c) => c.id.equals(id))).write(
           CategoryTableCompanion(
             deletedAt: common.deletedAt,
             updatedAt: common.updatedAt,
@@ -534,7 +544,9 @@ class ItemDao {
         );
         continue;
       }
-      await _db.into(_db.categoryTable).insertOnConflictUpdate(
+      await _db
+          .into(_db.categoryTable)
+          .insertOnConflictUpdate(
             CategoryTableCompanion.insert(
               id: id,
               shopId: shopId,
@@ -549,7 +561,9 @@ class ItemDao {
           );
       for (final unit in ((row['units'] as List?) ?? const [])) {
         final u = unit! as Map<String, Object?>;
-        await _db.into(_db.categoryUnitTable).insertOnConflictUpdate(
+        await _db
+            .into(_db.categoryUnitTable)
+            .insertOnConflictUpdate(
               CategoryUnitTableCompanion.insert(
                 categoryId: id,
                 unit: u['unit']! as String,
@@ -568,12 +582,18 @@ class ItemDao {
   ) async {
     if (skip.contains(shopId)) return;
     final common = _serverColumns(row);
-    await _db.into(_db.shopSettingsTable).insertOnConflictUpdate(
+    await _db
+        .into(_db.shopSettingsTable)
+        .insertOnConflictUpdate(
           ShopSettingsTableCompanion.insert(
             shopId: shopId,
-            useWholesalePrice: Value((row['useWholesalePrice'] as bool?) ?? false),
+            useWholesalePrice: Value(
+              (row['useWholesalePrice'] as bool?) ?? false,
+            ),
             useCostPrice: Value((row['useCostPrice'] as bool?) ?? true),
-            defaultCurrency: Value((row['defaultCurrency'] as String?) ?? 'KHR'),
+            defaultCurrency: Value(
+              (row['defaultCurrency'] as String?) ?? 'KHR',
+            ),
             khrPerUsd: Value((row['khrPerUsd'] as int?) ?? 4000),
             showConverted: Value((row['showConverted'] as bool?) ?? true),
             updatedAt: common.updatedAt,

@@ -20,12 +20,12 @@ class ShopItemVariantDraft {
     String sellerPrice = '',
     String packAmount = '',
     this.isPack = false,
-  })  : key = GlobalKey(),
-        labelController = TextEditingController(text: label),
-        customerPriceController = TextEditingController(text: customerPrice),
-        defaultPriceController = TextEditingController(text: defaultPrice),
-        sellerPriceController = TextEditingController(text: sellerPrice),
-        packAmountController = TextEditingController(text: packAmount);
+  }) : key = GlobalKey(),
+       labelController = TextEditingController(text: label),
+       customerPriceController = TextEditingController(text: customerPrice),
+       defaultPriceController = TextEditingController(text: defaultPrice),
+       sellerPriceController = TextEditingController(text: sellerPrice),
+       packAmountController = TextEditingController(text: packAmount);
 
   factory ShopItemVariantDraft.single() =>
       ShopItemVariantDraft(packAmount: '1');
@@ -154,10 +154,7 @@ class ShopItemFormController {
       _registerVariantDraftListeners(initialDraft);
       variantDrafts.add(initialDraft);
 
-      _initialTextValues.addAll({
-        'name': '',
-        'note': '',
-      });
+      _initialTextValues.addAll({'name': '', 'note': ''});
     }
 
     _initialCategory = categoryFilter;
@@ -264,8 +261,9 @@ class ShopItemFormController {
     final label = draft.labelController.text.trim();
     final packAmount = parseDraftPackAmount(draft);
     final labelSuffix = label.isEmpty ? '' : ' - $label';
-    final packSuffix =
-        packAmount != null && packAmount > 1 ? ' x$packAmount' : '';
+    final packSuffix = packAmount != null && packAmount > 1
+        ? ' x$packAmount'
+        : '';
     return '$baseName$labelSuffix$packSuffix';
   }
 

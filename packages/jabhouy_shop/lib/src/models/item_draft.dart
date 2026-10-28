@@ -95,7 +95,8 @@ class ItemDraft {
     Map<String, String> barcodeOwners = const {},
   }) {
     final problems = <String, FormProblem>{
-      if (name.trim().isEmpty) 'name': const FormProblem(ProblemKind.nameRequired),
+      if (name.trim().isEmpty)
+        'name': const FormProblem(ProblemKind.nameRequired),
     };
     for (final row in _usedRows) {
       final pack = row.packQty.trim();

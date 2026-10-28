@@ -15,6 +15,7 @@ class ShopHeader extends StatelessWidget {
   });
   final VoidCallback onSettingsPressed;
   final ValueChanged<String?> onSearchChanged;
+
   /// Null hides the filter button (the shop tab filters with chips).
   final VoidCallback? onFilterPressed;
 
@@ -94,50 +95,47 @@ class _SearchBar extends StatelessWidget {
             child: SizedBox.fromSize(
               size: const Size.fromHeight(_fieldHeight),
               child: CustomTextFormField(
-              controller: controller,
-              hintText: searchHintText ?? l10n.searchItems,
-              labelText: '',
-              prefixIcon: Icons.search,
-              onChanged: onChanged,
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontSize: 16,
+                controller: controller,
+                hintText: searchHintText ?? l10n.searchItems,
+                labelText: '',
+                prefixIcon: Icons.search,
+                onChanged: onChanged,
+                style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
+                action: TextInputAction.search,
+                showClearButton: true,
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                useCustomBorder: false,
+                decoration: InputDecoration(
+                  prefixIconColor: colorScheme.onSurfaceVariant,
+                  // The field only grows to its text and padding, so pad it to 54.
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 15,
+                  ),
+                  hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w300,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(_fieldRadius),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(_fieldRadius),
+                    borderSide: BorderSide.none,
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(_fieldRadius),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(_fieldRadius),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHigh,
+                ),
               ),
-              action: TextInputAction.search,
-              showClearButton: true,
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              useCustomBorder: false,
-              decoration: InputDecoration(
-                prefixIconColor: colorScheme.onSurfaceVariant,
-                // The field only grows to its text and padding, so pad it to 54.
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 15,
-                ),
-                hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w300,
-                    ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(_fieldRadius),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(_fieldRadius),
-                  borderSide: BorderSide.none,
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(_fieldRadius),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(_fieldRadius),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: colorScheme.surfaceContainerHigh,
-              ),
-            ),
             ),
           ),
           if (onScanPressed case final onScanPressed?) ...[
@@ -159,19 +157,19 @@ class _SearchBar extends StatelessWidget {
             ),
           ],
           if (onFilterPressed case final onFilterPressed?) ...[
-          const SizedBox(width: 8),
-          IconButtonWidget(
-            svgAsset: AppAssets.actionFilter,
-            color: hasFilter
-                ? colorScheme.onPrimaryContainer
-                : colorScheme.onSurfaceVariant,
-            backgroundColor: hasFilter
-                ? colorScheme.primaryContainer
-                : colorScheme.surfaceContainerHigh,
-            tooltip: l10n.filterItems,
-            onPressed: onFilterPressed,
-            colorScheme: colorScheme,
-          ),
+            const SizedBox(width: 8),
+            IconButtonWidget(
+              svgAsset: AppAssets.actionFilter,
+              color: hasFilter
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onSurfaceVariant,
+              backgroundColor: hasFilter
+                  ? colorScheme.primaryContainer
+                  : colorScheme.surfaceContainerHigh,
+              tooltip: l10n.filterItems,
+              onPressed: onFilterPressed,
+              colorScheme: colorScheme,
+            ),
           ],
           const SizedBox(width: 8),
           _SettingsButton(onPressed: onSettingsPressed),

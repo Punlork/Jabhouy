@@ -62,9 +62,9 @@ class _LetterTile extends StatelessWidget {
         child: Text(
           letter,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -129,9 +129,8 @@ class ShopItemCategoryChip extends StatelessWidget {
                 name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                style: Theme.of(context).textTheme.labelMedium
+                    ?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
             ),
           ),

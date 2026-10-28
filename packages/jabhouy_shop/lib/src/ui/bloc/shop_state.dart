@@ -46,15 +46,15 @@ class ShopLoaded extends ShopState {
 
   @override
   List<Object?> get props => [
-        searchQuery,
-        categoryFilter,
-        paginatedItems,
-        items.length,
-        isFiltering,
-        isOffline,
-        syncMessage,
-        ...items,
-      ];
+    searchQuery,
+    categoryFilter,
+    paginatedItems,
+    items.length,
+    isFiltering,
+    isOffline,
+    syncMessage,
+    ...items,
+  ];
 }
 
 class ShopError extends ShopState {
