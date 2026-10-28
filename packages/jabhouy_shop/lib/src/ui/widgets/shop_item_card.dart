@@ -18,28 +18,28 @@ class ShopItemCard extends StatelessWidget {
   final void Function(ShopItemModel) onDelete;
 
   void _confirmDelete(BuildContext context) => showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete "${item.name}"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                onDelete(item);
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.error,
-              ),
-              child: const Text('Delete'),
-            ),
-          ],
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Confirm Delete'),
+      content: Text('Are you sure you want to delete "${item.name}"?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Cancel'),
         ),
-      );
+        TextButton(
+          onPressed: () {
+            Navigator.pop(dialogContext);
+            onDelete(item);
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.error,
+          ),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

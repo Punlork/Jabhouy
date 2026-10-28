@@ -6,11 +6,7 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
 class GridShopItemCard extends StatelessWidget {
-  const GridShopItemCard({
-    required this.item,
-    required this.onEdit,
-    super.key,
-  });
+  const GridShopItemCard({required this.item, required this.onEdit, super.key});
 
   final ShopItemModel item;
   final void Function(ShopItemModel) onEdit;
@@ -123,7 +119,9 @@ class GridShopItemShimmer extends StatelessWidget {
         ),
       ),
       child: ColoredBox(
-        color: Theme.of(context).cardTheme.color ?? colorScheme.surfaceContainerLow,
+        color:
+            Theme.of(context).cardTheme.color ??
+            colorScheme.surfaceContainerLow,
         child: Shimmer.fromColors(
           baseColor: colorScheme.surfaceContainerHighest,
           highlightColor: colorScheme.surfaceContainerHigh,
@@ -152,10 +150,7 @@ class GridShopItemShimmer extends StatelessWidget {
                         color: colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const SizedBox(
-                        width: double.infinity,
-                        height: 14,
-                      ),
+                      child: const SizedBox(width: double.infinity, height: 14),
                     ),
                     const SizedBox(height: 8),
                     DecoratedBox(
@@ -163,10 +158,7 @@ class GridShopItemShimmer extends StatelessWidget {
                         color: colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const SizedBox(
-                        width: 100,
-                        height: 14,
-                      ),
+                      child: const SizedBox(width: 100, height: 14),
                     ),
                   ],
                 ),

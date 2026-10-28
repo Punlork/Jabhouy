@@ -2057,8 +2057,26 @@ abstract class AppLocalizations {
   /// Header above the Home item list
   ///
   /// In en, this message translates to:
-  /// **'{count} items · A–Z'**
-  String itemListHeader(Object count);
+  /// **'{count} items · {sort}'**
+  String itemListHeader(Object count, Object sort);
+
+  /// Accessible label of the sort menu on Home
+  ///
+  /// In en, this message translates to:
+  /// **'Sort items'**
+  String get itemSortTooltip;
+
+  /// Sort option and header label: by name
+  ///
+  /// In en, this message translates to:
+  /// **'A–Z'**
+  String get itemSortName;
+
+  /// Sort option and header label: most recently added or edited first
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get itemSortRecent;
 
   /// Accessible label of the grid toggle
   ///

@@ -60,9 +60,9 @@ class CategorySyncAdapter implements FeatureSyncAdapter, FeaturePullAdapter {
 
     return switch (await _api.createCategory(category)) {
       Ok(:final value) => () async {
-          await _dao.reconcileCreated(localId: id, serverCategory: value);
-          return SyncPushSucceeded(serverId: '${value.id}');
-        }(),
+        await _dao.reconcileCreated(localId: id, serverCategory: value);
+        return SyncPushSucceeded(serverId: '${value.id}');
+      }(),
       Err(:final error) => _fail(id, error),
     };
   }
@@ -73,9 +73,9 @@ class CategorySyncAdapter implements FeatureSyncAdapter, FeaturePullAdapter {
 
     return switch (await _api.updateCategory(category)) {
       Ok(:final value) => () async {
-          await _dao.replace(value, SyncStatus.synced);
-          return const SyncPushSucceeded();
-        }(),
+        await _dao.replace(value, SyncStatus.synced);
+        return const SyncPushSucceeded();
+      }(),
       Err(:final error) => _fail(id, error),
     };
   }

@@ -27,30 +27,21 @@ class ShopGetItemsEvent extends ShopEvent {
 }
 
 class ShopCreateItemEvent extends ShopEvent {
-  ShopCreateItemEvent({
-    required this.body,
-    this.onSuccess,
-  });
+  ShopCreateItemEvent({required this.body, this.onSuccess});
 
   final ShopItemModel body;
   final VoidCallback? onSuccess;
 }
 
 class ShopCreateItemsEvent extends ShopEvent {
-  ShopCreateItemsEvent({
-    required this.items,
-    this.onSuccess,
-  });
+  ShopCreateItemsEvent({required this.items, this.onSuccess});
 
   final List<ShopItemModel> items;
   final VoidCallback? onSuccess;
 }
 
 class ShopEditItemEvent extends ShopEvent {
-  ShopEditItemEvent({
-    required this.body,
-    this.onSuccess,
-  });
+  ShopEditItemEvent({required this.body, this.onSuccess});
 
   final ShopItemModel body;
   final VoidCallback? onSuccess;

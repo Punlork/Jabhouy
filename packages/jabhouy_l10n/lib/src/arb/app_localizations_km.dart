@@ -1043,9 +1043,18 @@ class AppLocalizationsKm extends AppLocalizations {
   String get priceRemove => 'លុបតម្លៃនេះ';
 
   @override
-  String itemListHeader(Object count) {
-    return 'ទំនិញ $count មុខ · ក–អ';
+  String itemListHeader(Object count, Object sort) {
+    return 'ទំនិញ $count មុខ · $sort';
   }
+
+  @override
+  String get itemSortTooltip => 'តម្រៀបទំនិញ';
+
+  @override
+  String get itemSortName => 'ក–អ';
+
+  @override
+  String get itemSortRecent => 'ថ្មីបំផុតមុន';
 
   @override
   String get itemListShowGrid => 'បង្ហាញជាក្រឡា';

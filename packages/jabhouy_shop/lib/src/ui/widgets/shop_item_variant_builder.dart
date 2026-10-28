@@ -27,9 +27,9 @@ class ShopItemVariantBuilder extends StatelessWidget {
   final VoidCallback onAddPack;
   final ValueChanged<ShopItemVariantDraft> onRemove;
   final void Function(ShopItemVariantDraft draft, {required bool isPack})
-      onPackChanged;
+  onPackChanged;
   final void Function(ShopItemVariantDraft draft, {required bool isExpanded})
-      onExpandedChanged;
+  onExpandedChanged;
 
   /// False on edit: one card, no chips, no ✕, no collapsing.
   final bool allowMultiple;
@@ -93,8 +93,9 @@ class _PresetChip extends StatelessWidget {
 
 String _problemMessage(AppLocalizations l10n, VariantProblem problem) {
   return switch (problem) {
-    VariantProblem.missingCustomerPrice =>
-      l10n.nameRequired(l10n.customerPrice),
+    VariantProblem.missingCustomerPrice => l10n.nameRequired(
+      l10n.customerPrice,
+    ),
     VariantProblem.invalidPrice => l10n.invalidPrice,
     VariantProblem.invalidPackSize => l10n.packSizeValidation,
   };
@@ -243,8 +244,8 @@ class _VariantDraftCard extends StatelessWidget {
 
     String? optionalPrice(String? value) =>
         (value ?? '').trim().isNotEmpty && parseWholeNumber(value!) == null
-            ? l10n.invalidPrice
-            : null;
+        ? l10n.invalidPrice
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,10 +262,9 @@ class _VariantDraftCard extends StatelessWidget {
             label: l10n.packSize,
             suffixText: l10n.itemsSuffix,
             wholeNumber: true,
-            validator: (value) =>
-                (parseWholeNumber(value ?? '') ?? 0) < 2
-                    ? l10n.packSizeValidation
-                    : null,
+            validator: (value) => (parseWholeNumber(value ?? '') ?? 0) < 2
+                ? l10n.packSizeValidation
+                : null,
           ),
         ],
         const SizedBox(height: 12),
@@ -354,8 +354,7 @@ class _LabeledInput extends StatelessWidget {
           // soon as the pack size was typed. This clears a field's error
           // the moment it is fixed and leaves the rest alone until save.
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          keyboardType:
-              wholeNumber ? TextInputType.number : TextInputType.text,
+          keyboardType: wholeNumber ? TextInputType.number : TextInputType.text,
           inputFormatters: wholeNumber ? const [WholeNumberFormatter()] : null,
           decoration: InputDecoration(
             isDense: true,

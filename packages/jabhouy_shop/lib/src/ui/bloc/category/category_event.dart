@@ -8,9 +8,7 @@ class CategoryGetEvent extends CategoryEvent {
 }
 
 class CategoryCreateEvent extends CategoryEvent {
-  CategoryCreateEvent({
-    required this.body,
-  });
+  CategoryCreateEvent({required this.body});
 
   final CategoryItemModel body;
 

@@ -93,9 +93,9 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
   }
 
   bool get _hasChanges => _formController.hasChanges(
-        uploadState: _uploadBloc.state,
-        selectedImage: _uploadBloc.selectedImage,
-      );
+    uploadState: _uploadBloc.state,
+    selectedImage: _uploadBloc.selectedImage,
+  );
 
   Future<bool> _confirmDiscardChanges() async {
     if (!_hasChanges) {
@@ -151,30 +151,30 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
 
   void _saveEditedItem(ShopItemModel item) {
     context.read<ShopBloc>().add(
-          ShopEditItemEvent(
-            body: item,
-            onSuccess: () {
-              if (!mounted) return;
-              widget.onSaved(item);
-              context.pop();
-            },
-          ),
-        );
+      ShopEditItemEvent(
+        body: item,
+        onSuccess: () {
+          if (!mounted) return;
+          widget.onSaved(item);
+          context.pop();
+        },
+      ),
+    );
   }
 
   void _saveNewItems(List<ShopItemModel> items) {
     context.read<ShopBloc>().add(
-          ShopCreateItemsEvent(
-            items: items,
-            onSuccess: () {
-              if (!mounted) return;
-              if (items.isNotEmpty) {
-                widget.onSaved(items.first);
-              }
-              context.pop();
-            },
-          ),
-        );
+      ShopCreateItemsEvent(
+        items: items,
+        onSuccess: () {
+          if (!mounted) return;
+          if (items.isNotEmpty) {
+            widget.onSaved(items.first);
+          }
+          context.pop();
+        },
+      ),
+    );
   }
 
   void _submitItem() {
@@ -272,8 +272,8 @@ class _ShopItemFormPageState extends State<_ShopItemFormPageContent> {
     final label = _formController.isEditing
         ? l10n.saveChanges
         : (_formController.variantDrafts.length > 1
-            ? l10n.addItems
-            : l10n.addItem);
+              ? l10n.addItems
+              : l10n.addItem);
 
     if (!isKeyboardVisible) {
       return Positioned(

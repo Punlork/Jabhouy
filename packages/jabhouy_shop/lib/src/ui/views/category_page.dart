@@ -83,10 +83,7 @@ class _CategoryPageContent extends StatelessWidget {
         ),
         onPressed: () => _showCategoryDialog(context),
         icon: const Icon(Icons.add),
-        label: Text(
-          AppLocalizations.of(context).add,
-          style: AppTextTheme.body,
-        ),
+        label: Text(AppLocalizations.of(context).add, style: AppTextTheme.body),
       ),
     );
   }
@@ -106,25 +103,17 @@ class _CategoryPageContent extends StatelessWidget {
         contentPadding: const EdgeInsets.only(left: 12),
         title: Text(
           item.name,
-          style: AppTextTheme.body.copyWith(
-            color: colorScheme.onSurface,
-          ),
+          style: AppTextTheme.body.copyWith(color: colorScheme.onSurface),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(
-                Icons.edit,
-                color: colorScheme.onSurfaceVariant,
-              ),
+              icon: Icon(Icons.edit, color: colorScheme.onSurfaceVariant),
               onPressed: () => _showCategoryDialog(context, item: item),
             ),
             IconButton(
-              icon: Icon(
-                Icons.delete,
-                color: colorScheme.error,
-              ),
+              icon: Icon(Icons.delete, color: colorScheme.error),
               onPressed: () => _showDeleteConfirmation(context, item),
             ),
           ],
@@ -133,10 +122,7 @@ class _CategoryPageContent extends StatelessWidget {
     );
   }
 
-  void _showCategoryDialog(
-    BuildContext context, {
-    CategoryItemModel? item,
-  }) {
+  void _showCategoryDialog(BuildContext context, {CategoryItemModel? item}) {
     final isEdit = item != null;
     final controller = TextEditingController(text: item?.name ?? '');
     final colorScheme = Theme.of(context).colorScheme;
@@ -147,7 +133,9 @@ class _CategoryPageContent extends StatelessWidget {
         value: context.read<CategoryBloc>(),
         child: AlertDialog(
           title: Text(
-            isEdit ? AppLocalizations.of(context).editCategory : AppLocalizations.of(context).addCategory,
+            isEdit
+                ? AppLocalizations.of(context).editCategory
+                : AppLocalizations.of(context).addCategory,
             style: AppTextTheme.title,
           ),
           content: TextField(
@@ -157,9 +145,7 @@ class _CategoryPageContent extends StatelessWidget {
               labelStyle: AppTextTheme.body,
             ),
             autofocus: true,
-            style: AppTextTheme.body.copyWith(
-              color: colorScheme.onSurface,
-            ),
+            style: AppTextTheme.body.copyWith(color: colorScheme.onSurface),
           ),
           actions: [
             TextButton(
@@ -178,26 +164,25 @@ class _CategoryPageContent extends StatelessWidget {
                     final body = item.copyWith(name: controller.text);
                     bloc.add(CategoryEditEvent(body: body));
                     if (shopBloc.state.asLoaded?.categoryFilter == item) {
-                      context.read<ShopBloc>().add(ShopGetItemsEvent(categoryFilter: body));
+                      context.read<ShopBloc>().add(
+                        ShopGetItemsEvent(categoryFilter: body),
+                      );
                     }
                   } else {
                     bloc.add(
                       CategoryCreateEvent(
-                        body: CategoryItemModel(
-                          id: 0,
-                          name: controller.text,
-                        ),
+                        body: CategoryItemModel(id: 0, name: controller.text),
                       ),
                     );
                   }
                   Navigator.pop(context);
                 }
               },
-              style: TextButton.styleFrom(
-                foregroundColor: colorScheme.primary,
-              ),
+              style: TextButton.styleFrom(foregroundColor: colorScheme.primary),
               child: Text(
-                isEdit ? AppLocalizations.of(context).saveChanges : AppLocalizations.of(context).addItem,
+                isEdit
+                    ? AppLocalizations.of(context).saveChanges
+                    : AppLocalizations.of(context).addItem,
                 style: AppTextTheme.caption,
               ),
             ),
@@ -233,12 +218,12 @@ class _CategoryPageContent extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                context.read<CategoryBloc>().add(CategoryDeleteEvent(body: item));
+                context.read<CategoryBloc>().add(
+                  CategoryDeleteEvent(body: item),
+                );
                 Navigator.pop(context);
               },
-              style: TextButton.styleFrom(
-                foregroundColor: colorScheme.error,
-              ),
+              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
               child: Text(
                 AppLocalizations.of(context).delete,
                 style: AppTextTheme.caption,

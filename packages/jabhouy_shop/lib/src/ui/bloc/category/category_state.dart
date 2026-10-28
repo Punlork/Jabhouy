@@ -17,17 +17,12 @@ class CategoryLoading extends CategoryState {
 
 @CopyWith()
 class CategoryLoaded extends CategoryState {
-  const CategoryLoaded({
-    required this.items,
-  });
+  const CategoryLoaded({required this.items});
 
   final List<CategoryItemModel> items;
 
   @override
-  List<Object?> get props => [
-        items.length,
-        ...items,
-      ];
+  List<Object?> get props => [items.length, ...items];
 }
 
 class CategoryError extends CategoryState {

@@ -123,10 +123,7 @@ class _ShopTabState extends State<_ShopTabView>
 }
 
 class _SyncStatusBanner extends StatelessWidget {
-  const _SyncStatusBanner({
-    required this.message,
-    required this.isOffline,
-  });
+  const _SyncStatusBanner({required this.message, required this.isOffline});
 
   final String message;
   final bool isOffline;
@@ -152,10 +149,7 @@ class _SyncStatusBanner extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            child: Text(message, style: Theme.of(context).textTheme.bodySmall),
           ),
         ],
       ),
@@ -164,23 +158,20 @@ class _SyncStatusBanner extends StatelessWidget {
 }
 
 class ShopGridLoading extends StatelessWidget {
-  const ShopGridLoading({
-    super.key,
-  });
+  const ShopGridLoading({super.key});
 
   @override
   Widget build(BuildContext context) {
     final crossAxisCount = _resolveCrossAxisCount(context);
 
     return CustomScrollView(
-      physics: const BouncingScrollPhysics()
-          .applyTo(const AlwaysScrollableScrollPhysics()),
+      physics: const BouncingScrollPhysics().applyTo(
+        const AlwaysScrollableScrollPhysics(),
+      ),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-            bottom: 52,
-            top: 52,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16)
+              .copyWith(bottom: 52, top: 52),
           sliver: SliverAlignedGrid.count(
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 8,
@@ -217,10 +208,7 @@ class ErrorView extends StatelessWidget {
         children: [
           Icon(Icons.error_outline, size: 64, color: error),
           const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(fontSize: 18, color: error),
-          ),
+          Text(message, style: TextStyle(fontSize: 18, color: error)),
         ],
       ),
     );

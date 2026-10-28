@@ -1058,9 +1058,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceRemove => 'Remove this price';
 
   @override
-  String itemListHeader(Object count) {
-    return '$count items · A–Z';
+  String itemListHeader(Object count, Object sort) {
+    return '$count items · $sort';
   }
+
+  @override
+  String get itemSortTooltip => 'Sort items';
+
+  @override
+  String get itemSortName => 'A–Z';
+
+  @override
+  String get itemSortRecent => 'Newest first';
 
   @override
   String get itemListShowGrid => 'Show as grid';

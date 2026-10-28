@@ -40,8 +40,9 @@ class ShopItemModel extends Equatable {
       ),
       createdAt: tryCast<String>(json['createdAt'])?.let(DateTime.parse),
       updatedAt: tryCast<String>(json['updatedAt'])?.let(DateTime.parse),
-      syncStatus:
-            SyncStatus.fromWireValue(tryCast<int>(json['syncStatus']) ?? 0),
+      syncStatus: SyncStatus.fromWireValue(
+        tryCast<int>(json['syncStatus']) ?? 0,
+      ),
       isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }
@@ -94,17 +95,13 @@ class ShopItemModel extends Equatable {
     );
   }
 
-  String get displayName => buildDisplayName(
-        baseName,
-        packAmount: packAmount,
-      );
+  String get displayName => buildDisplayName(baseName, packAmount: packAmount);
 
-  static String buildDisplayName(
-    String name, {
-    int? packAmount,
-  }) {
-    final normalizedName =
-        name.trim().replaceFirst(_packSuffixPattern, '').trim();
+  static String buildDisplayName(String name, {int? packAmount}) {
+    final normalizedName = name
+        .trim()
+        .replaceFirst(_packSuffixPattern, '')
+        .trim();
     if (normalizedName.isEmpty) {
       return normalizedName;
     }
@@ -130,18 +127,17 @@ class ShopItemModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        defaultPrice,
-        customerPrice,
-        sellerPrice,
-        note,
-        imageUrl,
-        category,
-        createdAt,
-        updatedAt,
-        syncStatus,
-        isDeleted,
-      ];
-
+    id,
+    name,
+    defaultPrice,
+    customerPrice,
+    sellerPrice,
+    note,
+    imageUrl,
+    category,
+    createdAt,
+    updatedAt,
+    syncStatus,
+    isDeleted,
+  ];
 }

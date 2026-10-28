@@ -77,7 +77,11 @@ class ItemFormCubit extends Cubit<ItemFormState> {
     final id = suggestCategory(name, state.categories);
     if (id == null || id == state.categoryId) return;
     emit(
-      state.copyWith(categoryId: id, suggested: true, units: await _unitsFor(id)),
+      state.copyWith(
+        categoryId: id,
+        suggested: true,
+        units: await _unitsFor(id),
+      ),
     );
   }
 

@@ -12,15 +12,15 @@ class CategoryDao {
   final AppDatabase _db;
 
   Stream<List<CategoryItemModel>> watchCategories() {
-    return (_db.select(_db.categories)
-          ..where((t) => t.isDeleted.equals(false)))
+    return (_db.select(_db.categories)..where((t) => t.isDeleted.equals(false)))
         .watch()
         .map((rows) => rows.map(_toModel).toList());
   }
 
   Future<CategoryItemModel?> findById(int id) async {
-    final row = await (_db.select(_db.categories)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.categories,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row == null ? null : _toModel(row);
   }
 
@@ -59,26 +59,29 @@ class CategoryDao {
 
       final onServer = categories.map((c) => c.id).toList();
       final keep = queued.map(int.tryParse).whereType<int>().toList();
-      await (_db.categories.delete()
-            ..where(
-              (t) =>
-                  t.id.isBiggerThanValue(0) &
-                  t.id.isNotIn(onServer) &
-                  t.id.isNotIn(keep),
-            ))
+      await (_db.categories.delete()..where(
+            (t) =>
+                t.id.isBiggerThanValue(0) &
+                t.id.isNotIn(onServer) &
+                t.id.isNotIn(keep),
+          ))
           .go();
     });
   }
 
   Future<void> insertPending(CategoryItemModel category) {
-    return _db.into(_db.categories).insert(
+    return _db
+        .into(_db.categories)
+        .insert(
           _companion(category, SyncStatus.pending),
           mode: InsertMode.insertOrReplace,
         );
   }
 
   Future<void> replace(CategoryItemModel category, SyncStatus status) {
-    return _db.update(_db.categories).replace(
+    return _db
+        .update(_db.categories)
+        .replace(
           Category(
             id: category.id,
             name: category.name,
@@ -120,7 +123,9 @@ class CategoryDao {
     required CategoryItemModel serverCategory,
   }) {
     return _db.transaction(() async {
-      await _db.into(_db.categories).insert(
+      await _db
+          .into(_db.categories)
+          .insert(
             _companion(serverCategory, SyncStatus.synced),
             mode: InsertMode.insertOrReplace,
           );
