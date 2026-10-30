@@ -15,9 +15,18 @@ part 'credit_list_cubit.g.dart';
 /// The Credit tab: every Credit read once, then narrowed in memory by the
 /// chip and the customer search, with the summary over all unpaid ones.
 class CreditListCubit extends Cubit<CreditListState> {
-  CreditListCubit(this._repository) : super(const CreditListState());
+  CreditListCubit(
+    this._repository, {
+    CreditSort sort = CreditSort.recent,
+    bool sortReversed = false,
+    this.onSortChanged,
+  }) : super(CreditListState(sort: sort, sortReversed: sortReversed));
 
   final CreditRepository _repository;
+
+  /// Lets the app remember the sort order, as Home does for Items.
+  final void Function(CreditSort sort, {required bool reversed})?
+  onSortChanged;
 
   StreamSubscription<List<Credit>>? _subscription;
   List<Credit> _all = const [];
@@ -39,7 +48,7 @@ class CreditListCubit extends Cubit<CreditListState> {
     await _subscription?.cancel();
     _subscription = null;
     _all = const [];
-    emit(const CreditListState());
+    emit(CreditListState(sort: state.sort, sortReversed: state.sortReversed));
   }
 
   /// With its lines, for the details sheet; null once deleted.
@@ -57,20 +66,32 @@ class CreditListCubit extends Cubit<CreditListState> {
 
   void search(String query) => emit(_derive(state.copyWith(query: query)));
 
+  /// Another order starts in its own direction; the same one flips it.
+  void setSort(CreditSort sort) {
+    final reversed = sort == state.sort && !state.sortReversed;
+    emit(_derive(state.copyWith(sort: sort, sortReversed: reversed)));
+    onSortChanged?.call(sort, reversed: reversed);
+  }
+
   void filter(CreditFilter filter) =>
       emit(_derive(state.copyWith(filter: filter)));
 
   CreditListState _derive(CreditListState next) {
     final query = normalizeSearch(next.query);
+    final credits = [
+      for (final credit in _all)
+        if ((next.filter == CreditFilter.all ||
+                credit.isPaid == (next.filter == CreditFilter.paid)) &&
+            (query.isEmpty ||
+                normalizeSearch(credit.customerName).contains(query)))
+          credit,
+    ];
+    // The DAO already reads newest first.
+    if (next.sort == CreditSort.name) {
+      credits.sort((a, b) => a.customerName.compareTo(b.customerName));
+    }
     return next.copyWith(
-      credits: [
-        for (final credit in _all)
-          if ((next.filter == CreditFilter.all ||
-                  credit.isPaid == (next.filter == CreditFilter.paid)) &&
-              (query.isEmpty ||
-                  normalizeSearch(credit.customerName).contains(query)))
-            credit,
-      ],
+      credits: next.sortReversed ? credits.reversed.toList() : credits,
       summary: summarize(
         _all.where((credit) => !credit.isPaid),
         next.currency,

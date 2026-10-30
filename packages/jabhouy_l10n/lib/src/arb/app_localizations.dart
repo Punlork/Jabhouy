@@ -1304,30 +1304,6 @@ abstract class AppLocalizations {
   /// **'Couldn\'t sign in with Google. Please try again.'**
   String get googleSignInFailed;
 
-  /// Title of the page where a User who joined with Google picks a Username
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a username'**
-  String get chooseUsername;
-
-  /// Explains the Username picker, above the suggestions
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ll use it to sign in. Pick one below or type your own.'**
-  String get chooseUsernameSubtitle;
-
-  /// Label of the Username field
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get username;
-
-  /// Hint and validation message for a Username
-  ///
-  /// In en, this message translates to:
-  /// **'3–30 letters, numbers, _ or .'**
-  String get usernameRules;
-
   /// Bottom tab for the credit list
   ///
   /// In en, this message translates to:
@@ -2057,8 +2033,8 @@ abstract class AppLocalizations {
   /// Header above the Home item list
   ///
   /// In en, this message translates to:
-  /// **'{count} items · {sort}'**
-  String itemListHeader(Object count, Object sort);
+  /// **'{count} items'**
+  String itemListHeader(Object count);
 
   /// Accessible label of the sort menu on Home
   ///
@@ -2077,6 +2053,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Newest first'**
   String get itemSortRecent;
+
+  /// Sort option label once A–Z is flipped: by name, last first
+  ///
+  /// In en, this message translates to:
+  /// **'Z–A'**
+  String get itemSortNameReversed;
+
+  /// Sort option label once newest first is flipped: oldest first
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get itemSortRecentReversed;
 
   /// Accessible label of the grid toggle
   ///

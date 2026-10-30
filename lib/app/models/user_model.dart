@@ -27,8 +27,6 @@ class User extends Equatable {
     );
   }
 
-  bool get hasUsername => username?.isNotEmpty ?? false;
-
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,

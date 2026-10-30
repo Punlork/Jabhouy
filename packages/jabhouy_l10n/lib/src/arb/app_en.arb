@@ -847,22 +847,6 @@
   "@googleSignInFailed": {
     "description": "Shown when Google sign-in fails on the phone, before reaching the server"
   },
-  "chooseUsername": "Choose a username",
-  "@chooseUsername": {
-    "description": "Title of the page where a User who joined with Google picks a Username"
-  },
-  "chooseUsernameSubtitle": "You'll use it to sign in. Pick one below or type your own.",
-  "@chooseUsernameSubtitle": {
-    "description": "Explains the Username picker, above the suggestions"
-  },
-  "username": "Username",
-  "@username": {
-    "description": "Label of the Username field"
-  },
-  "usernameRules": "3–30 letters, numbers, _ or .",
-  "@usernameRules": {
-    "description": "Hint and validation message for a Username"
-  },
   "credit": "Credit",
   "@credit": {
     "description": "Bottom tab for the credit list"
@@ -1381,12 +1365,11 @@
   "@priceRemove": {
     "description": "Accessible label of the remove price row button"
   },
-  "itemListHeader": "{count} items · {sort}",
+  "itemListHeader": "{count} items",
   "@itemListHeader": {
     "description": "Header above the Home item list",
     "placeholders": {
-      "count": {},
-      "sort": {}
+      "count": {}
     }
   },
   "itemSortTooltip": "Sort items",
@@ -1400,6 +1383,14 @@
   "itemSortRecent": "Newest first",
   "@itemSortRecent": {
     "description": "Sort option and header label: most recently added or edited first"
+  },
+  "itemSortNameReversed": "Z–A",
+  "@itemSortNameReversed": {
+    "description": "Sort option label once A–Z is flipped: by name, last first"
+  },
+  "itemSortRecentReversed": "Oldest first",
+  "@itemSortRecentReversed": {
+    "description": "Sort option label once newest first is flipped: oldest first"
   },
   "itemListShowGrid": "Show as grid",
   "@itemListShowGrid": {

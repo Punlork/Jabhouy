@@ -807,10 +807,6 @@
   "syncFailed": "មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ",
   "continueWithGoogle": "បន្តជាមួយ Google",
   "googleSignInFailed": "មិនអាចចូលជាមួយ Google បានទេ។ សូមព្យាយាមម្តងទៀត។",
-  "chooseUsername": "ជ្រើសរើសឈ្មោះអ្នកប្រើ",
-  "chooseUsernameSubtitle": "អ្នកនឹងប្រើវាដើម្បីចូល។ ជ្រើសរើសមួយខាងក្រោម ឬវាយបញ្ចូលដោយខ្លួនឯង។",
-  "username": "ឈ្មោះអ្នកប្រើ",
-  "usernameRules": "អក្សរ លេខ _ ឬ . ពី 3 ដល់ 30 តួ",
   "credit": "ជំពាក់",
   "@credit": {
     "description": "Bottom tab for the credit list"
@@ -1329,12 +1325,11 @@
   "@priceRemove": {
     "description": "Accessible label of the remove price row button"
   },
-  "itemListHeader": "ទំនិញ {count} មុខ · {sort}",
+  "itemListHeader": "ទំនិញ {count} មុខ",
   "@itemListHeader": {
     "description": "Header above the Home item list",
     "placeholders": {
-      "count": {},
-      "sort": {}
+      "count": {}
     }
   },
   "itemSortTooltip": "តម្រៀបទំនិញ",
@@ -1348,6 +1343,14 @@
   "itemSortRecent": "ថ្មីបំផុតមុន",
   "@itemSortRecent": {
     "description": "Sort option and header label: most recently added or edited first"
+  },
+  "itemSortNameReversed": "អ–ក",
+  "@itemSortNameReversed": {
+    "description": "Sort option label once A–Z is flipped: by name, last first"
+  },
+  "itemSortRecentReversed": "ចាស់បំផុតមុន",
+  "@itemSortRecentReversed": {
+    "description": "Sort option label once newest first is flipped: oldest first"
   },
   "itemListShowGrid": "បង្ហាញជាក្រឡា",
   "@itemListShowGrid": {

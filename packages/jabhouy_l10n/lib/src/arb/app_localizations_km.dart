@@ -644,19 +644,6 @@ class AppLocalizationsKm extends AppLocalizations {
       'មិនអាចចូលជាមួយ Google បានទេ។ សូមព្យាយាមម្តងទៀត។';
 
   @override
-  String get chooseUsername => 'ជ្រើសរើសឈ្មោះអ្នកប្រើ';
-
-  @override
-  String get chooseUsernameSubtitle =>
-      'អ្នកនឹងប្រើវាដើម្បីចូល។ ជ្រើសរើសមួយខាងក្រោម ឬវាយបញ្ចូលដោយខ្លួនឯង។';
-
-  @override
-  String get username => 'ឈ្មោះអ្នកប្រើ';
-
-  @override
-  String get usernameRules => 'អក្សរ លេខ _ ឬ . ពី 3 ដល់ 30 តួ';
-
-  @override
   String get credit => 'ជំពាក់';
 
   @override
@@ -1043,8 +1030,8 @@ class AppLocalizationsKm extends AppLocalizations {
   String get priceRemove => 'លុបតម្លៃនេះ';
 
   @override
-  String itemListHeader(Object count, Object sort) {
-    return 'ទំនិញ $count មុខ · $sort';
+  String itemListHeader(Object count) {
+    return 'ទំនិញ $count មុខ';
   }
 
   @override
@@ -1055,6 +1042,12 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get itemSortRecent => 'ថ្មីបំផុតមុន';
+
+  @override
+  String get itemSortNameReversed => 'អ–ក';
+
+  @override
+  String get itemSortRecentReversed => 'ចាស់បំផុតមុន';
 
   @override
   String get itemListShowGrid => 'បង្ហាញជាក្រឡា';

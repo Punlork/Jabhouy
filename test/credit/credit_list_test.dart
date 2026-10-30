@@ -125,4 +125,20 @@ void main() {
     c.start();
     expect((await settled(c)).credits, hasLength(2));
   });
+
+  test('A–Z sorts by customer; tapping it again reverses', () async {
+    final saved = <(CreditSort, bool)>[];
+    final c = CreditListCubit(
+      repo,
+      onSortChanged: (sort, {required reversed}) => saved.add((sort, reversed)),
+    )..start();
+    addTearDown(c.close);
+    await settled(c);
+
+    c.setSort(CreditSort.name);
+    expect(c.state.credits.map((x) => x.id), ['c1', 'c2']);
+    c.setSort(CreditSort.name);
+    expect(c.state.credits.map((x) => x.id), ['c2', 'c1']);
+    expect(saved, [(CreditSort.name, false), (CreditSort.name, true)]);
+  });
 }

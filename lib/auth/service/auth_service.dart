@@ -218,11 +218,30 @@ class AuthService extends BaseService {
       parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
     );
 
-    if (response.success && response.data != null) {
-      await cacheUser(response.data!);
-    }
+    if (!response.success || response.data == null) return response;
+    final user = await _withUsername(response.data!);
+    await cacheUser(user);
+    return ApiResponse(success: true, data: user, message: response.message);
+  }
 
-    return response;
+  /// A Google account has no Username, so one is taken from its name and
+  /// email instead of asking. Best effort: the User signs in without one.
+  Future<User> _withUsername(User user) async {
+    if (user.username?.isNotEmpty ?? false) return user;
+    try {
+      final names = await usernameSuggestions(user, count: 1);
+      if (names.isEmpty) return user;
+      final response = await post<bool>(
+        '/update-user',
+        bodyParser: User(name: user.name, image: user.image, username: names.first).toJson,
+        showSnackBar: false,
+        parser: (value) => value is Map && value['status'].toString() == 'true',
+      );
+      return response.success && (response.data ?? false) ? user.copyWith(username: names.first) : user;
+    } catch (e) {
+      logger.w('Google username not set: $e');
+      return user;
+    }
   }
 
   /// Android reports a refusal such as an unregistered signing key
@@ -239,8 +258,7 @@ class AuthService extends BaseService {
 
   /// Up to [count] free Usernames built from [user]'s name and email.
   ///
-  /// Empty when none can be built or checked; the picker still takes a
-  /// typed one.
+  /// Empty when none can be built or checked.
   Future<List<String>> usernameSuggestions(User user, {int count = 3}) async {
     final name = _usernameBase(user.name ?? '', '_');
     final email = _usernameBase((user.email ?? '').split('@').first, '_');

@@ -193,4 +193,23 @@ void main() {
     expect(list.state.grid, isTrue);
     expect(saved, [true]);
   });
+
+  test('a sort starts in its own direction; tapping it again flips it',
+      () async {
+    final saved = <(ItemSort, bool)>[];
+    final list = ItemListCubit(
+      repo,
+      scope,
+      onSortChanged: (sort, {required reversed}) => saved.add((sort, reversed)),
+    )..start();
+    addTearDown(list.close);
+    final ascending = (await settled(list)).items.map((i) => i.id).toList();
+
+    list.setSort(ItemSort.name);
+    expect((await settled(list)).items.map((i) => i.id), ascending.reversed);
+
+    list.setSort(ItemSort.recent);
+    expect(list.state.sortReversed, isFalse);
+    expect(saved, [(ItemSort.name, true), (ItemSort.recent, false)]);
+  });
 }

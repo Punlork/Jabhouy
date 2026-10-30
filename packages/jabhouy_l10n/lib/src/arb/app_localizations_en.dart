@@ -658,19 +658,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t sign in with Google. Please try again.';
 
   @override
-  String get chooseUsername => 'Choose a username';
-
-  @override
-  String get chooseUsernameSubtitle =>
-      'You\'ll use it to sign in. Pick one below or type your own.';
-
-  @override
-  String get username => 'Username';
-
-  @override
-  String get usernameRules => '3–30 letters, numbers, _ or .';
-
-  @override
   String get credit => 'Credit';
 
   @override
@@ -1058,8 +1045,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceRemove => 'Remove this price';
 
   @override
-  String itemListHeader(Object count, Object sort) {
-    return '$count items · $sort';
+  String itemListHeader(Object count) {
+    return '$count items';
   }
 
   @override
@@ -1070,6 +1057,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get itemSortRecent => 'Newest first';
+
+  @override
+  String get itemSortNameReversed => 'Z–A';
+
+  @override
+  String get itemSortRecentReversed => 'Oldest first';
 
   @override
   String get itemListShowGrid => 'Show as grid';

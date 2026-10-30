@@ -17,6 +17,10 @@ abstract class _$CreditListStateCWProxy {
 
   CreditListState query(String query);
 
+  CreditListState sort(CreditSort sort);
+
+  CreditListState sortReversed(bool sortReversed);
+
   CreditListState currency(Currency currency);
 
   /// Creates a new instance with the provided field values.
@@ -33,6 +37,8 @@ abstract class _$CreditListStateCWProxy {
     CreditSummary? summary,
     CreditFilter filter,
     String query,
+    CreditSort sort,
+    bool sortReversed,
     Currency currency,
   });
 }
@@ -60,6 +66,13 @@ class _$CreditListStateCWProxyImpl implements _$CreditListStateCWProxy {
   CreditListState query(String query) => call(query: query);
 
   @override
+  CreditListState sort(CreditSort sort) => call(sort: sort);
+
+  @override
+  CreditListState sortReversed(bool sortReversed) =>
+      call(sortReversed: sortReversed);
+
+  @override
   CreditListState currency(Currency currency) => call(currency: currency);
 
   /// Creates a new instance with the provided field values.
@@ -77,6 +90,8 @@ class _$CreditListStateCWProxyImpl implements _$CreditListStateCWProxy {
     Object? summary = const $CopyWithPlaceholder(),
     Object? filter = const $CopyWithPlaceholder(),
     Object? query = const $CopyWithPlaceholder(),
+    Object? sort = const $CopyWithPlaceholder(),
+    Object? sortReversed = const $CopyWithPlaceholder(),
     Object? currency = const $CopyWithPlaceholder(),
   }) {
     return CreditListState(
@@ -100,6 +115,15 @@ class _$CreditListStateCWProxyImpl implements _$CreditListStateCWProxy {
           ? _value.query
           // ignore: cast_nullable_to_non_nullable
           : query as String,
+      sort: sort == const $CopyWithPlaceholder() || sort == null
+          ? _value.sort
+          // ignore: cast_nullable_to_non_nullable
+          : sort as CreditSort,
+      sortReversed:
+          sortReversed == const $CopyWithPlaceholder() || sortReversed == null
+          ? _value.sortReversed
+          // ignore: cast_nullable_to_non_nullable
+          : sortReversed as bool,
       currency: currency == const $CopyWithPlaceholder() || currency == null
           ? _value.currency
           // ignore: cast_nullable_to_non_nullable

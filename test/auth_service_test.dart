@@ -189,6 +189,73 @@ void main() {
       expect((await authService.getCachedUser())?.id, 'g-1');
     });
 
+    test('names a Google user after their Google name and saves it', () async {
+      final account = _MockGoogleAccount();
+      when(() => account.authentication)
+          .thenReturn(const GoogleSignInAuthentication(idToken: 'id-token'));
+      when(() => google.authenticate()).thenAnswer((_) async => account);
+      when(postSocial).thenAnswer(
+        (_) async => ApiResponse(
+          success: true,
+          data: const User(id: 'g-1', name: 'Dara Sok', email: 'a@gmail.com'),
+        ),
+      );
+      Future<ApiResponse<bool>> postBool(String path) => apiService.post<bool>(
+            path,
+            body: any(named: 'body'),
+            parser: any(named: 'parser'),
+            bodyParser: any(named: 'bodyParser'),
+            imageFile: any(named: 'imageFile'),
+            imageFieldName: any(named: 'imageFieldName'),
+            context: any(named: 'context'),
+            showSnackBar: any(named: 'showSnackBar'),
+          );
+      when(() => postBool('/auth/is-username-available')).thenAnswer(
+        (_) async => ApiResponse(success: true, data: true),
+      );
+      when(() => postBool('/auth/update-user')).thenAnswer(
+        (_) async => ApiResponse(success: true, data: true),
+      );
+
+      final response = await authService.signInWithGoogle();
+
+      expect(response?.data?.username, 'dara_sok');
+      expect(response?.data?.name, 'Dara Sok');
+      expect((await authService.getCachedUser())?.username, 'dara_sok');
+      final sent = verify(
+        () => apiService.post<bool>(
+          '/auth/update-user',
+          body: any(named: 'body'),
+          parser: any(named: 'parser'),
+          bodyParser: captureAny(named: 'bodyParser'),
+          imageFile: any(named: 'imageFile'),
+          imageFieldName: any(named: 'imageFieldName'),
+          context: any(named: 'context'),
+          showSnackBar: any(named: 'showSnackBar'),
+        ),
+      ).captured.single as Map<String, dynamic> Function();
+      expect(sent()['username'], 'dara_sok');
+    });
+
+    test('signs in without a Username when none can be saved', () async {
+      final account = _MockGoogleAccount();
+      when(() => account.authentication)
+          .thenReturn(const GoogleSignInAuthentication(idToken: 'id-token'));
+      when(() => google.authenticate()).thenAnswer((_) async => account);
+      when(postSocial).thenAnswer(
+        (_) async => ApiResponse(
+          success: true,
+          data: const User(id: 'g-1', name: 'Dara Sok', email: 'a@gmail.com'),
+        ),
+      );
+      // Nothing else is stubbed, so the availability check throws.
+
+      final response = await authService.signInWithGoogle();
+
+      expect(response?.success, isTrue);
+      expect(response?.data?.username, isNull);
+    });
+
     test('returns null and calls no API when the user cancels', () async {
       when(() => google.authenticate()).thenThrow(
         const GoogleSignInException(code: GoogleSignInExceptionCode.canceled),

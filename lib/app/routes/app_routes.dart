@@ -32,6 +32,9 @@ class AppRouter {
   /// Home's list-or-grid choice, remembered on the phone.
   static const _itemGridKey = 'item_list_grid';
   static const _itemSortKey = 'item_list_sort';
+  static const _itemSortReversedKey = 'item_list_sort_reversed';
+  static const _creditSortKey = 'credit_list_sort';
+  static const _creditSortReversedKey = 'credit_list_sort_reversed';
 
   static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
 
@@ -76,15 +79,31 @@ class AppRouter {
                     sort: ItemSort.values.asNameMap()[getIt<SharedPreferences>()
                             .getString(_itemSortKey)] ??
                         ItemSort.name,
-                    onSortChanged: (sort) => unawaited(
-                      getIt<SharedPreferences>()
-                          .setString(_itemSortKey, sort.name),
-                    ),
+                    sortReversed: getIt<SharedPreferences>()
+                            .getBool(_itemSortReversedKey) ??
+                        false,
+                    onSortChanged: (sort, {required reversed}) {
+                      final prefs = getIt<SharedPreferences>();
+                      unawaited(prefs.setString(_itemSortKey, sort.name));
+                      unawaited(prefs.setBool(_itemSortReversedKey, reversed));
+                    },
                   ),
                 ),
                 BlocProvider(
-                  create: (context) =>
-                      CreditListCubit(getIt<CreditRepository>()),
+                  create: (context) => CreditListCubit(
+                    getIt<CreditRepository>(),
+                    sort: CreditSort.values.asNameMap()[getIt<SharedPreferences>()
+                            .getString(_creditSortKey)] ??
+                        CreditSort.recent,
+                    sortReversed: getIt<SharedPreferences>()
+                            .getBool(_creditSortReversedKey) ??
+                        false,
+                    onSortChanged: (sort, {required reversed}) {
+                      final prefs = getIt<SharedPreferences>();
+                      unawaited(prefs.setString(_creditSortKey, sort.name));
+                      unawaited(prefs.setBool(_creditSortReversedKey, reversed));
+                    },
+                  ),
                 ),
                 BlocProvider(
                   create: (context) => CategoryBloc(
@@ -354,24 +373,6 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const SigninPage(),
-            transitionsBuilder: _rightToLeftTransition,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.chooseUsername.toPath,
-        name: AppRoutes.chooseUsername,
-        pageBuilder: (BuildContext context, GoRouterState state) {
-          GlobalContext.currentContext = context;
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: BlocProvider(
-              create: (context) => ProfileBloc(
-                getIt<UploadBloc>(),
-                getIt<ProfileService>(),
-              ),
-              child: const ChooseUsernamePage(),
-            ),
             transitionsBuilder: _rightToLeftTransition,
           );
         },

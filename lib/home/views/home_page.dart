@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final _isBackgroundSyncEnabled = getIt<FeatureFlags>().isEnabled(Feature.backgroundSync);
 
   /// The search header slides away while scrolling down a list and comes
-  /// back on any scroll up. Category chips live in the tab, so they stay
+  /// back only once the list is at the top. Category chips live in the tab, so they stay
   /// put and move up into the header's place (decision 43).
   bool _chromeVisible = true;
   double _scrollRun = 0;
@@ -69,10 +69,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (delta.sign != _scrollRun.sign) _scrollRun = 0;
     _scrollRun += delta;
 
-    if (_scrollRun <= -_chromeScrollThreshold) {
-      _setChromeVisible(true);
-    } else if (_scrollRun >= _chromeScrollThreshold && _searchController.text.isEmpty) {
-      // A search in progress keeps its field on screen.
+    // Only the top brings it back (above), never a scroll up mid-list.
+    // A search in progress keeps its field on screen.
+    if (_scrollRun >= _chromeScrollThreshold && _searchController.text.isEmpty) {
       _setChromeVisible(false);
     }
     return false;
@@ -251,19 +250,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       if (!mounted) return;
       final authState = context.read<AuthBloc>().state;
       if (authState is Authenticated) {
-        _onAuthenticated(authState);
+        _loadProtectedData();
       }
     });
-  }
-
-  /// The app opens on Home before the session is known, so the Username
-  /// gate in `authRedirect` has to be applied here once it is.
-  void _onAuthenticated(Authenticated authState) {
-    if (!authState.user.hasUsername) {
-      context.goNamed(AppRoutes.chooseUsername);
-      return;
-    }
-    _loadProtectedData();
   }
 
   void _loadProtectedData() {
@@ -305,7 +294,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
       listener: (context, authState) {
         if (authState is Authenticated) {
-          _onAuthenticated(authState);
+          _loadProtectedData();
           return;
         }
 

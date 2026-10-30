@@ -83,7 +83,33 @@ class _CreditViewState extends State<CreditView>
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.zero,
                   children: [
-                    const SizedBox(height: 8),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: SortButtons<CreditSort>(
+                          options: [
+                            (
+                              CreditSort.name,
+                              state.sort == CreditSort.name &&
+                                      state.sortReversed
+                                  ? l10n.itemSortNameReversed
+                                  : l10n.itemSortName,
+                            ),
+                            (
+                              CreditSort.recent,
+                              state.sort == CreditSort.recent &&
+                                      state.sortReversed
+                                  ? l10n.itemSortRecentReversed
+                                  : l10n.itemSortRecent,
+                            ),
+                          ],
+                          selected: state.sort,
+                          reversed: state.sortReversed,
+                          onChanged: cubit.setSort,
+                        ),
+                      ),
+                    ),
                     if (state.loading)
                       const Padding(
                         padding: EdgeInsets.only(top: 80),

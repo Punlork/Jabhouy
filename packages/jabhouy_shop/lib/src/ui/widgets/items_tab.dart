@@ -102,36 +102,33 @@ class _ItemsTabState extends State<ItemsTab>
                             child: Text(
                               searching
                                   ? l10n.itemSearchResults(state.items.length)
-                                  : l10n.itemListHeader(
-                                      state.items.length,
-                                      state.sort == ItemSort.name
-                                          ? l10n.itemSortName
-                                          : l10n.itemSortRecent,
-                                    ),
+                                  : l10n.itemListHeader(state.items.length),
                               style: AppTextTheme.hint.copyWith(
                                 color: t.textSecondary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                          PopupMenuButton<ItemSort>(
-                            tooltip: l10n.itemSortTooltip,
-                            initialValue: state.sort,
-                            onSelected: cubit.setSort,
-                            icon: Icon(
-                              Icons.sort_rounded,
-                              color: t.textSecondary,
-                            ),
-                            itemBuilder: (_) => [
-                              PopupMenuItem(
-                                value: ItemSort.name,
-                                child: Text(l10n.itemSortName),
+                          SortButtons<ItemSort>(
+                            options: [
+                              (
+                                ItemSort.name,
+                                state.sort == ItemSort.name &&
+                                        state.sortReversed
+                                    ? l10n.itemSortNameReversed
+                                    : l10n.itemSortName,
                               ),
-                              PopupMenuItem(
-                                value: ItemSort.recent,
-                                child: Text(l10n.itemSortRecent),
+                              (
+                                ItemSort.recent,
+                                state.sort == ItemSort.recent &&
+                                        state.sortReversed
+                                    ? l10n.itemSortRecentReversed
+                                    : l10n.itemSortRecent,
                               ),
                             ],
+                            selected: state.sort,
+                            reversed: state.sortReversed,
+                            onChanged: cubit.setSort,
                           ),
                           IconButton(
                             onPressed: cubit.toggleGrid,
