@@ -110,14 +110,12 @@ jobs:
       # Split per ABI: Telegram bots upload at most 50 MB, and the single
       # APK is larger. arm64 covers current Android phones, and it is the
       # only one sent, so the other ABIs are not compiled.
-      # -v is TEMPORARY: it prints each Gradle task, so the log shows where
-      # the build time goes. Remove after one measuring run.
       - name: Build development APK
         env:
-          # Read by android/app/build.gradle: skips R8 and lint-vital here only.
+          # Read by android/app/build.gradle: skips lint-vital here only.
           FAST_DEV_BUILD: "true"
         run: >
-          flutter build apk -v --release --split-per-abi
+          flutter build apk --release --split-per-abi
           --target-platform android-arm64
           --build-name=${{ steps.build.outputs.name }}
           --build-number=${{ steps.build.outputs.number }}

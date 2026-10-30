@@ -69,9 +69,10 @@ if (project.hasProperty('dart-defines')) {
 // Missing means off, matching BuildTimeFeatureFlags.
 def isFeatureEnabled = { key -> dartDefines[key] == 'true' }
 
-// CI-only switch for the dev Telegram build: skips R8 and lint-vital, which
-// cost minutes and only matter for builds that ship. Unset everywhere else
-// (local builds, production), so those builds are unchanged.
+// CI-only switch for the dev Telegram build: skips lint-vital, which costs
+// time and only matters for builds that ship. R8 stays on so dev builds
+// shrink code the same way production does. Unset everywhere else (local
+// builds, production), so those builds are unchanged.
 def fastDevBuild = System.getenv('FAST_DEV_BUILD') == 'true'
 
 android {
@@ -173,10 +174,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled !fastDevBuild
-            // Flutter's Gradle plugin turns this on for release; Android refuses it
-            // when code shrinking is off, so it follows the same switch.
-            shrinkResources !fastDevBuild
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
         debug {
