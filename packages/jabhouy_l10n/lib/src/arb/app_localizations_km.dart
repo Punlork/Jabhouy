@@ -803,9 +803,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get timeAdd => 'បន្ថែមម៉ោង';
 
   @override
-  String voiceSpeakingInto(Object field) {
-    return 'កំពុងបញ្ចូលទៅ $field';
-  }
+  String get voiceSpeakingInto => 'កំពុងបញ្ចូលទៅ';
+
+  @override
+  String get voiceRetry => 'ចុចដើម្បីស្តាប់ម្តងទៀត';
 
   @override
   String get voiceListening => 'កំពុងស្តាប់…';

@@ -1610,11 +1610,17 @@ abstract class AppLocalizations {
   /// **'Add time'**
   String get timeAdd;
 
-  /// Title of the voice input sheet
+  /// Small line above the field name in the voice input sheet
   ///
   /// In en, this message translates to:
-  /// **'Speaking into {field}'**
-  String voiceSpeakingInto(Object field);
+  /// **'Speaking into'**
+  String get voiceSpeakingInto;
+
+  /// Shown when voice input stopped listening; tapping starts again
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to listen again'**
+  String get voiceRetry;
 
   /// Shown while voice input listens
   ///

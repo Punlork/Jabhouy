@@ -5,13 +5,18 @@ import 'package:speech_to_text/speech_to_text.dart';
 // ignore: one_member_abstracts — the seam is the point, not the member count.
 abstract interface class SpeechService {
   /// Starts listening; [onText] gets the transcript so far and [onLevel] the
-  /// volume from 0 to 1. False when the phone has no speech engine or the
+  /// volume from 0 to 1. [onStopped] fires when the engine stops on its own
+  /// (a pause, or an error). False when the phone has no speech engine or the
   /// microphone was refused.
   Future<bool> start({
     required String localeId,
     required void Function(String text) onText,
     required void Function(double level) onLevel,
+    required void Function() onStopped,
   });
+
+  /// Whether the engine can recognise [localeId] (e.g. `km-KH`).
+  Future<bool> supports(String localeId);
 
   Future<void> stop();
 }
@@ -19,14 +24,37 @@ abstract interface class SpeechService {
 /// The phone's own speech engine.
 final class DeviceSpeechService implements SpeechService {
   final _speech = SpeechToText();
+  // initialize() keeps the first listeners only, so they call this field.
+  void Function()? _onStopped;
+  bool? _ready;
+
+  Future<bool> _init() async => _ready ??= await _speech.initialize(
+    onStatus: (status) {
+      if (status == SpeechToText.doneStatus ||
+          status == SpeechToText.notListeningStatus) {
+        _onStopped?.call();
+      }
+    },
+    onError: (_) => _onStopped?.call(),
+  );
+
+  @override
+  Future<bool> supports(String localeId) async {
+    if (!await _init()) return false;
+    final locales = await _speech.locales();
+    final lang = localeId.split('-').first;
+    return locales.any((l) => l.localeId.split(RegExp('[-_]')).first == lang);
+  }
 
   @override
   Future<bool> start({
     required String localeId,
     required void Function(String text) onText,
     required void Function(double level) onLevel,
+    required void Function() onStopped,
   }) async {
-    if (!await _speech.initialize()) return false;
+    _onStopped = onStopped;
+    if (!await _init()) return false;
     await _speech.listen(
       onResult: (result) => onText(result.recognizedWords),
       // Android reports about -2 to 10, iOS other ranges; the wave only

@@ -817,9 +817,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timeAdd => 'Add time';
 
   @override
-  String voiceSpeakingInto(Object field) {
-    return 'Speaking into $field';
-  }
+  String get voiceSpeakingInto => 'Speaking into';
+
+  @override
+  String get voiceRetry => 'Tap to listen again';
 
   @override
   String get voiceListening => 'Listening…';

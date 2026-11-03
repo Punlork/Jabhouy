@@ -1057,12 +1057,13 @@
   "@timeAdd": {
     "description": "Empty time button of the date and time field"
   },
-  "voiceSpeakingInto": "Speaking into {field}",
+  "voiceSpeakingInto": "Speaking into",
   "@voiceSpeakingInto": {
-    "description": "Title of the voice input sheet",
-    "placeholders": {
-      "field": {}
-    }
+    "description": "Small line above the field name in the voice input sheet"
+  },
+  "voiceRetry": "Tap to listen again",
+  "@voiceRetry": {
+    "description": "Shown when voice input stopped listening; tapping starts again"
   },
   "voiceListening": "Listening…",
   "@voiceListening": {

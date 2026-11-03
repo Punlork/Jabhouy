@@ -1005,12 +1005,13 @@
   "@timeAdd": {
     "description": "Empty time button of the date and time field"
   },
-  "voiceSpeakingInto": "កំពុងបញ្ចូលទៅ {field}",
+  "voiceSpeakingInto": "កំពុងបញ្ចូលទៅ",
   "@voiceSpeakingInto": {
-    "description": "Title of the voice input sheet",
-    "placeholders": {
-      "field": {}
-    }
+    "description": "Small line above the field name in the voice input sheet"
+  },
+  "voiceRetry": "ចុចដើម្បីស្តាប់ម្តងទៀត",
+  "@voiceRetry": {
+    "description": "Shown when voice input stopped listening; tapping starts again"
   },
   "voiceListening": "កំពុងស្តាប់…",
   "@voiceListening": {
