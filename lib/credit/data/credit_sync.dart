@@ -38,7 +38,8 @@ Map<String, Object?> _creditBody(Credit c) => {
         'qty': l.qty,
         'currency': l.currency.name.toUpperCase(),
         'unitPrice': l.unitPrice,
-        'total': l.total.amount,
+        // The contract wants it in the Credit's currency, converted per line.
+        'total': l.total.convertTo(c.currency, khrPerUsd: c.khrPerUsd).amount,
       },
   ],
 };

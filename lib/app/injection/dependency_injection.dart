@@ -76,7 +76,10 @@ Future<void> setupDependencies() async {
     // register an HTTP `ShopSyncApi` here instead; nothing else changes.
     ..registerLazySingleton<ShopSyncApi>(
       () => getIt<FeatureFlags>().isEnabled(Feature.userScopedApi)
-          ? UserScopedShopSyncApi(getIt<ApiService>())
+          ? UserScopedShopSyncApi(
+              getIt<ApiService>(),
+              shopScoped: getIt<FeatureFlags>().isEnabled(Feature.serverShops),
+            )
           : InMemoryShopSyncApi(),
     )
     // One engine for the whole app: the outbox is one queue, and ordering
