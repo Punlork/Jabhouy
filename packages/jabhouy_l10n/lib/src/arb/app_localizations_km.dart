@@ -1204,4 +1204,57 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get creditChooseCustomer => 'សូមជ្រើសរើសអតិថិជន';
+
+  @override
+  String get inviteGenerate => 'បង្កើតលេខកូដ';
+
+  @override
+  String inviteShareText(Object shop, Object code) {
+    return 'ចូលរួមហាង $shop ក្នុង Jabhouy ដោយប្រើលេខកូដ $code។ ផុតកំណត់ក្នុង ២៤ ម៉ោង។';
+  }
+
+  @override
+  String get inviteCopied => 'បានចម្លងលេខកូដ';
+
+  @override
+  String get joinCodeHint => 'ម្ចាស់ហាងរកឃើញវានៅ ការកំណត់ › សមាជិក និងសិទ្ធិ';
+
+  @override
+  String get joinAlreadyMember => 'អ្នកនៅក្នុងហាងនេះរួចហើយ';
+
+  @override
+  String joinSuccess(Object shop) {
+    return 'អ្នកបានចូលរួមហាង $shop';
+  }
+
+  @override
+  String get membershipFailed =>
+      'មិនអាចភ្ជាប់ទៅម៉ាស៊ីនមេបានទេ។ សូមព្យាយាមម្តងទៀត។';
+
+  @override
+  String get shopRemovedNotice => 'អ្នកលែងជាសមាជិកហាងនោះហើយ';
+
+  @override
+  String get memberYou => 'អ្នក';
+
+  @override
+  String memberSetRole(Object role) {
+    return 'ប្តូរទៅ៖ $role';
+  }
+
+  @override
+  String get memberTransfer => 'ផ្ទេរជាម្ចាស់ហាង';
+
+  @override
+  String memberTransferConfirm(Object name) {
+    return 'ផ្ទេរហាងទៅ $name? អ្នកនឹងក្លាយជាអ្នកកែតម្លៃ ហើយលែងគ្រប់គ្រងសមាជិក ឬការកំណត់បានទៀត។';
+  }
+
+  @override
+  String get memberRemove => 'ដកចេញពីហាង';
+
+  @override
+  String memberRemoveConfirm(Object name) {
+    return 'ដក $name ចេញ? ទិន្នន័យហាងនេះនឹងត្រូវលុបចេញពីទូរស័ព្ទរបស់គាត់។';
+  }
 }

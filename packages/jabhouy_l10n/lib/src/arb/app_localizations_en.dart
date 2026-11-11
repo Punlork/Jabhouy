@@ -1220,4 +1220,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditChooseCustomer => 'Choose a customer';
+
+  @override
+  String get inviteGenerate => 'Make a code';
+
+  @override
+  String inviteShareText(Object shop, Object code) {
+    return 'Join my shop $shop on Jabhouy with code $code. It expires in 24 hours.';
+  }
+
+  @override
+  String get inviteCopied => 'Code copied';
+
+  @override
+  String get joinCodeHint => 'The owner finds it in Settings › Members & roles';
+
+  @override
+  String get joinAlreadyMember => 'You\'re already in this shop';
+
+  @override
+  String joinSuccess(Object shop) {
+    return 'You joined $shop';
+  }
+
+  @override
+  String get membershipFailed => 'Couldn\'t reach the server. Try again.';
+
+  @override
+  String get shopRemovedNotice => 'You\'re no longer a member of that shop';
+
+  @override
+  String get memberYou => 'You';
+
+  @override
+  String memberSetRole(Object role) {
+    return 'Change to: $role';
+  }
+
+  @override
+  String get memberTransfer => 'Make owner';
+
+  @override
+  String memberTransferConfirm(Object name) {
+    return 'Hand the shop to $name? You become an editor and can no longer manage members or settings.';
+  }
+
+  @override
+  String get memberRemove => 'Remove from shop';
+
+  @override
+  String memberRemoveConfirm(Object name) {
+    return 'Remove $name? This shop\'s data will be deleted from their phone.';
+  }
 }

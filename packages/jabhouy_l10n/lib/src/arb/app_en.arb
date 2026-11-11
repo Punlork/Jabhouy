@@ -1599,5 +1599,77 @@
   "creditChooseCustomer": "Choose a customer",
   "@creditChooseCustomer": {
     "description": "Error when a Credit is saved without a customer"
+  },
+  "inviteGenerate": "Make a code",
+  "@inviteGenerate": {
+    "description": "Button that makes an invite code for the chosen role"
+  },
+  "inviteShareText": "Join my shop {shop} on Jabhouy with code {code}. It expires in 24 hours.",
+  "@inviteShareText": {
+    "description": "Text sent with the share sheet",
+    "placeholders": {
+      "shop": {},
+      "code": {}
+    }
+  },
+  "inviteCopied": "Code copied",
+  "@inviteCopied": {
+    "description": "Snack bar after copying an invite code"
+  },
+  "joinCodeHint": "The owner finds it in Settings › Members & roles",
+  "@joinCodeHint": {
+    "description": "Hint under the invite code boxes"
+  },
+  "joinAlreadyMember": "You're already in this shop",
+  "@joinAlreadyMember": {
+    "description": "Join error: already a member"
+  },
+  "joinSuccess": "You joined {shop}",
+  "@joinSuccess": {
+    "description": "Snack bar after joining a shop",
+    "placeholders": {
+      "shop": {}
+    }
+  },
+  "membershipFailed": "Couldn't reach the server. Try again.",
+  "@membershipFailed": {
+    "description": "Generic error on the join and members screens"
+  },
+  "shopRemovedNotice": "You're no longer a member of that shop",
+  "@shopRemovedNotice": {
+    "description": "Snack bar when the phone learns the user was removed from a shop"
+  },
+  "memberYou": "You",
+  "@memberYou": {
+    "description": "Label on the signed-in user's own row in the member list"
+  },
+  "memberSetRole": "Change to: {role}",
+  "@memberSetRole": {
+    "description": "Member action: change role",
+    "placeholders": {
+      "role": {}
+    }
+  },
+  "memberTransfer": "Make owner",
+  "@memberTransfer": {
+    "description": "Member action: hand the shop over"
+  },
+  "memberTransferConfirm": "Hand the shop to {name}? You become an editor and can no longer manage members or settings.",
+  "@memberTransferConfirm": {
+    "description": "Confirm dialog before a transfer",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "memberRemove": "Remove from shop",
+  "@memberRemove": {
+    "description": "Member action: remove"
+  },
+  "memberRemoveConfirm": "Remove {name}? This shop's data will be deleted from their phone.",
+  "@memberRemoveConfirm": {
+    "description": "Confirm dialog before removing a member",
+    "placeholders": {
+      "name": {}
+    }
   }
 }

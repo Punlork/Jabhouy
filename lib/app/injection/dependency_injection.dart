@@ -38,6 +38,7 @@ Future<void> setupDependencies() async {
       () => meApiFor(getIt<FeatureFlags>(), getIt<ApiService>()),
     )
     ..registerLazySingleton(() => CurrentShop(getIt<MeApi>()))
+    ..registerLazySingleton(() => MembershipApi(getIt<ApiService>()))
     ..registerLazySingleton(
       () => AuthService(
         getIt<ApiService>(),

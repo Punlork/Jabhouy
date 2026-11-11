@@ -70,6 +70,51 @@ void main() {
     expect(offline.id, isNull);
   });
 
+  test('removed from the remembered shop: falls back to the own shop', () async {
+    const aunt = ShopMembership(id: 'c', name: 'ហាងមីង', role: MemberRole.editor);
+    final shop = CurrentShop(_StubMeApi(const Ok([_mum, aunt, _home])));
+    await shop.load('u1');
+    await shop.switchTo('c');
+
+    final again = CurrentShop(_StubMeApi(const Ok([_mum, _home])));
+    await again.load('u1');
+    expect(again.id, 'a', reason: 'own shop, not just the first in the list');
+  });
+
+  test('switchTo notifies and is remembered', () async {
+    final shop = CurrentShop(_StubMeApi(const Ok([_home, _mum])));
+    await shop.load('u1');
+    var notified = 0;
+    shop.addListener(() => notified++);
+
+    await shop.switchTo('b');
+    await shop.switchTo('b');
+    expect((shop.id, shop.role, notified), ('b', MemberRole.viewer, 1));
+
+    final again = CurrentShop(_StubMeApi(const Ok([_home, _mum])));
+    await again.load('u1');
+    expect(again.id, 'b');
+  });
+
+  test('refresh notifies only when the shop or role changed', () async {
+    final api = _StubMeApi(const Ok([_home, _mum]));
+    final shop = CurrentShop(api);
+    await shop.load('u1');
+    await shop.switchTo('b');
+    var notified = 0;
+    shop.addListener(() => notified++);
+
+    await shop.refresh();
+    expect(notified, 0);
+
+    api.answer = const Ok([
+      _home,
+      ShopMembership(id: 'b', name: 'ហាងម្តាយ', role: MemberRole.editor),
+    ]);
+    await shop.refresh();
+    expect((shop.role, notified), (MemberRole.editor, 1));
+  });
+
   test('FEATURE_SERVER_SHOPS picks the real API, otherwise the fake', () {
     final api = _MockApiService();
     expect(meApiFor(const FixedFeatureFlags({}), api), isA<FakeMeApi>());

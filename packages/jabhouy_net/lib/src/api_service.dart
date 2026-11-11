@@ -97,6 +97,7 @@ class ApiService {
         success: false,
         message: errorMessage,
         statusCode: e is ApiException ? e.statusCode : null,
+        code: e is ApiException ? e.code : null,
       );
     } finally {
       LoadingOverlay.hide();
@@ -202,6 +203,7 @@ class ApiService {
         success: false,
         message: errorMessage,
         statusCode: e is ApiException ? e.statusCode : null,
+        code: e is ApiException ? e.code : null,
       );
     } finally {
       LoadingOverlay.hide();
@@ -261,6 +263,7 @@ class ApiService {
         success: false,
         message: errorMessage,
         statusCode: e is ApiException ? e.statusCode : null,
+        code: e is ApiException ? e.code : null,
       );
     } finally {
       LoadingOverlay.hide();
@@ -302,6 +305,7 @@ class ApiService {
         success: false,
         message: errorMessage,
         statusCode: e is ApiException ? e.statusCode : null,
+        code: e is ApiException ? e.code : null,
       );
     } finally {
       LoadingOverlay.hide();

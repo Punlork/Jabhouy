@@ -51,58 +51,66 @@ class AppRouter {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(
-                  create: (context) => ShopBloc(
-                    getIt<ShopRepository>(),
-                    getIt<UploadBloc>(),
-                    getIt<ConnectivityService>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
+            // A new Shop or role rebuilds every list for it: the blocs read
+            // CurrentShop once, when they start.
+            child: ListenableBuilder(
+              listenable: getIt<CurrentShop>(),
+              builder: (context, _) => MultiBlocProvider(
+                key: ValueKey(
+                  '${getIt<CurrentShop>().shopId}:${getIt<CurrentShop>().role}',
                 ),
-                BlocProvider(
-                  create: (context) => SignoutBloc(getIt<AuthService>()),
-                ),
-                BlocProvider(
-                  create: (context) => ItemListCubit(
-                    getIt<ItemRepository>(),
-                    getIt<CurrentShop>(),
-                    grid: getIt<SharedPreferences>().getBool(_itemGridKey) ??
-                        false,
-                    onGridChanged: (grid) => unawaited(
-                      getIt<SharedPreferences>().setBool(_itemGridKey, grid),
-                    ),
-                    sort: ItemSort.values.asNameMap()[getIt<SharedPreferences>()
-                            .getString(_itemSortKey)] ??
-                        ItemSort.name,
-                    onSortChanged: (sort) => unawaited(
-                      getIt<SharedPreferences>()
-                          .setString(_itemSortKey, sort.name),
-                    ),
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) =>
-                      CreditListCubit(getIt<CreditRepository>()),
-                ),
-                BlocProvider(
-                  create: (context) => CategoryBloc(
-                    getIt<CategoryRepository>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
-                ),
-                // No bloc, no capture: IncomeBloc is the only caller of
-                // IncomeService.initialize, which starts the listener.
-                if (_isIncomeEnabled)
+                providers: [
                   BlocProvider(
-                    create: (context) => IncomeBloc(
-                      getIt<IncomeService>(),
-                      getIt<FcmService>(),
+                    create: (context) => ShopBloc(
+                      getIt<ShopRepository>(),
+                      getIt<UploadBloc>(),
+                      getIt<ConnectivityService>(),
+                      flags: getIt<FeatureFlags>(),
                     ),
                   ),
-              ],
-              child: const HomePage(),
+                  BlocProvider(
+                    create: (context) => SignoutBloc(getIt<AuthService>()),
+                  ),
+                  BlocProvider(
+                    create: (context) => ItemListCubit(
+                      getIt<ItemRepository>(),
+                      getIt<CurrentShop>(),
+                      grid: getIt<SharedPreferences>().getBool(_itemGridKey) ??
+                          false,
+                      onGridChanged: (grid) => unawaited(
+                        getIt<SharedPreferences>().setBool(_itemGridKey, grid),
+                      ),
+                      sort: ItemSort.values.asNameMap()[getIt<SharedPreferences>()
+                              .getString(_itemSortKey)] ??
+                          ItemSort.name,
+                      onSortChanged: (sort) => unawaited(
+                        getIt<SharedPreferences>()
+                            .setString(_itemSortKey, sort.name),
+                      ),
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (context) =>
+                        CreditListCubit(getIt<CreditRepository>()),
+                  ),
+                  BlocProvider(
+                    create: (context) => CategoryBloc(
+                      getIt<CategoryRepository>(),
+                      flags: getIt<FeatureFlags>(),
+                    ),
+                  ),
+                  // No bloc, no capture: IncomeBloc is the only caller of
+                  // IncomeService.initialize, which starts the listener.
+                  if (_isIncomeEnabled)
+                    BlocProvider(
+                      create: (context) => IncomeBloc(
+                        getIt<IncomeService>(),
+                        getIt<FcmService>(),
+                      ),
+                    ),
+                ],
+                child: const HomePage(),
+              ),
             ),
             transitionsBuilder: _rightToLeftTransition,
           );

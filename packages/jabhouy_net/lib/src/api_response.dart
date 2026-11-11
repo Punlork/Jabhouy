@@ -6,6 +6,7 @@ class ApiResponse<T> {
     this.data,
     this.message,
     this.statusCode,
+    this.code,
   });
   final bool success;
   final T? data;
@@ -18,4 +19,8 @@ class ApiResponse<T> {
   /// 400. The sync engine is the first caller that must: one is worth
   /// retrying and the other never will be.
   final int? statusCode;
+
+  /// The API's error code on a failure (`invite_used`, `not_member`, …):
+  /// what a caller matches on, since [message] is for people.
+  final String? code;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
@@ -154,7 +155,7 @@ class UserScopedShopSyncApi implements ShopSyncApi {
       body: toApiBody(type, body),
       showSnackBar: false,
     );
-    return response.toVoidResult();
+    return response.toShopVoidResult();
   }
 
   @override
@@ -168,7 +169,7 @@ class UserScopedShopSyncApi implements ShopSyncApi {
     final response = await _api.delete<dynamic>(path, showSnackBar: false);
     // Already gone is what a delete wants.
     if (response.statusCode == 404) return const Ok(null);
-    return response.toVoidResult();
+    return response.toShopVoidResult();
   }
 
   static const _changeKeys = {
@@ -193,10 +194,11 @@ class UserScopedShopSyncApi implements ShopSyncApi {
     final data = response.data;
     if (!response.success || data == null) {
       return Err(
-        AppException(
-          response.message ?? 'Request failed.',
-          statusCode: response.statusCode,
-        ),
+        response.shopError ??
+            AppException(
+              response.message ?? 'Request failed.',
+              statusCode: response.statusCode,
+            ),
       );
     }
     return Ok(
