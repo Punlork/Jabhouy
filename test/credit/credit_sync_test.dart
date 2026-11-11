@@ -18,8 +18,9 @@ class _Scope implements ShopScope {
 
   @override
   final String userId;
+  // Mutable so a test can switch Shops.
   @override
-  String get shopId => 's1';
+  String shopId = 's1';
   @override
   MemberRole get role => MemberRole.owner;
   @override
@@ -27,8 +28,8 @@ class _Scope implements ShopScope {
 }
 
 class _Phone {
-  _Phone(String userId, ShopSyncApi api, {bool online = true}) {
-    final scope = _Scope(userId);
+  _Phone(String userId, ShopSyncApi api, {bool online = true})
+      : scope = _Scope(userId) {
     final dao = CreditDao(db);
     final connectivity = _Connectivity();
     when(() => connectivity.isOnline).thenAnswer((_) async => online);
@@ -47,6 +48,7 @@ class _Phone {
     repo = CreditRepository(dao, scope, engine, connectivity);
   }
 
+  final _Scope scope;
   final db = AppDatabase(NativeDatabase.memory());
   late final SyncEngine engine;
   late final CreditRepository repo;
@@ -159,5 +161,39 @@ void main() {
         lessThan(api.writes.indexOf('put credit c9')));
     await b.engine.pullShop('s1');
     expect((await b.repo.credit('c9'))!.customerName, 'សុខា');
+  });
+
+  test('a job queued before a Shop switch still goes to its own Shop',
+      () async {
+    final phone = _Phone('ud', api, online: false);
+    addTearDown(phone.db.close);
+    await phone.repo.saveCustomer(
+      const CreditCustomer(id: 'vin', name: 'វិន'),
+    );
+    await phone.repo.saveCredit(
+      Credit(
+        id: 'c7',
+        customerId: 'vin',
+        currency: Currency.khr,
+        khrPerUsd: 4000,
+        takenAt: taken,
+        amount: 100,
+      ),
+    );
+
+    phone.scope.shopId = 's2';
+    await phone.engine.drain();
+
+    Future<List<Object?>> creditIds(String shopId) async {
+      final page = await api.changes(shopId, since: 0);
+      final rows = switch (page) {
+        Ok(:final value) => value.rows[SyncEntityType.credit] ?? const [],
+        Err() => const <Map<String, Object?>>[],
+      };
+      return [for (final r in rows) r['id']];
+    }
+
+    expect(await creditIds('s1'), contains('c7'));
+    expect(await creditIds('s2'), isNot(contains('c7')));
   });
 }
