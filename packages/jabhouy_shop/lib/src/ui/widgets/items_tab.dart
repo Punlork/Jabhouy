@@ -118,18 +118,35 @@ class _ItemsTabState extends State<ItemsTab>
                             tooltip: l10n.itemSortTooltip,
                             initialValue: state.sort,
                             onSelected: cubit.setSort,
+                            // Open below the button, not over the grid toggle.
+                            position: PopupMenuPosition.under,
+                            color: t.surface,
+                            surfaceTintColor: Colors.transparent,
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.radiusCard,
+                              ),
+                              side: BorderSide(color: t.border),
+                            ),
                             icon: Icon(
                               Icons.sort_rounded,
                               color: t.textSecondary,
                             ),
                             itemBuilder: (_) => [
-                              PopupMenuItem(
-                                value: ItemSort.name,
-                                child: Text(l10n.itemSortName),
+                              _sortItem(
+                                context,
+                                ItemSort.name,
+                                Icons.sort_by_alpha_rounded,
+                                l10n.itemSortName,
+                                selected: state.sort,
                               ),
-                              PopupMenuItem(
-                                value: ItemSort.recent,
-                                child: Text(l10n.itemSortRecent),
+                              _sortItem(
+                                context,
+                                ItemSort.recent,
+                                Icons.schedule_rounded,
+                                l10n.itemSortRecent,
+                                selected: state.sort,
                               ),
                             ],
                           ),
@@ -243,6 +260,43 @@ class _ItemsTabState extends State<ItemsTab>
 
 /// Room at the bottom for the nav bar and its floating button.
 const _listPadding = EdgeInsets.fromLTRB(16, 4, 16, 160);
+
+/// One sort option: icon, label, and a check on the one in use.
+PopupMenuItem<ItemSort> _sortItem(
+  BuildContext context,
+  ItemSort value,
+  IconData icon,
+  String label, {
+  required ItemSort selected,
+}) {
+  final t = context.tokens;
+  final on = value == selected;
+  return PopupMenuItem(
+    value: value,
+    height: 44,
+    child: Row(
+      children: [
+        Icon(icon, size: 20, color: on ? t.textPrimary : t.textMuted),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextTheme.body.copyWith(
+              color: on ? t.textPrimary : t.textSecondary,
+              fontWeight: on ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        // Kept in the layout when off so the menu width does not jump.
+        Opacity(
+          opacity: on ? 1 : 0,
+          child: Icon(Icons.check_rounded, size: 20, color: t.textPrimary),
+        ),
+      ],
+    ),
+  );
+}
 
 class _ItemRow extends StatelessWidget {
   const _ItemRow({
