@@ -4,20 +4,27 @@ import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class _FakeSpeech implements SpeechService {
-  _FakeSpeech({this.ok = true});
+  _FakeSpeech({this.ok = true, this.khmer = true});
 
   final bool ok;
+  final bool khmer;
   final locales = <String>[];
   void Function(String)? say;
+  void Function()? stopped;
+
+  @override
+  Future<bool> supports(String localeId) async => khmer;
 
   @override
   Future<bool> start({
     required String localeId,
     required void Function(String text) onText,
     required void Function(double level) onLevel,
+    required void Function() onStopped,
   }) async {
     locales.add(localeId);
     say = onText;
+    stopped = onStopped;
     return ok;
   }
 
@@ -89,6 +96,31 @@ void main() {
     expect(find.text('មិនអាចប្រើសំឡេងបានទេ'), findsOneWidget);
     final use = tester.widget<FilledButton>(find.byType(FilledButton));
     expect(use.onPressed, isNull);
+  });
+
+  testWidgets('stopped listening: dot goes, tap listens again', (tester) async {
+    final speech = _FakeSpeech();
+    await open(tester, speech);
+    expect(find.text('កំពុងស្តាប់…'), findsOneWidget);
+
+    speech.stopped!();
+    await tester.pump();
+    expect(find.text('កំពុងស្តាប់…'), findsNothing);
+    expect(find.text('ចុចដើម្បីស្តាប់ម្តងទៀត'), findsOneWidget);
+
+    await tester.tap(find.text('ចុចដើម្បីស្តាប់ម្តងទៀត'));
+    await tester.pumpAndSettle();
+    expect(speech.locales, ['km-KH', 'km-KH']);
+    expect(find.text('កំពុងស្តាប់…'), findsOneWidget);
+  });
+
+  testWidgets('no Khmer on the phone: starts in English, no toggle', (
+    tester,
+  ) async {
+    final speech = _FakeSpeech(khmer: false);
+    await open(tester, speech);
+    expect(speech.locales, ['en-US']);
+    expect(find.text('ខ្មែរ'), findsNothing);
   });
 
   testWidgets(

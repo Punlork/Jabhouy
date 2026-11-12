@@ -9,6 +9,7 @@ import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/credit/credit.dart';
 import 'package:jabhouy/home/home_tabs.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
@@ -263,9 +264,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.read<ItemListCubit>().start();
     context.read<CreditListCubit>().start();
     _syncNotices ??= getIt<SyncEngine>().notices.listen((notice) {
-      // A removed Member's data is already gone; the list just empties.
+      // A removed Member's data is already gone; /me picks the Shop to
+      // show instead. A refused write may mean a new role: /me has it.
+      if (notice == SyncNotice.shopRemoved && mounted) {
+        showErrorSnackBar(context, context.l10n.shopRemovedNotice);
+      }
       if (notice == SyncNotice.noPermission && mounted) {
         showErrorSnackBar(context, context.l10n.syncNoPermission);
+      }
+      if (notice == SyncNotice.shopRemoved || notice == SyncNotice.noPermission) {
+        unawaited(getIt<CurrentShop>().refresh());
       }
     });
     context.read<CategoryBloc>().add(CategoryGetEvent());

@@ -14,6 +14,16 @@ import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class _StubMeApi implements MeApi {
+  const _StubMeApi(this.role);
+
+  final MemberRole role;
+
+  @override
+  Future<Result<List<ShopMembership>>> shops(String userId) async =>
+      Ok([ShopMembership(id: 's1', name: 'ហាងម្តាយ', role: role)]);
+}
+
 class _MockAppBloc extends MockBloc<AppEvent, AppState> implements AppBloc {}
 
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
@@ -130,5 +140,46 @@ void main() {
     await tester.tap(find.text('ចាកចេញ').last);
     await tester.pumpAndSettle();
     verify(() => signout.add(const SignoutSubmitted())).called(1);
+  });
+
+  group('with server shops', () {
+    Future<void> useShop(MemberRole role) async {
+      final shop = CurrentShop(_StubMeApi(role));
+      await shop.load('u1');
+      getIt
+        ..unregister<FeatureFlags>()
+        ..unregister<CurrentShop>()
+        ..registerSingleton<FeatureFlags>(
+          const FixedFeatureFlags({Feature.serverShops}),
+        )
+        ..registerSingleton(shop);
+    }
+
+    testWidgets('an owner can switch shops and manage members', (tester) async {
+      await useShop(MemberRole.owner);
+      await pumpPage(tester);
+
+      expect(find.text('ប្តូរហាង'), findsOneWidget);
+      expect(find.text('សមាជិក និងសិទ្ធិ'), findsOneWidget);
+    });
+
+    testWidgets('a viewer can switch shops but not manage members', (
+      tester,
+    ) async {
+      await useShop(MemberRole.viewer);
+      await pumpPage(tester);
+
+      expect(find.text('ប្តូរហាង'), findsOneWidget);
+      expect(find.text('សមាជិក និងសិទ្ធិ'), findsNothing);
+    });
+  });
+
+  testWidgets('without server shops there is no switcher or members row', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+
+    expect(find.text('ប្តូរហាង'), findsNothing);
+    expect(find.text('សមាជិក និងសិទ្ធិ'), findsNothing);
   });
 }

@@ -1586,11 +1586,17 @@ abstract class AppLocalizations {
   /// **'Add time'**
   String get timeAdd;
 
-  /// Title of the voice input sheet
+  /// Small line above the field name in the voice input sheet
   ///
   /// In en, this message translates to:
-  /// **'Speaking into {field}'**
-  String voiceSpeakingInto(Object field);
+  /// **'Speaking into'**
+  String get voiceSpeakingInto;
+
+  /// Shown when voice input stopped listening; tapping starts again
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to listen again'**
+  String get voiceRetry;
 
   /// Shown while voice input listens
   ///
@@ -2335,6 +2341,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a customer'**
   String get creditChooseCustomer;
+
+  /// Button that makes an invite code for the chosen role
+  ///
+  /// In en, this message translates to:
+  /// **'Make a code'**
+  String get inviteGenerate;
+
+  /// Text sent with the share sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Join my shop {shop} on Jabhouy with code {code}. It expires in 24 hours.'**
+  String inviteShareText(Object shop, Object code);
+
+  /// Snack bar after copying an invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get inviteCopied;
+
+  /// Hint under the invite code boxes
+  ///
+  /// In en, this message translates to:
+  /// **'The owner finds it in Settings › Members & roles'**
+  String get joinCodeHint;
+
+  /// Join error: already a member
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in this shop'**
+  String get joinAlreadyMember;
+
+  /// Snack bar after joining a shop
+  ///
+  /// In en, this message translates to:
+  /// **'You joined {shop}'**
+  String joinSuccess(Object shop);
+
+  /// Generic error on the join and members screens
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the server. Try again.'**
+  String get membershipFailed;
+
+  /// Snack bar when the phone learns the user was removed from a shop
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re no longer a member of that shop'**
+  String get shopRemovedNotice;
+
+  /// Label on the signed-in user's own row in the member list
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get memberYou;
+
+  /// Member action: change role
+  ///
+  /// In en, this message translates to:
+  /// **'Change to: {role}'**
+  String memberSetRole(Object role);
+
+  /// Member action: hand the shop over
+  ///
+  /// In en, this message translates to:
+  /// **'Make owner'**
+  String get memberTransfer;
+
+  /// Confirm dialog before a transfer
+  ///
+  /// In en, this message translates to:
+  /// **'Hand the shop to {name}? You become an editor and can no longer manage members or settings.'**
+  String memberTransferConfirm(Object name);
+
+  /// Member action: remove
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from shop'**
+  String get memberRemove;
+
+  /// Confirm dialog before removing a member
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}? This shop\'s data will be deleted from their phone.'**
+  String memberRemoveConfirm(Object name);
 }
 
 class _AppLocalizationsDelegate

@@ -1,12 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:jabhouy/membership/data/me_api.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Which Shop this phone is working in right now, and the user's role
-/// there. Every query and save is scoped to [id].
-class CurrentShop implements ShopScope {
+/// there. Every query and save is scoped to [id]. Notifies when either
+/// changes, so Home rebuilds its lists for the new Shop or role.
+class CurrentShop extends ChangeNotifier implements ShopScope {
   CurrentShop(this._api);
 
   static const _key = 'current_shop';
@@ -47,9 +49,13 @@ class CurrentShop implements ShopScope {
     switch (await _api.shops(userId)) {
       case Ok(:final value) when value.isNotEmpty:
         _shops = value;
+        // The remembered Shop if still in it; after a removal, the user's own.
         _shop = value.firstWhere(
           (s) => s.id == cached?.$1,
-          orElse: () => value.first,
+          orElse: () => value.firstWhere(
+            (s) => s.role == MemberRole.owner,
+            orElse: () => value.first,
+          ),
         );
         await _write(prefs);
       case _:
@@ -58,6 +64,23 @@ class CurrentShop implements ShopScope {
           _shop = _shops.firstWhere((s) => s.id == cached.$1);
         }
     }
+  }
+
+  /// Asks the server again: after joining, a removal or a role change.
+  Future<void> refresh() async {
+    final userId = _userId;
+    if (userId == null) return;
+    final before = (_shop?.id, _shop?.role, _shops.length);
+    await load(userId);
+    if ((_shop?.id, _shop?.role, _shops.length) != before) notifyListeners();
+  }
+
+  /// Works in [shopId] from now on; it must be one of [shops].
+  Future<void> switchTo(String shopId) async {
+    if (shopId == _shop?.id) return;
+    _shop = _shops.firstWhere((s) => s.id == shopId);
+    await _write(await SharedPreferences.getInstance());
+    notifyListeners();
   }
 
   Future<void> clear() async {

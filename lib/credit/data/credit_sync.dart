@@ -38,7 +38,8 @@ Map<String, Object?> _creditBody(Credit c) => {
         'qty': l.qty,
         'currency': l.currency.name.toUpperCase(),
         'unitPrice': l.unitPrice,
-        'total': l.total.amount,
+        // The contract wants it in the Credit's currency, converted per line.
+        'total': l.total.convertTo(c.currency, khrPerUsd: c.khrPerUsd).amount,
       },
   ],
 };
@@ -64,7 +65,8 @@ class CreditCustomerSyncAdapter implements FeatureSyncAdapter {
 
   @override
   Future<SyncPushOutcome> push(OutboxEntry entry) async {
-    final shopId = _shopId();
+    // The row's own Shop: the user may have switched Shops since the job was queued.
+    final shopId = await _dao.shopOfCustomer(entry.localId) ?? _shopId();
     final customer = entry.operation == SyncOperation.delete
         ? null
         : await _dao.customerById(entry.localId);
@@ -90,7 +92,8 @@ class CreditSyncAdapter implements FeatureSyncAdapter {
 
   @override
   Future<SyncPushOutcome> push(OutboxEntry entry) async {
-    final shopId = _shopId();
+    // The row's own Shop: the user may have switched Shops since the job was queued.
+    final shopId = await _dao.shopOfCredit(entry.localId) ?? _shopId();
     final credit = entry.operation == SyncOperation.delete
         ? null
         : await _dao.creditById(entry.localId);

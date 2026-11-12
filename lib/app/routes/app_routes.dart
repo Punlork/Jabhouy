@@ -36,7 +36,8 @@ class AppRouter {
   static const _creditSortKey = 'credit_list_sort';
   static const _creditSortReversedKey = 'credit_list_sort_reversed';
 
-  static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
+  static bool get _isIncomeEnabled =>
+      getIt<FeatureFlags>().isEnabled(Feature.income);
 
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.home.toPath,
@@ -54,74 +55,95 @@ class AppRouter {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(
-                  create: (context) => ShopBloc(
-                    getIt<ShopRepository>(),
-                    getIt<UploadBloc>(),
-                    getIt<ConnectivityService>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
+            // A new Shop or role rebuilds every list for it: the blocs read
+            // CurrentShop once, when they start.
+            child: ListenableBuilder(
+              listenable: getIt<CurrentShop>(),
+              builder: (context, _) => MultiBlocProvider(
+                key: ValueKey(
+                  '${getIt<CurrentShop>().shopId}:${getIt<CurrentShop>().role}',
                 ),
-                BlocProvider(
-                  create: (context) => SignoutBloc(getIt<AuthService>()),
-                ),
-                BlocProvider(
-                  create: (context) => ItemListCubit(
-                    getIt<ItemRepository>(),
-                    getIt<CurrentShop>(),
-                    grid: getIt<SharedPreferences>().getBool(_itemGridKey) ??
-                        false,
-                    onGridChanged: (grid) => unawaited(
-                      getIt<SharedPreferences>().setBool(_itemGridKey, grid),
-                    ),
-                    sort: ItemSort.values.asNameMap()[getIt<SharedPreferences>()
-                            .getString(_itemSortKey)] ??
-                        ItemSort.name,
-                    sortReversed: getIt<SharedPreferences>()
-                            .getBool(_itemSortReversedKey) ??
-                        false,
-                    onSortChanged: (sort, {required reversed}) {
-                      final prefs = getIt<SharedPreferences>();
-                      unawaited(prefs.setString(_itemSortKey, sort.name));
-                      unawaited(prefs.setBool(_itemSortReversedKey, reversed));
-                    },
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) => CreditListCubit(
-                    getIt<CreditRepository>(),
-                    sort: CreditSort.values.asNameMap()[getIt<SharedPreferences>()
-                            .getString(_creditSortKey)] ??
-                        CreditSort.recent,
-                    sortReversed: getIt<SharedPreferences>()
-                            .getBool(_creditSortReversedKey) ??
-                        false,
-                    onSortChanged: (sort, {required reversed}) {
-                      final prefs = getIt<SharedPreferences>();
-                      unawaited(prefs.setString(_creditSortKey, sort.name));
-                      unawaited(prefs.setBool(_creditSortReversedKey, reversed));
-                    },
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) => CategoryBloc(
-                    getIt<CategoryRepository>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
-                ),
-                // No bloc, no capture: IncomeBloc is the only caller of
-                // IncomeService.initialize, which starts the listener.
-                if (_isIncomeEnabled)
+                providers: [
                   BlocProvider(
-                    create: (context) => IncomeBloc(
-                      getIt<IncomeService>(),
-                      getIt<FcmService>(),
+                    create: (context) => ShopBloc(
+                      getIt<ShopRepository>(),
+                      getIt<UploadBloc>(),
+                      getIt<ConnectivityService>(),
+                      flags: getIt<FeatureFlags>(),
                     ),
                   ),
-              ],
-              child: const HomePage(),
+                  BlocProvider(
+                    create: (context) => SignoutBloc(getIt<AuthService>()),
+                  ),
+                  BlocProvider(
+                    create: (context) => ItemListCubit(
+                      getIt<ItemRepository>(),
+                      getIt<CurrentShop>(),
+                      grid:
+                          getIt<SharedPreferences>().getBool(_itemGridKey) ??
+                          false,
+                      onGridChanged: (grid) => unawaited(
+                        getIt<SharedPreferences>().setBool(_itemGridKey, grid),
+                      ),
+                      sort:
+                          ItemSort.values.asNameMap()[getIt<SharedPreferences>()
+                              .getString(_itemSortKey)] ??
+                          ItemSort.name,
+                      sortReversed:
+                          getIt<SharedPreferences>().getBool(
+                            _itemSortReversedKey,
+                          ) ??
+                          false,
+                      onSortChanged: (sort, {required reversed}) {
+                        final prefs = getIt<SharedPreferences>();
+                        unawaited(prefs.setString(_itemSortKey, sort.name));
+                        unawaited(
+                          prefs.setBool(_itemSortReversedKey, reversed),
+                        );
+                      },
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (context) => CreditListCubit(
+                      getIt<CreditRepository>(),
+                      sort:
+                          CreditSort.values
+                              .asNameMap()[getIt<SharedPreferences>().getString(
+                            _creditSortKey,
+                          )] ??
+                          CreditSort.recent,
+                      sortReversed:
+                          getIt<SharedPreferences>().getBool(
+                            _creditSortReversedKey,
+                          ) ??
+                          false,
+                      onSortChanged: (sort, {required reversed}) {
+                        final prefs = getIt<SharedPreferences>();
+                        unawaited(prefs.setString(_creditSortKey, sort.name));
+                        unawaited(
+                          prefs.setBool(_creditSortReversedKey, reversed),
+                        );
+                      },
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (context) => CategoryBloc(
+                      getIt<CategoryRepository>(),
+                      flags: getIt<FeatureFlags>(),
+                    ),
+                  ),
+                  // No bloc, no capture: IncomeBloc is the only caller of
+                  // IncomeService.initialize, which starts the listener.
+                  if (_isIncomeEnabled)
+                    BlocProvider(
+                      create: (context) => IncomeBloc(
+                        getIt<IncomeService>(),
+                        getIt<FcmService>(),
+                      ),
+                    ),
+                ],
+                child: const HomePage(),
+              ),
             ),
             transitionsBuilder: _rightToLeftTransition,
           );
@@ -135,7 +157,8 @@ class AppRouter {
               final extra = state.extra! as Map<String, dynamic>;
               final onAdd = extra['onAdd'] as void Function(ShopItemModel)?;
               final existingItem = extra['existingItem'] as ShopItemModel?;
-              final activeCategory = extra['activeCategory'] as CategoryItemModel?;
+              final activeCategory =
+                  extra['activeCategory'] as CategoryItemModel?;
               final shop = extra['shop'] as ShopBloc;
               final category = extra['category'] as CategoryBloc;
               return CustomTransitionPage(
@@ -224,10 +247,7 @@ class AppRouter {
               final shop = extra['shop'] as ShopBloc;
               return CustomTransitionPage(
                 key: state.pageKey,
-                child: CategoryPage(
-                  category: category,
-                  shop: shop,
-                ),
+                child: CategoryPage(category: category, shop: shop),
                 transitionsBuilder: _rightToLeftTransition,
               );
             },
@@ -260,15 +280,20 @@ class AppRouter {
             name: AppRoutes.settings,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
-              final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ?? context.read<SignoutBloc>();
+              final incomeBloc =
+                  extra?['incomeBloc'] as IncomeBloc? ??
+                  _maybeReadIncomeBloc(context);
+              final signoutBloc =
+                  extra?['signoutBloc'] as SignoutBloc? ??
+                  context.read<SignoutBloc>();
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: MultiBlocProvider(
                   providers: [
-                    if (incomeBloc != null) BlocProvider.value(value: incomeBloc),
+                    if (incomeBloc != null)
+                      BlocProvider.value(value: incomeBloc),
                     BlocProvider.value(value: signoutBloc),
                     // Shared with the Prices & currency screen, so its
                     // changes show in the Settings row on return.
@@ -330,7 +355,9 @@ class AppRouter {
             name: AppRoutes.appDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
+              final incomeBloc =
+                  extra?['incomeBloc'] as IncomeBloc? ??
+                  _maybeReadIncomeBloc(context);
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(
@@ -350,7 +377,9 @@ class AppRouter {
             name: AppRoutes.incomeDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? BlocProvider.of<IncomeBloc>(context);
+              final incomeBloc =
+                  extra?['incomeBloc'] as IncomeBloc? ??
+                  BlocProvider.of<IncomeBloc>(context);
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(

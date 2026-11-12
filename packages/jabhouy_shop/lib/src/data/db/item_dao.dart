@@ -420,6 +420,22 @@ class ItemDao {
   }
 
   /// The live Item with [id] and its options, or null once deleted.
+  /// The Shop an item belongs to, deleted or not; null once its row is gone.
+  Future<String?> shopOfItem(String id) =>
+      (_db.selectOnly(_db.itemTable)
+            ..addColumns([_db.itemTable.shopId])
+            ..where(_db.itemTable.id.equals(id)))
+          .map((r) => r.read(_db.itemTable.shopId))
+          .getSingleOrNull();
+
+  /// The Shop a category belongs to, deleted or not; null once its row is gone.
+  Future<String?> shopOfCategory(String id) =>
+      (_db.selectOnly(_db.categoryTable)
+            ..addColumns([_db.categoryTable.shopId])
+            ..where(_db.categoryTable.id.equals(id)))
+          .map((r) => r.read(_db.categoryTable.shopId))
+          .getSingleOrNull();
+
   Future<Item?> liveItem(String id) async {
     final query =
         _db.select(_db.itemTable).join([

@@ -42,6 +42,22 @@ class CreditDao {
   }
 
   /// The live Credit with its lines, or null once deleted.
+  /// The Shop a credit belongs to, deleted or not; null once its row is gone.
+  Future<String?> shopOfCredit(String id) =>
+      (_db.selectOnly(_db.creditTable)
+            ..addColumns([_db.creditTable.shopId])
+            ..where(_db.creditTable.id.equals(id)))
+          .map((r) => r.read(_db.creditTable.shopId))
+          .getSingleOrNull();
+
+  /// The Shop a customer belongs to, deleted or not; null once its row is gone.
+  Future<String?> shopOfCustomer(String id) =>
+      (_db.selectOnly(_db.customerTable)
+            ..addColumns([_db.customerTable.shopId])
+            ..where(_db.customerTable.id.equals(id)))
+          .map((r) => r.read(_db.customerTable.shopId))
+          .getSingleOrNull();
+
   Future<Credit?> creditById(String id) async {
     final row =
         await (_db.select(_db.creditTable)

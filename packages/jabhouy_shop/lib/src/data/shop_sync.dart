@@ -74,7 +74,8 @@ class ItemSyncAdapter implements FeatureSyncAdapter {
 
   @override
   Future<SyncPushOutcome> push(OutboxEntry entry) async {
-    final shopId = _shopId();
+    // The row's own Shop: the user may have switched Shops since the job was queued.
+    final shopId = await _dao.shopOfItem(entry.localId) ?? _shopId();
     final item = entry.operation == SyncOperation.delete
         ? null
         : await _dao.liveItem(entry.localId);
@@ -101,7 +102,8 @@ class ItemCategorySyncAdapter implements FeatureSyncAdapter {
 
   @override
   Future<SyncPushOutcome> push(OutboxEntry entry) async {
-    final shopId = _shopId();
+    // The row's own Shop: the user may have switched Shops since the job was queued.
+    final shopId = await _dao.shopOfCategory(entry.localId) ?? _shopId();
     final category = entry.operation == SyncOperation.delete
         ? null
         : await _dao.liveCategory(entry.localId);

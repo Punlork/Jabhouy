@@ -24,6 +24,8 @@ class _SettingsPageState extends State<SettingsPage> {
   late final Future<String> _appVersionFuture;
   final _isIncomeEnabled = getIt<FeatureFlags>().isEnabled(Feature.income);
   final _isDiagnosticsEnabled = getIt<FeatureFlags>().isEnabled(Feature.diagnostics);
+  // Switching, joining and members need the API's Shops.
+  final _hasServerShops = getIt<FeatureFlags>().isEnabled(Feature.serverShops);
 
   @override
   void initState() {
@@ -198,6 +200,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   ? null
                   : l10n.settingsOwnerOnly,
               rows: [
+                if (_hasServerShops)
+                  _Row(
+                    icon: Icons.storefront_outlined,
+                    title: l10n.shopSwitch,
+                    subtitle: shopName,
+                    onTap: () => showShopSwitcher(context),
+                  ),
+                if (_hasServerShops && shop.role == MemberRole.owner)
+                  _Row(
+                    icon: Icons.group_outlined,
+                    title: l10n.settingsMembers,
+                    onTap: () => openMembers(context),
+                  ),
                 BlocBuilder<PriceSettingsCubit, PriceSettings?>(
                   builder: (context, prices) => _Row(
                     icon: Icons.sell_outlined,

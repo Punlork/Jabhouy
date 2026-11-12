@@ -1001,12 +1001,13 @@
   "@timeAdd": {
     "description": "Empty time button of the date and time field"
   },
-  "voiceSpeakingInto": "កំពុងបញ្ចូលទៅ {field}",
+  "voiceSpeakingInto": "កំពុងបញ្ចូលទៅ",
   "@voiceSpeakingInto": {
-    "description": "Title of the voice input sheet",
-    "placeholders": {
-      "field": {}
-    }
+    "description": "Small line above the field name in the voice input sheet"
+  },
+  "voiceRetry": "ចុចដើម្បីស្តាប់ម្តងទៀត",
+  "@voiceRetry": {
+    "description": "Shown when voice input stopped listening; tapping starts again"
   },
   "voiceListening": "កំពុងស្តាប់…",
   "@voiceListening": {
@@ -1549,5 +1550,77 @@
   "creditChooseCustomer": "សូមជ្រើសរើសអតិថិជន",
   "@creditChooseCustomer": {
     "description": "Error when a Credit is saved without a customer"
+  },
+  "inviteGenerate": "បង្កើតលេខកូដ",
+  "@inviteGenerate": {
+    "description": "Button that makes an invite code for the chosen role"
+  },
+  "inviteShareText": "ចូលរួមហាង {shop} ក្នុង Jabhouy ដោយប្រើលេខកូដ {code}។ ផុតកំណត់ក្នុង ២៤ ម៉ោង។",
+  "@inviteShareText": {
+    "description": "Text sent with the share sheet",
+    "placeholders": {
+      "shop": {},
+      "code": {}
+    }
+  },
+  "inviteCopied": "បានចម្លងលេខកូដ",
+  "@inviteCopied": {
+    "description": "Snack bar after copying an invite code"
+  },
+  "joinCodeHint": "ម្ចាស់ហាងរកឃើញវានៅ ការកំណត់ › សមាជិក និងសិទ្ធិ",
+  "@joinCodeHint": {
+    "description": "Hint under the invite code boxes"
+  },
+  "joinAlreadyMember": "អ្នកនៅក្នុងហាងនេះរួចហើយ",
+  "@joinAlreadyMember": {
+    "description": "Join error: already a member"
+  },
+  "joinSuccess": "អ្នកបានចូលរួមហាង {shop}",
+  "@joinSuccess": {
+    "description": "Snack bar after joining a shop",
+    "placeholders": {
+      "shop": {}
+    }
+  },
+  "membershipFailed": "មិនអាចភ្ជាប់ទៅម៉ាស៊ីនមេបានទេ។ សូមព្យាយាមម្តងទៀត។",
+  "@membershipFailed": {
+    "description": "Generic error on the join and members screens"
+  },
+  "shopRemovedNotice": "អ្នកលែងជាសមាជិកហាងនោះហើយ",
+  "@shopRemovedNotice": {
+    "description": "Snack bar when the phone learns the user was removed from a shop"
+  },
+  "memberYou": "អ្នក",
+  "@memberYou": {
+    "description": "Label on the signed-in user's own row in the member list"
+  },
+  "memberSetRole": "ប្តូរទៅ៖ {role}",
+  "@memberSetRole": {
+    "description": "Member action: change role",
+    "placeholders": {
+      "role": {}
+    }
+  },
+  "memberTransfer": "ផ្ទេរជាម្ចាស់ហាង",
+  "@memberTransfer": {
+    "description": "Member action: hand the shop over"
+  },
+  "memberTransferConfirm": "ផ្ទេរហាងទៅ {name}? អ្នកនឹងក្លាយជាអ្នកកែតម្លៃ ហើយលែងគ្រប់គ្រងសមាជិក ឬការកំណត់បានទៀត។",
+  "@memberTransferConfirm": {
+    "description": "Confirm dialog before a transfer",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "memberRemove": "ដកចេញពីហាង",
+  "@memberRemove": {
+    "description": "Member action: remove"
+  },
+  "memberRemoveConfirm": "ដក {name} ចេញ? ទិន្នន័យហាងនេះនឹងត្រូវលុបចេញពីទូរស័ព្ទរបស់គាត់។",
+  "@memberRemoveConfirm": {
+    "description": "Confirm dialog before removing a member",
+    "placeholders": {
+      "name": {}
+    }
   }
 }

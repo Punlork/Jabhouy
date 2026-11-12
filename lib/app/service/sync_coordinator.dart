@@ -34,6 +34,9 @@ class SyncCoordinator {
     unawaited(_sync());
   }
 
+  /// Push and pull now, e.g. right after switching Shops.
+  Future<void> syncNow() => _sync();
+
   /// On sign-out, so a signed-out app stops talking to the server.
   void stop() {
     unawaited(_connection?.cancel());
