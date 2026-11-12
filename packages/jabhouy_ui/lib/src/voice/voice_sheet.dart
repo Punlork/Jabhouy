@@ -37,7 +37,6 @@ class _VoiceSheetState extends State<VoiceSheet> {
 
   /// `km-KH` first (plan §5.6); the toggle restarts listening.
   String _locale = 'km-KH';
-  bool _khmer = true;
   String _text = '';
   final _levels = List<double>.filled(_bars, 0, growable: true);
   bool _unavailable = false;
@@ -46,18 +45,7 @@ class _VoiceSheetState extends State<VoiceSheet> {
   @override
   void initState() {
     super.initState();
-    _begin();
-  }
-
-  Future<void> _begin() async {
-    // Hide ខ្មែរ on a phone that cannot recognise it (plan §5.6).
-    if (!await widget.service.supports('km-KH') && mounted) {
-      setState(() {
-        _khmer = false;
-        _locale = 'en-US';
-      });
-    }
-    await _listen();
+    _listen();
   }
 
   Future<void> _listen() async {
@@ -125,15 +113,17 @@ class _VoiceSheetState extends State<VoiceSheet> {
               ],
             ),
           ),
-          if (_khmer)
-            SizedBox(
-              width: 120,
-              child: SegmentedControl<String>(
-                options: const [('km-KH', 'ខ្មែរ'), ('en-US', 'EN')],
-                selected: _locale,
-                onChanged: _switch,
-              ),
+          // Always offered: speech_to_text lists only on-device languages
+          // on Android 13+, which leaves out Khmer that online recognition
+          // (as in Gboard) handles.
+          SizedBox(
+            width: 120,
+            child: SegmentedControl<String>(
+              options: const [('km-KH', 'ខ្មែរ'), ('en-US', 'EN')],
+              selected: _locale,
+              onChanged: _switch,
             ),
+          ),
         ],
       ),
       footer: Row(

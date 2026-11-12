@@ -4,16 +4,12 @@ import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class _FakeSpeech implements SpeechService {
-  _FakeSpeech({this.ok = true, this.khmer = true});
+  _FakeSpeech({this.ok = true});
 
   final bool ok;
-  final bool khmer;
   final locales = <String>[];
   void Function(String)? say;
   void Function()? stopped;
-
-  @override
-  Future<bool> supports(String localeId) async => khmer;
 
   @override
   Future<bool> start({
@@ -114,13 +110,15 @@ void main() {
     expect(find.text('កំពុងស្តាប់…'), findsOneWidget);
   });
 
-  testWidgets('no Khmer on the phone: starts in English, no toggle', (
+  testWidgets('both languages always offered; EN listens in English', (
     tester,
   ) async {
-    final speech = _FakeSpeech(khmer: false);
+    final speech = _FakeSpeech();
     await open(tester, speech);
-    expect(speech.locales, ['en-US']);
-    expect(find.text('ខ្មែរ'), findsNothing);
+    expect(find.text('ខ្មែរ'), findsOneWidget);
+    await tester.tap(find.text('EN'));
+    await tester.pumpAndSettle();
+    expect(speech.locales, ['km-KH', 'en-US']);
   });
 
   testWidgets(

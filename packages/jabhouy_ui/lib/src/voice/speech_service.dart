@@ -15,9 +15,6 @@ abstract interface class SpeechService {
     required void Function() onStopped,
   });
 
-  /// Whether the engine can recognise [localeId] (e.g. `km-KH`).
-  Future<bool> supports(String localeId);
-
   Future<void> stop();
 }
 
@@ -37,14 +34,6 @@ final class DeviceSpeechService implements SpeechService {
     },
     onError: (_) => _onStopped?.call(),
   );
-
-  @override
-  Future<bool> supports(String localeId) async {
-    if (!await _init()) return false;
-    final locales = await _speech.locales();
-    final lang = localeId.split('-').first;
-    return locales.any((l) => l.localeId.split(RegExp('[-_]')).first == lang);
-  }
 
   @override
   Future<bool> start({
