@@ -5,6 +5,9 @@ enum CreditStatus { unpaid, paid }
 /// The list's chips: `មិនទាន់សង` (default), `សងរួច`, `ទាំងអស់`.
 enum CreditFilter { unpaid, paid, all }
 
+/// The list's order: `ក–អ` by customer, or newest first (default).
+enum CreditSort { name, recent }
+
 /// Someone who takes goods on credit. Created in the customer picker.
 class CreditCustomer {
   const CreditCustomer({

@@ -7,7 +7,8 @@ import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-/// A pill above home's bottom bar saying what sync is doing.
+/// An icon beside Home's settings gear saying what sync is doing; its
+/// tooltip spells it out and a failure carries a count.
 ///
 /// It replaces the per-list banners, which were English literals set by
 /// each bloc from a connectivity guess. This reads the engine. It takes no
@@ -111,9 +112,8 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       duration: const Duration(milliseconds: 200),
       child: pill == _Pill.hidden
           ? const SizedBox.shrink(key: ValueKey('hidden'))
-          : Padding(
+          : KeyedSubtree(
               key: ValueKey(pill),
-              padding: const EdgeInsets.only(bottom: 8),
               child: _PillView(
                 pill: pill,
                 activity: _activity,
@@ -164,29 +164,16 @@ class _PillView extends StatelessWidget {
       _Pill.synced => (Icons.cloud_done_rounded, l10n.synced),
       _Pill.hidden => (Icons.circle, ''),
     };
-    final foreground =
-        failed ? colorScheme.onErrorContainer : colorScheme.onSurface;
-
-    return Material(
-      color: failed
-          ? colorScheme.errorContainer
-          : colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 16, color: foreground),
-              const SizedBox(width: 8),
-              Text(label, style: AppTextTheme.caption.copyWith(color: foreground)),
-            ],
-          ),
-        ),
+    return IconButton(
+      onPressed: onTap,
+      tooltip: label,
+      icon: Badge(
+        isLabelVisible: failed,
+        label: Text('${activity.failing}'),
+        child: Icon(icon, size: 24),
       ),
+      color: failed ? colorScheme.error : colorScheme.onSurfaceVariant,
+      constraints: const BoxConstraints.tightFor(width: 48, height: 54),
     );
   }
 }

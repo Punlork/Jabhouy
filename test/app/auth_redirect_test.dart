@@ -42,25 +42,10 @@ void main() {
     expect(authRedirect(signedIn, path, const FixedFeatureFlags({Feature.diagnostics, Feature.income})), isNull);
   });
 
-  group('Username gate', () {
+  test('a User without a Username is not held back', () {
     const noUsername = Authenticated(User(id: 'g1', email: 'a@gmail.com'));
-    final picker = AppRoutes.chooseUsername.toPath;
 
-    test('authenticated without a Username goes to the picker', () {
-      expect(authRedirect(noUsername, home, flags), picker);
-      expect(authRedirect(noUsername, settings, flags), picker);
-    });
-
-    test('authenticated without a Username stays on the picker', () {
-      expect(authRedirect(noUsername, picker, flags), isNull);
-    });
-
-    test('authenticated with a Username leaves the picker for home', () {
-      expect(authRedirect(signedIn, picker, flags), home);
-    });
-
-    test('signed out on the picker goes to sign-in', () {
-      expect(authRedirect(signedOut, picker, flags), signin);
-    });
+    expect(authRedirect(noUsername, home, flags), isNull);
+    expect(authRedirect(noUsername, settings, flags), isNull);
   });
 }

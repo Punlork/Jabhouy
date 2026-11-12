@@ -64,8 +64,8 @@ void main() {
     await emit(tester, const SyncActivity());
     await tester.pump(const Duration(seconds: 2));
 
-    expect(find.text('Syncing…'), findsNothing);
-    expect(find.text('Synced'), findsNothing);
+    expect(find.byTooltip('Syncing…'), findsNothing);
+    expect(find.byTooltip('Synced'), findsNothing);
   });
 
   testWidgets('a slow sync shows "Syncing…", then "Synced", then nothing',
@@ -74,15 +74,15 @@ void main() {
 
     await emit(tester, const SyncActivity(pushing: true, waiting: 3));
     await tester.pump(const Duration(milliseconds: 1100));
-    expect(find.text('Syncing…'), findsOneWidget);
+    expect(find.byTooltip('Syncing…'), findsOneWidget);
 
     await emit(tester, const SyncActivity());
     await tester.pumpAndSettle(const Duration(milliseconds: 300));
-    expect(find.text('Synced'), findsOneWidget);
+    expect(find.byTooltip('Synced'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
-    expect(find.text('Synced'), findsNothing);
+    expect(find.byTooltip('Synced'), findsNothing);
   });
 
   testWidgets('offline with changes queued says how many wait',
@@ -93,7 +93,7 @@ void main() {
     await emit(tester, const SyncActivity(waiting: 3));
     await tester.pumpAndSettle();
 
-    expect(find.text('3 changes waiting'), findsOneWidget);
+    expect(find.byTooltip('3 changes waiting'), findsOneWidget);
   });
 
   testWidgets('online with changes queued but nothing wrong stays hidden',
@@ -103,7 +103,7 @@ void main() {
     await emit(tester, const SyncActivity(waiting: 3));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Text), findsNothing);
+    expect(find.byType(IconButton), findsNothing);
   });
 
   testWidgets("failures stay up, and a tap shows the server's reasons",
@@ -127,9 +127,9 @@ void main() {
 
     await emit(tester, const SyncActivity(waiting: 1, failing: 1));
     await tester.pumpAndSettle();
-    expect(find.text('1 change failed'), findsOneWidget);
+    expect(find.byTooltip('1 change failed'), findsOneWidget);
 
-    await tester.tap(find.text('1 change failed'));
+    await tester.tap(find.byTooltip('1 change failed'));
     await tester.pumpAndSettle();
 
     expect(find.text('Loaner #37'), findsOneWidget);

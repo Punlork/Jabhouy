@@ -17,6 +17,7 @@ class ItemListState extends Equatable {
     this.missingOnly = false,
     this.grid = false,
     this.sort = ItemSort.name,
+    this.sortReversed = false,
     this.canEdit = false,
     this.settings = const PriceSettings(),
   });
@@ -39,6 +40,9 @@ class ItemListState extends Equatable {
   final bool grid;
   final ItemSort sort;
 
+  /// Flipped from the order [sort] starts in: Z–A, or oldest first.
+  final bool sortReversed;
+
   /// Owner or editor: sees the missing-price chip.
   final bool canEdit;
   final PriceSettings settings;
@@ -56,6 +60,7 @@ class ItemListState extends Equatable {
     missingOnly,
     grid,
     sort,
+    sortReversed,
     canEdit,
     settings,
   ];

@@ -123,7 +123,7 @@ void main() {
     // sugar row.
     expect(find.text('មិនទាន់មានតម្លៃ'), findsNWidgets(3));
     expect(find.text('0 ៛'), findsNothing);
-    expect(find.text('ទំនិញ 3 មុខ · ក–អ'), findsOneWidget);
+    expect(find.text('ទំនិញ 3 មុខ'), findsOneWidget);
 
     await tester.tap(find.text('Coca-Cola'));
     await settle(tester);
@@ -174,7 +174,7 @@ void main() {
     chromeVisible = false;
     rebuild();
     await settle(tester);
-    expect(find.text('ទំនិញ 3 មុខ · ក–អ').hitTestable(), findsNothing);
+    expect(find.text('ទំនិញ 3 មុខ').hitTestable(), findsNothing);
     await close(tester);
   });
 

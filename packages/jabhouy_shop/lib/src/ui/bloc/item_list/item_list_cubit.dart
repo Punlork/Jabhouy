@@ -21,11 +21,13 @@ class ItemListCubit extends Cubit<ItemListState> {
     bool grid = false,
     this.onGridChanged,
     ItemSort sort = ItemSort.name,
+    bool sortReversed = false,
     this.onSortChanged,
   }) : super(
          ItemListState(
            grid: grid,
            sort: sort,
+           sortReversed: sortReversed,
            canEdit: _scope.role?.canEditPrices ?? false,
          ),
        );
@@ -37,7 +39,7 @@ class ItemListCubit extends Cubit<ItemListState> {
   final ValueChanged<bool>? onGridChanged;
 
   /// Same for the sort order.
-  final ValueChanged<ItemSort>? onSortChanged;
+  final void Function(ItemSort sort, {required bool reversed})? onSortChanged;
 
   final _subscriptions = <StreamSubscription<Object?>>[];
   StreamSubscription<List<Item>>? _items;
@@ -85,7 +87,13 @@ class ItemListCubit extends Cubit<ItemListState> {
     }
     _subscriptions.clear();
     _filtered = const [];
-    emit(ItemListState(grid: state.grid, sort: state.sort));
+    emit(
+      ItemListState(
+        grid: state.grid,
+        sort: state.sort,
+        sortReversed: state.sortReversed,
+      ),
+    );
   }
 
   void search(String query) {
@@ -119,24 +127,29 @@ class ItemListCubit extends Cubit<ItemListState> {
     onGridChanged?.call(state.grid);
   }
 
+  /// Another order starts in its own direction; the same one flips it.
   void setSort(ItemSort sort) {
-    if (sort == state.sort) return;
-    emit(state.copyWith(sort: sort));
-    onSortChanged?.call(sort);
+    final reversed = sort == state.sort && !state.sortReversed;
+    emit(state.copyWith(sort: sort, sortReversed: reversed));
+    onSortChanged?.call(sort, reversed: reversed);
     _watchItems();
   }
 
   /// The DAO reads by name; `recent` re-orders in memory, no date last.
-  List<Item> _sorted(List<Item> items) => state.sort == ItemSort.name
-      ? items
-      : ([...items]..sort((a, b) {
-          final x = a.updatedAt;
-          final y = b.updatedAt;
-          if (x == null || y == null) {
-            return x == y ? 0 : (x == null ? 1 : -1);
-          }
-          return y.compareTo(x);
-        }));
+  List<Item> _sorted(List<Item> items) {
+    final reversed = state.sortReversed;
+    if (state.sort == ItemSort.name) {
+      return reversed ? items.reversed.toList() : items;
+    }
+    return [...items]..sort((a, b) {
+      final x = a.updatedAt;
+      final y = b.updatedAt;
+      if (x == null || y == null) {
+        return x == y ? 0 : (x == null ? 1 : -1);
+      }
+      return reversed ? x.compareTo(y) : y.compareTo(x);
+    });
+  }
 
   void _watchItems() {
     if (_subscriptions.isEmpty) return;

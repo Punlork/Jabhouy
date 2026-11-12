@@ -50,6 +50,77 @@ class FilterChips extends StatelessWidget {
   }
 }
 
+/// A list's sort orders as icon and label; the chosen one is darker and
+/// bolder, with no fill, and its arrow points down, or up once [reversed].
+/// Tapping it again flips it. Not scrolling: keep it to two short labels.
+class SortButtons<T> extends StatelessWidget {
+  const SortButtons({
+    required this.options,
+    required this.selected,
+    required this.reversed,
+    required this.onChanged,
+    super.key,
+  });
+
+  final List<(T, String)> options;
+  final T selected;
+  final bool reversed;
+  final ValueChanged<T> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final (value, label) in options)
+          Semantics(
+            button: true,
+            selected: value == selected,
+            child: InkWell(
+              onTap: () => onChanged(value),
+              borderRadius: BorderRadius.circular(AppSizes.radiusChip),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: AppSizes.minTapTarget,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        value != selected
+                            ? Icons.swap_vert_rounded
+                            : reversed
+                            ? Icons.arrow_upward_rounded
+                            : Icons.arrow_downward_rounded,
+                        size: 18,
+                        color: value == selected ? t.textPrimary : t.textMuted,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        label,
+                        style: AppTextTheme.hint.copyWith(
+                          color: value == selected
+                              ? t.textPrimary
+                              : t.textMuted,
+                          fontWeight: value == selected
+                              ? FontWeight.w700
+                              : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 /// Wrapping row of suggestions that fill a field when tapped.
 class QuickPickChips extends StatelessWidget {
   const QuickPickChips({
