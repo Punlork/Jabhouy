@@ -9,21 +9,16 @@ void showShopItemDetailSheet({
   required ShopItemModel item,
   required VoidCallback onEdit,
   required VoidCallback onDelete,
-}) =>
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      isScrollControlled: true,
-      builder: (context) => AppBottomSheet(
-        child: ShopItemDetailSheet(
-          item: item,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        ),
-      ),
-    );
+}) => showModalBottomSheet<void>(
+  context: context,
+  shape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  ),
+  isScrollControlled: true,
+  builder: (context) => AppBottomSheet(
+    child: ShopItemDetailSheet(item: item, onEdit: onEdit, onDelete: onDelete),
+  ),
+);
 
 class ShopItemDetailSheet extends StatelessWidget {
   const ShopItemDetailSheet({
@@ -105,7 +100,9 @@ class ShopItemDetailSheet extends StatelessWidget {
           ),
           _buildDetailRow(
             l10n.customerPrice,
-            item.customerPrice != null ? formatRiel(item.customerPrice) : l10n.na,
+            item.customerPrice != null
+                ? formatRiel(item.customerPrice)
+                : l10n.na,
             context,
           ),
           _buildDetailRow(
@@ -124,10 +121,7 @@ class ShopItemDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              item.note!,
-              style: AppTextTheme.body,
-            ),
+            Text(item.note!, style: AppTextTheme.body),
           ],
 
           const SizedBox(height: 24),
@@ -140,10 +134,7 @@ class ShopItemDetailSheet extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit),
-                  label: Text(
-                    l10n.edit,
-                    style: AppTextTheme.body,
-                  ),
+                  label: Text(l10n.edit, style: AppTextTheme.body),
                 ),
               ),
               const SizedBox(width: 20),
@@ -151,10 +142,7 @@ class ShopItemDetailSheet extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _confirmDelete(context),
                   icon: const Icon(Icons.delete),
-                  label: Text(
-                    l10n.delete,
-                    style: AppTextTheme.body,
-                  ),
+                  label: Text(l10n.delete, style: AppTextTheme.body),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: colorScheme.error,
                     side: BorderSide(color: colorScheme.error),
@@ -169,11 +157,7 @@ class ShopItemDetailSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(
-    String label,
-    String value,
-    BuildContext context,
-  ) =>
+  Widget _buildDetailRow(String label, String value, BuildContext context) =>
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
@@ -187,9 +171,7 @@ class ShopItemDetailSheet extends StatelessWidget {
             ),
             Text(
               value,
-              style: AppTextTheme.body.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextTheme.body.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -200,10 +182,7 @@ class ShopItemDetailSheet extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(
-          l10n.confirmDelete,
-          style: AppTextTheme.title,
-        ),
+        title: Text(l10n.confirmDelete, style: AppTextTheme.title),
         content: Text(
           l10n.confirmDeleteMessage(item.name),
           style: AppTextTheme.body,
@@ -211,10 +190,7 @@ class ShopItemDetailSheet extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              l10n.cancel,
-              style: AppTextTheme.caption,
-            ),
+            child: Text(l10n.cancel, style: AppTextTheme.caption),
           ),
           TextButton(
             onPressed: () async {
@@ -225,10 +201,7 @@ class ShopItemDetailSheet extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: Text(
-              l10n.delete,
-              style: AppTextTheme.caption,
-            ),
+            child: Text(l10n.delete, style: AppTextTheme.caption),
           ),
         ],
       ),

@@ -28,8 +28,7 @@ class ShopDao {
         _db.categories.id.equalsExp(_db.shopItems.categoryId) &
             _db.categories.isDeleted.equals(false),
       ),
-    ])
-      ..where(_db.shopItems.isDeleted.equals(false));
+    ])..where(_db.shopItems.isDeleted.equals(false));
 
     if (searchQuery.isNotEmpty) {
       query.where(
@@ -54,15 +53,15 @@ class ShopDao {
     ]);
 
     return query.watch().map(
-          (rows) => rows
-              .map(
-                (row) => _toModel(
-                  row.readTable(_db.shopItems),
-                  row.readTableOrNull(_db.categories),
-                ),
-              )
-              .toList(),
-        );
+      (rows) => rows
+          .map(
+            (row) => _toModel(
+              row.readTable(_db.shopItems),
+              row.readTableOrNull(_db.categories),
+            ),
+          )
+          .toList(),
+    );
   }
 
   Future<bool> hasCachedItems({
@@ -87,8 +86,9 @@ class ShopDao {
   }
 
   Future<ShopItemModel?> findById(int id) async {
-    final row = await (_db.select(_db.shopItems)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.shopItems,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row == null ? null : _toModel(row);
   }
 
@@ -128,19 +128,20 @@ class ShopDao {
 
       final onServer = items.map((i) => i.id).toList();
       final keep = queued.map(int.tryParse).whereType<int>().toList();
-      await (_db.shopItems.delete()
-            ..where(
-              (t) =>
-                  t.id.isBiggerThanValue(0) &
-                  t.id.isNotIn(onServer) &
-                  t.id.isNotIn(keep),
-            ))
+      await (_db.shopItems.delete()..where(
+            (t) =>
+                t.id.isBiggerThanValue(0) &
+                t.id.isNotIn(onServer) &
+                t.id.isNotIn(keep),
+          ))
           .go();
     });
   }
 
   Future<void> insertPending(ShopItemModel item) {
-    return _db.into(_db.shopItems).insert(
+    return _db
+        .into(_db.shopItems)
+        .insert(
           _companion(item, SyncStatus.pending),
           mode: InsertMode.insertOrReplace,
         );
@@ -180,7 +181,9 @@ class ShopDao {
   }) {
     return _db.transaction(() async {
       await purge(localId);
-      await _db.into(_db.shopItems).insert(
+      await _db
+          .into(_db.shopItems)
+          .insert(
             _companion(serverItem, SyncStatus.synced),
             mode: InsertMode.insertOrReplace,
           );
@@ -200,7 +203,8 @@ class ShopDao {
       updatedAt: item.updatedAt,
       syncStatus: item.syncStatus,
       isDeleted: item.isDeleted,
-      category: category?.let(
+      category:
+          category?.let(
             (value) => CategoryItemModel(
               id: value.id,
               name: value.name,

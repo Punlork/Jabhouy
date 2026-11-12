@@ -4,7 +4,28 @@ import 'package:drift/drift.dart';
 ///
 /// Names match the model classes already in the app, so a reader meets no
 /// new vocabulary.
-enum SyncEntityType { shopItem, category, customer, loaner, bankNotification }
+enum SyncEntityType {
+  shopItem,
+  category,
+  customer,
+  loaner,
+  bankNotification,
+
+  /// Redesign Item with its Price options (schema 9 tables).
+  item,
+
+  /// Redesign category with its units; `category` is the old table's.
+  itemCategory,
+
+  /// The Shop's price and currency settings; one row per Shop.
+  shopSettings,
+
+  /// Redesign Customer (schema 9 `customer`); `customer` is the old table's.
+  creditCustomer,
+
+  /// Redesign Credit with its items; `loaner` is the old table's.
+  credit,
+}
 
 /// What an outbox job will do to the server.
 enum SyncOperation { create, update, delete }

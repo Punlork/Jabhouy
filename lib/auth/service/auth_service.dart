@@ -1,8 +1,12 @@
 // ignore_for_file: avoid_dynamic_calls
 
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,18 +24,34 @@ class AuthBootstrapResult {
 class AuthService extends BaseService {
   factory AuthService(
     ApiService apiService,
-    ConnectivityService connectivityService,
-  ) =>
+    ConnectivityService connectivityService, {
+    GoogleSignIn? googleSignIn,
+    FeatureFlags flags = const FixedFeatureFlags({}),
+  }) =>
       AuthService._(
         apiService,
         connectivityService,
+        googleSignIn ?? GoogleSignIn.instance,
+        flags,
       );
 
-  AuthService._(super.apiService, this._connectivityService);
+  AuthService._(
+    super.apiService,
+    this._connectivityService,
+    this._google,
+    this._flags,
+  );
 
   static const _cachedUserKey = 'cached_auth_user';
+  static const _needsInternetToSignIn =
+      'You need internet to sign in the first time.';
 
   final ConnectivityService _connectivityService;
+  final GoogleSignIn _google;
+  final FeatureFlags _flags;
+
+  /// `GoogleSignIn.initialize` must run exactly once.
+  Future<void>? _googleInitialized;
 
   @override
   String get basePath => '/auth';
@@ -86,7 +106,7 @@ class AuthService extends BaseService {
   Future<bool> get hasPersistedSession async {
     final cachedUser = await getCachedUser();
     final cookies = getIt<ApiService>().cookies;
-    final baseUrl = Uri.https(getIt<ApiService>().baseUrl);
+    final baseUrl = getIt<ApiService>().uri('');
     return cachedUser != null && cookies.getCookieHeader(baseUrl) != null;
   }
 
@@ -141,22 +161,25 @@ class AuthService extends BaseService {
     return response;
   }
 
-  Future<ApiResponse<User>> signup({
-    required String name,
-    required String email,
+  Future<ApiResponse<User>> signin({
+    required String username,
     required String password,
     String callbackURL = 'sad',
   }) async {
-    final signupData = {
-      'username': name,
-      'name': name,
-      'email': email,
+    if (!await _connectivityService.isOnline) {
+      return ApiResponse(success: false, message: _needsInternetToSignIn);
+    }
+
+    final signinData = {
+      'username': username,
       'password': password,
     };
 
+    // The sign-in page shows the failure, so no snackbar here as well.
     final response = await post(
-      '/sign-up/email',
-      body: signupData,
+      '/sign-in/username',
+      body: signinData,
+      showSnackBar: false,
       parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
     );
 
@@ -167,34 +190,116 @@ class AuthService extends BaseService {
     return response;
   }
 
-  Future<ApiResponse<User>> signin({
-    required String username,
-    required String password,
-    String callbackURL = 'sad',
-  }) async {
+  /// Null when the user closes the Google dialog.
+  ///
+  /// Other Google failures throw [GoogleSignInException].
+  Future<ApiResponse<User>?> signInWithGoogle() async {
     if (!await _connectivityService.isOnline) {
-      return ApiResponse(
-        success: false,
-        message: 'You need internet to sign in the first time.',
-      );
+      return ApiResponse(success: false, message: _needsInternetToSignIn);
     }
 
-    final signinData = {
-      'username': username,
-      'password': password,
-    };
+    final GoogleSignInAccount account;
+    try {
+      await _initializeGoogle();
+      account = await _google.authenticate();
+    } on GoogleSignInException catch (e) {
+      logger.w('Google sign-in failed: ${e.code.name} ${e.description}');
+      if (_isUserCancel(e)) return null;
+      rethrow;
+    }
 
     final response = await post(
-      '/sign-in/username',
-      body: signinData,
+      '/sign-in/social',
+      body: {
+        'provider': 'google',
+        'idToken': {'token': account.authentication.idToken},
+      },
+      showSnackBar: false,
       parser: (value) => User.fromJson(value['user'] as Map<String, dynamic>),
     );
 
-    if (response.success && response.data != null) {
-      await cacheUser(response.data!);
-    }
+    if (!response.success || response.data == null) return response;
+    final user = await _withUsername(response.data!);
+    await cacheUser(user);
+    return ApiResponse(success: true, data: user, message: response.message);
+  }
 
-    return response;
+  /// A Google account has no Username, so one is taken from its name and
+  /// email instead of asking. Best effort: the User signs in without one.
+  Future<User> _withUsername(User user) async {
+    if (user.username?.isNotEmpty ?? false) return user;
+    try {
+      final names = await usernameSuggestions(user, count: 1);
+      if (names.isEmpty) return user;
+      final response = await post<bool>(
+        '/update-user',
+        bodyParser: User(name: user.name, image: user.image, username: names.first).toJson,
+        showSnackBar: false,
+        parser: (value) => value is Map && value['status'].toString() == 'true',
+      );
+      return response.success && (response.data ?? false) ? user.copyWith(username: names.first) : user;
+    } catch (e) {
+      logger.w('Google username not set: $e');
+      return user;
+    }
+  }
+
+  /// Android reports a refusal such as an unregistered signing key
+  /// ("[16] Account reauth failed.") as `canceled` too; only its message
+  /// tells it from the User closing the dialog.
+  // shortcut: matches Google's message text, revisit if a real cancel shows an error.
+  bool _isUserCancel(GoogleSignInException e) =>
+      e.code == GoogleSignInExceptionCode.canceled &&
+      (e.description == null || e.description!.toLowerCase().contains('cancel'));
+
+  Future<void> _initializeGoogle() => _googleInitialized ??= _google.initialize(
+        serverClientId: dotenv.get('GOOGLE_SERVER_CLIENT_ID'),
+      );
+
+  /// Up to [count] free Usernames built from [user]'s name and email.
+  ///
+  /// Empty when none can be built or checked.
+  Future<List<String>> usernameSuggestions(User user, {int count = 3}) async {
+    final name = _usernameBase(user.name ?? '', '_');
+    final email = _usernameBase((user.email ?? '').split('@').first, '_');
+    final suffix = 100 + Random().nextInt(900);
+    final candidates = {
+      name,
+      email,
+      _usernameBase(user.name ?? '', '.'),
+      '$name$suffix',
+      '$email$suffix',
+    }.where(isValidUsername).toList();
+
+    final available = await Future.wait(candidates.map(_isUsernameAvailable));
+    return [
+      for (var i = 0; i < candidates.length; i++)
+        if (available[i]) candidates[i],
+    ].take(count).toList();
+  }
+
+  /// The username plugin's default rules.
+  static bool isValidUsername(String value) =>
+      value.length >= 3 && value.length <= 30 && RegExp(r'^[a-zA-Z0-9_.]+$').hasMatch(value);
+
+  /// Lowercase, words joined by [separator], other characters dropped.
+  String _usernameBase(String text, String separator) {
+    final base = text
+        .toLowerCase()
+        .trim()
+        .replaceAll(RegExp(r'\s+'), separator)
+        .replaceAll(RegExp('[^a-z0-9_.]'), '');
+    return base.length > 26 ? base.substring(0, 26) : base;
+  }
+
+  Future<bool> _isUsernameAvailable(String username) async {
+    final response = await post(
+      '/is-username-available',
+      body: {'username': username},
+      showSnackBar: false,
+      parser: (value) => value is Map && value['available'] == true,
+    );
+    return response.success && (response.data ?? false);
   }
 
   Future<ApiResponse<dynamic>> signout() async {
@@ -207,6 +312,15 @@ class AuthService extends BaseService {
       );
     }
 
-    return post('/sign-out');
+    final response = await post<dynamic>('/sign-out');
+    // Forget the Google account too, so on a shared phone the next person
+    // gets the account chooser. Too late to fail the sign-out over it.
+    if (response.success && _flags.isEnabled(Feature.googleSignIn)) {
+      try {
+        await _initializeGoogle();
+        await _google.signOut();
+      } catch (_) {}
+    }
+    return response;
   }
 }

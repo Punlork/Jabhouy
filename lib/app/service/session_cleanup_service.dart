@@ -2,6 +2,7 @@ import 'package:jabhouy/auth/service/auth_service.dart';
 import 'package:jabhouy/income/services/firebase_income_sync_service.dart';
 import 'package:jabhouy/income/services/notification_diagnostics_service.dart';
 import 'package:jabhouy/income/services/notification_tracking_bridge.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 
@@ -13,6 +14,7 @@ class SessionCleanupService {
     required this._incomeSyncService,
     required this._notificationTrackingBridge,
     required this._notificationDiagnosticsService,
+    required this._currentShop,
   });
 
   final ApiService _apiService;
@@ -21,6 +23,7 @@ class SessionCleanupService {
   final FirebaseIncomeSyncService _incomeSyncService;
   final NotificationTrackingBridge _notificationTrackingBridge;
   final NotificationDiagnosticsService _notificationDiagnosticsService;
+  final CurrentShop _currentShop;
 
   Future<void> clearSignedInUserData() async {
     await _incomeSyncService.clearPersistedSessionState();
@@ -29,5 +32,6 @@ class SessionCleanupService {
     await _apiService.cookies.clearCookies();
     await _authService.clearCachedSession();
     await _database.clearUserData();
+    await _currentShop.clear();
   }
 }

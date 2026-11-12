@@ -1,9 +1,0 @@
-export 'data/api/customer_api.dart';
-export 'data/customer_repository.dart';
-export 'data/customer_repository_impl.dart';
-export 'data/customer_sync_adapter.dart';
-export 'data/db/customer_dao.dart';
-export 'models/customer_model.dart';
-export 'ui/bloc/customer_bloc.dart';
-export 'ui/pages/customer_page.dart';
-export 'ui/widgets/customer_auto_complete_field.dart';

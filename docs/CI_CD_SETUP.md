@@ -72,9 +72,8 @@ This project uses **Patrol** for native UI tests and **Fastlane** with **GitHub 
 
    - Run lanes from `android/`:
      - `bundle exec fastlane build_dev` – debug dev APK  
-     - `bundle exec fastlane build_staging` – release staging APK  
      - `bundle exec fastlane build_release` – production release APK  
-     - `bundle exec fastlane internal` – build staging + upload to Play **internal**  
+     - `bundle exec fastlane internal` – build production + upload to Play **internal**  
      - `bundle exec fastlane beta` – build release + upload to Play **beta**
    - For **supply** (Play Store): copy store metadata into `android/fastlane/metadata` (e.g. from `fastlane/metadata/android`) and configure **Google Play service account** (JSON key).
 
@@ -82,8 +81,7 @@ This project uses **Patrol** for native UI tests and **Fastlane** with **GitHub 
 
    - Run lanes from `ios/`:
      - `bundle exec fastlane build_dev` – debug, no code signing (CI-friendly)  
-     - `bundle exec fastlane build_staging` / `build_release` – archive + IPA (needs signing)  
-     - `bundle exec fastlane staging` – build staging + upload to **TestFlight**  
+     - `bundle exec fastlane build_release` – archive + IPA (needs signing)  
      - `bundle exec fastlane beta` – build production + upload to **TestFlight**
    - For TestFlight/App Store: configure **App Store Connect API key** and/or **match** (or other signing).
 
@@ -117,7 +115,7 @@ Configure in **GitHub → Settings → Secrets and variables → Actions** if yo
 | Push / PR to `main` | Patrol Android UI tests (emulator) |
 | Push to `main` (after Patrol) | Android: `fastlane build_dev`; iOS: `fastlane build_dev` |
 
-To add **deploy** steps (e.g. Play internal/beta, TestFlight), add jobs or steps that call `fastlane internal` / `fastlane beta` (Android) or `fastlane staging` / `fastlane beta` (iOS) and set the required secrets.
+To add **deploy** steps (e.g. Play internal/beta, TestFlight), add jobs or steps that call `fastlane internal` / `fastlane beta` (Android) or `fastlane beta` (iOS) and set the required secrets.
 
 ---
 

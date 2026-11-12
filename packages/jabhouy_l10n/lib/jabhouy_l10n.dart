@@ -8,3 +8,4 @@ library jabhouy_l10n;
 
 export 'src/arb/app_localizations.dart';
 export 'src/context_extension.dart';
+export 'src/date_text.dart';

@@ -81,7 +81,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get grid => 'ក្រឡា';
 
   @override
-  String get searchItems => 'ស្វែងរកធាតុ...';
+  String get searchItems => 'ស្វែងរកទំនិញ...';
 
   @override
   String get signOut => 'ចាកចេញ';
@@ -220,10 +220,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get darkModeOff => 'បានបើកផ្ទាំងពណ៌ភ្លឺ';
 
   @override
-  String get editItem => 'កែសម្រួលធាតុ';
+  String get editItem => 'កែសម្រួលទំនិញ';
 
   @override
-  String get addNewItem => 'បន្ថែមធាតុថ្មី';
+  String get addNewItem => 'បន្ថែមទំនិញថ្មី';
 
   @override
   String nameRequired(String name) {
@@ -276,7 +276,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get saveChanges => 'រក្សាទុកការផ្លាស់ប្តូរ';
 
   @override
-  String get addItem => 'បន្ថែមធាតុ';
+  String get addItem => 'បន្ថែមទំនិញ';
 
   @override
   String get unsavedChanges => 'ការផ្លាស់ប្តូរមិនទាន់រក្សាទុក';
@@ -371,7 +371,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get filterLoaners => 'ត្រងអ្នកខ្ចី';
 
   @override
-  String get filterItems => 'តម្រងធាតុ';
+  String get filterItems => 'តម្រងទំនិញ';
 
   @override
   String get fromDate => 'ចាប់ពីថ្ងៃ';
@@ -398,7 +398,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get createCategory => 'បង្កើតប្រភេទ';
 
   @override
-  String get noItemFound => 'រកមិនឃើញធាតុ';
+  String get noItemFound => 'រកមិនឃើញទំនិញ';
 
   @override
   String get noLoanerFound => 'រកមិនឃើញអ្នកខ្ចីទេ';
@@ -635,4 +635,619 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get syncFailed => 'មិនទាន់រក្សាទុកលើម៉ាស៊ីនមេ';
+
+  @override
+  String get continueWithGoogle => 'បន្តជាមួយ Google';
+
+  @override
+  String get googleSignInFailed =>
+      'មិនអាចចូលជាមួយ Google បានទេ។ សូមព្យាយាមម្តងទៀត។';
+
+  @override
+  String get credit => 'ជំពាក់';
+
+  @override
+  String get itemAdd => 'បន្ថែមទំនិញ';
+
+  @override
+  String get itemEdit => 'កែទំនិញ';
+
+  @override
+  String get itemName => 'ឈ្មោះទំនិញ';
+
+  @override
+  String get itemPhoto => 'រូបថត';
+
+  @override
+  String get priceSection => 'តម្លៃ';
+
+  @override
+  String get priceUnit => 'លក់ជា';
+
+  @override
+  String get priceCount => 'ចំនួន';
+
+  @override
+  String get priceSelling => 'តម្លៃលក់';
+
+  @override
+  String get priceWholesale => 'តម្លៃលក់ដុំ';
+
+  @override
+  String get priceCost => 'តម្លៃដើម';
+
+  @override
+  String get priceAdd => 'បន្ថែមតម្លៃទំនិញ';
+
+  @override
+  String get priceAddExample => 'ឧ. កេះ ×24, បេ';
+
+  @override
+  String get priceMissing => 'មិនទាន់មានតម្លៃ';
+
+  @override
+  String get priceTapToEdit => 'ចុចលើតម្លៃដើម្បីកែ';
+
+  @override
+  String get priceNoneYet => 'អាចរក្សាទុកសិនបាន ហើយបន្ថែមតម្លៃពេលក្រោយ';
+
+  @override
+  String get priceNew => 'តម្លៃថ្មី';
+
+  @override
+  String get priceDone => 'រួចរាល់';
+
+  @override
+  String get priceEdit => 'កែតម្លៃ';
+
+  @override
+  String get optional => '(មិនចាំបាច់)';
+
+  @override
+  String get categoryChoose => 'ជ្រើសរើសប្រភេទ';
+
+  @override
+  String get categoryNew => 'បង្កើតប្រភេទថ្មី';
+
+  @override
+  String get categorySuggested => 'បានណែនាំតាមឈ្មោះ · ចុចដើម្បីប្តូរ';
+
+  @override
+  String get noteLabel => 'កំណត់ចំណាំ';
+
+  @override
+  String get searchGoods => 'ស្វែងរកទំនិញ';
+
+  @override
+  String get searchCustomers => 'ស្វែងរកអតិថិជន';
+
+  @override
+  String get creditAdd => 'បន្ថែមការជំពាក់';
+
+  @override
+  String get creditEdit => 'កែការជំពាក់';
+
+  @override
+  String get creditCustomer => 'អតិថិជន';
+
+  @override
+  String get creditChoose => 'ជ្រើសរើស';
+
+  @override
+  String get creditItems => 'ទំនិញដែលយក';
+
+  @override
+  String get creditAddItems => 'បន្ថែមទំនិញពីបញ្ជីតម្លៃ';
+
+  @override
+  String get creditAmountHint => 'គណនាពីទំនិញ';
+
+  @override
+  String get creditTakenAt => 'ថ្ងៃ និងម៉ោងជំពាក់';
+
+  @override
+  String get creditDueDate => 'ត្រូវសង';
+
+  @override
+  String get creditUnpaid => 'មិនទាន់សង';
+
+  @override
+  String get creditPaid => 'សងរួច';
+
+  @override
+  String get creditMarkPaid => 'សម្គាល់ថាសងរួច';
+
+  @override
+  String get creditTotalOwed => 'នៅជំពាក់សរុប';
+
+  @override
+  String get creditNoAmount => 'មិនទាន់មានចំនួន';
+
+  @override
+  String creditOwes(Object amount) {
+    return 'ជំពាក់ $amount';
+  }
+
+  @override
+  String get customerAddNew => 'បន្ថែមអតិថិជនថ្មី';
+
+  @override
+  String get customerHasCredits =>
+      'មិនអាចលុបបានទេ ព្រោះអតិថិជននេះនៅមានការជំពាក់';
+
+  @override
+  String get pickerTitle => 'ជ្រើសទំនិញ';
+
+  @override
+  String get pickerAddToCredit => 'បន្ថែមទៅការជំពាក់';
+
+  @override
+  String pickerSelected(Object count) {
+    return 'បានជ្រើស $count មុខ';
+  }
+
+  @override
+  String get timeAdd => 'បន្ថែមម៉ោង';
+
+  @override
+  String get voiceSpeakingInto => 'កំពុងបញ្ចូលទៅ';
+
+  @override
+  String get voiceRetry => 'ចុចដើម្បីស្តាប់ម្តងទៀត';
+
+  @override
+  String get voiceListening => 'កំពុងស្តាប់…';
+
+  @override
+  String get voiceUnavailable => 'មិនអាចប្រើសំឡេងបានទេ';
+
+  @override
+  String get voiceUse => 'ប្រើអត្ថបទនេះ';
+
+  @override
+  String get settingsTitle => 'ការកំណត់ហាង';
+
+  @override
+  String get settingsPricesUsed => 'តម្លៃដែលហាងប្រើ';
+
+  @override
+  String get settingsCurrency => 'រូបិយប័ណ្ណ';
+
+  @override
+  String get settingsDefaultCurrency => 'រូបិយប័ណ្ណលំនាំដើម';
+
+  @override
+  String get settingsRate => 'អត្រាប្តូរប្រាក់';
+
+  @override
+  String settingsRateFormat(Object rate) {
+    return '\$1 = $rate ៛';
+  }
+
+  @override
+  String get settingsRateConfirm => 'ការជំពាក់ចាស់នៅតែប្រើអត្រាដើមរបស់វា។';
+
+  @override
+  String get settingsShowConverted => 'បង្ហាញតម្លៃជារូបិយប័ណ្ណទាំងពីរ';
+
+  @override
+  String get settingsCategoriesUnits => 'ប្រភេទទំនិញ និងពាក្យកាត់';
+
+  @override
+  String categoriesCount(Object count) {
+    return '$count ប្រភេទ';
+  }
+
+  @override
+  String get categoryHidden => 'លាក់';
+
+  @override
+  String get categoryUnits => 'ពាក្យកាត់';
+
+  @override
+  String get scanTitle => 'ស្កេនបាកូដ';
+
+  @override
+  String scanFound(Object code) {
+    return 'រកឃើញ · $code';
+  }
+
+  @override
+  String scanNotFound(Object code) {
+    return 'រកមិនឃើញ · $code';
+  }
+
+  @override
+  String get scanThisBarcode => 'បាកូដនេះ';
+
+  @override
+  String get scanDetails => 'មើលលម្អិត';
+
+  @override
+  String get scanNext => 'ស្កេនបន្ទាប់';
+
+  @override
+  String get scanCameraError => 'មិនអាចបើកកាមេរ៉ាបានទេ';
+
+  @override
+  String get settingsMembers => 'សមាជិក និងសិទ្ធិ';
+
+  @override
+  String lastEditedBy(Object date, Object name) {
+    return 'កែចុងក្រោយ $date ដោយ $name';
+  }
+
+  @override
+  String get currencyKhr => 'រៀល';
+
+  @override
+  String get currencyUsd => 'ដុល្លារ';
+
+  @override
+  String get authWelcome => 'សូមស្វាគមន៍';
+
+  @override
+  String get authWelcomeSub => 'ចូលដើម្បីមើលតម្លៃហាងរបស់អ្នក';
+
+  @override
+  String get authOr => 'ឬ';
+
+  @override
+  String get authUserOrEmail => 'ឈ្មោះអ្នកប្រើ ឬអ៊ីមែល';
+
+  @override
+  String get authSignOut => 'ចេញពីគណនី';
+
+  @override
+  String get syncNoPermission => 'អ្នកលែងមានសិទ្ធិកែ';
+
+  @override
+  String shopHello(Object name) {
+    return 'សួស្តី $name';
+  }
+
+  @override
+  String get shopNoShop => 'អ្នកមិនទាន់នៅក្នុងហាងណាមួយទេ។ ជ្រើសមួយ៖';
+
+  @override
+  String get shopJoin => 'ចូលរួមហាង';
+
+  @override
+  String get shopJoinSub => 'សម្រាប់សមាជិកគ្រួសារ · ស្កេន QR ឬវាយលេខកូដ';
+
+  @override
+  String get shopCreate => 'បង្កើតហាងថ្មី';
+
+  @override
+  String get shopCreateSub => 'សម្រាប់ម្ចាស់ហាង';
+
+  @override
+  String get shopName => 'ឈ្មោះហាង';
+
+  @override
+  String get shopStarterCats => 'ប្រភេទចាប់ផ្តើម';
+
+  @override
+  String get shopCreateBtn => 'បង្កើតហាង';
+
+  @override
+  String get shopJoinBtn => 'ចូលរួម';
+
+  @override
+  String get shopSwitch => 'ប្តូរហាង';
+
+  @override
+  String get joinScan => 'ស្កេន QR ពីទូរស័ព្ទម្ចាស់ហាង';
+
+  @override
+  String get joinCode => 'វាយលេខកូដអញ្ជើញ';
+
+  @override
+  String get joinInvalid => 'លេខកូដមិនត្រឹមត្រូវ';
+
+  @override
+  String get joinExpired => 'លេខកូដផុតកំណត់ហើយ';
+
+  @override
+  String get joinUsed => 'លេខកូដត្រូវបានប្រើរួចហើយ';
+
+  @override
+  String get inviteTitle => 'អញ្ជើញសមាជិក';
+
+  @override
+  String get inviteRole => 'សិទ្ធិរបស់អ្នកចូលរួម';
+
+  @override
+  String get inviteExpires => 'ផុតកំណត់ក្នុង ២៤ ម៉ោង';
+
+  @override
+  String get inviteShare => 'ចែករំលែកលេខកូដ';
+
+  @override
+  String get roleViewer => 'មិនអាចកែតម្លៃ';
+
+  @override
+  String get roleEditor => 'អាចកែតម្លៃ';
+
+  @override
+  String get roleOwner => 'ម្ចាស់ហាង';
+
+  @override
+  String get members => 'សមាជិក';
+
+  @override
+  String get itemNicknames => 'ឈ្មោះផ្សេង';
+
+  @override
+  String get itemNicknamesHint => 'ជួយឱ្យស្វែងរកឃើញ';
+
+  @override
+  String get itemAddNickname => '+ ឈ្មោះផ្សេង';
+
+  @override
+  String get itemAddNicknameExample => 'ឧ. ទឹកធំ, Kulen';
+
+  @override
+  String get itemNameMissing => 'សូមបញ្ចូលឈ្មោះទំនិញ';
+
+  @override
+  String get itemDuplicateName => 'មានទំនិញឈ្មោះនេះរួចហើយ';
+
+  @override
+  String get itemSaveAsNew => 'ឬរក្សាទុកជាទំនិញថ្មី';
+
+  @override
+  String get itemView => 'មើល';
+
+  @override
+  String get priceRielNoDecimals => 'តម្លៃរៀលមិនអាចមានទសភាគ';
+
+  @override
+  String get priceUsdTwoDecimals => 'ដុល្លារមានទសភាគបានតែ ២ ខ្ទង់';
+
+  @override
+  String get priceNotNumber => 'សូមបញ្ចូលតម្លៃជាលេខ';
+
+  @override
+  String get pricePackPositive => 'ចំនួនត្រូវធំជាង ០';
+
+  @override
+  String priceBarcodeUsed(Object name) {
+    return 'បាកូដនេះប្រើរួចហើយសម្រាប់ «$name»';
+  }
+
+  @override
+  String priceUnitsFor(Object category) {
+    return 'ពាក្យកាត់សម្រាប់ «$category»';
+  }
+
+  @override
+  String get priceWholesaleShort => 'ដុំ';
+
+  @override
+  String get priceCostShort => 'ដើម';
+
+  @override
+  String get priceRemove => 'លុបតម្លៃនេះ';
+
+  @override
+  String itemListHeader(Object count) {
+    return 'ទំនិញ $count មុខ';
+  }
+
+  @override
+  String get itemSortTooltip => 'តម្រៀបទំនិញ';
+
+  @override
+  String get itemSortName => 'ក–អ';
+
+  @override
+  String get itemSortRecent => 'ថ្មីបំផុតមុន';
+
+  @override
+  String get itemSortNameReversed => 'អ–ក';
+
+  @override
+  String get itemSortRecentReversed => 'ចាស់បំផុតមុន';
+
+  @override
+  String get itemListShowGrid => 'បង្ហាញជាក្រឡា';
+
+  @override
+  String get itemListShowList => 'បង្ហាញជាបញ្ជី';
+
+  @override
+  String get itemListEmpty => 'មិនទាន់មានទំនិញ';
+
+  @override
+  String get itemSearchHint => 'ស្វែងរកឈ្មោះទំនិញ';
+
+  @override
+  String get currencySwitch => 'ប្តូររូបិយប័ណ្ណ';
+
+  @override
+  String get priceUnitHint => 'ឧ. ដប';
+
+  @override
+  String lastEditedOn(Object date) {
+    return 'កែចុងក្រោយ $date';
+  }
+
+  @override
+  String get itemNameHint => 'ឧ. អង្ករផ្កាម្លិះ';
+
+  @override
+  String get itemNoteHint => 'អ្នកផ្គត់ផ្គង់, កន្លែងដាក់ទំនិញ…';
+
+  @override
+  String get priceSellingHint => 'ឧ. 3,000';
+
+  @override
+  String get priceCountHint => '1';
+
+  @override
+  String get categoryHint => 'ជ្រើសប្រភេទ ងាយស្រួលស្វែងរកពេលក្រោយ';
+
+  @override
+  String get categorySearch => 'ស្វែងរកប្រភេទ';
+
+  @override
+  String get categoryNameHint => 'ឧ. ភេសជ្ជៈ';
+
+  @override
+  String get priceWholesaleLabel => 'លក់ដុំ';
+
+  @override
+  String get settingsPricesCurrency => 'តម្លៃ និងរូបិយប័ណ្ណ';
+
+  @override
+  String get settingsPricesUsedHint => 'តម្លៃដែលធីក នឹងបង្ហាញនៅគ្រប់ទំនិញ';
+
+  @override
+  String get settingsAlwaysOn => 'តែងតែបើក';
+
+  @override
+  String get settingsWholesaleHint => 'សម្រាប់អ្នកទិញដុំ';
+
+  @override
+  String get settingsRateKeepsOld => 'ការជំពាក់ចាស់រក្សាអត្រាដើម';
+
+  @override
+  String get settingsRateInvalid => 'អត្រាត្រូវធំជាង ០';
+
+  @override
+  String get settingsOwnerOnly => 'មានតែម្ចាស់ហាងទេដែលអាចកែការកំណត់ហាងបាន';
+
+  @override
+  String get settingsAppSection => 'កម្មវិធី';
+
+  @override
+  String get settingsAppearance => 'រូបរាង';
+
+  @override
+  String get settingsLanguage => 'ភាសា';
+
+  @override
+  String itemMorePrices(Object count) {
+    return '+$count ទៀត';
+  }
+
+  @override
+  String get itemRecentLabel => 'ទើបមើល';
+
+  @override
+  String itemSearchResults(Object count) {
+    return 'លទ្ធផល $count';
+  }
+
+  @override
+  String get itemOtherName => 'ឈ្មោះផ្សេង៖';
+
+  @override
+  String get itemNotFound => 'រកមិនឃើញទំនិញដែលចង់បាន?';
+
+  @override
+  String itemAddNamed(Object name) {
+    return 'បន្ថែម «$name»';
+  }
+
+  @override
+  String get signInWelcome => 'សូមស្វាគមន៍';
+
+  @override
+  String get signInSubtitle => 'ចូលដើម្បីមើលតម្លៃហាងរបស់អ្នក';
+
+  @override
+  String get signInUsernameOrEmail => 'ឈ្មោះអ្នកប្រើ ឬអ៊ីមែល';
+
+  @override
+  String get signInUsernameOrEmailHint => 'ឧ. dara ឬ dara@gmail.com';
+
+  @override
+  String get signInOr => 'ឬ';
+
+  @override
+  String creditSummaryPeople(Object count) {
+    return 'មិនទាន់សង $count នាក់';
+  }
+
+  @override
+  String creditSummaryUnknown(Object count) {
+    return '$count នាក់មិនទាន់មានចំនួន';
+  }
+
+  @override
+  String get creditListEmpty => 'មិនទាន់មានការជំពាក់';
+
+  @override
+  String get creditAmountDue => 'ចំនួនត្រូវសង';
+
+  @override
+  String get creditEditButton => 'កែ';
+
+  @override
+  String get creditItemsHint =>
+      'ជ្រើសពីបញ្ជីតម្លៃ ដើម្បីគណនាចំនួនទឹកប្រាក់ដោយស្វ័យប្រវត្តិ';
+
+  @override
+  String get creditPickDate => 'ជ្រើសថ្ងៃ';
+
+  @override
+  String get creditNoteHint => 'ទីតាំង ឬព័ត៌មានផ្សេងៗ';
+
+  @override
+  String get creditChooseCustomer => 'សូមជ្រើសរើសអតិថិជន';
+
+  @override
+  String get inviteGenerate => 'បង្កើតលេខកូដ';
+
+  @override
+  String inviteShareText(Object shop, Object code) {
+    return 'ចូលរួមហាង $shop ក្នុង Jabhouy ដោយប្រើលេខកូដ $code។ ផុតកំណត់ក្នុង ២៤ ម៉ោង។';
+  }
+
+  @override
+  String get inviteCopied => 'បានចម្លងលេខកូដ';
+
+  @override
+  String get joinCodeHint => 'ម្ចាស់ហាងរកឃើញវានៅ ការកំណត់ › សមាជិក និងសិទ្ធិ';
+
+  @override
+  String get joinAlreadyMember => 'អ្នកនៅក្នុងហាងនេះរួចហើយ';
+
+  @override
+  String joinSuccess(Object shop) {
+    return 'អ្នកបានចូលរួមហាង $shop';
+  }
+
+  @override
+  String get membershipFailed =>
+      'មិនអាចភ្ជាប់ទៅម៉ាស៊ីនមេបានទេ។ សូមព្យាយាមម្តងទៀត។';
+
+  @override
+  String get shopRemovedNotice => 'អ្នកលែងជាសមាជិកហាងនោះហើយ';
+
+  @override
+  String get memberYou => 'អ្នក';
+
+  @override
+  String memberSetRole(Object role) {
+    return 'ប្តូរទៅ៖ $role';
+  }
+
+  @override
+  String get memberTransfer => 'ផ្ទេរជាម្ចាស់ហាង';
+
+  @override
+  String memberTransferConfirm(Object name) {
+    return 'ផ្ទេរហាងទៅ $name? អ្នកនឹងក្លាយជាអ្នកកែតម្លៃ ហើយលែងគ្រប់គ្រងសមាជិក ឬការកំណត់បានទៀត។';
+  }
+
+  @override
+  String get memberRemove => 'ដកចេញពីហាង';
+
+  @override
+  String memberRemoveConfirm(Object name) {
+    return 'ដក $name ចេញ? ទិន្នន័យហាងនេះនឹងត្រូវលុបចេញពីទូរស័ព្ទរបស់គាត់។';
+  }
 }

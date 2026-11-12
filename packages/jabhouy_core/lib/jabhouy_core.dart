@@ -9,10 +9,14 @@ export 'package:drift/drift.dart' show Value;
 
 export 'src/database/app_database.dart';
 export 'src/features/feature_flags.dart';
+export 'src/ids/uuid_v7.dart';
 export 'src/logging/logger.dart';
 export 'src/models/casts.dart';
 export 'src/models/dates.dart';
+export 'src/models/member_role.dart';
 export 'src/models/pagination.dart';
+export 'src/models/shop_scope.dart';
+export 'src/money/money.dart';
 export 'src/result/app_exception.dart';
 export 'src/result/result.dart';
 export 'src/routes/route_names.dart';

@@ -1,6 +1,6 @@
 name: jabhouy
 description: Shop management
-version: 1.0.27+32
+version: 1.0.28+36
 publish_to: none
 
 # Workspace members. Each package declares what it imports; list a
@@ -54,6 +54,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.0
 
   # Networking
+  google_sign_in: ^7.2.0
   http: ^1.3.0
 
   # Firebase and notifications
@@ -63,7 +64,6 @@ dependencies:
   flutter_local_notifications: ^18.0.0
 
   # UI components
-  flutter_floating_bottom_bar: ^1.3.0
   flutter_keyboard_visibility: ^6.0.0
   flutter_native_splash: ^2.4.4
   flutter_slidable: ^3.1.2
@@ -88,6 +88,8 @@ dependencies:
 
   # Debugging
   flutter_runtime_debugger: ^0.4.0
+  qr_flutter: ^4.1.0
+  share_plus: ^12.0.2
 
 dev_dependencies:
   # Testing
@@ -111,29 +113,20 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   fonts:
-    - family: NotoSansKhmer
+    - family: KantumruyPro
       fonts:
-        - asset: fonts/NotoSansKhmer-Black.ttf
-          weight: 900
-        - asset: fonts/NotoSansKhmer-Bold.ttf
-          weight: 700
-        - asset: fonts/NotoSansKhmer-ExtraBold.ttf
-          weight: 800
-        - asset: fonts/NotoSansKhmer-ExtraLight.ttf
-          weight: 200
-        - asset: fonts/NotoSansKhmer-Light.ttf
-          weight: 300
-        - asset: fonts/NotoSansKhmer-Medium.ttf
-          weight: 500
-        - asset: fonts/NotoSansKhmer-Regular.ttf
+        - asset: fonts/KantumruyPro-Regular.ttf
           weight: 400
-        - asset: fonts/NotoSansKhmer-SemiBold.ttf
+        - asset: fonts/KantumruyPro-Medium.ttf
+          weight: 500
+        - asset: fonts/KantumruyPro-SemiBold.ttf
           weight: 600
-        - asset: fonts/NotoSansKhmer-Thin.ttf
-          weight: 100
+        - asset: fonts/KantumruyPro-Bold.ttf
+          weight: 700
   assets:
     - .env
     - .env.dev
+    - .env.local
     - assets/
     - assets/banks/
     - assets/icons/
@@ -185,8 +178,6 @@ melos:
     # remember --dart-define-from-file.
     run:dev:
       run: flutter run --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json
-    run:stg:
-      run: flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=config/features/staging.json
     run:prod:
       run: flutter run --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json
     build:prod:

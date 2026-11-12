@@ -56,7 +56,9 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(context)
+                            .colorScheme
+                            .onPrimary,
                       ),
                       onPressed: () {
                         context
@@ -96,34 +98,32 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                 setState(() {});
                 widget.onChanged?.call(value);
               },
-              decoration: InputDecoration(
-                label: Container(
-                  margin: const EdgeInsets.only(left: 16),
-                  child: Text(
-                    l10n.category,
-                    style: AppTextTheme.body,
+              decoration:
+                  InputDecoration(
+                    label: Container(
+                      margin: const EdgeInsets.only(left: 16),
+                      child: Text(l10n.category, style: AppTextTheme.body),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                    border: inputTheme.border,
+                    enabledBorder: inputTheme.enabledBorder,
+                    focusedBorder: inputTheme.focusedBorder,
+                    filled: inputTheme.filled,
+                    fillColor: inputTheme.fillColor,
+                  ).copyWith(
+                    label: widget.decoration?.label,
+                    contentPadding: widget.decoration?.contentPadding,
+                    border: widget.decoration?.border,
+                    enabledBorder: widget.decoration?.enabledBorder,
+                    focusedBorder: widget.decoration?.focusedBorder,
+                    filled: widget.decoration?.filled,
+                    fillColor: widget.decoration?.fillColor,
                   ),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                border: inputTheme.border,
-                enabledBorder: inputTheme.enabledBorder,
-                focusedBorder: inputTheme.focusedBorder,
-                filled: inputTheme.filled,
-                fillColor: inputTheme.fillColor,
-              ).copyWith(
-                label: widget.decoration?.label,
-                contentPadding: widget.decoration?.contentPadding,
-                border: widget.decoration?.border,
-                enabledBorder: widget.decoration?.enabledBorder,
-                focusedBorder: widget.decoration?.focusedBorder,
-                filled: widget.decoration?.filled,
-                fillColor: widget.decoration?.fillColor,
-              ),
               buttonStyleData: const ButtonStyleData(
                 padding: EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
-                    // color: Colors.red,
-                    ),
+                  // color: Colors.red,
+                ),
               ),
               dropdownStyleData: DropdownStyleData(
                 maxHeight: 200,

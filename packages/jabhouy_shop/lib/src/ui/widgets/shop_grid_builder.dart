@@ -23,7 +23,8 @@ class ShopGridBuilder extends StatefulWidget {
 class _ShopGridBuilderState extends State<ShopGridBuilder>
     with AutomaticKeepAliveClientMixin, InfiniteScrollMixin<ShopGridBuilder> {
   @override
-  ScrollController? getScrollController(BuildContext context) => TabScrollManager.of(context)?.getController(0);
+  ScrollController? getScrollController(BuildContext context) =>
+      TabScrollManager.of(context)?.getController(0);
 
   @override
   void onScrollToBottom() {
@@ -31,13 +32,13 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
     final state = context.read<ShopBloc>().state.asLoaded;
     if (state != null && state.pagination.hasNext) {
       context.read<ShopBloc>().add(
-            ShopGetItemsEvent(
-              page: state.pagination.page + 1,
-              limit: state.pagination.limit,
-              searchQuery: state.searchQuery,
-              categoryFilter: state.categoryFilter,
-            ),
-          );
+        ShopGetItemsEvent(
+          page: state.pagination.page + 1,
+          limit: state.pagination.limit,
+          searchQuery: state.searchQuery,
+          categoryFilter: state.categoryFilter,
+        ),
+      );
     }
   }
 
@@ -62,12 +63,8 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
       ),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ).copyWith(
-            bottom: 52,
-            top: 52,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16)
+              .copyWith(bottom: 52, top: 52),
           sliver: SliverAlignedGrid.count(
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 8,
@@ -91,9 +88,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
             },
           ),
         ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 20),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 20)),
       ],
     );
   }
@@ -118,9 +113,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
       },
       onDelete: () {
         if (!mounted) return;
-        context.read<ShopBloc>().add(
-              ShopDeleteItemEvent(body: item),
-            );
+        context.read<ShopBloc>().add(ShopDeleteItemEvent(body: item));
       },
     );
   }
@@ -134,10 +127,7 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
   @override
   bool get wantKeepAlive => true;
 
-  int _resolveCrossAxisCount(
-    BuildContext context, {
-    required int itemCount,
-  }) {
+  int _resolveCrossAxisCount(BuildContext context, {required int itemCount}) {
     final preferredCount = MediaQuery.sizeOf(context).width > 600 ? 3 : 2;
 
     if (itemCount <= 0) {

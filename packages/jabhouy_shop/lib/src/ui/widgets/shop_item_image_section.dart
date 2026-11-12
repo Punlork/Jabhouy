@@ -26,10 +26,7 @@ class ShopItemImageSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.image,
-            style: AppTextTheme.body,
-          ),
+          Text(l10n.image, style: AppTextTheme.body),
           const SizedBox(height: 8),
           BlocBuilder<UploadBloc, UploadState>(
             bloc: uploadBloc,
@@ -41,18 +38,16 @@ class ShopItemImageSection extends StatelessWidget {
                       if (state is UploadInProgress) return;
                       uploadBloc.showImageSourceDialog(
                         context,
-                        onTakePhoto: () => uploadBloc
-                            .add(SelectImageEvent(ImageSource.camera)),
+                        onTakePhoto: () => uploadBloc.add(
+                          SelectImageEvent(ImageSource.camera),
+                        ),
                         onChoseFromGallery: () => uploadBloc.add(
                           SelectImageEvent(ImageSource.gallery),
                         ),
                       );
                     },
                     icon: const Icon(Icons.upload),
-                    label: Text(
-                      l10n.uploadImage,
-                      style: AppTextTheme.body,
-                    ),
+                    label: Text(l10n.uploadImage, style: AppTextTheme.body),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: colorScheme.onSurface,
                       backgroundColor: colorScheme.surfaceContainerHighest,
@@ -61,19 +56,19 @@ class ShopItemImageSection extends StatelessWidget {
                   const SizedBox(width: 16),
                   switch (state) {
                     UploadImageSelected() => _SelectedImagePreview(
-                        imageFile: state.selectedImage,
-                        onClear: () {
-                          uploadBloc.add(ClearImageEvent());
-                          onImageCleared();
-                        },
-                      ),
+                      imageFile: state.selectedImage,
+                      onClear: () {
+                        uploadBloc.add(ClearImageEvent());
+                        onImageCleared();
+                      },
+                    ),
                     UploadImageUrlLoaded() => _NetworkImagePreview(
-                        imageUrl: state.imageUrl,
-                        onClear: () {
-                          uploadBloc.add(ClearImageEvent());
-                          onImageCleared();
-                        },
-                      ),
+                      imageUrl: state.imageUrl,
+                      onClear: () {
+                        uploadBloc.add(ClearImageEvent());
+                        onImageCleared();
+                      },
+                    ),
                     _ => const SizedBox.shrink(),
                   },
                 ],
@@ -87,10 +82,7 @@ class ShopItemImageSection extends StatelessWidget {
 }
 
 class _SelectedImagePreview extends StatelessWidget {
-  const _SelectedImagePreview({
-    required this.imageFile,
-    required this.onClear,
-  });
+  const _SelectedImagePreview({required this.imageFile, required this.onClear});
 
   final File imageFile;
   final VoidCallback onClear;
@@ -111,10 +103,7 @@ class _SelectedImagePreview extends StatelessWidget {
 }
 
 class _NetworkImagePreview extends StatelessWidget {
-  const _NetworkImagePreview({
-    required this.imageUrl,
-    required this.onClear,
-  });
+  const _NetworkImagePreview({required this.imageUrl, required this.onClear});
 
   final String imageUrl;
   final VoidCallback onClear;
@@ -135,10 +124,7 @@ class _NetworkImagePreview extends StatelessWidget {
 }
 
 class _PreviewFrame extends StatelessWidget {
-  const _PreviewFrame({
-    required this.child,
-    required this.onClear,
-  });
+  const _PreviewFrame({required this.child, required this.onClear});
 
   final Widget child;
   final VoidCallback onClear;
@@ -149,10 +135,7 @@ class _PreviewFrame extends StatelessWidget {
 
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: child,
-        ),
+        ClipRRect(borderRadius: BorderRadius.circular(8), child: child),
         Positioned(
           top: 5,
           right: 5,
@@ -165,11 +148,7 @@ class _PreviewFrame extends StatelessWidget {
             ),
             child: GestureDetector(
               onTap: onClear,
-              child: const Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 16,
-              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
             ),
           ),
         ),

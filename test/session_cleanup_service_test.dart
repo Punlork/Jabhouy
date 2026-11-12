@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
 import 'package:jabhouy/income/income.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:mocktail/mocktail.dart';
@@ -100,6 +101,7 @@ void main() {
       incomeSyncService: incomeSyncService,
       notificationTrackingBridge: notificationTrackingBridge,
       notificationDiagnosticsService: diagnosticsService,
+      currentShop: CurrentShop(const FakeMeApi()),
     );
   });
 

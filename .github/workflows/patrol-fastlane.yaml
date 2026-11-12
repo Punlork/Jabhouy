@@ -276,7 +276,7 @@ jobs:
   #     - name: Install CocoaPods
   #       run: cd ios && pod install
 
-  #     - name: Build staging (no codesign for CI)
+  #     - name: Build development (no codesign for CI)
   #       working-directory: ios
   #       run: bundle exec fastlane build_dev
   #       env:

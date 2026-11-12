@@ -34,6 +34,28 @@ final class SyncPushRejected extends SyncPushOutcome {
   final String error;
 }
 
+/// Why the server refused a job in a way a new pull settles.
+enum SyncDropReason {
+  /// 403 `forbidden_role`: the Member's role no longer allows the write.
+  forbiddenRole,
+
+  /// 403 `not_member`: the Member was removed from the Shop.
+  notMember,
+
+  /// 409: the server's row and the job disagree; its row wins.
+  conflict,
+}
+
+/// The server refused the job and a retry cannot help (decision 11): the
+/// engine drops it and pulls the Shop again so the phone shows what the
+/// server holds. Never retried.
+final class SyncPushDropped extends SyncPushOutcome {
+  const SyncPushDropped(this.reason, {required this.shopId});
+
+  final SyncDropReason reason;
+  final String shopId;
+}
+
 /// Sends one job to the server.
 ///
 /// This is the only part of syncing that needs a network client, which is

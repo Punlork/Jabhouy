@@ -26,34 +26,32 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     this.upload,
     this._connectivityService, {
     FeatureFlags flags = const FixedFeatureFlags({}),
-  })  : _inBackground = flags.isEnabled(Feature.backgroundSync),
-        super(const ShopInitial()) {
+  }) : _inBackground = flags.isEnabled(Feature.backgroundSync),
+       super(const ShopInitial()) {
     _filtersController = StreamController<_ShopFilters>.broadcast(sync: true)
-      ..add(
-        const _ShopFilters(),
-      );
+      ..add(const _ShopFilters());
 
     _itemsSubscription = _filtersController.stream
         .switchMap(
-      (filters) => _repository.watchItems(
-        searchQuery: filters.searchQuery,
-        categoryFilter: filters.categoryFilter,
-      ),
-    )
+          (filters) => _repository.watchItems(
+            searchQuery: filters.searchQuery,
+            categoryFilter: filters.categoryFilter,
+          ),
+        )
         .listen((items) {
-      _latestItems = items;
+          _latestItems = items;
+          if (!isClosed) {
+            add(_ShopInternalItemsUpdated(items));
+          }
+        });
+
+    _connectivitySubscription = _connectivityService.connectivityStream.listen((
+      isOnline,
+    ) {
       if (!isClosed) {
-        add(_ShopInternalItemsUpdated(items));
+        add(_ShopConnectivityChanged(isOnline: isOnline));
       }
     });
-
-    _connectivitySubscription = _connectivityService.connectivityStream.listen(
-      (isOnline) {
-        if (!isClosed) {
-          add(_ShopConnectivityChanged(isOnline: isOnline));
-        }
-      },
-    );
 
     on<_ShopInternalItemsUpdated>((event, emit) {
       // An empty phone before the first download is not an empty shop.
@@ -63,11 +61,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         ShopLoaded(
           paginatedItems: PaginatedResponse<ShopItemModel>(
             items: event.items,
-            pagination: currentState?.pagination ??
-                Pagination(
-                  total: event.items.length,
-                  totalPage: 1,
-                ),
+            pagination:
+                currentState?.pagination ??
+                Pagination(total: event.items.length, totalPage: 1),
           ),
           searchQuery: currentState?.searchQuery ?? '',
           categoryFilter: currentState?.categoryFilter,
@@ -168,7 +164,11 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         ok: (item) {
           showSuccessSnackBar(
             null,
-            syncFeedback(item.syncStatus, done: 'Created ${item.name}', inBackground: _inBackground),
+            syncFeedback(
+              item.syncStatus,
+              done: 'Created ${item.name}',
+              inBackground: _inBackground,
+            ),
           );
           event.onSuccess?.call();
         },
@@ -192,7 +192,11 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
         ok: (item) {
           showSuccessSnackBar(
             null,
-            syncFeedback(item.syncStatus, done: 'Updated: ${item.name}', inBackground: _inBackground),
+            syncFeedback(
+              item.syncStatus,
+              done: 'Updated: ${item.name}',
+              inBackground: _inBackground,
+            ),
           );
           event.onSuccess?.call();
         },
@@ -322,7 +326,8 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    final showFilterLoading = event.forceRefresh &&
+    final showFilterLoading =
+        event.forceRefresh &&
         !hasCachedItems &&
         effectivePage == 1 &&
         currentState == null;
@@ -420,9 +425,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       return;
     }
 
-    emit(
-      ShopError(result.errorOrNull?.message ?? 'Failed to load items.'),
-    );
+    emit(ShopError(result.errorOrNull?.message ?? 'Failed to load items.'));
   }
 
   /// First load with background sync: an empty phone waits for the
@@ -467,7 +470,9 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
           currentState.copyWith(
             isOffline: true,
             // The sync indicator says how many changes wait, in place of this.
-            syncMessage: _inBackground ? null : _offlineMessage(currentState.items.isNotEmpty),
+            syncMessage: _inBackground
+                ? null
+                : _offlineMessage(currentState.items.isNotEmpty),
           ),
         );
       }
@@ -544,10 +549,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
 }
 
 class _ShopFilters {
-  const _ShopFilters({
-    this.searchQuery = '',
-    this.categoryFilter,
-  });
+  const _ShopFilters({this.searchQuery = '', this.categoryFilter});
 
   final String searchQuery;
   final CategoryItemModel? categoryFilter;

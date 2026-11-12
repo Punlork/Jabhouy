@@ -20,44 +20,43 @@ class CategoryChips extends StatelessWidget {
 
         final categoryChips = switch (categoryState) {
           CategoryLoaded(:final items) => [
-              for (final category in items)
-                InkWell(
-                  borderRadius: BorderRadius.circular(19),
-                  onTap: () {
-                    if (currentShopState?.categoryFilter?.name ==
-                        category.name) {
-                      return;
-                    }
-                    context.read<ShopBloc>().add(
-                          ShopGetItemsEvent(categoryFilter: category),
-                        );
-                  },
-                  child: _buildChip(
-                    context,
-                    label: category.name,
-                    isSelected: currentShopState?.categoryFilter?.name ==
-                        category.name,
-                  ),
+            for (final category in items)
+              InkWell(
+                borderRadius: BorderRadius.circular(19),
+                onTap: () {
+                  if (currentShopState?.categoryFilter?.name == category.name) {
+                    return;
+                  }
+                  context.read<ShopBloc>().add(
+                    ShopGetItemsEvent(categoryFilter: category),
+                  );
+                },
+                child: _buildChip(
+                  context,
+                  label: category.name,
+                  isSelected:
+                      currentShopState?.categoryFilter?.name == category.name,
                 ),
-            ],
+              ),
+          ],
           CategoryLoading() => [
-              for (var i = 0; i < 5; i++)
-                Shimmer.fromColors(
-                  baseColor: colorScheme.surfaceContainerHighest,
-                  highlightColor: colorScheme.surfaceContainerHigh,
-                  child: Chip(
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    label: Container(
-                      width: 30,
-                      height: 20,
-                      color: colorScheme.surfaceContainerHighest,
-                    ),
-                    backgroundColor: colorScheme.surface,
+            for (var i = 0; i < 5; i++)
+              Shimmer.fromColors(
+                baseColor: colorScheme.surfaceContainerHighest,
+                highlightColor: colorScheme.surfaceContainerHigh,
+                child: Chip(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  label: Container(
+                    width: 30,
+                    height: 20,
+                    color: colorScheme.surfaceContainerHighest,
                   ),
+                  backgroundColor: colorScheme.surface,
                 ),
-            ],
+              ),
+          ],
           _ => const <Widget>[],
         };
 
@@ -82,8 +81,8 @@ class CategoryChips extends StatelessWidget {
                   onTap: () {
                     if (isAllSelected) return;
                     context.read<ShopBloc>().add(
-                          ShopGetItemsEvent(clearCategoryFilter: true),
-                        );
+                      ShopGetItemsEvent(clearCategoryFilter: true),
+                    );
                   },
                   child: _buildChip(
                     context,
@@ -120,9 +119,7 @@ class CategoryChips extends StatelessWidget {
     return Theme(
       data: ThemeData(canvasColor: Colors.transparent),
       child: Chip(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(19),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
         // Filled and borderless, like the header's search field and
         // filter button: the same off and on colors as that button.
         side: BorderSide.none,

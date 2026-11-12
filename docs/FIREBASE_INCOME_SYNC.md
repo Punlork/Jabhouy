@@ -42,7 +42,6 @@ Place one file per flavor:
 
 ```txt
 android/app/src/development/google-services.json
-android/app/src/staging/google-services.json
 android/app/src/production/google-services.json
 ```
 
@@ -51,7 +50,6 @@ Each file can point to a different Firebase project.
 Recommended mapping:
 
 - `development` -> dev Firebase project
-- `staging` -> staging Firebase project
 - `production` -> production Firebase project
 
 If no `google-services.json` is present, the Android build skips the Google services plugin and the app falls back to env-based Firebase initialization.
@@ -84,14 +82,13 @@ If both native config and env values are missing, the app intentionally falls ba
 
 ### 1. Create Firebase projects
 
-For multi-flavor setup, create one Firebase project per environment if you want hard separation between dev, staging, and production data.
+For multi-flavor setup, create one Firebase project per environment if you want hard separation between dev and production data.
 
 Add the matching Android and iOS apps for each flavor/project pair.
 
 Example:
 
 - `com.pl.shop.management.dev` -> development Firebase project
-- `com.pl.shop.management.stg` -> staging Firebase project
 - `com.pl.shop.management` -> production Firebase project
 
 ### 2. Enable Cloud Firestore

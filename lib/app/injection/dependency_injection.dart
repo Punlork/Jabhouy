@@ -1,22 +1,25 @@
 import 'package:get_it/get_it.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/app/service/database/database_connection.dart';
+import 'package:jabhouy/app/service/user_scoped_shop_sync_api.dart';
 import 'package:jabhouy/auth/auth.dart';
-import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/credit/credit.dart';
 import 'package:jabhouy/income/income.dart';
-import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
   final apiService = ApiService();
   await apiService.cookies.initCookies();
+  getIt.registerSingleton(await SharedPreferences.getInstance());
   getIt
     // Read through the interface so a runtime source can replace this
     // one line; see FeatureFlags.
@@ -30,10 +33,17 @@ Future<void> setupDependencies() async {
     ..registerSingleton(ConnectivityService())
     ..registerLazySingleton(() => UploadService(getIt<ApiService>()))
     ..registerLazySingleton(() => ProfileService(getIt<ApiService>()))
+    // Flip FEATURE_SERVER_SHOPS in config/features/<flavor>.json to switch.
+    ..registerLazySingleton(
+      () => meApiFor(getIt<FeatureFlags>(), getIt<ApiService>()),
+    )
+    ..registerLazySingleton(() => CurrentShop(getIt<MeApi>()))
+    ..registerLazySingleton(() => MembershipApi(getIt<ApiService>()))
     ..registerLazySingleton(
       () => AuthService(
         getIt<ApiService>(),
         getIt<ConnectivityService>(),
+        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton(NotificationTrackingBridge.new)
@@ -60,28 +70,39 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton(() => ShopApi(getIt<ApiService>()))
     ..registerLazySingleton(() => CategoryDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => CategoryApi(getIt<ApiService>()))
-    ..registerLazySingleton(() => CustomerDao(getIt<AppDatabase>()))
-    ..registerLazySingleton(() => CustomerApi(getIt<ApiService>()))
-    ..registerLazySingleton(() => LoanerDao(getIt<AppDatabase>()))
-    ..registerLazySingleton(() => LoanerApi(getIt<ApiService>()))
     ..registerLazySingleton(() => IncomeDao(getIt<AppDatabase>()))
     ..registerLazySingleton(() => IncomeApi(getIt<ApiService>()))
+    ..registerLazySingleton(() => CreditDao(getIt<AppDatabase>()))
+    // The server for Shop-scoped data. To go live (jabhouy-api #3–#8),
+    // register an HTTP `ShopSyncApi` here instead; nothing else changes.
+    ..registerLazySingleton<ShopSyncApi>(
+      () => getIt<FeatureFlags>().isEnabled(Feature.userScopedApi)
+          ? UserScopedShopSyncApi(
+              getIt<ApiService>(),
+              shopScoped: getIt<FeatureFlags>().isEnabled(Feature.serverShops),
+            )
+          : InMemoryShopSyncApi(),
+    )
     // One engine for the whole app: the outbox is one queue, and ordering
     // a shop item after its category only works if both drain together.
     ..registerLazySingleton(() {
       final shop = ShopSyncAdapter(getIt<ShopDao>(), getIt<ShopApi>());
       final category =
           CategorySyncAdapter(getIt<CategoryDao>(), getIt<CategoryApi>());
-      final customer =
-          CustomerSyncAdapter(getIt<CustomerDao>(), getIt<CustomerApi>());
-      final loaner = LoanerSyncAdapter(getIt<LoanerDao>(), getIt<LoanerApi>());
+      final items = getIt<ItemDao>();
+      final credits = getIt<CreditDao>();
+      final shopSync = getIt<ShopSyncApi>();
+      String shopId() => getIt<CurrentShop>().shopId!;
       return SyncEngine(
         database: getIt<AppDatabase>(),
         transport: AdapterSyncTransport([
           shop,
           category,
-          customer,
-          loaner,
+          ItemSyncAdapter(items, shopSync, shopId),
+          ItemCategorySyncAdapter(items, shopSync, shopId),
+          ShopSettingsSyncAdapter(items, shopSync),
+          CreditCustomerSyncAdapter(credits, shopSync, shopId),
+          CreditSyncAdapter(credits, shopSync, shopId),
           // Registered even when Feature.income is off: a job queued
           // before the flag flipped would otherwise be rejected for good.
           IncomeSyncAdapter(
@@ -91,11 +112,39 @@ Future<void> setupDependencies() async {
           ),
         ]),
         // Income pulls through PullRemoteNotificationsUseCase instead.
-        pullAdapters: [shop, category, customer, loaner],
+        // shop and category read the old `GET /items` and `/categories`
+        // shapes, which the user-scoped API has replaced.
+        pullAdapters: getIt<FeatureFlags>().isEnabled(Feature.userScopedApi)
+            ? const []
+            : [shop, category],
+        // Categories first, so an item's category is already here.
+        changesSource: shopSync,
+        changeAppliers: [
+          ItemCategoryChangeApplier(items),
+          CreditCustomerChangeApplier(credits),
+          ItemChangeApplier(items),
+          CreditChangeApplier(credits),
+          ShopSettingsChangeApplier(items),
+        ],
       );
     })
     ..registerLazySingleton(
-      () => SyncCoordinator(getIt<SyncEngine>(), getIt<ConnectivityService>()),
+      () => SyncCoordinator(
+        getIt<SyncEngine>(),
+        getIt<ConnectivityService>(),
+        syncedShopId: () {
+          final shop = getIt<CurrentShop>();
+          return shop.syncs ? shop.shopId : null;
+        },
+      ),
+    )
+    ..registerLazySingleton(
+      () => CreditRepository(
+        getIt<CreditDao>(),
+        getIt<CurrentShop>(),
+        getIt<SyncEngine>(),
+        getIt<ConnectivityService>(),
+      ),
     )
     ..registerLazySingleton<IncomeRepository>(
       () => DefaultIncomeRepository(
@@ -119,28 +168,13 @@ Future<void> setupDependencies() async {
         flags: getIt<FeatureFlags>(),
       ),
     )
-    ..registerLazySingleton<LoanerRepository>(
-      () => DefaultLoanerRepository(
-        getIt<LoanerDao>(),
-        getIt<LoanerApi>(),
-        getIt<SyncEngine>(),
-        getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
-      ),
-    )
+    ..registerLazySingleton(() => ItemDao(getIt<AppDatabase>()))
     ..registerLazySingleton(
-      () => RefreshLoanersUseCase(
-        getIt<LoanerRepository>(),
-        getIt<CustomerRepository>(),
-      ),
-    )
-    ..registerLazySingleton<CustomerRepository>(
-      () => DefaultCustomerRepository(
-        getIt<CustomerDao>(),
-        getIt<CustomerApi>(),
+      () => ItemRepository(
+        getIt<ItemDao>(),
+        getIt<CurrentShop>(),
         getIt<SyncEngine>(),
         getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
       ),
     )
     ..registerLazySingleton(
@@ -169,6 +203,7 @@ Future<void> setupDependencies() async {
         incomeSyncService: getIt<FirebaseIncomeSyncService>(),
         notificationTrackingBridge: getIt<NotificationTrackingBridge>(),
         notificationDiagnosticsService: getIt<NotificationDiagnosticsService>(),
+        currentShop: getIt<CurrentShop>(),
       ),
     )
     ..registerFactory(
@@ -186,6 +221,7 @@ Future<void> setupDependencies() async {
         getIt<AuthService>(),
         getIt<ConnectivityService>(),
         getIt<SessionCleanupService>(),
+        getIt<CurrentShop>(),
       )..add(AuthCheckRequested()),
     )
     ..registerFactory(
@@ -209,23 +245,7 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerFactory(() => SigninBloc(getIt<AuthService>()))
-    ..registerFactory(() => SignupBloc(getIt<AuthService>()))
     ..registerFactory(() => SignoutBloc(getIt<AuthService>()))
-    ..registerFactory(
-      () => LoanerBloc(
-        getIt<LoanerRepository>(),
-        getIt<RefreshLoanersUseCase>(),
-        getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
-      ),
-    )
-    ..registerFactory(
-      () => CustomerBloc(
-        getIt<CustomerRepository>(),
-        getIt<ConnectivityService>(),
-        flags: getIt<FeatureFlags>(),
-      ),
-    )
     ..registerFactory(
       () => IncomeBloc(
         getIt<IncomeService>(),

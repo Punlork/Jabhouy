@@ -1,0 +1,151 @@
+# Every push to dev (and on demand from Actions › Run workflow): analyze and
+# test, build the development APK, and send it to the testers' Telegram chat.
+#
+# Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DEV_DOTENV (.env.dev), and
+# the dev signing key: ANDROID_DEV_KEYSTORE_BASE64, _ALIAS, _PASSWORD and
+# _PRIVATE_KEY_PASSWORD. The dev APK must carry the dev key: its SHA-1 is the
+# one registered for com.pl.shop.management.dev in Google Cloud (Google
+# sign-in), and it is the key local builds use, so a CI APK and a local one
+# update each other without an uninstall.
+
+name: Dev build to Telegram
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+# A newer push replaces a build still running; only the latest is sent.
+concurrency:
+  group: dev-telegram
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Check, build and send
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # No .fvm/ on the runner: use the SDK flutter-action puts on PATH.
+      MELOS_SDK_PATH: auto
+      ANDROID_DEV_KEYSTORE_PATH: ${{ github.workspace }}/android/dev-keystore.jks
+      ANDROID_DEV_KEYSTORE_ALIAS: ${{ secrets.ANDROID_DEV_KEYSTORE_ALIAS }}
+      ANDROID_DEV_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_DEV_KEYSTORE_PASSWORD }}
+      ANDROID_DEV_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_DEV_KEYSTORE_PRIVATE_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # The same Flutter as local builds, so the analyzer baseline holds.
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          # Gradle's downloads and build cache; the APK build is the slow step.
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Restore env files
+        shell: bash
+        env:
+          DEV_DOTENV: ${{ secrets.DEV_DOTENV }}
+        run: |
+          if [ -z "$DEV_DOTENV" ]; then
+            echo "Missing DEV_DOTENV secret."
+            exit 1
+          fi
+          printf '%s' "$DEV_DOTENV" > .env.dev
+          # Declared as an asset; the development flavor reads .env.dev.
+          touch .env
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: dart run melos run analyze
+
+      - name: Test
+        run: dart run melos run test
+
+      - name: Restore Android dev keystore
+        shell: bash
+        env:
+          ANDROID_DEV_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEV_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$ANDROID_DEV_KEYSTORE_BASE64" ]; then
+            echo "Missing ANDROID_DEV_KEYSTORE_* secrets."
+            exit 1
+          fi
+          umask 077
+          echo "$ANDROID_DEV_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_DEV_KEYSTORE_PATH"
+
+      # Android installs an update only when its versionCode is higher than
+      # the installed one, and pubspec's number rarely moves. So each run adds
+      # its own: pubspec's build number x 10000 + the run number. It rises
+      # with every run, and with every pubspec bump.
+      - name: Compute build number
+        id: build
+        shell: bash
+        run: |
+          PUBSPEC="$(grep '^version:' pubspec.yaml | head -n 1 | awk '{print $2}')"
+          NAME="${PUBSPEC%%+*}"
+          BASE=1
+          if [[ "$PUBSPEC" == *+* ]]; then BASE="${PUBSPEC##*+}"; fi
+          NUMBER=$((BASE * 10000 + GITHUB_RUN_NUMBER))
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Building $NAME+$NUMBER"
+
+      # Split per ABI: Telegram bots upload at most 50 MB, and the single
+      # APK is larger. arm64 covers current Android phones, and it is the
+      # only one sent, so the other ABIs are not compiled.
+      - name: Build development APK
+        env:
+          # Read by android/app/build.gradle: skips lint-vital here only.
+          FAST_DEV_BUILD: "true"
+        run: >
+          flutter build apk --release --split-per-abi
+          --target-platform android-arm64
+          --build-name=${{ steps.build.outputs.name }}
+          --build-number=${{ steps.build.outputs.number }}
+          --flavor development -t lib/main_development.dart
+          --dart-define-from-file=config/features/development.json
+
+      - name: Send to Telegram
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          APK="build/app/outputs/flutter-apk/app-arm64-v8a-development-release.apk"
+          if [ ! -f "$APK" ]; then
+            echo "APK not found:"; ls build/app/outputs/flutter-apk; exit 1
+          fi
+          SIZE=$(stat -c %s "$APK")
+          if [ "$SIZE" -gt 52428800 ]; then
+            echo "APK is $SIZE bytes, over Telegram's 50 MB bot limit."; exit 1
+          fi
+          VERSION="${{ steps.build.outputs.name }}+${{ steps.build.outputs.number }}"
+          SHORT="${GITHUB_SHA::7}"
+          SUBJECT="$(git log -1 --pretty=%s)"
+          NAME="Jabhouy-dev-${VERSION%%+*}-${SHORT}.apk"
+          cp "$APK" "$NAME"
+          CAPTION="Jabhouy dev ${VERSION} · ${SHORT}
+          ${SUBJECT}"
+          curl --fail-with-body -sS \
+            -F chat_id="$TELEGRAM_CHAT_ID" \
+            -F document=@"$NAME" \
+            -F caption="${CAPTION:0:1000}" \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" > /dev/null
+          echo "Sent $NAME ($SIZE bytes)."

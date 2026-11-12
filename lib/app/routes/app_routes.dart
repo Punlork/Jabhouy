@@ -1,24 +1,27 @@
 // ignore_for_file: inference_failure_on_instance_creation
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_runtime_debugger/flutter_runtime_debugger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy/auth/auth.dart';
-import 'package:jabhouy/customer/customer.dart';
+import 'package:jabhouy/credit/credit.dart';
 import 'package:jabhouy/home/home.dart';
 import 'package:jabhouy/home/views/home_page.dart';
 import 'package:jabhouy/income/income.dart';
-import 'package:jabhouy/loaner/loaner.dart';
+import 'package:jabhouy/membership/membership.dart';
 import 'package:jabhouy/profile/profile.dart';
 import 'package:jabhouy/settings/settings.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_net/jabhouy_net.dart';
 import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// The router itself, and the two sets its redirect consults.
+/// The router itself; its redirect rules live in [authRedirect].
 ///
 /// The route *names* live in `jabhouy_core` as [AppRoutes], because a
 /// feature package needs them and this file imports every feature. What
@@ -26,48 +29,24 @@ import 'package:jabhouy_ui/jabhouy_ui.dart';
 class AppRouter {
   const AppRouter._();
 
-  static final allowedUnauthenticated = {
-    AppRoutes.signin.toPath,
-    AppRoutes.signup.toPath,
-  };
+  /// Home's list-or-grid choice, remembered on the phone.
+  static const _itemGridKey = 'item_list_grid';
+  static const _itemSortKey = 'item_list_sort';
+  static const _itemSortReversedKey = 'item_list_sort_reversed';
+  static const _creditSortKey = 'credit_list_sort';
+  static const _creditSortReversedKey = 'credit_list_sort_reversed';
 
-  static final allowedAuthenticated = {
-    AppRoutes.home.toPath,
-    '${AppRoutes.home.toPath}${AppRoutes.formShop.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.formLoaner.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.category.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.profile.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.settings.toPath}',
-    if (_isDiagnosticsEnabled) '${AppRoutes.home.toPath}${AppRoutes.appDiagnostics.toPath}',
-    '${AppRoutes.home.toPath}${AppRoutes.customer.toPath}',
-    // Left out when income is off, so the redirect below sends a stale
-    // link home instead of to a page with no bloc.
-    if (_isIncomeEnabled && _isDiagnosticsEnabled)
-      '${AppRoutes.home.toPath}${AppRoutes.incomeDiagnostics.toPath}',
-  };
-
-  static bool get _isIncomeEnabled => getIt<FeatureFlags>().isEnabled(Feature.income);
-  static bool get _isDiagnosticsEnabled => getIt<FeatureFlags>().isEnabled(Feature.diagnostics);
+  static bool get _isIncomeEnabled =>
+      getIt<FeatureFlags>().isEnabled(Feature.income);
 
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.home.toPath,
     observers: [DebuggerRouteObserver()],
-    redirect: (context, state) {
-      final authState = BlocProvider.of<AuthBloc>(context).state;
-      final currentPath = state.matchedLocation;
-
-      if (authState is Unauthenticated) {
-        if (!allowedUnauthenticated.contains(currentPath)) {
-          return AppRoutes.signin.toPath;
-        }
-      }
-      if (authState is Authenticated) {
-        if (!allowedAuthenticated.contains(currentPath)) {
-          return AppRoutes.home.toPath;
-        }
-      }
-      return null;
-    },
+    redirect: (context, state) => authRedirect(
+      BlocProvider.of<AuthBloc>(context).state,
+      state.matchedLocation,
+      getIt<FeatureFlags>(),
+    ),
     routes: [
       GoRoute(
         path: AppRoutes.home.toPath,
@@ -76,51 +55,95 @@ class AppRouter {
           GlobalContext.currentContext = context;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(
-                  create: (context) => ShopBloc(
-                    getIt<ShopRepository>(),
-                    getIt<UploadBloc>(),
-                    getIt<ConnectivityService>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
+            // A new Shop or role rebuilds every list for it: the blocs read
+            // CurrentShop once, when they start.
+            child: ListenableBuilder(
+              listenable: getIt<CurrentShop>(),
+              builder: (context, _) => MultiBlocProvider(
+                key: ValueKey(
+                  '${getIt<CurrentShop>().shopId}:${getIt<CurrentShop>().role}',
                 ),
-                BlocProvider(
-                  create: (context) => SignoutBloc(getIt<AuthService>()),
-                ),
-                BlocProvider(
-                  create: (context) => CategoryBloc(
-                    getIt<CategoryRepository>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) => LoanerBloc(
-                    getIt<LoanerRepository>(),
-                    getIt<RefreshLoanersUseCase>(),
-                    getIt<ConnectivityService>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
-                ),
-                BlocProvider(
-                  create: (context) => CustomerBloc(
-                    getIt<CustomerRepository>(),
-                    getIt<ConnectivityService>(),
-                    flags: getIt<FeatureFlags>(),
-                  ),
-                ),
-                // No bloc, no capture: IncomeBloc is the only caller of
-                // IncomeService.initialize, which starts the listener.
-                if (_isIncomeEnabled)
+                providers: [
                   BlocProvider(
-                    create: (context) => IncomeBloc(
-                      getIt<IncomeService>(),
-                      getIt<FcmService>(),
+                    create: (context) => ShopBloc(
+                      getIt<ShopRepository>(),
+                      getIt<UploadBloc>(),
+                      getIt<ConnectivityService>(),
+                      flags: getIt<FeatureFlags>(),
                     ),
                   ),
-              ],
-              child: const HomePage(),
+                  BlocProvider(
+                    create: (context) => SignoutBloc(getIt<AuthService>()),
+                  ),
+                  BlocProvider(
+                    create: (context) => ItemListCubit(
+                      getIt<ItemRepository>(),
+                      getIt<CurrentShop>(),
+                      grid:
+                          getIt<SharedPreferences>().getBool(_itemGridKey) ??
+                          false,
+                      onGridChanged: (grid) => unawaited(
+                        getIt<SharedPreferences>().setBool(_itemGridKey, grid),
+                      ),
+                      sort:
+                          ItemSort.values.asNameMap()[getIt<SharedPreferences>()
+                              .getString(_itemSortKey)] ??
+                          ItemSort.name,
+                      sortReversed:
+                          getIt<SharedPreferences>().getBool(
+                            _itemSortReversedKey,
+                          ) ??
+                          false,
+                      onSortChanged: (sort, {required reversed}) {
+                        final prefs = getIt<SharedPreferences>();
+                        unawaited(prefs.setString(_itemSortKey, sort.name));
+                        unawaited(
+                          prefs.setBool(_itemSortReversedKey, reversed),
+                        );
+                      },
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (context) => CreditListCubit(
+                      getIt<CreditRepository>(),
+                      sort:
+                          CreditSort.values
+                              .asNameMap()[getIt<SharedPreferences>().getString(
+                            _creditSortKey,
+                          )] ??
+                          CreditSort.recent,
+                      sortReversed:
+                          getIt<SharedPreferences>().getBool(
+                            _creditSortReversedKey,
+                          ) ??
+                          false,
+                      onSortChanged: (sort, {required reversed}) {
+                        final prefs = getIt<SharedPreferences>();
+                        unawaited(prefs.setString(_creditSortKey, sort.name));
+                        unawaited(
+                          prefs.setBool(_creditSortReversedKey, reversed),
+                        );
+                      },
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (context) => CategoryBloc(
+                      getIt<CategoryRepository>(),
+                      flags: getIt<FeatureFlags>(),
+                    ),
+                  ),
+                  // No bloc, no capture: IncomeBloc is the only caller of
+                  // IncomeService.initialize, which starts the listener.
+                  if (_isIncomeEnabled)
+                    BlocProvider(
+                      create: (context) => IncomeBloc(
+                        getIt<IncomeService>(),
+                        getIt<FcmService>(),
+                      ),
+                    ),
+                ],
+                child: const HomePage(),
+              ),
             ),
             transitionsBuilder: _rightToLeftTransition,
           );
@@ -134,7 +157,8 @@ class AppRouter {
               final extra = state.extra! as Map<String, dynamic>;
               final onAdd = extra['onAdd'] as void Function(ShopItemModel)?;
               final existingItem = extra['existingItem'] as ShopItemModel?;
-              final activeCategory = extra['activeCategory'] as CategoryItemModel?;
+              final activeCategory =
+                  extra['activeCategory'] as CategoryItemModel?;
               final shop = extra['shop'] as ShopBloc;
               final category = extra['category'] as CategoryBloc;
               return CustomTransitionPage(
@@ -151,20 +175,63 @@ class AppRouter {
             },
           ),
           GoRoute(
-            path: AppRoutes.formLoaner.toPath,
-            name: AppRoutes.formLoaner,
+            path: AppRoutes.formItem.toPath,
+            name: AppRoutes.formItem,
             pageBuilder: (BuildContext context, GoRouterState state) {
               GlobalContext.currentContext = context;
               final extra = state.extra! as Map<String, dynamic>;
-              final existingLoaner = extra['existingLoaner'] as LoanerModel?;
-              final loanerBloc = extra['loanerBloc'] as LoanerBloc;
-              final customerBloc = extra['customerBloc'] as CustomerBloc;
+              final existingItem = extra['existingItem'] as Item?;
+              final scan = getIt<FeatureFlags>().isEnabled(Feature.barcodeScan);
               return CustomTransitionPage(
                 key: state.pageKey,
-                child: LoanerFormPage(
-                  loanerBloc: loanerBloc,
-                  customerBloc: customerBloc,
-                  existingLoaner: existingLoaner,
+                child: BlocProvider(
+                  create: (_) => ItemFormCubit(
+                    getIt<ItemRepository>(),
+                    existing: existingItem,
+                  )..load(),
+                  child: ItemFormPage(
+                    scanBarcode: scan ? scanBarcode : null,
+                    barcode: extra['barcode'] as String?,
+                    name: extra['name'] as String?,
+                  ),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.formCredit.toPath,
+            name: AppRoutes.formCredit,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider(
+                  create: (_) => CreditFormCubit(
+                    getIt<CreditRepository>(),
+                    existing: extra['existingCredit'] as Credit?,
+                  )..load(),
+                  child: CreditFormPage(
+                    pickCustomer: (context, selectedId) => showCustomerPicker(
+                      context,
+                      getIt<CreditRepository>(),
+                      selectedId: selectedId,
+                    ),
+                    pickItems:
+                        (
+                          context, {
+                          required currency,
+                          required khrPerUsd,
+                          required initial,
+                        }) => showItemPicker(
+                          context,
+                          getIt<ItemRepository>(),
+                          currency: currency,
+                          khrPerUsd: khrPerUsd,
+                          initial: initial,
+                        ),
+                  ),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );
@@ -180,24 +247,7 @@ class AppRouter {
               final shop = extra['shop'] as ShopBloc;
               return CustomTransitionPage(
                 key: state.pageKey,
-                child: CategoryPage(
-                  category: category,
-                  shop: shop,
-                ),
-                transitionsBuilder: _rightToLeftTransition,
-              );
-            },
-          ),
-          GoRoute(
-            path: AppRoutes.customer.toPath,
-            name: AppRoutes.customer,
-            pageBuilder: (BuildContext context, GoRouterState state) {
-              final extra = state.extra! as Map<String, dynamic>;
-              GlobalContext.currentContext = context;
-              final customer = extra['customerBloc'] as CustomerBloc;
-              return CustomTransitionPage(
-                key: state.pageKey,
-                child: CustomerPage(customerBloc: customer),
+                child: CategoryPage(category: category, shop: shop),
                 transitionsBuilder: _rightToLeftTransition,
               );
             },
@@ -230,24 +280,71 @@ class AppRouter {
             name: AppRoutes.settings,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final categoryBloc = extra?['category'] as CategoryBloc? ?? context.read<CategoryBloc>();
-              final shopBloc = extra?['shop'] as ShopBloc? ?? context.read<ShopBloc>();
-              final customerBloc = extra?['customerBloc'] as CustomerBloc? ?? context.read<CustomerBloc>();
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
-              final signoutBloc = extra?['signoutBloc'] as SignoutBloc? ?? context.read<SignoutBloc>();
+              final incomeBloc =
+                  extra?['incomeBloc'] as IncomeBloc? ??
+                  _maybeReadIncomeBloc(context);
+              final signoutBloc =
+                  extra?['signoutBloc'] as SignoutBloc? ??
+                  context.read<SignoutBloc>();
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: MultiBlocProvider(
                   providers: [
-                    BlocProvider.value(value: categoryBloc),
-                    BlocProvider.value(value: shopBloc),
-                    BlocProvider.value(value: customerBloc),
-                    if (incomeBloc != null) BlocProvider.value(value: incomeBloc),
+                    if (incomeBloc != null)
+                      BlocProvider.value(value: incomeBloc),
                     BlocProvider.value(value: signoutBloc),
+                    // Shared with the Prices & currency screen, so its
+                    // changes show in the Settings row on return.
+                    BlocProvider(
+                      create: (_) => PriceSettingsCubit(
+                        getIt<ItemRepository>(),
+                        getIt<CurrentShop>(),
+                      )..load(),
+                    ),
+                    BlocProvider(
+                      create: (_) => CategoriesCubit(
+                        getIt<ItemRepository>(),
+                        getIt<CurrentShop>(),
+                      )..load(),
+                    ),
                   ],
                   child: const SettingsPage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.priceSettings.toPath,
+            name: AppRoutes.priceSettings,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              final cubit = extra['priceSettingsCubit'] as PriceSettingsCubit;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider.value(
+                  value: cubit,
+                  child: const PriceSettingsPage(),
+                ),
+                transitionsBuilder: _rightToLeftTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.categoriesUnits.toPath,
+            name: AppRoutes.categoriesUnits,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              GlobalContext.currentContext = context;
+              final extra = state.extra! as Map<String, dynamic>;
+              final cubit = extra['categoriesCubit'] as CategoriesCubit;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: BlocProvider.value(
+                  value: cubit,
+                  child: const CategoriesUnitsPage(),
                 ),
                 transitionsBuilder: _rightToLeftTransition,
               );
@@ -258,7 +355,9 @@ class AppRouter {
             name: AppRoutes.appDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? _maybeReadIncomeBloc(context);
+              final incomeBloc =
+                  extra?['incomeBloc'] as IncomeBloc? ??
+                  _maybeReadIncomeBloc(context);
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(
@@ -278,7 +377,9 @@ class AppRouter {
             name: AppRoutes.incomeDiagnostics,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final incomeBloc = extra?['incomeBloc'] as IncomeBloc? ?? BlocProvider.of<IncomeBloc>(context);
+              final incomeBloc =
+                  extra?['incomeBloc'] as IncomeBloc? ??
+                  BlocProvider.of<IncomeBloc>(context);
               GlobalContext.currentContext = context;
 
               return CustomTransitionPage(
@@ -301,18 +402,6 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const SigninPage(),
-            transitionsBuilder: _rightToLeftTransition,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.signup.toPath,
-        name: AppRoutes.signup,
-        pageBuilder: (BuildContext context, GoRouterState state) {
-          GlobalContext.currentContext = context;
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: const SignupPage(),
             transitionsBuilder: _rightToLeftTransition,
           );
         },

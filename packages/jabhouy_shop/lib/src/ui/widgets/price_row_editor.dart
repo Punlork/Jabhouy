@@ -1,0 +1,604 @@
+import 'package:flutter/material.dart';
+import 'package:jabhouy_core/jabhouy_core.dart';
+import 'package:jabhouy_l10n/jabhouy_l10n.dart';
+import 'package:jabhouy_shop/src/models/item.dart';
+import 'package:jabhouy_shop/src/models/item_draft.dart';
+import 'package:jabhouy_shop/src/ui/widgets/unit_picker_sheet.dart';
+import 'package:jabhouy_shop/src/ui/widgets/whole_number_input.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
+
+/// The message for [problem], in the reader's language.
+String problemText(AppLocalizations l10n, FormProblem problem) =>
+    switch (problem.kind) {
+      ProblemKind.nameRequired => l10n.itemNameMissing,
+      ProblemKind.rielDecimals => l10n.priceRielNoDecimals,
+      ProblemKind.usdDecimals => l10n.priceUsdTwoDecimals,
+      ProblemKind.invalidNumber => l10n.priceNotNumber,
+      ProblemKind.packQtyNotPositive => l10n.pricePackPositive,
+      ProblemKind.barcodeUsed => l10n.priceBarcodeUsed(problem.itemName ?? ''),
+    };
+
+const _countWidth = 70.0;
+const _gap = 8.0;
+
+/// Chips shown in the form; the rest are behind `ទាំងអស់ ›`.
+const _unitChipLimit = 5;
+
+/// One Price option being typed: unit, optional pack count, selling price,
+/// and a quiet line with wholesale and cost when the Shop uses them.
+/// Wholesale and cost follow the selling price's currency.
+class PriceRowEditor extends StatefulWidget {
+  const PriceRowEditor({
+    required this.initial,
+    required this.settings,
+    required this.onChanged,
+    this.onRemove,
+    this.onScan,
+    this.problems = const {},
+    this.unitChips = const [],
+    this.unitHint,
+    this.autofocus = false,
+    this.onSubmit,
+    super.key,
+  });
+
+  final PriceRowDraft initial;
+  final PriceSettings settings;
+  final ValueChanged<PriceRowDraft> onChanged;
+
+  /// Null hides the remove button (the only row).
+  final VoidCallback? onRemove;
+
+  /// Reads a barcode for this row; null hides the button (flag off).
+  final Future<String?> Function()? onScan;
+
+  /// This row's problems, keyed by field: `price`, `packQty`, ….
+  final Map<String, FormProblem> problems;
+
+  /// Unit suggestions; the form passes them to its first row only.
+  final List<String> unitChips;
+  final String? unitHint;
+
+  /// Puts the cursor in the unit field when the editor opens.
+  final bool autofocus;
+
+  /// The keyboard's Done key on the last field.
+  final VoidCallback? onSubmit;
+
+  @override
+  State<PriceRowEditor> createState() => _PriceRowEditorState();
+}
+
+class _PriceRowEditorState extends State<PriceRowEditor> {
+  late PriceRowDraft _draft = widget.initial;
+  late final _unit = TextEditingController(text: _draft.unit);
+  late final _packQty = TextEditingController(text: _draft.packQty);
+  late final _wholesale = TextEditingController(text: _draft.wholesale);
+  late final _cost = TextEditingController(text: _draft.cost);
+
+  @override
+  void dispose() {
+    for (final c in [_unit, _packQty, _wholesale, _cost]) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  /// Wholesale and cost follow the row's currency: when the price
+  /// switches, their amounts convert too, as the price's does.
+  void _convertSecondary(Currency to) {
+    for (final c in [_wholesale, _cost]) {
+      final money = Money.tryParse(c.text, _draft.currency);
+      c.text =
+          money
+              ?.convertTo(to, khrPerUsd: widget.settings.khrPerUsd)
+              .formatNumber() ??
+          '';
+    }
+  }
+
+  void _update({
+    String? unit,
+    String? packQty,
+    String? price,
+    Currency? currency,
+    String? wholesale,
+    String? cost,
+    String? barcode,
+  }) {
+    _draft = PriceRowDraft(
+      id: _draft.id,
+      currency: currency ?? _draft.currency,
+      unit: unit ?? _draft.unit,
+      packQty: packQty ?? _draft.packQty,
+      price: price ?? _draft.price,
+      wholesale: wholesale ?? _draft.wholesale,
+      cost: cost ?? _draft.cost,
+      barcode: barcode ?? _draft.barcode,
+    );
+    widget.onChanged(_draft);
+  }
+
+  void _pickUnit(String unit) => setState(() {
+    _unit.text = unit;
+    _update(unit: unit);
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final t = context.tokens;
+    final problems = widget.problems;
+    final settings = widget.settings;
+    // The remove button sits on this line: on the price line it left the
+    // price field too narrow to read.
+    final hasSecondary = settings.useWholesale || settings.useCost;
+    final showQuiet =
+        settings.useWholesale ||
+        settings.useCost ||
+        widget.onRemove != null ||
+        widget.onScan != null;
+    // Each message sits under the line its field is on.
+    List<Widget> errorsFor(List<String> fields) => [
+      for (final field in fields)
+        if (problems[field] case final problem?)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSizes.fieldGap),
+            child: ErrorLine(problemText(l10n, problem)),
+          ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _FieldLabel(l10n.priceUnit),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: _unit,
+                    autofocus: widget.autofocus,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (v) => _update(unit: v),
+                    decoration: InputDecoration(
+                      hintText: l10n.priceUnitHint,
+                      error: problems.containsKey('unit')
+                          ? const SizedBox()
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: _gap),
+            SizedBox(
+              width: _countWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _FieldLabel(l10n.priceCount),
+                  const SizedBox(height: 4),
+                  Semantics(
+                    label: '${l10n.priceCount} ${l10n.optional}',
+                    child: TextField(
+                      controller: _packQty,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (v) => _update(packQty: v),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: const [WholeNumberFormatter()],
+                      decoration: InputDecoration(
+                        hintText: l10n.priceCountHint,
+                        // prefixText only shows while focused; this always does.
+                        prefixIcon: Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 12),
+                          child: Text(
+                            '×',
+                            style: AppTextTheme.body.copyWith(
+                              color: t.textMuted,
+                            ),
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 13,
+                        ),
+                        error: problems.containsKey('packQty')
+                            ? const SizedBox()
+                            : null,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        ...errorsFor(['unit', 'packQty']),
+        if (widget.unitChips.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          // Not stops for the keyboard's Next key.
+          ExcludeFocus(
+            child: QuickPickChips(
+              options: widget.unitChips.take(_unitChipLimit).toList(),
+              selected: _draft.unit,
+              onPick: _pickUnit,
+              trailing: widget.unitChips.length > _unitChipLimit
+                  ? PickChip(
+                      label: '${l10n.all} ›',
+                      selected: false,
+                      onTap: () async {
+                        final unit = await showUnitPicker(
+                          context,
+                          units: widget.unitChips,
+                          selected: _draft.unit,
+                        );
+                        if (unit != null && mounted) _pickUnit(unit);
+                      },
+                    )
+                  : null,
+            ),
+          ),
+          if (widget.unitHint != null) ...[
+            const SizedBox(height: AppSizes.fieldGap),
+            Text(
+              widget.unitHint!,
+              style: AppTextTheme.hint.copyWith(color: t.textMuted),
+            ),
+          ],
+        ],
+        const SizedBox(height: 16),
+        _FieldLabel(l10n.priceSelling),
+        const SizedBox(height: 4),
+        MoneyInput(
+          value: Money.tryParse(_draft.price, _draft.currency),
+          currency: _draft.currency,
+          khrPerUsd: settings.khrPerUsd,
+          hintText: l10n.priceSellingHint,
+          textInputAction: hasSecondary
+              ? TextInputAction.next
+              : TextInputAction.done,
+          onSubmitted: hasSecondary ? null : widget.onSubmit,
+          onText: (text, currency) => setState(() {
+            if (currency != _draft.currency) _convertSecondary(currency);
+            _update(
+              price: text,
+              currency: currency,
+              wholesale: _wholesale.text,
+              cost: _cost.text,
+            );
+          }),
+          hasError: problems.containsKey('price'),
+        ),
+        ...errorsFor(['price']),
+        if (showQuiet) ...[
+          const SizedBox(height: _gap),
+          Row(
+            children: [
+              if (settings.useWholesale) ...[
+                Expanded(
+                  child: _QuietField(
+                    label: l10n.priceWholesaleShort,
+                    semanticLabel: l10n.priceWholesale,
+                    currency: _draft.currency,
+                    controller: _wholesale,
+                    hasError: problems.containsKey('wholesale'),
+                    textInputAction: settings.useCost
+                        ? TextInputAction.next
+                        : TextInputAction.done,
+                    onSubmitted: settings.useCost ? null : widget.onSubmit,
+                    onChanged: (v) => _update(wholesale: v),
+                  ),
+                ),
+                if (settings.useCost) const SizedBox(width: _gap),
+              ],
+              if (settings.useCost)
+                Expanded(
+                  child: _QuietField(
+                    label: l10n.priceCostShort,
+                    semanticLabel: l10n.priceCost,
+                    currency: _draft.currency,
+                    controller: _cost,
+                    hasError: problems.containsKey('cost'),
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: widget.onSubmit,
+                    onChanged: (v) => _update(cost: v),
+                  ),
+                ),
+              if (!settings.useWholesale && !settings.useCost) const Spacer(),
+              if (widget.onScan case final scan?) ...[
+                const SizedBox(width: _gap),
+                _BarcodeButton(
+                  attached: _draft.barcode?.isNotEmpty ?? false,
+                  hasError: problems.containsKey('barcode'),
+                  onPressed: () async {
+                    final code = await scan();
+                    if (code != null && mounted) {
+                      setState(() => _update(barcode: code));
+                    }
+                  },
+                ),
+              ],
+              if (widget.onRemove != null)
+                IconButton(
+                  onPressed: widget.onRemove,
+                  tooltip: l10n.priceRemove,
+                  icon: Icon(Icons.close_rounded, size: 20, color: t.textMuted),
+                ),
+            ],
+          ),
+        ],
+        ...errorsFor(['wholesale', 'cost', 'barcode']),
+      ],
+    );
+  }
+}
+
+/// A 12 px muted label over a sheet field.
+class _FieldLabel extends StatelessWidget {
+  const _FieldLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text,
+    style: AppTextTheme.hint.copyWith(color: context.tokens.textMuted),
+  );
+}
+
+/// One row of the form's price list (canvas ៣): the unit badge, the price
+/// with `ដុំ` and `ដើម` under it when set, a barcode mark and `›`. Tapping
+/// it opens the price sheet.
+class PriceRowSummary extends StatelessWidget {
+  const PriceRowSummary({
+    required this.draft,
+    required this.khrPerUsd,
+    required this.onTap,
+    this.hasProblem = false,
+    super.key,
+  });
+
+  final PriceRowDraft draft;
+  final int khrPerUsd;
+  final VoidCallback onTap;
+
+  /// Outlined in red: the row holds a save-time problem.
+  final bool hasProblem;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final t = context.tokens;
+    final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
+    final qty = parseWholeNumber(draft.packQty);
+    final extras = [
+      for (final (label, text) in [
+        (l10n.priceWholesaleShort, draft.wholesale),
+        (l10n.priceCostShort, draft.cost),
+      ])
+        if (Money.tryParse(text, draft.currency) case final money?)
+          '$label ${money.format()}',
+    ];
+
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: AppSizes.minTapTarget),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: hasProblem
+            ? BoxDecoration(
+                border: Border.all(color: t.dangerText, width: 2),
+                borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+              )
+            : null,
+        child: Row(
+          children: [
+            Container(
+              constraints: const BoxConstraints(minWidth: 64),
+              height: 46,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: t.surfaceSubtle,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    draft.unit.trim().isEmpty ? '—' : draft.unit.trim(),
+                    style: AppTextTheme.body.copyWith(
+                      color: t.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (qty != null && qty > 1) Text('×$qty', style: muted),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  PriceDisplay(
+                    price: Money.tryParse(draft.price, draft.currency),
+                    khrPerUsd: khrPerUsd,
+                    showConverted: true,
+                  ),
+                  if (extras.isNotEmpty) Text(extras.join(' · '), style: muted),
+                ],
+              ),
+            ),
+            if (draft.barcode?.isNotEmpty ?? false) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.qr_code_2_rounded, size: 16, color: t.textMuted),
+            ],
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_rounded, color: t.textMuted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary price field: a thin outline, label inside, the
+/// row's currency at the end. 44 tall so it stays a valid tap target.
+class _QuietField extends StatelessWidget {
+  const _QuietField({
+    required this.label,
+    required this.semanticLabel,
+    required this.currency,
+    required this.controller,
+    required this.hasError,
+    required this.onChanged,
+    required this.textInputAction,
+    required this.onSubmitted,
+  });
+
+  final String label;
+  final String semanticLabel;
+  final Currency currency;
+  final TextEditingController controller;
+  final bool hasError;
+  final ValueChanged<String> onChanged;
+  final TextInputAction textInputAction;
+  final VoidCallback? onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final muted = AppTextTheme.hint.copyWith(color: t.textMuted);
+    return Container(
+      height: AppSizes.minTapTarget,
+      // Centres the baseline-aligned row vertically in the 44 px box.
+      alignment: AlignmentDirectional.centerStart,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        // Quiet on purpose: wholesale and cost are secondary to the price.
+        border: Border.all(
+          color: hasError ? t.dangerText : t.divider,
+          width: hasError ? 2 : 1,
+        ),
+      ),
+      // Baseline, not centre: Khmer and Latin glyphs sit at different
+      // heights, so centring the boxes leaves the number looking off.
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Text(label, style: muted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Semantics(
+              label: semanticLabel,
+              child: TextField(
+                controller: controller,
+                onChanged: onChanged,
+                textInputAction: textInputAction,
+                onSubmitted: onSubmitted == null ? null : (_) => onSubmitted!(),
+                keyboardType: moneyKeyboard(currency),
+                inputFormatters: moneyFormatters(currency),
+                style: AppTextTheme.hint.copyWith(color: t.textPrimary),
+                // The app theme fills and outlines every field; this one
+                // draws only its underline, so turn both off here.
+                decoration: InputDecoration(
+                  isCollapsed: true,
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  hintText: '0',
+                  hintStyle: AppTextTheme.hint.copyWith(color: t.placeholder),
+                ),
+              ),
+            ),
+          ),
+          Text(
+            currency == Currency.khr ? '៛' : r'$',
+            style: muted.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 44×44 barcode button (canvas ៤ខ): outlined with none, dark once a
+/// code is attached, red when that code is used by another Item.
+class _BarcodeButton extends StatelessWidget {
+  const _BarcodeButton({
+    required this.attached,
+    required this.hasError,
+    required this.onPressed,
+  });
+
+  final bool attached;
+  final bool hasError;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final fg = hasError
+        ? t.dangerText
+        : attached
+        ? t.onPrimary
+        : t.textPrimary;
+    return SizedBox.square(
+      dimension: 44,
+      child: IconButton(
+        onPressed: onPressed,
+        tooltip: context.l10n.scanTitle,
+        style: IconButton.styleFrom(
+          backgroundColor: attached && !hasError ? t.textPrimary : t.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: hasError
+                ? BorderSide(color: t.dangerText, width: 2)
+                : attached
+                ? BorderSide.none
+                : BorderSide(color: t.border),
+          ),
+        ),
+        icon: Icon(Icons.qr_code_scanner_rounded, size: 20, color: fg),
+      ),
+    );
+  }
+}
+
+/// A red message with an icon, under the field it is about.
+class ErrorLine extends StatelessWidget {
+  const ErrorLine(this.message, {super.key});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.tokens.dangerText;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.error_outline, size: 16, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            message,
+            style: AppTextTheme.hint.copyWith(
+              color: color,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

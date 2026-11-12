@@ -58,11 +58,6 @@ platform :android do
     sh("cd #{project_root} && flutter build apk --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json --release --split-per-abi")
   end
 
-  desc "Build staging release APK (for internal testing)"
-  lane :build_staging do
-    sh("cd #{project_root} && flutter build apk --flavor staging -t lib/main_staging.dart --dart-define-from-file=config/features/staging.json --release")
-  end
-
   desc "Build production release APK"
   lane :build_release do
     sh("cd #{project_root} && flutter build apk --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json --release")
@@ -104,9 +99,9 @@ platform :android do
     )
   end
 
-  desc "Deploy to internal testing track (Google Play)"
+  desc "Deploy production to internal testing track (Google Play)"
   lane :internal do
-    build_staging
+    build_release
     supply(
       track: "internal",
       aab: false,

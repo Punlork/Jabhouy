@@ -45,7 +45,7 @@ fvm dart run melos run run:dev
 ```
 
 Firebase is optional: without `google-services.json`, income stays local-only.
-For per-flavor Firebase projects, place it in `android/app/src/<development|staging|production>/`.
+For per-flavor Firebase projects, place it in `android/app/src/<development|production>/`.
 
 ## Everyday commands
 
@@ -64,10 +64,9 @@ fvm dart run melos run build:prod # release APK with production flags
 | Flavor | Entry point | App name | Income |
 | --- | --- | --- | --- |
 | development | `lib/main_development.dart` | [DEV] Jabhouy | on |
-| staging | `lib/main_staging.dart` | [STG] Jabhouy | on |
 | production | `lib/main_production.dart` | Jabhouy | off |
 
-Background sync — saves that never wait for the server — is on in all three.
+Background sync — saves that never wait for the server — is on in both.
 Each flavor reads its flags from `config/features/<flavor>.json`.
 To ship or hold back a feature, change its value there; the melos scripts, fastlane lanes and VS Code launch configs already pass the file.
 [ARCHITECTURE.md](ARCHITECTURE.md#switching-a-feature-off-for-a-release) covers adding a flag.

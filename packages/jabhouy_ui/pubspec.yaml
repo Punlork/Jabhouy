@@ -15,9 +15,12 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_svg: ^2.2.0
   image_picker: ^1.1.2
+  jabhouy_core:
+    path: ../jabhouy_core
   jabhouy_l10n:
     path: ../jabhouy_l10n
   path_provider: ^2.1.5
+  speech_to_text: ^7.5.0
 
 dev_dependencies:
   flutter_test:

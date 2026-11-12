@@ -46,7 +46,7 @@ Edges come from each package's `pubspec.yaml`.
 No package imports `package:jabhouy/`; workspace members share one package config, so the pubspec cannot enforce that, and `test/architecture/package_independence_test.dart` does.
 `jabhouy_core` and `jabhouy_sync` have no Flutter dependency and run their tests under `dart test`.
 
-The other features — auth, customer, home, income, loaner, profile, settings — stay folders in `lib/`.
+The other features — auth, credit, home, income, profile, settings — stay folders in `lib/`.
 Shop is a package as an experiment; the three shared packages beside it exist because each was the only way out of an import cycle, as the restructure record explains.
 
 ## Layers inside a feature
@@ -65,31 +65,31 @@ Two features have a `logic/` folder:
 
 | Feature | Use case | Why it earned one |
 | --- | --- | --- |
-| loaner | `RefreshLoanersUseCase` | Merges two repositories: a loan references a customer |
+| credit | `credit_money.dart` (pure rules, not a use case) | The rate snapshot, per-line rounding and the summary, which the server must repeat |
 | income | `PullRemoteNotificationsUseCase` | Fingerprint deduplication and main-device gating |
 
 Everywhere else the repository is the seam.
 
 ## How an edit reaches the server
 
-The seller edits a loan while offline, then walks back into coverage.
+The seller edits a Credit while offline, then walks back into coverage.
 
 | Step | What happens | Where |
 | --- | --- | --- |
-| 1 | The form sends `UpdateLoaner`; the bloc calls `updateLoaner` | `loaner_bloc.dart` |
-| 2 | The repository writes the row as `pending` and enqueues an `update` job | `loaner_repository_impl.dart` |
+| 1 | The form's `save` calls `CreditRepository.saveCredit` | `credit_form_cubit.dart` |
+| 2 | The repository writes the row and its items to Drift in one transaction and enqueues an `update` job, folded into any job already waiting for that row | `credit_repository.dart` |
 | 3 | Offline, nothing drains; the list already shows the edit, read from Drift | — |
-| 4 | Connectivity returns; the bloc calls `syncPendingChanges()`, which drains | `loaner_bloc.dart:347` |
-| 5 | The engine picks due jobs whose dependency has cleared, oldest first | `SyncEngine.dueEntries` |
-| 6 | `LoanerSyncAdapter` re-reads the row, builds the body, calls `PUT /loans/:id` | `loaner_sync_adapter.dart` |
-| 7 | The server's reply replaces the row as `synced`; the job is deleted | same |
+| 4 | Connectivity returns; `SyncCoordinator` asks the engine to drain | `SyncCoordinator` |
+| 5 | The engine picks due jobs whose dependency has cleared, oldest first: the Customer before its Credit | `SyncEngine.dueEntries` |
+| 6 | `CreditSyncAdapter` re-reads the row, builds the body and calls `ShopSyncApi.put` | `credit_sync.dart` |
+| 7 | The server accepts; the job is deleted. The row's `seq` arrives with the next `/changes` pull | `SyncEngine.pullShop` |
 
-Online, step 4 happens at once: each write drains straight after enqueueing when `isOnline` is true.
+Online, step 4 happens at once: each write requests a drain straight after enqueueing when `isOnline` is true.
 
 Step 6 re-reads the row on every attempt, so a job carries no stale body: fix the code that builds it, and the queued job goes through on the next drain.
 The same fact makes pulls dangerous, so a pull skips any row with a job still queued (`AppDatabase.queuedLocalIds`): writing the server's older copy there would make the job send it.
 
-Each push ends in one of three outcomes:
+Each push ends in one of these outcomes (a Shop-scoped write can also be dropped by a 403 or 409, below):
 
 | Outcome | Engine does | Example |
 | --- | --- | --- |
@@ -114,6 +114,13 @@ With it on, the table above changes in three places:
 A pull downloads a whole list (`fetchEveryPage`) and deletes local rows the server no longer has, but only when the list is provably complete, the row has a positive id, and it has no queued job.
 Drains and pulls run behind one lock in the engine, because a create landing mid-pull would be missing from the downloaded list and deleted.
 
+## Shop data: `/changes`
+
+Items, categories, settings, Customers and Credits (the redesign tables) sync through a `ShopSyncApi`, one seam registered in `lib/app/injection/dependency_injection.dart`: `changes`, `put`, `delete`. Until jabhouy-api's shop routes are live it is `InMemoryShopSyncApi`; going live is registering an HTTP implementation there.
+`SyncEngine.pullShop` pages from the Shop's own cursor (`shop_sync_cursors`) until `hasMore` ends, applies each page through the feature's `ChangeApplier` and moves the cursor in the same transaction. Rows with a queued job are skipped, and a tombstone hides the row.
+A 403 `forbidden_role` or a 409 drops the job (never retried), shows `syncNoPermission` for the first, and re-reads the whole Shop from seq 0, because the pull had skipped the queued row. A 403 `not_member` wipes that Shop's rows (`AppDatabase.wipeShop`).
+`ShopScope.syncs` is false for the stand-in Shop, so nothing is queued or pulled until `/me` is live.
+
 ## Switching a feature off for a release
 
 `FeatureFlags` in `jabhouy_core` answers `isEnabled(Feature)`.
@@ -135,7 +142,6 @@ Two generators run through `build_runner`: Drift for the schema in `jabhouy_core
 
 Generated `copyWith` sets a nullable field when handed `null` and keeps it only when the argument is left out.
 The analyzer reads the generated interface and calls `syncMessage: null` redundant; it is not, and removing it leaves the old banner on screen.
-`test/loaner/loaner_state_copy_with_test.dart` pins both halves.
 
 ## What holds the rules
 

@@ -45,6 +45,18 @@ void main() {
     verify(() => engine.pull()).called(1);
   });
 
+  test('a syncing Shop pulls its changes after the lists', () async {
+    when(() => engine.pullShop('s1')).thenAnswer((_) async {});
+    coordinator = SyncCoordinator(
+      engine,
+      connectivity,
+      syncedShopId: () => 's1',
+    )..start();
+    await pumpEventQueue();
+
+    verifyInOrder([() => engine.pull(), () => engine.pullShop('s1')]);
+  });
+
   test('a reconnect retries backed-off pushes, then pulls', () async {
     coordinator.start();
     await pumpEventQueue();

@@ -12,15 +12,16 @@ part 'category_state.dart';
 part 'category_bloc.g.dart';
 
 extension CategoryStateExtension on CategoryState {
-  CategoryLoaded? get asLoaded => this is CategoryLoaded ? this as CategoryLoaded : null;
+  CategoryLoaded? get asLoaded =>
+      this is CategoryLoaded ? this as CategoryLoaded : null;
 }
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   CategoryBloc(
     this._repository, {
     FeatureFlags flags = const FixedFeatureFlags({}),
-  })  : _inBackground = flags.isEnabled(Feature.backgroundSync),
-        super(const CategoryInitial()) {
+  }) : _inBackground = flags.isEnabled(Feature.backgroundSync),
+       super(const CategoryInitial()) {
     _categorySubscription = _repository.watchCategories().listen((items) {
       add(_CategoryUpdatedFromLocal(items));
     });
@@ -47,15 +48,23 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     return super.close();
   }
 
-  Future<void> _onCreateItem(CategoryCreateEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onCreateItem(
+    CategoryCreateEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.createCategory(event.body)).fold(
         ok: (c) => showSuccessSnackBar(
           null,
-          syncFeedback(c.syncStatus, done: 'Created: ${c.name}', inBackground: _inBackground),
+          syncFeedback(
+            c.syncStatus,
+            done: 'Created: ${c.name}',
+            inBackground: _inBackground,
+          ),
         ),
-        err: (e) => showErrorSnackBar(null, 'Failed to create item: ${e.message}'),
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to create item: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to create item: $e');
@@ -64,15 +73,23 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onEditItem(CategoryEditEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onEditItem(
+    CategoryEditEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.updateCategory(event.body)).fold(
         ok: (c) => showSuccessSnackBar(
           null,
-          syncFeedback(c.syncStatus, done: 'Updated: ${c.name}', inBackground: _inBackground),
+          syncFeedback(
+            c.syncStatus,
+            done: 'Updated: ${c.name}',
+            inBackground: _inBackground,
+          ),
         ),
-        err: (e) => showErrorSnackBar(null, 'Failed to update item: ${e.message}'),
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to update item: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to update item: $e');
@@ -81,12 +98,16 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onDeleteItem(CategoryDeleteEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onDeleteItem(
+    CategoryDeleteEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     if (!_inBackground) LoadingOverlay.show();
     try {
       (await _repository.deleteCategory(event.body)).fold(
         ok: (_) => showSuccessSnackBar(null, 'Deleted ${event.body.name}'),
-        err: (e) => showErrorSnackBar(null, 'Failed to delete item: ${e.message}'),
+        err: (e) =>
+            showErrorSnackBar(null, 'Failed to delete item: ${e.message}'),
       );
     } catch (e) {
       showErrorSnackBar(null, 'Failed to delete item: $e');
@@ -95,7 +116,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onGetItems(CategoryGetEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onGetItems(
+    CategoryGetEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     // The list is the Drift watch; SyncCoordinator pulls categories, and
     // the shop tab's pull-to-refresh pulls them with the items.
     if (_inBackground) return;

@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 
 class EmptyView extends StatelessWidget {
-  const EmptyView({
-    super.key,
-    this.msg,
-  });
+  const EmptyView({super.key, this.msg});
 
   final String? msg;
 
@@ -20,10 +17,7 @@ class EmptyView extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             msg ?? context.l10n.noItemFound,
-            style: TextStyle(
-              fontSize: 18,
-              color: muted,
-            ),
+            style: TextStyle(fontSize: 18, color: muted),
           ),
         ],
       ),

@@ -1,0 +1,15 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:jabhouy/app/app.dart';
+import 'package:jabhouy/bootstrap.dart';
+
+Future<void> main() async {
+  await bootstrap(
+    () => const Directionality(
+      textDirection: TextDirection.ltr,
+      child: App(),
+    ),
+    flavor: AppFlavor.development,
+    initialize: () => dotenv.load(fileName: '.env.local'),
+  );
+}

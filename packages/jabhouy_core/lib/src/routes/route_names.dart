@@ -11,13 +11,14 @@ extension StringExtension on String {
 class AppRoutes {
   static const home = 'home';
   static const signin = 'signin';
-  static const signup = 'signup';
   static const formShop = 'form_shop';
-  static const formLoaner = 'form_loaner';
+  static const formItem = 'form_item';
+  static const formCredit = 'form_credit';
   static const category = 'category';
-  static const customer = 'customer';
   static const profile = 'profile';
   static const settings = 'settings';
+  static const priceSettings = 'price_settings';
+  static const categoriesUnits = 'categories_units';
   static const appDiagnostics = 'app_diagnostics';
   static const incomeDiagnostics = 'income_diagnostics';
 }

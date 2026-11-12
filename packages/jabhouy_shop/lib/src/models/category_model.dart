@@ -18,8 +18,9 @@ class CategoryItemModel extends Equatable {
     return CategoryItemModel(
       id: tryCast<int>(json['id'], fallback: 0)!,
       name: tryCast<String>(json['name'], fallback: '')!,
-      syncStatus:
-            SyncStatus.fromWireValue(tryCast<int>(json['syncStatus']) ?? 0),
+      syncStatus: SyncStatus.fromWireValue(
+        tryCast<int>(json['syncStatus']) ?? 0,
+      ),
       isDeleted: tryCast<bool>(json['isDeleted']) ?? false,
     );
   }

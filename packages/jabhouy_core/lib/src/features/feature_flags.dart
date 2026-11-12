@@ -15,6 +15,28 @@ enum Feature {
 
   /// The App diagnostics page and the income diagnostics behind it.
   diagnostics,
+
+  /// "Continue with Google" on the sign-in page.
+  googleSignIn,
+
+  /// The signed-in user's Shops come from the API's `GET /me` instead of a
+  /// fake one-shop answer. Off until jabhouy-api's shop setup is live.
+  /// Rows written under the fake shop id do not sync after switching; the
+  /// release clean start wipes them anyway.
+  serverShops,
+
+  /// Barcode scanning: Home's scan button, the scan result, and the price
+  /// row's barcode button (decision 44). Off until proven on a real phone.
+  barcodeScan,
+
+  /// Mic buttons on free-text fields and the voice sheet (decision 44).
+  /// Off until Khmer dictation is proven on a real Android phone.
+  voiceInput,
+
+  /// Shop-scoped writes go to the API's user-scoped `/items`, `/credits`
+  /// routes instead of the in-memory stand-in, and nothing is pulled. For
+  /// running the app against a local API before `/shops/:id/…` exists.
+  userScopedApi,
 }
 
 /// Answers whether a [Feature] is on.
@@ -43,6 +65,16 @@ final class BuildTimeFeatureFlags implements FeatureFlags {
           const bool.fromEnvironment('FEATURE_BACKGROUND_SYNC'),
         Feature.diagnostics =>
           const bool.fromEnvironment('FEATURE_DIAGNOSTICS'),
+        Feature.googleSignIn =>
+          const bool.fromEnvironment('FEATURE_GOOGLE_SIGN_IN'),
+        Feature.serverShops =>
+          const bool.fromEnvironment('FEATURE_SERVER_SHOPS'),
+        Feature.barcodeScan =>
+          const bool.fromEnvironment('FEATURE_BARCODE_SCAN'),
+        Feature.voiceInput =>
+          const bool.fromEnvironment('FEATURE_VOICE_INPUT'),
+        Feature.userScopedApi =>
+          const bool.fromEnvironment('FEATURE_USER_SCOPED_API'),
       };
 }
 

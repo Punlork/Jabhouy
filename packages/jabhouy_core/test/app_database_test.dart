@@ -21,7 +21,7 @@ void main() {
   });
 
   test('opens on a plain Dart VM and creates every declared table', () async {
-    expect(db.schemaVersion, 8);
+    expect(db.schemaVersion, 11);
 
     // Each select proves the table exists; a missing one throws here.
     expect(await db.select(db.customers).get(), isEmpty);
@@ -30,6 +30,7 @@ void main() {
     expect(await db.select(db.loaners).get(), isEmpty);
     expect(await db.select(db.bankNotifications).get(), isEmpty);
     expect(await db.select(db.outboxEntries).get(), isEmpty);
+    expect(await db.select(db.shopSyncCursors).get(), isEmpty);
   });
 
   test('a shop item round-trips with the category it points at', () async {
@@ -92,8 +93,25 @@ void main() {
           ),
         );
 
+    await db.into(db.itemTable).insert(
+          ItemTableCompanion.insert(id: newId(), shopId: 's1', name: 'ទឹក'),
+        );
+    await db.into(db.creditTable).insert(
+          CreditTableCompanion.insert(
+            id: newId(),
+            shopId: 's1',
+            customerId: newId(),
+            currency: 'KHR',
+            khrPerUsd: 4000,
+            status: 'unpaid',
+            takenAt: DateTime.utc(2026),
+          ),
+        );
+
     await db.clearUserData();
 
+    expect(await db.select(db.itemTable).get(), isEmpty);
+    expect(await db.select(db.creditTable).get(), isEmpty);
     expect(await db.select(db.customers).get(), isEmpty);
     expect(await db.select(db.categories).get(), isEmpty);
     expect(await db.select(db.loaners).get(), isEmpty);

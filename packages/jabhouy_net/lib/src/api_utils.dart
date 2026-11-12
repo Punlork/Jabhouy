@@ -42,6 +42,7 @@ ApiResponse<T> handleResponse<T>(
           ? responseBody['message'].toString()
           : 'Error: $statusCode',
       statusCode: statusCode,
+      code: responseBody is Map<String, dynamic> ? responseBody['code']?.toString() : null,
       stackTrace: StackTrace.current,
     );
   }

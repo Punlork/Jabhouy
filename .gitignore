@@ -124,3 +124,6 @@ app.*.map.json
 patrol_test/test_bundle.dart
 # Local dependency overrides (per-developer)
 pubspec_overrides.yaml
+
+# Local scratch: specs, issues, review notes
+.scratch/

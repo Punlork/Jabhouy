@@ -134,7 +134,10 @@ class DefaultShopRepository implements ShopRepository {
   @override
   Future<void> pullLatest() async {
     if (!await _connectivity.isOnline) return;
-    await _engine.pull(force: true, only: {SyncEntityType.category, SyncEntityType.shopItem});
+    await _engine.pull(
+      force: true,
+      only: {SyncEntityType.category, SyncEntityType.shopItem},
+    );
   }
 
   @override
@@ -158,8 +161,9 @@ class DefaultShopRepository implements ShopRepository {
       // server first. Category has no adapter yet, so nothing is queued
       // under that id and this is inert; it becomes load-bearing the day
       // category is layered, with no change here.
-      dependsOnLocalId:
-          categoryId != null && categoryId < 0 ? '$categoryId' : null,
+      dependsOnLocalId: categoryId != null && categoryId < 0
+          ? '$categoryId'
+          : null,
     );
   }
 
