@@ -13,7 +13,8 @@
         "--flavor",
         "development",
         "--dart-define-from-file=config/features/local.json"
-      ]
+      ],
+      // fvm flutter run --flavor development -t lib/main_local.dart --dart-define-from-file=config/features/local.json
     },
     {
       "name": "Development",
@@ -31,6 +32,7 @@
         "--dart-define-from-file=config/features/development.json",
         "-v"
       ]
+      // fvm flutter run --flavor development -t lib/main_development.dart --dart-define-from-file=config/features/development.json
     },
     {
       "name": "Production",
