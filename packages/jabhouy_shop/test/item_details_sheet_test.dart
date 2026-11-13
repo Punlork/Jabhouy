@@ -144,11 +144,11 @@ void main() {
     bool onScreen(Finder f) => screen.contains(tester.getCenter(f));
     expect(onScreen(find.text('កែតម្លៃ')), isTrue, reason: 'buttons fixed');
 
-    await tester.drag(find.text('u3'), const Offset(0, -300));
+    await tester.drag(find.text('u3 (1)'), const Offset(0, -300));
     await tester.pumpAndSettle();
     expect(onScreen(find.text('Many')), isTrue, reason: 'header fixed');
     expect(onScreen(find.text('កែតម្លៃ')), isTrue);
-    expect(find.text('u11'), findsOneWidget, reason: 'last price reached');
+    expect(find.text('u11 (1)'), findsOneWidget, reason: 'last price reached');
   });
 
   testWidgets('the ≈ line follows the shop setting', (tester) async {

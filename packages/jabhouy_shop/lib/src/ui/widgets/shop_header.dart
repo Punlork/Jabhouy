@@ -113,6 +113,11 @@ class _SearchBar extends StatelessWidget {
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 useCustomBorder: false,
                 decoration: InputDecoration(
+                  suffixIcon: MicButton(
+                    fieldLabel: searchHintText ?? l10n.searchItems,
+                    controller: controller,
+                    onChanged: onChanged,
+                  ),
                   prefixIconColor: colorScheme.onSurfaceVariant,
                   // The field only grows to its text and padding, so pad it to 54.
                   contentPadding: const EdgeInsets.symmetric(

@@ -66,9 +66,10 @@ class CreditListCubit extends Cubit<CreditListState> {
 
   void search(String query) => emit(_derive(state.copyWith(query: query)));
 
-  /// Another order starts in its own direction; the same one flips it.
-  void setSort(CreditSort sort) {
-    final reversed = sort == state.sort && !state.sortReversed;
+  /// Sets [reversed] when given; otherwise another order starts in its own
+  /// direction and the same one flips it.
+  void setSort(CreditSort sort, {bool? reversed}) {
+    reversed ??= sort == state.sort && !state.sortReversed;
     emit(_derive(state.copyWith(sort: sort, sortReversed: reversed)));
     onSortChanged?.call(sort, reversed: reversed);
   }

@@ -15,17 +15,22 @@ Future<String?> scanBarcode(BuildContext context) =>
     );
 
 /// Home's scan: each code's result shows over the camera. Returns the
-/// [Item] to open, a code to add a new Item with, or null when closed.
+/// [Item] to open, a code to add a new Item with, `(join: code)` for an
+/// unmatched code [isJoinCode] accepts, or null when closed.
 Future<Object?> findByBarcode(
   BuildContext context,
-  Future<List<Item>> Function(String code) lookup,
-) => Navigator.of(context).push<Object>(
+  Future<List<Item>> Function(String code) lookup, {
+  bool Function(String code)? isJoinCode,
+}) => Navigator.of(context).push<Object>(
   MaterialPageRoute(
     fullscreenDialog: true,
     builder: (_) => BarcodeScannerPage(
       onCode: (pageContext, code) async {
         final items = await lookup(code);
         if (!pageContext.mounted) return null;
+        if (items.isEmpty && (isJoinCode?.call(code) ?? false)) {
+          return (join: code);
+        }
         return showScanResult(pageContext, code: code, items: items);
       },
     ),

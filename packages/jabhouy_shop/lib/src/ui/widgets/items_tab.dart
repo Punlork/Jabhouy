@@ -60,28 +60,37 @@ class _ItemsTabState extends State<ItemsTab>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FilterChips(
-              items: [
-                FilterChipItem(
-                  label: l10n.all,
-                  selected: all,
-                  onTap: cubit.filter,
-                ),
-                if (state.canEdit && state.missingCount > 0)
+            // Once the search row scrolls away, the chips would touch the
+            // status bar above and the list below.
+            AnimatedPadding(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              padding: EdgeInsets.symmetric(
+                vertical: widget.chromeVisible ? 0 : 8,
+              ),
+              child: FilterChips(
+                items: [
                   FilterChipItem(
-                    label: l10n.priceMissing,
-                    selected: state.missingOnly,
-                    warningCount: state.missingCount,
-                    onTap: () => cubit.filter(missingOnly: true),
+                    label: l10n.all,
+                    selected: all,
+                    onTap: cubit.filter,
                   ),
-                for (final category in state.categories)
-                  if (!category.hidden)
+                  if (state.canEdit && state.missingCount > 0)
                     FilterChipItem(
-                      label: category.name,
-                      selected: category.id == state.categoryId,
-                      onTap: () => cubit.filter(categoryId: category.id),
+                      label: l10n.priceMissing,
+                      selected: state.missingOnly,
+                      warningCount: state.missingCount,
+                      onTap: () => cubit.filter(missingOnly: true),
                     ),
-              ],
+                  for (final category in state.categories)
+                    if (!category.hidden)
+                      FilterChipItem(
+                        label: category.name,
+                        selected: category.id == state.categoryId,
+                        onTap: () => cubit.filter(categoryId: category.id),
+                      ),
+                ],
+              ),
             ),
             ClipRect(
               child: AnimatedAlign(
@@ -109,50 +118,25 @@ class _ItemsTabState extends State<ItemsTab>
                               ),
                             ),
                           ),
-                          PopupMenuButton<ItemSort>(
+                          SortMenu<ItemSort>(
                             tooltip: l10n.itemSortTooltip,
-                            initialValue: state.sort,
-                            // Picking the current order again flips it.
-                            onSelected: cubit.setSort,
-                            // Open below the button, not over the grid toggle.
-                            position: PopupMenuPosition.under,
-                            color: t.surface,
-                            surfaceTintColor: Colors.transparent,
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppSizes.radiusCard,
-                              ),
-                              side: BorderSide(color: t.border),
-                            ),
-                            icon: Icon(
-                              Icons.sort_rounded,
-                              color: t.textSecondary,
-                            ),
-                            itemBuilder: (_) => [
-                              _sortItem(
-                                context,
+                            options: [
+                              (
                                 ItemSort.name,
                                 Icons.sort_by_alpha_rounded,
-                                state.sort == ItemSort.name &&
-                                        state.sortReversed
-                                    ? l10n.itemSortNameReversed
-                                    : l10n.itemSortName,
-                                selected: state.sort,
-                                reversed: state.sortReversed,
+                                l10n.itemSortName,
+                                l10n.itemSortNameReversed,
                               ),
-                              _sortItem(
-                                context,
+                              (
                                 ItemSort.recent,
                                 Icons.schedule_rounded,
-                                state.sort == ItemSort.recent &&
-                                        state.sortReversed
-                                    ? l10n.itemSortRecentReversed
-                                    : l10n.itemSortRecent,
-                                selected: state.sort,
-                                reversed: state.sortReversed,
+                                l10n.itemSortRecent,
+                                l10n.itemSortRecentReversed,
                               ),
                             ],
+                            selected: state.sort,
+                            reversed: state.sortReversed,
+                            onChanged: cubit.setSort,
                           ),
                           IconButton(
                             onPressed: cubit.toggleGrid,
@@ -264,51 +248,6 @@ class _ItemsTabState extends State<ItemsTab>
 
 /// Room at the bottom for the nav bar and its floating button.
 const _listPadding = EdgeInsets.fromLTRB(16, 4, 16, 160);
-
-/// One sort option: icon, label, and on the one in use an arrow for its
-/// direction, down or up once reversed.
-PopupMenuItem<ItemSort> _sortItem(
-  BuildContext context,
-  ItemSort value,
-  IconData icon,
-  String label, {
-  required ItemSort selected,
-  required bool reversed,
-}) {
-  final t = context.tokens;
-  final on = value == selected;
-  return PopupMenuItem(
-    value: value,
-    height: 44,
-    child: Row(
-      children: [
-        Icon(icon, size: 20, color: on ? t.textPrimary : t.textMuted),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: AppTextTheme.body.copyWith(
-              color: on ? t.textPrimary : t.textSecondary,
-              fontWeight: on ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        // Kept in the layout when off so the menu width does not jump.
-        Opacity(
-          opacity: on ? 1 : 0,
-          child: Icon(
-            reversed
-                ? Icons.arrow_upward_rounded
-                : Icons.arrow_downward_rounded,
-            size: 20,
-            color: t.textPrimary,
-          ),
-        ),
-      ],
-    ),
-  );
-}
 
 class _ItemRow extends StatelessWidget {
   const _ItemRow({
@@ -560,9 +499,10 @@ class _ItemCard extends StatelessWidget {
   }
 }
 
-/// Three price lines at most, then `+n ទៀត`: the sheet shows the rest.
+/// Three price lines, then `+n ទៀត` for the rest; a lone fourth line shows
+/// itself, since `+1 ទៀត` takes the same room.
 List<Widget> _priceLines(BuildContext context, Item item) {
-  const shown = 3;
+  final shown = item.prices.length <= 4 ? 4 : 3;
   return [
     for (final option in item.prices.take(shown)) _PriceLine(option),
     if (item.prices.length > shown)
@@ -603,7 +543,7 @@ class _PriceLine extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              option.label,
+              option.countLabel,
               style: AppTextTheme.hint.copyWith(
                 color: context.tokens.textMuted,
               ),

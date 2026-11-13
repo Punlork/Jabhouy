@@ -259,7 +259,7 @@ class _PriceBlock extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  option.label,
+                  option.countLabel,
                   style: AppTextTheme.body.copyWith(
                     color: t.textPrimary,
                     fontWeight: FontWeight.w600,
