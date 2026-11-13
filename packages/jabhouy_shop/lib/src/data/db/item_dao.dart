@@ -419,6 +419,54 @@ class ItemDao {
     return [for (final row in rows) row.read<String>('unit')];
   }
 
+  /// Units on the Shop's live Items, most used first.
+  Future<List<String>> shopUnitsByUse(String shopId) async {
+    final rows = await _db
+        .customSelect(
+          '''
+      SELECT ip.unit AS unit, COUNT(*) AS uses
+      FROM item_price ip
+      JOIN item i ON i.id = ip.item_id
+      WHERE i.shop_id = ? AND i.deleted_at IS NULL AND TRIM(ip.unit) != ''
+      GROUP BY ip.unit
+      ORDER BY uses DESC, ip.unit ASC
+      ''',
+          variables: [Variable.withString(shopId)],
+          readsFrom: {_db.itemTable, _db.itemPriceTable},
+        )
+        .get();
+    return [for (final row in rows) row.read<String>('unit')];
+  }
+
+  /// Visible units across the Shop's live categories: the server's
+  /// starter units plus any the owner added.
+  Future<List<String>> shopCategoryUnits(String shopId) async {
+    final rows = await _db
+        .customSelect(
+          '''
+      SELECT DISTINCT cu.unit AS unit
+      FROM category_unit cu
+      JOIN category c ON c.id = cu.category_id
+      WHERE c.shop_id = ? AND c.deleted_at IS NULL AND cu.hidden = 0
+      ORDER BY c.sort_order, cu.unit
+      ''',
+          variables: [Variable.withString(shopId)],
+          readsFrom: {_db.categoryTable, _db.categoryUnitTable},
+        )
+        .get();
+    return [for (final row in rows) row.read<String>('unit')];
+  }
+
+  /// Units the owner hid on a category.
+  Future<Set<String>> hiddenUnits(String categoryId) async {
+    final rows =
+        await (_db.select(_db.categoryUnitTable)..where(
+              (u) => u.categoryId.equals(categoryId) & u.hidden.equals(true),
+            ))
+            .get();
+    return {for (final row in rows) row.unit};
+  }
+
   /// The live Item with [id] and its options, or null once deleted.
   /// The Shop an item belongs to, deleted or not; null once its row is gone.
   Future<String?> shopOfItem(String id) =>

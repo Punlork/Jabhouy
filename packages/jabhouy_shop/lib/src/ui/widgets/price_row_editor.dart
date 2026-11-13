@@ -418,7 +418,7 @@ class PriceRowSummary extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (qty != null && qty > 1) Text('×$qty', style: muted),
+                  Text('×${qty ?? 1}', style: muted),
                 ],
               ),
             ),

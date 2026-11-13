@@ -195,6 +195,26 @@ class ItemRepository {
   Future<List<String>> unitsFor(String categoryId) =>
       _dao.unitsByUse(categoryId);
 
+  /// The price sheet's unit chips: the category's own units, then units
+  /// the Shop's Items use, then every other category's units, then the
+  /// starter units (Shops made before the server seeded them have none),
+  /// minus any this category hides. Never empty.
+  Future<List<String>> unitChipsFor(String? categoryId) async {
+    final own = categoryId == null
+        ? const <String>[]
+        : await _dao.unitsByUse(categoryId);
+    final hidden = categoryId == null
+        ? const <String>{}
+        : await _dao.hiddenUnits(categoryId);
+    final shop = await _dao.shopUnitsByUse(_shopId);
+    final others = await _dao.shopCategoryUnits(_shopId);
+    final starter = starterCategories.expand((c) => c.$2);
+    return [
+      for (final unit in {...own, ...shop, ...others, ...starter})
+        if (!hidden.contains(unit)) unit,
+    ];
+  }
+
   Future<void> _queue(
     SyncEntityType type,
     String id,

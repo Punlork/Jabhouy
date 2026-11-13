@@ -4,16 +4,12 @@ import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 class _FakeSpeech implements SpeechService {
-  _FakeSpeech({this.ok = true, this.khmer = true});
+  _FakeSpeech({this.ok = true});
 
   final bool ok;
-  final bool khmer;
   final locales = <String>[];
   void Function(String)? say;
   void Function()? stopped;
-
-  @override
-  Future<bool> supports(String localeId) async => khmer;
 
   @override
   Future<bool> start({
@@ -114,22 +110,30 @@ void main() {
     expect(find.text('កំពុងស្តាប់…'), findsOneWidget);
   });
 
-  testWidgets('no Khmer on the phone: starts in English, no toggle', (
+  testWidgets('both languages always offered; EN listens in English', (
     tester,
   ) async {
-    final speech = _FakeSpeech(khmer: false);
+    final speech = _FakeSpeech();
     await open(tester, speech);
-    expect(speech.locales, ['en-US']);
-    expect(find.text('ខ្មែរ'), findsNothing);
+    expect(find.text('ខ្មែរ'), findsOneWidget);
+    await tester.tap(find.text('EN'));
+    await tester.pumpAndSettle();
+    expect(speech.locales, ['km-KH', 'en-US']);
   });
 
   testWidgets(
     'MicButton fills the field only after confirm; hidden without a scope',
     (tester) async {
       final speech = _FakeSpeech();
+      final field = TextEditingController(text: 'កាហ្វេ');
+      addTearDown(field.dispose);
       var got = '';
       Widget app({required bool scoped}) {
-        final mic = MicButton(fieldLabel: 'ឈ្មោះ', onText: (t) => got = t);
+        final mic = MicButton(
+          fieldLabel: 'ឈ្មោះ',
+          controller: field,
+          onChanged: (t) => got = t,
+        );
         return MaterialApp(
           theme: AppTheme.lightTheme,
           locale: const Locale('km'),
@@ -152,7 +156,59 @@ void main() {
       expect(got, '');
       await tester.tap(find.text('ប្រើអត្ថបទនេះ'));
       await tester.pumpAndSettle();
-      expect(got, 'ទឹកក្រូច');
+      // Added after what was typed, not in its place.
+      expect(got, 'កាហ្វេ ទឹកក្រូច');
+      expect(field.text, 'កាហ្វេ ទឹកក្រូច');
     },
   );
+
+  testWidgets('listening again continues the text, in either language', (
+    tester,
+  ) async {
+    final speech = _FakeSpeech();
+    await open(tester, speech);
+    speech.say!('កាហ្វេ');
+    speech.stopped!();
+    await tester.pump();
+
+    await tester.tap(find.text('ចុចដើម្បីស្តាប់ម្តងទៀត'));
+    await tester.pumpAndSettle();
+    speech.say!('ទឹកដោះគោ');
+    await tester.tap(find.text('EN'));
+    await tester.pumpAndSettle();
+    speech.say!('large');
+    await tester.pump();
+
+    await tester.tap(find.text('ប្រើអត្ថបទនេះ'));
+    await tester.pumpAndSettle();
+    expect(result, 'កាហ្វេ ទឹកដោះគោ large');
+  });
+
+  group('insertDictation', () {
+    TextEditingValue at(String text, int start, [int? end]) => TextEditingValue(
+      text: text,
+      selection: TextSelection(baseOffset: start, extentOffset: end ?? start),
+    );
+
+    test('appends to an unfocused field with a space', () {
+      final v = insertDictation(const TextEditingValue(text: 'Coca'), 'cola');
+      expect(v.text, 'Coca cola');
+      expect(v.selection.baseOffset, 9);
+    });
+
+    test('empty field gets the words alone', () {
+      expect(insertDictation(TextEditingValue.empty, 'cola').text, 'cola');
+    });
+
+    test('inserts at the cursor, spaced from the words around it', () {
+      final v = insertDictation(at('Coca 1.5L', 4), 'cola');
+      expect(v.text, 'Coca cola 1.5L');
+      expect(v.selection.baseOffset, 9);
+    });
+
+    test('replaces a selection; no space needed before a space', () {
+      expect(insertDictation(at('Coca pepsi', 5, 10), 'cola').text, 'Coca cola');
+      expect(insertDictation(at('ab', 1), 'X').text, 'a X b');
+    });
+  });
 }

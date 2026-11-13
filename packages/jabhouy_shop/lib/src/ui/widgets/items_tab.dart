@@ -60,28 +60,37 @@ class _ItemsTabState extends State<ItemsTab>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FilterChips(
-              items: [
-                FilterChipItem(
-                  label: l10n.all,
-                  selected: all,
-                  onTap: cubit.filter,
-                ),
-                if (state.canEdit && state.missingCount > 0)
+            // Once the search row scrolls away, the chips would touch the
+            // status bar above and the list below.
+            AnimatedPadding(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              padding: EdgeInsets.symmetric(
+                vertical: widget.chromeVisible ? 0 : 8,
+              ),
+              child: FilterChips(
+                items: [
                   FilterChipItem(
-                    label: l10n.priceMissing,
-                    selected: state.missingOnly,
-                    warningCount: state.missingCount,
-                    onTap: () => cubit.filter(missingOnly: true),
+                    label: l10n.all,
+                    selected: all,
+                    onTap: cubit.filter,
                   ),
-                for (final category in state.categories)
-                  if (!category.hidden)
+                  if (state.canEdit && state.missingCount > 0)
                     FilterChipItem(
-                      label: category.name,
-                      selected: category.id == state.categoryId,
-                      onTap: () => cubit.filter(categoryId: category.id),
+                      label: l10n.priceMissing,
+                      selected: state.missingOnly,
+                      warningCount: state.missingCount,
+                      onTap: () => cubit.filter(missingOnly: true),
                     ),
-              ],
+                  for (final category in state.categories)
+                    if (!category.hidden)
+                      FilterChipItem(
+                        label: category.name,
+                        selected: category.id == state.categoryId,
+                        onTap: () => cubit.filter(categoryId: category.id),
+                      ),
+                ],
+              ),
             ),
             ClipRect(
               child: AnimatedAlign(
@@ -109,21 +118,20 @@ class _ItemsTabState extends State<ItemsTab>
                               ),
                             ),
                           ),
-                          SortButtons<ItemSort>(
+                          SortMenu<ItemSort>(
+                            tooltip: l10n.itemSortTooltip,
                             options: [
                               (
                                 ItemSort.name,
-                                state.sort == ItemSort.name &&
-                                        state.sortReversed
-                                    ? l10n.itemSortNameReversed
-                                    : l10n.itemSortName,
+                                Icons.sort_by_alpha_rounded,
+                                l10n.itemSortName,
+                                l10n.itemSortNameReversed,
                               ),
                               (
                                 ItemSort.recent,
-                                state.sort == ItemSort.recent &&
-                                        state.sortReversed
-                                    ? l10n.itemSortRecentReversed
-                                    : l10n.itemSortRecent,
+                                Icons.schedule_rounded,
+                                l10n.itemSortRecent,
+                                l10n.itemSortRecentReversed,
                               ),
                             ],
                             selected: state.sort,
@@ -491,9 +499,10 @@ class _ItemCard extends StatelessWidget {
   }
 }
 
-/// Three price lines at most, then `+n ទៀត`: the sheet shows the rest.
+/// Three price lines, then `+n ទៀត` for the rest; a lone fourth line shows
+/// itself, since `+1 ទៀត` takes the same room.
 List<Widget> _priceLines(BuildContext context, Item item) {
-  const shown = 3;
+  final shown = item.prices.length <= 4 ? 4 : 3;
   return [
     for (final option in item.prices.take(shown)) _PriceLine(option),
     if (item.prices.length > shown)
@@ -534,7 +543,7 @@ class _PriceLine extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              option.label,
+              option.countLabel,
               style: AppTextTheme.hint.copyWith(
                 color: context.tokens.textMuted,
               ),

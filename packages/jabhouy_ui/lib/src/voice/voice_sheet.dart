@@ -35,9 +35,9 @@ class VoiceSheet extends StatefulWidget {
 class _VoiceSheetState extends State<VoiceSheet> {
   static const _bars = 30;
 
-  /// `km-KH` first (plan §5.6); the toggle restarts listening.
+  /// `km-KH` first (plan §5.6); the toggle restarts listening, keeping the
+  /// text so far.
   String _locale = 'km-KH';
-  bool _khmer = true;
   String _text = '';
   final _levels = List<double>.filled(_bars, 0, growable: true);
   bool _unavailable = false;
@@ -46,26 +46,19 @@ class _VoiceSheetState extends State<VoiceSheet> {
   @override
   void initState() {
     super.initState();
-    _begin();
+    _listen();
   }
 
-  Future<void> _begin() async {
-    // Hide ខ្មែរ on a phone that cannot recognise it (plan §5.6).
-    if (!await widget.service.supports('km-KH') && mounted) {
-      setState(() {
-        _khmer = false;
-        _locale = 'en-US';
-      });
-    }
-    await _listen();
-  }
-
+  /// Each listen continues the text so far, as Gboard does.
   Future<void> _listen() async {
     if (mounted) setState(() => _listening = true);
+    final before = _text.trim();
     final ok = await widget.service.start(
       localeId: _locale,
       onText: (text) {
-        if (mounted) setState(() => _text = text);
+        if (mounted) {
+          setState(() => _text = before.isEmpty ? text : '$before $text');
+        }
       },
       onLevel: (level) {
         if (mounted) {
@@ -87,7 +80,6 @@ class _VoiceSheetState extends State<VoiceSheet> {
     await widget.service.stop();
     setState(() {
       _locale = locale;
-      _text = '';
       _unavailable = false;
     });
     await _listen();
@@ -125,15 +117,17 @@ class _VoiceSheetState extends State<VoiceSheet> {
               ],
             ),
           ),
-          if (_khmer)
-            SizedBox(
-              width: 120,
-              child: SegmentedControl<String>(
-                options: const [('km-KH', 'ខ្មែរ'), ('en-US', 'EN')],
-                selected: _locale,
-                onChanged: _switch,
-              ),
+          // Always offered: speech_to_text lists only on-device languages
+          // on Android 13+, which leaves out Khmer that online recognition
+          // (as in Gboard) handles.
+          SizedBox(
+            width: 120,
+            child: SegmentedControl<String>(
+              options: const [('km-KH', 'ខ្មែរ'), ('en-US', 'EN')],
+              selected: _locale,
+              onChanged: _switch,
             ),
+          ),
         ],
       ),
       footer: Row(

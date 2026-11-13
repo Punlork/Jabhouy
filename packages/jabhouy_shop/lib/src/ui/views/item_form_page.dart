@@ -166,7 +166,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                           hintText: l10n.itemNoteHint,
                           suffixIcon: MicButton(
                             fieldLabel: l10n.noteLabel,
-                            onText: (text) => _note.text = text,
+                            controller: _note,
                           ),
                         ),
                       ),
@@ -220,10 +220,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
               error: nameProblem == null ? null : const SizedBox(),
               suffixIcon: MicButton(
                 fieldLabel: l10n.itemName,
-                onText: (text) {
-                  _name.text = text;
-                  _cubit.nameChanged(text);
-                },
+                controller: _name,
+                onChanged: _cubit.nameChanged,
               ),
             ),
           ),
