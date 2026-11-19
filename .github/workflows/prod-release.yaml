@@ -197,6 +197,7 @@ jobs:
             echo "Missing PRODUCTION_GOOGLE_SERVICES_JSON secret."
             exit 1
           fi
+          mkdir -p android/app/src/production
           printf '%s' "$PRODUCTION_GOOGLE_SERVICES_JSON" > android/app/src/production/google-services.json
 
       - name: Restore production .env
