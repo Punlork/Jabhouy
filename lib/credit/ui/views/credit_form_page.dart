@@ -121,6 +121,23 @@ class _CreditFormPageState extends State<CreditFormPage> {
                     const SizedBox(height: AppSizes.sectionGap),
                     _amount(state),
                     const SizedBox(height: AppSizes.sectionGap),
+                    LabeledField(
+                      label: l10n.noteLabel,
+                      hint: l10n.creditNoteHelp,
+                      child: TextField(
+                        controller: _note,
+                        minLines: 3,
+                        maxLines: 5,
+                        decoration: InputDecoration(
+                          hintText: l10n.creditNoteHint,
+                          suffixIcon: MicButton(
+                            fieldLabel: l10n.noteLabel,
+                            controller: _note,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.sectionGap),
                     _takenAt(state),
                     const SizedBox(height: AppSizes.sectionGap),
                     LabeledField(
@@ -142,22 +159,6 @@ class _CreditFormPageState extends State<CreditFormPage> {
                         ],
                         selected: state.creditStatus,
                         onChanged: _cubit.setStatus,
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    LabeledField(
-                      label: l10n.noteLabel,
-                      optional: true,
-                      child: TextField(
-                        controller: _note,
-                        maxLines: 2,
-                        decoration: InputDecoration(
-                          hintText: l10n.creditNoteHint,
-                          suffixIcon: MicButton(
-                            fieldLabel: l10n.noteLabel,
-                            controller: _note,
-                          ),
-                        ),
                       ),
                     ),
                   ],
