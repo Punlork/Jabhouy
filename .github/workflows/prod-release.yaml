@@ -1,8 +1,7 @@
-# Patrol UI tests + Fastlane build/deploy
-# - Patrol: UI tests on Android emulator (and optionally iOS simulator on macOS)
-# - Fastlane: build and deploy via lanes (triggered manually or on release)
+# PRs into main: analyze and test. Push to main: build the production app,
+# upload the AAB to Play internal testing, then create the GitHub release.
 
-name: Patrol & Fastlane CI/CD
+name: Prod release
 
 on:
   push:
@@ -126,6 +125,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # Gradle's downloads and build cache; the APK build is the slow step.
+          cache: gradle
 
       # Unpinned stable failed pub resolve (copy_with_extension_gen vs drift_dev).
       - name: Read Flutter version from .fvmrc
@@ -182,6 +183,20 @@ jobs:
         run: |
           umask 077
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+
+      # Gitignored; without it the Google services plugin is skipped and the
+      # build has no Firebase (push for income sync, Analytics). src/main, not
+      # src/production: build.gradle only checks development/ and main/.
+      - name: Restore Firebase config
+        shell: bash
+        env:
+          PRODUCTION_GOOGLE_SERVICES_JSON: ${{ secrets.PRODUCTION_GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$PRODUCTION_GOOGLE_SERVICES_JSON" ]; then
+            echo "Missing PRODUCTION_GOOGLE_SERVICES_JSON secret."
+            exit 1
+          fi
+          printf '%s' "$PRODUCTION_GOOGLE_SERVICES_JSON" > android/app/src/main/google-services.json
 
       - name: Restore production .env
         shell: bash

@@ -51,7 +51,7 @@ This project uses **Patrol** for native UI tests and **Fastlane** with **GitHub 
 
 ### CI (GitHub Actions)
 
-- Workflow: **`.github/workflows/patrol-fastlane.yaml`**
+- Workflow: **`.github/workflows/prod-release.yaml`**
 - **Patrol (Android)** job: starts an Android emulator (API 34) and runs `patrol test --flavor development`.
 - No extra secrets required for the Patrol job.
 
@@ -87,9 +87,12 @@ This project uses **Patrol** for native UI tests and **Fastlane** with **GitHub 
 
 ### CI (GitHub Actions)
 
-- **Patrol & Fastlane** workflow: `.github/workflows/patrol-fastlane.yaml`
-  - On **push to `main`**: after Patrol passes, **Fastlane Android** runs `build_dev`, **Fastlane iOS** runs `build_dev` (no signing).
-  - No secrets required for these build-only steps.
+- **Prod release** workflow: `.github/workflows/prod-release.yaml`
+  - On **push to `main`**: after analyze and test pass, builds the production APK, runs `fastlane internal` (AAB to Play internal testing), then creates the GitHub release.
+  - Secrets: `ANDROID_KEYSTORE_*`, `PRODUCTION_DOTENV`, `PRODUCTION_GOOGLE_SERVICES_JSON`, `PLAY_STORE_JSON_KEY`.
+- **Dev release** workflow: `.github/workflows/dev-release.yaml`
+  - On **push to `dev`**: analyze, test, build the development APK and send it to Telegram.
+  - Secrets: `ANDROID_DEV_KEYSTORE_*`, `DEV_DOTENV`, `DEV_GOOGLE_SERVICES_JSON`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
 
 ### Secrets for deployment (optional)
 
