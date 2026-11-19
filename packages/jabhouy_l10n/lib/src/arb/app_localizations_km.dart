@@ -1080,6 +1080,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get itemNoteHint => 'អ្នកផ្គត់ផ្គង់, កន្លែងដាក់ទំនិញ…';
 
   @override
+  String get itemNoteHelp =>
+      'សរសេរអ្វីដែលមានតែអ្នកចាំ ដើម្បីឱ្យអ្នកផ្សេងអាចលក់ជំនួសបាន។';
+
+  @override
   String get priceSellingHint => 'ឧ. 3,000';
 
   @override
@@ -1194,6 +1198,10 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get creditNoteHint => 'ទីតាំង ឬព័ត៌មានផ្សេងៗ';
+
+  @override
+  String get creditNoteHelp =>
+      'សរសេរថ្ងៃដែលគាត់សន្យាសង ដើម្បីងាយរំលឹកពេលក្រោយ។';
 
   @override
   String get creditChooseCustomer => 'សូមជ្រើសរើសអតិថិជន';

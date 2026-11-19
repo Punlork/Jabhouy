@@ -2126,6 +2126,12 @@ abstract class AppLocalizations {
   /// **'Supplier, where it is kept…'**
   String get itemNoteHint;
 
+  /// Helper text under the Item note, encouraging the seller to fill it
+  ///
+  /// In en, this message translates to:
+  /// **'Write what only you remember, so others can serve customers too.'**
+  String get itemNoteHelp;
+
   /// Hint in the selling price field
   ///
   /// In en, this message translates to:
@@ -2335,6 +2341,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Place or other details'**
   String get creditNoteHint;
+
+  /// Helper text under the Credit note, encouraging the seller to fill it
+  ///
+  /// In en, this message translates to:
+  /// **'Write when they promised to pay, so you can remind them later.'**
+  String get creditNoteHelp;
 
   /// Error when a Credit is saved without a customer
   ///

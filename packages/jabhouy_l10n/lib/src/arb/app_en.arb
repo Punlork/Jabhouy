@@ -1432,6 +1432,10 @@
   "@itemNoteHint": {
     "description": "Hint in the item note field"
   },
+  "itemNoteHelp": "Write what only you remember, so others can serve customers too.",
+  "@itemNoteHelp": {
+    "description": "Helper text under the Item note, encouraging the seller to fill it"
+  },
   "priceSellingHint": "e.g. 3,000",
   "@priceSellingHint": {
     "description": "Hint in the selling price field"
@@ -1586,6 +1590,10 @@
   "creditNoteHint": "Place or other details",
   "@creditNoteHint": {
     "description": "Placeholder of the Credit note"
+  },
+  "creditNoteHelp": "Write when they promised to pay, so you can remind them later.",
+  "@creditNoteHelp": {
+    "description": "Helper text under the Credit note, encouraging the seller to fill it"
   },
   "creditChooseCustomer": "Choose a customer",
   "@creditChooseCustomer": {
