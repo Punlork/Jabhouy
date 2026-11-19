@@ -1392,6 +1392,10 @@
   "@itemNoteHint": {
     "description": "Hint in the item note field"
   },
+  "itemNoteHelp": "សរសេរអ្វីដែលមានតែអ្នកចាំ ដើម្បីឱ្យអ្នកផ្សេងអាចលក់ជំនួសបាន។",
+  "@itemNoteHelp": {
+    "description": "Helper text under the Item note, encouraging the seller to fill it"
+  },
   "priceSellingHint": "ឧ. 3,000",
   "@priceSellingHint": {
     "description": "Hint in the selling price field"
@@ -1546,6 +1550,10 @@
   "creditNoteHint": "ទីតាំង ឬព័ត៌មានផ្សេងៗ",
   "@creditNoteHint": {
     "description": "Placeholder of the Credit note"
+  },
+  "creditNoteHelp": "សរសេរថ្ងៃដែលគាត់សន្យាសង ដើម្បីងាយរំលឹកពេលក្រោយ។",
+  "@creditNoteHelp": {
+    "description": "Helper text under the Credit note, encouraging the seller to fill it"
   },
   "creditChooseCustomer": "សូមជ្រើសរើសអតិថិជន",
   "@creditChooseCustomer": {

@@ -345,7 +345,12 @@ class _CategorySheetState extends State<_CategorySheet> {
               controller: _name,
               enabled: canEdit,
               textInputAction: TextInputAction.done,
-              decoration: InputDecoration(hintText: l10n.categoryNameHint),
+              decoration: InputDecoration(
+                hintText: l10n.categoryNameHint,
+                suffixIcon: canEdit
+                    ? MicButton(fieldLabel: l10n.name, controller: _name)
+                    : null,
+              ),
             ),
           ),
           const SizedBox(height: 8),

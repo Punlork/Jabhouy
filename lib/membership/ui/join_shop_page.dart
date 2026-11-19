@@ -12,15 +12,24 @@ import 'package:jabhouy_shop/jabhouy_shop.dart';
 import 'package:jabhouy_sync/jabhouy_sync.dart';
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
-Future<void> openJoinShop(BuildContext context) =>
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => const JoinShopPage()));
+/// A [code] (an invite QR scanned elsewhere) is filled in and joined.
+Future<void> openJoinShop(BuildContext context, {String? code}) =>
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => JoinShopPage(code: code)),
+    );
+
+/// Whether a scanned [code] is shaped like an invite: six characters from
+/// the API's alphabet (no 0, 1, I or O). Not a server check.
+bool isInviteCode(String code) =>
+    RegExp(r'^[A-HJ-NP-Z2-9]{6}$').hasMatch(code.trim());
 
 /// Join shop (canvas ១៧): scan the owner's QR or type the 6-character code.
 class JoinShopPage extends StatefulWidget {
-  const JoinShopPage({super.key});
+  const JoinShopPage({this.code, super.key});
 
   static const codeLength = 6;
+
+  final String? code;
 
   @override
   State<JoinShopPage> createState() => _JoinShopPageState();
@@ -36,6 +45,13 @@ class _JoinShopPageState extends State<JoinShopPage> {
   void initState() {
     super.initState();
     _code.addListener(() => setState(() => _error = null));
+    if (widget.code case final code?) {
+      _code.text = _clean(code);
+      // _join reads the localizations, which need the first frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _code.text.length == JoinShopPage.codeLength) _join();
+      });
+    }
   }
 
   @override

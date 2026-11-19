@@ -47,12 +47,9 @@ class _UnitPickerSheetState extends State<_UnitPickerSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextField(
+          MicSearchField(
+            hintText: l10n.priceUnit,
             onChanged: (v) => setState(() => _query = v),
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.search_rounded, color: t.textMuted),
-            ),
           ),
           const SizedBox(height: 8),
           for (final unit in widget.units)

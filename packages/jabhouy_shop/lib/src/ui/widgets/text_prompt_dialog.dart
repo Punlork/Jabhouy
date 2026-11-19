@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
+import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 /// Asks for one line of text; null when dismissed.
 Future<String?> showTextPrompt(
@@ -39,7 +40,13 @@ class _TextPromptDialogState extends State<_TextPromptDialog> {
       content: TextField(
         controller: _controller,
         autofocus: true,
-        decoration: InputDecoration(hintText: widget.hintText),
+        decoration: InputDecoration(
+          hintText: widget.hintText,
+          suffixIcon: MicButton(
+            fieldLabel: widget.title,
+            controller: _controller,
+          ),
+        ),
         onSubmitted: (v) => Navigator.pop(context, v),
       ),
       actions: [

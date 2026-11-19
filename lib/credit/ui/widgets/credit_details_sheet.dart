@@ -243,10 +243,21 @@ class CreditDetailsSheet extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              note,
-              style: AppTextTheme.body.copyWith(color: t.textPrimary),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: t.surfaceMuted,
+                borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+              ),
+              child: SelectableText(
+                note,
+                style: AppTextTheme.body.copyWith(
+                  color: t.textPrimary,
+                  fontSize: 17,
+                  height: 1.6,
+                ),
+              ),
             ),
           ],
           const SizedBox(height: 8),

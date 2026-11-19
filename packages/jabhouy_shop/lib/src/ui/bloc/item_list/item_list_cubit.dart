@@ -127,9 +127,10 @@ class ItemListCubit extends Cubit<ItemListState> {
     onGridChanged?.call(state.grid);
   }
 
-  /// Another order starts in its own direction; the same one flips it.
-  void setSort(ItemSort sort) {
-    final reversed = sort == state.sort && !state.sortReversed;
+  /// Sets [reversed] when given; otherwise another order starts in its own
+  /// direction and the same one flips it.
+  void setSort(ItemSort sort, {bool? reversed}) {
+    reversed ??= sort == state.sort && !state.sortReversed;
     emit(state.copyWith(sort: sort, sortReversed: reversed));
     onSortChanged?.call(sort, reversed: reversed);
     _watchItems();

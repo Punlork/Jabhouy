@@ -146,7 +146,7 @@ class _Match extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          option.label,
+                          option.countLabel,
                           style: AppTextTheme.body.copyWith(
                             color: t.onPrimary,
                             fontWeight: FontWeight.w600,
@@ -180,7 +180,7 @@ class _Match extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      option.label,
+                      option.countLabel,
                       style: AppTextTheme.body.copyWith(color: t.textMuted),
                     ),
                   ),
@@ -237,7 +237,7 @@ class _Choice extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    option.label,
+                    option.countLabel,
                     style: AppTextTheme.hint.copyWith(color: t.textMuted),
                   ),
                 ],

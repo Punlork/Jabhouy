@@ -1095,6 +1095,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemNoteHint => 'Supplier, where it is kept…';
 
   @override
+  String get itemNoteHelp =>
+      'Write what only you remember, so others can serve customers too.';
+
+  @override
   String get priceSellingHint => 'e.g. 3,000';
 
   @override
@@ -1210,6 +1214,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditNoteHint => 'Place or other details';
+
+  @override
+  String get creditNoteHelp =>
+      'Write when they promised to pay, so you can remind them later.';
 
   @override
   String get creditChooseCustomer => 'Choose a customer';

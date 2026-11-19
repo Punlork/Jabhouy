@@ -121,6 +121,23 @@ class _CreditFormPageState extends State<CreditFormPage> {
                     const SizedBox(height: AppSizes.sectionGap),
                     _amount(state),
                     const SizedBox(height: AppSizes.sectionGap),
+                    LabeledField(
+                      label: l10n.noteLabel,
+                      hint: l10n.creditNoteHelp,
+                      child: TextField(
+                        controller: _note,
+                        minLines: 3,
+                        maxLines: 5,
+                        decoration: InputDecoration(
+                          hintText: l10n.creditNoteHint,
+                          suffixIcon: MicButton(
+                            fieldLabel: l10n.noteLabel,
+                            controller: _note,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.sectionGap),
                     _takenAt(state),
                     const SizedBox(height: AppSizes.sectionGap),
                     LabeledField(
@@ -142,22 +159,6 @@ class _CreditFormPageState extends State<CreditFormPage> {
                         ],
                         selected: state.creditStatus,
                         onChanged: _cubit.setStatus,
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    LabeledField(
-                      label: l10n.noteLabel,
-                      optional: true,
-                      child: TextField(
-                        controller: _note,
-                        maxLines: 2,
-                        decoration: InputDecoration(
-                          hintText: l10n.creditNoteHint,
-                          suffixIcon: MicButton(
-                            fieldLabel: l10n.noteLabel,
-                            onText: (text) => _note.text = text,
-                          ),
-                        ),
                       ),
                     ),
                   ],
@@ -193,48 +194,46 @@ class _CreditFormPageState extends State<CreditFormPage> {
       children: [
         LabeledField(
           label: l10n.creditCustomer,
-          child: Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: _chooseCustomer,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusInput),
-                  child: Container(
-                    height: AppSizes.inputHeight,
-                    alignment: AlignmentDirectional.centerStart,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: t.surface,
-                      borderRadius: BorderRadius.circular(AppSizes.radiusInput),
-                      border: Border.all(
-                        color: state.customerMissing
-                            ? t.dangerText
-                            : t.border,
-                      ),
-                    ),
+          // A select field: one tap target, picked name or a muted prompt,
+          // and a dropdown arrow.
+          child: InkWell(
+            onTap: _chooseCustomer,
+            borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+            child: Container(
+              height: AppSizes.inputHeight,
+              padding: const EdgeInsets.only(left: 14, right: 8),
+              decoration: BoxDecoration(
+                color: t.surface,
+                borderRadius: BorderRadius.circular(AppSizes.radiusInput),
+                border: Border.all(
+                  color: state.customerMissing ? t.dangerText : t.border,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.person_outline_rounded,
+                    size: 20,
+                    color: name == null ? t.textMuted : t.textPrimary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
                     child: Text(
-                      name ?? '',
+                      name ?? l10n.creditChoose,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextTheme.body.copyWith(color: t.textPrimary),
+                      style: AppTextTheme.body.copyWith(
+                        color: name == null ? t.textMuted : t.textPrimary,
+                        fontWeight: name == null
+                            ? FontWeight.w400
+                            : FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
+                  Icon(Icons.expand_more_rounded, color: t.textMuted),
+                ],
               ),
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: _chooseCustomer,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, AppSizes.inputHeight),
-                  foregroundColor: t.textPrimary,
-                  side: BorderSide(color: t.border),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radiusInput),
-                  ),
-                ),
-                child: Text(l10n.creditChoose),
-              ),
-            ],
+            ),
           ),
         ),
         if (state.customerMissing) ...[

@@ -280,7 +280,7 @@ class _CustomerDialogState extends State<_CustomerDialog> {
               hintText: l10n.customerName,
               suffixIcon: MicButton(
                 fieldLabel: l10n.customerName,
-                onText: (text) => _name.text = text,
+                controller: _name,
               ),
             ),
             onSubmitted: (_) => _save(),

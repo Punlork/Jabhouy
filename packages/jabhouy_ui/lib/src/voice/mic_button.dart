@@ -17,14 +17,21 @@ class VoiceScope extends InheritedWidget {
   bool updateShouldNotify(VoiceScope old) => service != old.service;
 }
 
-/// Mic for a free-text field (never a number field). Opens the voice sheet;
-/// [onText] gets the text only after it was confirmed. Draws nothing without
-/// a [VoiceScope].
+/// Mic for a free-text field (never a number field). Opens the voice sheet
+/// and, once the text is confirmed, inserts it at [controller]'s cursor as
+/// Gboard does, then calls [onChanged] with the field's new text. Draws
+/// nothing without a [VoiceScope].
 class MicButton extends StatelessWidget {
-  const MicButton({required this.fieldLabel, required this.onText, super.key});
+  const MicButton({
+    required this.fieldLabel,
+    required this.controller,
+    this.onChanged,
+    super.key,
+  });
 
   final String fieldLabel;
-  final ValueChanged<String> onText;
+  final TextEditingController controller;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +46,9 @@ class MicButton extends StatelessWidget {
             service: service,
             fieldLabel: fieldLabel,
           );
-          if (text != null) onText(text);
+          if (text == null) return;
+          controller.value = insertDictation(controller.value, text);
+          onChanged?.call(controller.text);
         },
         icon: Icon(Icons.mic_none_rounded, color: context.tokens.textMuted),
       ),
@@ -83,12 +92,28 @@ class _MicSearchFieldState extends State<MicSearchField> {
         prefixIcon: Icon(Icons.search_rounded, color: context.tokens.textMuted),
         suffixIcon: MicButton(
           fieldLabel: widget.hintText,
-          onText: (text) {
-            _controller.text = text;
-            widget.onChanged(text);
-          },
+          controller: _controller,
+          onChanged: widget.onChanged,
         ),
       ),
     );
   }
+}
+
+/// [value] with [spoken] in place of its selection (the end when the field
+/// was never focused), spaced from the words around it.
+TextEditingValue insertDictation(TextEditingValue value, String spoken) {
+  final text = value.text;
+  final sel = value.selection.isValid
+      ? value.selection
+      : TextSelection.collapsed(offset: text.length);
+  final before = text.substring(0, sel.start);
+  final after = text.substring(sel.end);
+  final lead = before.isEmpty || before.trimRight() != before ? '' : ' ';
+  final trail = after.isEmpty || after.trimLeft() != after ? '' : ' ';
+  final inserted = '$lead$spoken$trail';
+  return TextEditingValue(
+    text: '$before$inserted$after',
+    selection: TextSelection.collapsed(offset: sel.start + inserted.length),
+  );
 }

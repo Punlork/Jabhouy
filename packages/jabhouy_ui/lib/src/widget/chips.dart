@@ -50,11 +50,13 @@ class FilterChips extends StatelessWidget {
   }
 }
 
-/// A list's sort orders as icon and label; the chosen one is darker and
-/// bolder, with no fill, and its arrow points down, or up once [reversed].
-/// Tapping it again flips it. Not scrolling: keep it to two short labels.
-class SortButtons<T> extends StatelessWidget {
-  const SortButtons({
+/// The sort icon and its dropdown of orders: icon, label (the reversed
+/// label once [reversed]) and a ↓ ↑ pair with the active direction filled.
+/// Tapping a row picks it, or flips it when already in use; tapping an
+/// arrow sets that direction.
+class SortMenu<T> extends StatelessWidget {
+  const SortMenu({
+    required this.tooltip,
     required this.options,
     required this.selected,
     required this.reversed,
@@ -62,58 +64,91 @@ class SortButtons<T> extends StatelessWidget {
     super.key,
   });
 
-  final List<(T, String)> options;
+  final String tooltip;
+
+  /// Each order: value, icon, label, reversed label.
+  final List<(T, IconData, String, String)> options;
   final T selected;
   final bool reversed;
-  final ValueChanged<T> onChanged;
+  final void Function(T value, {bool? reversed}) onChanged;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final (value, label) in options)
-          Semantics(
-            button: true,
-            selected: value == selected,
-            child: InkWell(
-              onTap: () => onChanged(value),
-              borderRadius: BorderRadius.circular(AppSizes.radiusChip),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: AppSizes.minTapTarget,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        value != selected
-                            ? Icons.swap_vert_rounded
-                            : reversed
-                            ? Icons.arrow_upward_rounded
-                            : Icons.arrow_downward_rounded,
-                        size: 18,
-                        color: value == selected ? t.textPrimary : t.textMuted,
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        label,
-                        style: AppTextTheme.hint.copyWith(
-                          color: value == selected
-                              ? t.textPrimary
-                              : t.textMuted,
-                          fontWeight: value == selected
-                              ? FontWeight.w700
-                              : FontWeight.w400,
+    return PopupMenuButton<T>(
+      tooltip: tooltip,
+      initialValue: selected,
+      onSelected: onChanged,
+      // Open below the button, not over what sits beside it.
+      position: PopupMenuPosition.under,
+      color: t.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        side: BorderSide(color: t.border),
+      ),
+      icon: Icon(Icons.sort_rounded, color: t.textSecondary),
+      itemBuilder: (_) => [
+        for (final (value, icon, label, reversedLabel) in options)
+          PopupMenuItem(
+            value: value,
+            padding: const EdgeInsets.only(left: 16, right: 8),
+            child: Builder(
+              builder: (menuContext) {
+                final on = value == selected;
+                Widget arrow({required bool up, required String semantics}) {
+                  final active = on && reversed == up;
+                  return Semantics(
+                    button: true,
+                    selected: active,
+                    label: semantics,
+                    child: InkResponse(
+                      onTap: () {
+                        Navigator.pop(menuContext);
+                        onChanged(value, reversed: up);
+                      },
+                      radius: 20,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: active ? t.textPrimary : null,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          up
+                              ? Icons.arrow_upward_rounded
+                              : Icons.arrow_downward_rounded,
+                          size: 18,
+                          color: active ? t.onPrimary : t.textMuted,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
+                  );
+                }
+
+                return Row(
+                  children: [
+                    Icon(icon, size: 20, color: on ? t.textPrimary : t.textMuted),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        on && reversed ? reversedLabel : label,
+                        style: AppTextTheme.body.copyWith(
+                          color: on ? t.textPrimary : t.textSecondary,
+                          fontWeight: on ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    arrow(up: false, semantics: label),
+                    const SizedBox(width: 4),
+                    arrow(up: true, semantics: reversedLabel),
+                  ],
+                );
+              },
             ),
           ),
       ],

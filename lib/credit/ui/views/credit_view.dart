@@ -42,24 +42,33 @@ class _CreditViewState extends State<CreditView>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FilterChips(
-              items: [
-                FilterChipItem(
-                  label: l10n.creditUnpaid,
-                  selected: state.filter == CreditFilter.unpaid,
-                  onTap: () => cubit.filter(CreditFilter.unpaid),
-                ),
-                FilterChipItem(
-                  label: l10n.creditPaid,
-                  selected: state.filter == CreditFilter.paid,
-                  onTap: () => cubit.filter(CreditFilter.paid),
-                ),
-                FilterChipItem(
-                  label: l10n.all,
-                  selected: state.filter == CreditFilter.all,
-                  onTap: () => cubit.filter(CreditFilter.all),
-                ),
-              ],
+            // Once the search row scrolls away, the chips would touch the
+            // status bar above and the list below.
+            AnimatedPadding(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              padding: EdgeInsets.symmetric(
+                vertical: widget.chromeVisible ? 0 : 8,
+              ),
+              child: FilterChips(
+                items: [
+                  FilterChipItem(
+                    label: l10n.creditUnpaid,
+                    selected: state.filter == CreditFilter.unpaid,
+                    onTap: () => cubit.filter(CreditFilter.unpaid),
+                  ),
+                  FilterChipItem(
+                    label: l10n.creditPaid,
+                    selected: state.filter == CreditFilter.paid,
+                    onTap: () => cubit.filter(CreditFilter.paid),
+                  ),
+                  FilterChipItem(
+                    label: l10n.all,
+                    selected: state.filter == CreditFilter.all,
+                    onTap: () => cubit.filter(CreditFilter.all),
+                  ),
+                ],
+              ),
             ),
             ClipRect(
               child: AnimatedAlign(
@@ -87,21 +96,20 @@ class _CreditViewState extends State<CreditView>
                       alignment: AlignmentDirectional.centerEnd,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: SortButtons<CreditSort>(
+                        child: SortMenu<CreditSort>(
+                          tooltip: l10n.itemSortTooltip,
                           options: [
                             (
                               CreditSort.name,
-                              state.sort == CreditSort.name &&
-                                      state.sortReversed
-                                  ? l10n.itemSortNameReversed
-                                  : l10n.itemSortName,
+                              Icons.sort_by_alpha_rounded,
+                              l10n.itemSortName,
+                              l10n.itemSortNameReversed,
                             ),
                             (
                               CreditSort.recent,
-                              state.sort == CreditSort.recent &&
-                                      state.sortReversed
-                                  ? l10n.itemSortRecentReversed
-                                  : l10n.itemSortRecent,
+                              Icons.schedule_rounded,
+                              l10n.itemSortRecent,
+                              l10n.itemSortRecentReversed,
                             ),
                           ],
                           selected: state.sort,
@@ -296,11 +304,15 @@ class _CreditRow extends StatelessWidget {
             Row(
               children: [
                 Expanded(
+                  // Read often: body size, darker, two lines before cutting.
                   child: Text(
                     note,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextTheme.hint.copyWith(color: t.textMuted),
+                    style: AppTextTheme.body.copyWith(
+                      color: t.textSecondary,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

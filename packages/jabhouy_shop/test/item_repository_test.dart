@@ -289,6 +289,48 @@ void main() {
     expect(await shop.unitsFor(_drinks), ['ដប', 'កេះ', 'កំប៉ុង']);
   });
 
+  test("unit chips: category units, then the shop's, then starter; "
+      'hidden stays out', () async {
+    final shop = repo('s1');
+    await shop.saveCategory(
+      const ItemCategory(
+        id: _drinks,
+        name: 'ភេសជ្ជៈ',
+        units: [
+          CategoryUnit(unit: 'កំប៉ុង'),
+          CategoryUnit(unit: 'ដប', hidden: true),
+        ],
+      ),
+    );
+    await shop.saveCategory(
+      const ItemCategory(
+        id: 'cat-rice',
+        name: 'អង្ករ',
+        units: [CategoryUnit(unit: 'គីឡូ')],
+      ),
+    );
+    await shop.saveItem(
+      Item(id: 'soap', name: 'soap', prices: [_option('ដុំ', 1)]),
+    );
+    await shop.saveItem(
+      Item(id: 'oil', name: 'oil', prices: [_option('លីត្រ', 1)]),
+    );
+    await shop.saveItem(
+      Item(id: 'oil2', name: 'oil2', prices: [_option('លីត្រ', 1)]),
+    );
+
+    final chips = await shop.unitChipsFor(_drinks);
+    expect(chips.take(3), ['កំប៉ុង', 'លីត្រ', 'ដុំ']);
+    expect(chips, isNot(contains('ដប')));
+    expect(chips, contains('គីឡូ')); // another category's unit
+    expect(chips.toSet(), hasLength(chips.length));
+
+    // A category with no units, or none chosen, still gets chips.
+    expect((await shop.unitChipsFor(null)).take(2), ['លីត្រ', 'ដុំ']);
+    // A Shop with no categories or Items still gets the starter units.
+    expect(await repo('s2').unitChipsFor(null), contains('កំប៉ុង'));
+  });
+
   test('saving a category merges units and never removes one', () async {
     final shop = repo('s1');
     await shop.saveCategory(

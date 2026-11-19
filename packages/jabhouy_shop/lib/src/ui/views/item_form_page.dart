@@ -152,25 +152,26 @@ class _ItemFormPageState extends State<ItemFormPage> {
                   children: [
                     _nameSection(state),
                     const SizedBox(height: AppSizes.sectionGap),
-                    _categorySection(state),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    _priceSection(state),
-                    const SizedBox(height: AppSizes.sectionGap),
                     LabeledField(
                       label: l10n.noteLabel,
-                      optional: true,
+                      hint: l10n.itemNoteHelp,
                       child: TextField(
                         controller: _note,
-                        maxLines: 2,
+                        minLines: 3,
+                        maxLines: 5,
                         decoration: InputDecoration(
                           hintText: l10n.itemNoteHint,
                           suffixIcon: MicButton(
                             fieldLabel: l10n.noteLabel,
-                            onText: (text) => _note.text = text,
+                            controller: _note,
                           ),
                         ),
                       ),
                     ),
+                    const SizedBox(height: AppSizes.sectionGap),
+                    _categorySection(state),
+                    const SizedBox(height: AppSizes.sectionGap),
+                    _priceSection(state),
                   ],
                 ),
           bottomNavigationBar: SafeArea(
@@ -220,10 +221,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
               error: nameProblem == null ? null : const SizedBox(),
               suffixIcon: MicButton(
                 fieldLabel: l10n.itemName,
-                onText: (text) {
-                  _name.text = text;
-                  _cubit.nameChanged(text);
-                },
+                controller: _name,
+                onChanged: _cubit.nameChanged,
               ),
             ),
           ),

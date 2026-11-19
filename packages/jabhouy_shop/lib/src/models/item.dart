@@ -37,8 +37,12 @@ class PriceOption {
   final int? cost;
   final int sortOrder;
 
-  /// `ដប` or `កេះ (12)`.
+  /// `ដប` or `កេះ (12)`; what a Credit line stores, so keep it stable.
   String get label => unitLabel(unit, packQty);
+
+  /// For screens: the count always shows, `ដប (1)` included.
+  String get countLabel =>
+      '${unit.trim().isEmpty ? '—' : unit.trim()} (${packQty ?? 1})';
 
   Money? get selling => _money(price);
   Money? get wholesaleMoney => _money(wholesale);

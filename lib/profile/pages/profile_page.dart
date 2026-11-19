@@ -160,8 +160,12 @@ class _ProfilePageContent extends StatelessWidget {
                   labelText: l10n.displayName,
                   controller: displayNameController,
                   useCustomBorder: false,
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(
+                  decoration: InputDecoration(
+                    suffixIcon: MicButton(
+                      fieldLabel: l10n.displayName,
+                      controller: displayNameController,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
                       vertical: 20,
                       horizontal: 16,
                     ),

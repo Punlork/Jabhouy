@@ -263,6 +263,9 @@ void main() {
 
     await tester.tap(find.byType(PriceRowSummary));
     await tester.pumpAndSettle();
+    // The sheet always has unit chips now, so delete sits below the fold.
+    await tester.ensureVisible(find.text('លុបតម្លៃនេះ'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('លុបតម្លៃនេះ'));
     await tester.pumpAndSettle();
     expect(find.byType(PriceRowSummary), findsNothing);

@@ -115,6 +115,6 @@ class ItemFormCubit extends Cubit<ItemFormState> {
     emit(state.copyWith(status: ItemFormStatus.saved));
   }
 
-  Future<List<String>> _unitsFor(String? categoryId) async =>
-      categoryId == null ? const [] : _repository.unitsFor(categoryId);
+  Future<List<String>> _unitsFor(String? categoryId) =>
+      _repository.unitChipsFor(categoryId);
 }

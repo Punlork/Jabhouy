@@ -35,7 +35,8 @@ class VoiceSheet extends StatefulWidget {
 class _VoiceSheetState extends State<VoiceSheet> {
   static const _bars = 30;
 
-  /// `km-KH` first (plan §5.6); the toggle restarts listening.
+  /// `km-KH` first (plan §5.6); the toggle restarts listening, keeping the
+  /// text so far.
   String _locale = 'km-KH';
   String _text = '';
   final _levels = List<double>.filled(_bars, 0, growable: true);
@@ -48,12 +49,16 @@ class _VoiceSheetState extends State<VoiceSheet> {
     _listen();
   }
 
+  /// Each listen continues the text so far, as Gboard does.
   Future<void> _listen() async {
     if (mounted) setState(() => _listening = true);
+    final before = _text.trim();
     final ok = await widget.service.start(
       localeId: _locale,
       onText: (text) {
-        if (mounted) setState(() => _text = text);
+        if (mounted) {
+          setState(() => _text = before.isEmpty ? text : '$before $text');
+        }
       },
       onLevel: (level) {
         if (mounted) {
@@ -75,7 +80,6 @@ class _VoiceSheetState extends State<VoiceSheet> {
     await widget.service.stop();
     setState(() {
       _locale = locale;
-      _text = '';
       _unavailable = false;
     });
     await _listen();

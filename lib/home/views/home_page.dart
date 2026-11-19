@@ -187,11 +187,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     context.pushNamed(AppRoutes.formItem, extra: {'existingItem': item, 'barcode': barcode, 'name': name});
   }
 
-  /// Scan → the match's details, or Add item with the unknown code.
+  /// Scan → the match's details, Join shop with an invite code, or Add item
+  /// with the unknown code.
   Future<void> _scanItem() async {
-    final result = await findByBarcode(context, context.read<ItemListCubit>().itemsWithBarcode);
+    final result = await findByBarcode(
+      context,
+      context.read<ItemListCubit>().itemsWithBarcode,
+      isJoinCode: isInviteCode,
+    );
     if (!mounted) return;
     switch (result) {
+      case (join: final String code):
+        await openJoinShop(context, code: code);
       case final Item item:
         await showItemDetails(context, item, onEdit: _openItemForm);
       case final String code:

@@ -115,7 +115,7 @@ void main() {
     await pumpTab(tester);
 
     expect(find.text('Coca-Cola'), findsOneWidget);
-    expect(find.text('ដប'), findsOneWidget);
+    expect(find.text('ដប (1)'), findsOneWidget);
     expect(find.text('3,000 ៛'), findsOneWidget);
     expect(find.text('កេះ (24)'), findsOneWidget);
     expect(find.text('60,000 ៛'), findsOneWidget);
@@ -240,9 +240,27 @@ void main() {
     );
     await settle(tester);
 
-    expect(find.text('u2'), findsOneWidget);
-    expect(find.text('u3'), findsNothing);
+    expect(find.text('u2 (1)'), findsOneWidget);
+    expect(find.text('u3 (1)'), findsNothing);
     expect(find.text('+2 ទៀត'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('a fourth price shows itself, never +1', (tester) async {
+    await pumpTab(tester);
+    await tester.runAsync(
+      () => repo.saveItem(
+        Item(
+          id: 'four',
+          name: 'Four',
+          prices: [for (var i = 0; i < 4; i++) _option('u$i', 1000 + i)],
+        ),
+      ),
+    );
+    await settle(tester);
+
+    expect(find.text('u3 (1)'), findsOneWidget);
+    expect(find.text('+1 ទៀត'), findsNothing);
     await close(tester);
   });
 

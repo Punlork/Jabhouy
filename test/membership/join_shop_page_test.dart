@@ -33,14 +33,14 @@ void main() {
 
   tearDown(getIt.reset);
 
-  Future<void> pumpPage(WidgetTester tester) async {
+  Future<void> pumpPage(WidgetTester tester, {String? code}) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
         locale: const Locale('km'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const JoinShopPage(),
+        home: JoinShopPage(code: code),
       ),
     );
     await tester.pumpAndSettle();
@@ -83,5 +83,21 @@ void main() {
       expect(find.text(text), findsOneWidget, reason: '$error');
     }
     expect(api.codes, everyElement('K7P2QX'));
+  });
+
+  testWidgets('a code scanned on Home is filled in and joined at once', (
+    tester,
+  ) async {
+    await pumpPage(tester, code: 'k7p2qx');
+    expect(api.codes, ['K7P2QX']);
+  });
+
+  test('isInviteCode: six characters of the invite alphabet only', () {
+    expect(isInviteCode('K7P2QX'), isTrue);
+    expect(isInviteCode('K7P2Q'), isFalse);
+    expect(isInviteCode('K7P2QX9'), isFalse);
+    expect(isInviteCode('K0P2QX'), isFalse); // no 0, 1, I, O
+    expect(isInviteCode('k7p2qx'), isFalse); // the QR holds uppercase
+    expect(isInviteCode('8850001'), isFalse); // a product barcode
   });
 }
