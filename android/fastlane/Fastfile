@@ -99,13 +99,24 @@ platform :android do
     )
   end
 
-  desc "Deploy production to internal testing track (Google Play)"
+  desc "Build the production AAB and upload it to the Google Play internal testing track"
   lane :internal do
-    build_release
+    sh("cd #{project_root} && flutter build appbundle --flavor production -t lib/main_production.dart --dart-define-from-file=config/features/production.json --release")
+
+    aab_path = File.join(project_root, "build", "app", "outputs", "bundle", "productionRelease", "app-production-release.aab")
+    UI.user_error!("Expected AAB not found at #{aab_path}") unless File.exist?(aab_path)
+
+    json_key = ENV["PLAY_STORE_JSON_KEY"].to_s
+    UI.user_error!("Missing PLAY_STORE_JSON_KEY (Google Play service account JSON)") if json_key.empty?
+
     supply(
+      package_name: "com.pl.shop.management",
       track: "internal",
-      aab: false,
+      aab: aab_path,
+      json_key_data: json_key,
+      skip_upload_apk: true,
       skip_upload_metadata: true,
+      skip_upload_changelogs: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
     )
