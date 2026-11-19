@@ -185,8 +185,8 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
 
       # Gitignored; without it the Google services plugin is skipped and the
-      # build has no Firebase (push for income sync, Analytics). src/main, not
-      # src/production: build.gradle only checks development/ and main/.
+      # build has no Firebase (push for income sync, Analytics). The plugin
+      # reads src/production/, not src/main/.
       - name: Restore Firebase config
         shell: bash
         env:
@@ -196,7 +196,7 @@ jobs:
             echo "Missing PRODUCTION_GOOGLE_SERVICES_JSON secret."
             exit 1
           fi
-          printf '%s' "$PRODUCTION_GOOGLE_SERVICES_JSON" > android/app/src/main/google-services.json
+          printf '%s' "$PRODUCTION_GOOGLE_SERVICES_JSON" > android/app/src/production/google-services.json
 
       - name: Restore production .env
         shell: bash
