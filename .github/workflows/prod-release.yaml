@@ -1,5 +1,6 @@
 # PRs into main: analyze and test. Push to main: build the production app,
 # upload the AAB to Play internal testing, then create the GitHub release.
+# The push does not re-run analyze and test: the PR already did.
 
 name: Prod release
 
@@ -23,6 +24,7 @@ env:
 jobs:
   check:
     name: Analyze and test
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -106,7 +108,6 @@ jobs:
 
   fastlane-android-release:
     name: Fastlane Android (release)
-    needs: check
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     env:
