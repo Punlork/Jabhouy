@@ -127,9 +127,15 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # Unpinned stable failed pub resolve (copy_with_extension_gen vs drift_dev).
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
           channel: ${{ env.FLUTTER_CHANNEL }}
           cache: true
 
@@ -190,6 +196,13 @@ jobs:
       - name: Build production APK
         working-directory: android
         run: bundle exec fastlane build_release_ci
+
+      # Before the GitHub release, so a failed upload leaves no tag and a re-run works.
+      - name: Upload AAB to Google Play (internal testing)
+        working-directory: android
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+        run: bundle exec fastlane internal
 
       - name: Prepare release asset
         id: apk
