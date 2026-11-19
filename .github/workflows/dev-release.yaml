@@ -1,14 +1,15 @@
 # Every push to dev (and on demand from Actions › Run workflow): analyze and
 # test, build the development APK, and send it to the testers' Telegram chat.
 #
-# Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DEV_DOTENV (.env.dev), and
+# Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DEV_DOTENV (.env.dev),
+# DEV_GOOGLE_SERVICES_JSON (Firebase), and
 # the dev signing key: ANDROID_DEV_KEYSTORE_BASE64, _ALIAS, _PASSWORD and
 # _PRIVATE_KEY_PASSWORD. The dev APK must carry the dev key: its SHA-1 is the
 # one registered for com.pl.shop.management.dev in Google Cloud (Google
 # sign-in), and it is the key local builds use, so a CI APK and a local one
 # update each other without an uninstall.
 
-name: Dev build to Telegram
+name: Dev release
 
 on:
   push:
@@ -17,7 +18,7 @@ on:
 
 # A newer push replaces a build still running; only the latest is sent.
 concurrency:
-  group: dev-telegram
+  group: dev-release
   cancel-in-progress: true
 
 jobs:
@@ -55,6 +56,19 @@ jobs:
           flutter-version: ${{ steps.fvm.outputs.version }}
           channel: stable
           cache: true
+
+      # Gitignored; without it the Google services plugin is skipped and the
+      # build has no Firebase (push for income sync, Analytics).
+      - name: Restore Firebase config
+        shell: bash
+        env:
+          DEV_GOOGLE_SERVICES_JSON: ${{ secrets.DEV_GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$DEV_GOOGLE_SERVICES_JSON" ]; then
+            echo "Missing DEV_GOOGLE_SERVICES_JSON secret."
+            exit 1
+          fi
+          printf '%s' "$DEV_GOOGLE_SERVICES_JSON" > android/app/src/development/google-services.json
 
       - name: Restore env files
         shell: bash

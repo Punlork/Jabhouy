@@ -150,7 +150,7 @@ The analyzer reads the generated interface and calls `syncMessage: null` redunda
 | No package imports the app | `test/architecture/package_independence_test.dart` |
 | `logic/` has no Flutter or Drift, however indirectly | `test/architecture/logic_layer_test.dart` |
 | Core and sync stay pure Dart | Their tests run under `dart test`, which has no Flutter binding |
-| Analyze and every suite pass before a release | The `check` job in `.github/workflows/patrol-fastlane.yaml`, which the release job `needs` |
+| Analyze and every suite pass before a release | The `check` job in `.github/workflows/prod-release.yaml`, which the release job `needs` |
 
 ## Known gaps
 
