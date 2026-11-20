@@ -35,7 +35,7 @@ jobs:
       ANDROID_DEV_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_DEV_KEYSTORE_PRIVATE_KEY_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       # The same Flutter as local builds, so the analyzer baseline holds.
       - name: Read Flutter version from .fvmrc
