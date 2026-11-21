@@ -6,6 +6,7 @@ plugins {
 
 def firebaseConfigFiles = [
     file('src/development/google-services.json'),
+    file('src/production/google-services.json'),
     file('src/main/google-services.json'),
 ]
 def hasGoogleServicesConfig = firebaseConfigFiles.any { it.exists() }

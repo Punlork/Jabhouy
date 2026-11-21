@@ -1,6 +1,6 @@
 name: jabhouy
 description: Shop management
-version: 1.0.30+38
+version: 1.0.31+39
 publish_to: none
 
 # Workspace members. Each package declares what it imports; list a
@@ -90,6 +90,7 @@ dependencies:
   flutter_runtime_debugger: ^0.4.0
   qr_flutter: ^4.1.0
   share_plus: ^12.0.2
+  in_app_update: ^5.0.0
 
 dev_dependencies:
   # Testing

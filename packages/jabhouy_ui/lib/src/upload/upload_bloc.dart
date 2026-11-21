@@ -56,10 +56,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     LoadingOverlay.show();
     emit(const UploadInProgress());
     try {
-      final url = await _service.upload(
-        file: event.image,
-        fileName: 'image',
-      );
+      final url = await _service.upload(file: event.image, fileName: 'image');
       if (url != null) {
         emit(UploadSuccess(url));
       }

@@ -746,6 +746,18 @@ abstract class AppLocalizations {
   /// **'Later'**
   String get updateLater;
 
+  /// Day heading in the credit list for credits taken today
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get creditGroupToday;
+
+  /// Day heading in the credit list for credits taken yesterday
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get creditGroupYesterday;
+
   /// Button label to open the latest release for updating
   ///
   /// In en, this message translates to:

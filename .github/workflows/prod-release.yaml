@@ -1,5 +1,6 @@
 # PRs into main: analyze and test. Push to main: build the production app,
 # upload the AAB to Play internal testing, then create the GitHub release.
+# The push does not re-run analyze and test: the PR already did.
 
 name: Prod release
 
@@ -23,6 +24,7 @@ env:
 jobs:
   check:
     name: Analyze and test
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -106,7 +108,6 @@ jobs:
 
   fastlane-android-release:
     name: Fastlane Android (release)
-    needs: check
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     env:
@@ -185,8 +186,8 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
 
       # Gitignored; without it the Google services plugin is skipped and the
-      # build has no Firebase (push for income sync, Analytics). src/main, not
-      # src/production: build.gradle only checks development/ and main/.
+      # build has no Firebase (push for income sync, Analytics). The plugin
+      # reads src/production/, not src/main/.
       - name: Restore Firebase config
         shell: bash
         env:
@@ -196,7 +197,8 @@ jobs:
             echo "Missing PRODUCTION_GOOGLE_SERVICES_JSON secret."
             exit 1
           fi
-          printf '%s' "$PRODUCTION_GOOGLE_SERVICES_JSON" > android/app/src/main/google-services.json
+          mkdir -p android/app/src/production
+          printf '%s' "$PRODUCTION_GOOGLE_SERVICES_JSON" > android/app/src/production/google-services.json
 
       - name: Restore production .env
         shell: bash

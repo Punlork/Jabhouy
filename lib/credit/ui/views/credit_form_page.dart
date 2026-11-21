@@ -8,17 +8,18 @@ import 'package:jabhouy_shop/jabhouy_shop.dart' show ErrorLine;
 import 'package:jabhouy_ui/jabhouy_ui.dart';
 
 /// Opens the customer picker; null when dismissed.
-typedef PickCustomer =
-    Future<CreditCustomer?> Function(BuildContext context, String? selectedId);
+typedef PickCustomer = Future<CreditCustomer?> Function(
+  BuildContext context,
+  String? selectedId,
+);
 
 /// Opens the item picker with the Credit's lines; null when dismissed.
-typedef PickItems =
-    Future<List<CreditLine>?> Function(
-      BuildContext context, {
-      required Currency currency,
-      required int khrPerUsd,
-      required List<CreditLine> initial,
-    });
+typedef PickItems = Future<List<CreditLine>?> Function(
+  BuildContext context, {
+  required Currency currency,
+  required int khrPerUsd,
+  required List<CreditLine> initial,
+});
 
 /// Add or edit a Credit (canvas ៩, ៩ខ, ១០). Expects a [CreditFormCubit]
 /// above it; edits when the cubit has `existing`. The pickers come in as
@@ -503,7 +504,11 @@ class _DueDateField extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.calendar_today_rounded, size: 18, color: t.textSecondary),
+            Icon(
+              Icons.calendar_today_rounded,
+              size: 18,
+              color: t.textSecondary,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

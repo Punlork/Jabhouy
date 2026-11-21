@@ -449,6 +449,14 @@
   "@updateLater": {
     "description": "Button label to dismiss the update prompt"
   },
+  "creditGroupToday": "ថ្ងៃនេះ",
+  "@creditGroupToday": {
+    "description": "Day heading in the credit list for credits taken today"
+  },
+  "creditGroupYesterday": "ម្សិលមិញ",
+  "@creditGroupYesterday": {
+    "description": "Day heading in the credit list for credits taken yesterday"
+  },
   "updateNow": "អាប់ដេតឥឡូវនេះ",
   "@updateNow": {
     "description": "Button label to open the latest release for updating"

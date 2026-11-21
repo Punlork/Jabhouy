@@ -11,11 +11,8 @@ Money lineIn(CreditLine line, Currency currency, int khrPerUsd) =>
 
 /// The sum of [lines] in [currency]; null with no lines (the amount is
 /// then typed, or still unknown).
-Money? sumOfLines(
-  List<CreditLine> lines,
-  Currency currency,
-  int khrPerUsd,
-) => lines.isEmpty
+Money? sumOfLines(List<CreditLine> lines, Currency currency, int khrPerUsd) =>
+    lines.isEmpty
     ? null
     : Money(
         lines.fold(0, (sum, l) => sum + lineIn(l, currency, khrPerUsd).amount),

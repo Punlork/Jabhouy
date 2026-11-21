@@ -105,7 +105,11 @@ void main() {
     await tester.tap(find.text('ទាំងអស់'));
     await tester.pump();
     expect(find.text('ពូ បុល'), findsNWidgets(2));
-    expect(find.text('សងរួច'), findsNWidgets(2), reason: 'chip and the pill');
+    expect(
+      find.text('សងរួច'),
+      findsOneWidget,
+      reason: 'rows carry no status pill',
+    );
 
     await tester.pumpWidget(const SizedBox());
     // Closed in real time: a cancel under the fake clock never finishes.

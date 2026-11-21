@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jabhouy_ui/src/context/global_context.dart';
 
 void showErrorSnackBar(BuildContext? context, String message) {
-  final colorScheme =
-      Theme.of(context ?? GlobalContext.currentContext).colorScheme;
+  final colorScheme = Theme.of(context ?? GlobalContext.currentContext)
+      .colorScheme;
   _showSnackBar(
     context: context,
     message: message,
@@ -14,8 +14,8 @@ void showErrorSnackBar(BuildContext? context, String message) {
 }
 
 void showSuccessSnackBar(BuildContext? context, String message) {
-  final colorScheme =
-      Theme.of(context ?? GlobalContext.currentContext).colorScheme;
+  final colorScheme = Theme.of(context ?? GlobalContext.currentContext)
+      .colorScheme;
   _showSnackBar(
     context: context,
     message: message,
@@ -38,25 +38,16 @@ void _showSnackBar({
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              icon,
-              color: foregroundColor,
-              size: 24,
-            ),
+            Icon(icon, color: foregroundColor, size: 24),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                message,
-                style: TextStyle(color: foregroundColor),
-              ),
+              child: Text(message, style: TextStyle(color: foregroundColor)),
             ),
           ],
         ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
         elevation: 6,
