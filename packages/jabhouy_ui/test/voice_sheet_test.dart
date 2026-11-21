@@ -207,7 +207,10 @@ void main() {
     });
 
     test('replaces a selection; no space needed before a space', () {
-      expect(insertDictation(at('Coca pepsi', 5, 10), 'cola').text, 'Coca cola');
+      expect(
+        insertDictation(at('Coca pepsi', 5, 10), 'cola').text,
+        'Coca cola',
+      );
       expect(insertDictation(at('ab', 1), 'X').text, 'a X b');
     });
   });

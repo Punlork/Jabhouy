@@ -104,9 +104,7 @@ class CreditRepository {
     if (credit == null) return const Err(AppException('Credit not found'));
     if (credit.isPaid) return const Ok(null);
     final now = _clock();
-    await saveCredit(
-      credit.copyWith(status: CreditStatus.paid, paidAt: now),
-    );
+    await saveCredit(credit.copyWith(status: CreditStatus.paid, paidAt: now));
     return const Ok(null);
   }
 
@@ -140,9 +138,10 @@ class CreditRepository {
       if (u.amount == null) {
         unknown++;
       } else {
-        owed += Money(u.amount!, u.currency)
-            .convertTo(currency, khrPerUsd: u.khrPerUsd)
-            .amount;
+        owed += Money(
+          u.amount!,
+          u.currency,
+        ).convertTo(currency, khrPerUsd: u.khrPerUsd).amount;
       }
     }
     return CustomerBalance(

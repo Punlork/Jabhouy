@@ -349,6 +349,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateLater => 'Later';
 
   @override
+  String get creditGroupToday => 'Today';
+
+  @override
+  String get creditGroupYesterday => 'Yesterday';
+
+  @override
   String get updateNow => 'Update now';
 
   @override

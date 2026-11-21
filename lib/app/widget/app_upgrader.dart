@@ -1,240 +1,124 @@
-import 'dart:convert';
+import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:in_app_update/in_app_update.dart';
 import 'package:jabhouy/app/app.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 import 'package:jabhouy_l10n/jabhouy_l10n.dart';
-import 'package:jabhouy_net/jabhouy_net.dart';
-import 'package:jabhouy_ui/jabhouy_ui.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+/// Updates come from Google Play only. On launch and whenever the app
+/// returns to the foreground (at most once a day) it asks Play whether a
+/// newer build exists.
+///
+/// Play's update priority (0-5, set when the release is published) picks the
+/// mode: [_blockingPriority] and up forces a full-screen immediate update,
+/// anything lower downloads in the background and offers a restart.
+/// Sideloaded and debug builds are not installed by Play, so the check
+/// fails quietly and the app carries on.
 class AppUpgrader extends StatefulWidget {
-  const AppUpgrader({
-    required this.child,
-    super.key,
-    this.showIgnore = true,
-    this.showLater = true,
-  });
+  const AppUpgrader({required this.child, super.key});
+
   final Widget child;
-  final bool showIgnore;
-  final bool showLater;
 
   @override
   State<AppUpgrader> createState() => _AppUpgraderState();
 }
 
-class _AppUpgraderState extends State<AppUpgrader> {
-  static final Uri _latestReleaseUri = Uri.parse(
-    'https://api.github.com/repos/Punlork/Jabhouy/releases/latest',
-  );
+const _blockingPriority = 4;
+const _checkEvery = Duration(days: 1);
 
+class _AppUpgraderState extends State<AppUpgrader>
+    with WidgetsBindingObserver {
+  DateTime? _lastCheck;
   bool _isChecking = false;
-  bool _hasPrompted = false;
+  StreamSubscription<InstallStatus>? _installStatus;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkForUpdates();
-    });
+    if (!Platform.isAndroid) return;
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _check());
   }
 
-  Future<void> _checkForUpdates() async {
-    if (!mounted || _isChecking || _hasPrompted) return;
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(_installStatus?.cancel());
+    super.dispose();
+  }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_check());
+  }
+
+  Future<void> _check() async {
+    final last = _lastCheck;
+    if (!mounted ||
+        _isChecking ||
+        (last != null && DateTime.now().difference(last) < _checkEvery)) {
+      return;
+    }
     _isChecking = true;
     try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      final requestStartedAt = DateTime.now();
-      final response = await http.get(
-        _latestReleaseUri,
-        headers: const {
-          'Accept': 'application/vnd.github+json',
-        },
-      );
-      NetworkInspectorService.instance.capture(
-        timestamp: requestStartedAt,
-        method: 'GET',
-        uri: _latestReleaseUri,
-        duration: DateTime.now().difference(requestStartedAt),
-        requestHeaders: const {
-          'Accept': 'application/vnd.github+json',
-        },
-        statusCode: response.statusCode,
-        responseHeaders: response.headers,
-        responseBody: response.body,
-      );
+      final info = await InAppUpdate.checkForUpdate();
+      _lastCheck = DateTime.now();
 
-      if (response.statusCode != 200) return;
+      // An immediate update the user left half-done must be finished.
+      final resume =
+          info.updateAvailability ==
+          UpdateAvailability.developerTriggeredUpdateInProgress;
+      final available =
+          info.updateAvailability == UpdateAvailability.updateAvailable;
+      if (!resume && !available) return;
 
-      final payload = jsonDecode(response.body);
-      if (payload is! Map<String, dynamic>) return;
-
-      final currentVersion = packageInfo.version;
-      final latestVersion = _normalizeVersion(payload['tag_name']?.toString());
-
-      if (latestVersion == null ||
-          !_isRemoteVersionNewer(
-            currentVersion: currentVersion,
-            latestVersion: latestVersion,
-          )) {
-        return;
+      if (info.immediateUpdateAllowed &&
+          (resume || info.updatePriority >= _blockingPriority)) {
+        await InAppUpdate.performImmediateUpdate();
+      } else if (available && info.flexibleUpdateAllowed) {
+        await _startFlexible();
       }
-
-      final releaseUrl = _extractReleaseUrl(payload);
-      if (releaseUrl == null || !mounted) return;
-
-      _hasPrompted = true;
-      await _showUpdateSheet(
-        currentVersion: currentVersion,
-        latestVersion: latestVersion,
-        releaseUrl: releaseUrl,
-      );
-    } catch (error, stackTrace) {
-      logger.e(
-        'Failed to check for updates.',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      NetworkInspectorService.instance.capture(
-        timestamp: DateTime.now(),
-        method: 'GET',
-        uri: _latestReleaseUri,
-        duration: Duration.zero,
-        requestHeaders: const {
-          'Accept': 'application/vnd.github+json',
-        },
-        error: '$error\n$stackTrace',
-      );
-      // Ignore update-check failures and keep the app usable.
-      // rethrow;
+    } on Object catch (error, stackTrace) {
+      // Not installed from Play (debug, sideload) or Play unavailable.
+      logger.i('In-app update check skipped: $error', stackTrace: stackTrace);
     } finally {
       _isChecking = false;
     }
   }
 
-  Future<void> _showUpdateSheet({
-    required String currentVersion,
-    required String latestVersion,
-    required Uri releaseUrl,
-  }) async {
-    final overlayContext = AppRouter
-        .router.routerDelegate.navigatorKey.currentState?.overlay?.context;
-    if (overlayContext == null) return;
+  Future<void> _startFlexible() async {
+    await _installStatus?.cancel();
+    _installStatus = InAppUpdate.installUpdateListener.listen((status) {
+      if (status == InstallStatus.downloaded) _offerRestart();
+    });
+    // Play shows its own consent dialog, then downloads in the background.
+    await InAppUpdate.startFlexibleUpdate();
+  }
 
-    final l10n = AppLocalizations.of(overlayContext);
-
-    await showModalBottomSheet<void>(
-      context: overlayContext,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.updateAvailableTitle,
-                style: AppTextTheme.title,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.updateAvailableMessage(currentVersion, latestVersion),
-                style: AppTextTheme.body,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  if (widget.showLater)
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(),
-                        child: Text(l10n.updateLater),
-                      ),
-                    ),
-                  if (widget.showLater) const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final opened = await launchUrl(
-                          releaseUrl,
-                          mode: LaunchMode.externalApplication,
-                        );
-                        if (!sheetContext.mounted) return;
-                        if (opened) {
-                          Navigator.of(sheetContext).pop();
-                        }
-                      },
-                      child: Text(l10n.updateNow),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+  void _offerRestart() {
+    final context = AppRouter
+        .router
+        .routerDelegate
+        .navigatorKey
+        .currentState
+        ?.overlay
+        ?.context;
+    if (context == null || !context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        content: Text(l10n.updateAvailableTitle),
+        duration: const Duration(days: 1),
+        action: SnackBarAction(
+          label: l10n.updateNow,
+          onPressed: () => unawaited(InAppUpdate.completeFlexibleUpdate()),
         ),
       ),
     );
   }
 
-  Uri? _extractReleaseUrl(Map<String, dynamic> payload) {
-    final assets = payload['assets'];
-    if (assets is List) {
-      for (final asset in assets) {
-        if (asset is! Map<String, dynamic>) continue;
-        final name = asset['name']?.toString().toLowerCase();
-        final downloadUrl = asset['browser_download_url']?.toString();
-        if (name != null && name.endsWith('.apk') && downloadUrl != null) {
-          return Uri.tryParse(downloadUrl);
-        }
-      }
-    }
-
-    final htmlUrl = payload['html_url']?.toString();
-    return htmlUrl == null ? null : Uri.tryParse(htmlUrl);
-  }
-
-  String? _normalizeVersion(String? rawVersion) {
-    if (rawVersion == null || rawVersion.isEmpty) return null;
-    return rawVersion.startsWith('v') ? rawVersion.substring(1) : rawVersion;
-  }
-
-  bool _isRemoteVersionNewer({
-    required String currentVersion,
-    required String latestVersion,
-  }) {
-    final currentParts = _parseVersion(currentVersion);
-    final latestParts = _parseVersion(latestVersion);
-    final maxLength = currentParts.length > latestParts.length
-        ? currentParts.length
-        : latestParts.length;
-
-    for (var index = 0; index < maxLength; index++) {
-      final currentPart = index < currentParts.length ? currentParts[index] : 0;
-      final latestPart = index < latestParts.length ? latestParts[index] : 0;
-      if (latestPart > currentPart) return true;
-      if (latestPart < currentPart) return false;
-    }
-
-    return false;
-  }
-
-  List<int> _parseVersion(String version) {
-    return version
-        .split('+')
-        .first
-        .split('.')
-        .map((part) => int.tryParse(part) ?? 0)
-        .toList();
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 }

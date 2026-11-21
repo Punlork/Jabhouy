@@ -347,6 +347,12 @@ class AppLocalizationsKm extends AppLocalizations {
   String get updateLater => 'ពេលក្រោយ';
 
   @override
+  String get creditGroupToday => 'ថ្ងៃនេះ';
+
+  @override
+  String get creditGroupYesterday => 'ម្សិលមិញ';
+
+  @override
   String get updateNow => 'អាប់ដេតឥឡូវនេះ';
 
   @override

@@ -52,6 +52,10 @@ final class DeviceSpeechService implements SpeechService {
       listenOptions: SpeechListenOptions(
         localeId: localeId,
         listenMode: ListenMode.dictation,
+        // Shop talk has pauses between words and numbers; the default
+        // cuts in after a few seconds of quiet.
+        pauseFor: const Duration(seconds: 5),
+        listenFor: const Duration(minutes: 1),
       ),
     );
     return true;

@@ -18,7 +18,9 @@ mixin InfiniteScrollMixin<T extends StatefulWidget> on State<T> {
   void onScrollToBottom();
 
   bool isScrollAtBottom() {
-    if (_scrollController == null || !_scrollController!.hasClients) return false;
+    if (_scrollController == null || !_scrollController!.hasClients) {
+      return false;
+    }
     final maxScroll = _scrollController!.position.maxScrollExtent;
     final currentScroll = _scrollController!.offset;
     return currentScroll >= (maxScroll * 0.9);

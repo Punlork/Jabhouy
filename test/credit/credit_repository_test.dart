@@ -25,15 +25,19 @@ class _Scope implements ShopScope {
   String get userId => 'u1';
 }
 
-CreditLine _line(String name, int qty, int price, [Currency c = Currency.khr]) =>
-    CreditLine(
-      id: newId(),
-      name: name,
-      unit: 'ដប',
-      qty: qty,
-      currency: c,
-      unitPrice: price,
-    );
+CreditLine _line(
+  String name,
+  int qty,
+  int price, [
+  Currency c = Currency.khr,
+]) => CreditLine(
+  id: newId(),
+  name: name,
+  unit: 'ដប',
+  qty: qty,
+  currency: c,
+  unitPrice: price,
+);
 
 void main() {
   late AppDatabase db;
@@ -45,7 +49,10 @@ void main() {
     final connectivity = _Connectivity();
     when(() => connectivity.isOnline).thenAnswer((_) async => false);
     final scope = _Scope(role);
-    final engine = SyncEngine(database: db, transport: AdapterSyncTransport([]));
+    final engine = SyncEngine(
+      database: db,
+      transport: AdapterSyncTransport([]),
+    );
     items = ItemRepository(ItemDao(db), scope, engine, connectivity);
     return CreditRepository(
       CreditDao(db),
@@ -89,19 +96,21 @@ void main() {
     String search = '',
   ]) => repo.watchCredits(filter: filter, search: search).first;
 
-  test('2 × 3,000 + 5 × 3,800 saves 25,000 ៛ and reads back with its lines',
-      () async {
-    final saved = await repo.saveCredit(
-      credit('c1', lines: [_line('ទឹក', 2, 3000), _line('អង្ករ', 5, 3800)]),
-    );
+  test(
+    '2 × 3,000 + 5 × 3,800 saves 25,000 ៛ and reads back with its lines',
+    () async {
+      final saved = await repo.saveCredit(
+        credit('c1', lines: [_line('ទឹក', 2, 3000), _line('អង្ករ', 5, 3800)]),
+      );
 
-    expect((saved as Ok<Credit>).value.amount, 25000);
-    final read = (await repo.credit('c1'))!;
-    expect(read.amount, 25000);
-    expect(read.lines.map((l) => l.qty), [2, 5]);
-    expect(read.customerName, 'ដារ៉ា');
-    expect(amountOf(read), const Money(25000, Currency.khr));
-  });
+      expect((saved as Ok<Credit>).value.amount, 25000);
+      final read = (await repo.credit('c1'))!;
+      expect(read.amount, 25000);
+      expect(read.lines.map((l) => l.qty), [2, 5]);
+      expect(read.customerName, 'ដារ៉ា');
+      expect(amountOf(read), const Money(25000, Currency.khr));
+    },
+  );
 
   test('with lines a typed amount is ignored; without, it stands', () async {
     await repo.saveCredit(
@@ -115,21 +124,35 @@ void main() {
     expect((await repo.credit('c3'))!.amount, isNull);
   });
 
-  test('a shop rate change leaves a saved Credit and the summary alone',
-      () async {
-    await repo.saveCredit(
-      credit('c1', currency: Currency.usd, lines: [_line('a', 1, 500, Currency.usd)]),
-    );
-    final before = summarize(await list(), Currency.khr);
+  test(
+    'a shop rate change leaves a saved Credit and the summary alone',
+    () async {
+      await repo.saveCredit(
+        credit(
+          'c1',
+          currency: Currency.usd,
+          lines: [_line('a', 1, 500, Currency.usd)],
+        ),
+      );
+      final before = summarize(await list(), Currency.khr);
 
-    await items.savePriceSettings(const PriceSettings(khrPerUsd: 4200));
+      await items.savePriceSettings(const PriceSettings(khrPerUsd: 4200));
 
-    expect((await repo.currentRates()).khrPerUsd, 4200, reason: 'new Credits');
-    final after = summarize(await list(), Currency.khr);
-    expect(after.total, before.total);
-    expect(before.total, const Money(20000, Currency.khr), reason: r'$5 at 4,000');
-    expect((await repo.credit('c1'))!.khrPerUsd, 4000);
-  });
+      expect(
+        (await repo.currentRates()).khrPerUsd,
+        4200,
+        reason: 'new Credits',
+      );
+      final after = summarize(await list(), Currency.khr);
+      expect(after.total, before.total);
+      expect(
+        before.total,
+        const Money(20000, Currency.khr),
+        reason: r'$5 at 4,000',
+      );
+      expect((await repo.credit('c1'))!.khrPerUsd, 4000);
+    },
+  );
 
   test('marking paid sets paid_at and moves it between the chips', () async {
     await repo.saveCredit(credit('c1', amount: 5000));
@@ -159,36 +182,52 @@ void main() {
   });
 
   test('a Customer with any Credit, even paid, cannot be deleted', () async {
-    await repo.saveCredit(credit('c1', amount: 5000, status: CreditStatus.paid));
+    await repo.saveCredit(
+      credit('c1', amount: 5000, status: CreditStatus.paid),
+    );
 
     expect(await repo.deleteCustomer('dara'), isA<Err<void>>());
     expect(await repo.deleteCustomer('sok'), isA<Ok<void>>());
-    final names = (await repo.watchCustomers().first).map((b) => b.customer.name);
+    final names = (await repo.watchCustomers().first).map(
+      (b) => b.customer.name,
+    );
     expect(names, ['ដារ៉ា']);
   });
 
-  test('balances sum the unpaid, each at its own rate, in the default currency',
-      () async {
-    await repo.saveCredit(credit('c1', amount: 10000));
-    await repo.saveCredit(
-      credit('c2', currency: Currency.usd, amount: 100, rate: 4100),
-    );
-    await repo.saveCredit(credit('c3'));
-    await repo.saveCredit(credit('c4', amount: 9999, status: CreditStatus.paid));
+  test(
+    'balances sum the unpaid, each at its own rate, in the default currency',
+    () async {
+      await repo.saveCredit(credit('c1', amount: 10000));
+      await repo.saveCredit(
+        credit('c2', currency: Currency.usd, amount: 100, rate: 4100),
+      );
+      await repo.saveCredit(credit('c3'));
+      await repo.saveCredit(
+        credit('c4', amount: 9999, status: CreditStatus.paid),
+      );
 
-    final dara = (await repo.watchCustomers().first)
-        .firstWhere((b) => b.customer.id == 'dara');
+      final dara = (await repo.watchCustomers().first).firstWhere(
+        (b) => b.customer.id == 'dara',
+      );
 
-    expect(dara.owed, const Money(14100, Currency.khr), reason: r'10,000 + $1');
-    expect(dara.unknownCount, 1);
-    expect(dara.creditCount, 4);
-    final sok = (await repo.watchCustomers(search: 'សុខា').first).single;
-    expect(sok.owed, isNull);
-  });
+      expect(
+        dara.owed,
+        const Money(14100, Currency.khr),
+        reason: r'10,000 + $1',
+      );
+      expect(dara.unknownCount, 1);
+      expect(dara.creditCount, 4);
+      final sok = (await repo.watchCustomers(search: 'សុខា').first).single;
+      expect(sok.owed, isNull);
+    },
+  );
 
   test('a viewer records Credits but cannot delete one', () async {
     final viewer = build(MemberRole.viewer);
-    expect(await viewer.saveCredit(credit('c1', amount: 100)), isA<Ok<Credit>>());
+    expect(
+      await viewer.saveCredit(credit('c1', amount: 100)),
+      isA<Ok<Credit>>(),
+    );
     expect(await viewer.markPaid('c1'), isA<Ok<void>>());
 
     expect(await viewer.deleteCredit('c1'), isA<Err<void>>());

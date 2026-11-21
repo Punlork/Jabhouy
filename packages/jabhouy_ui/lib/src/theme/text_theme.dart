@@ -70,20 +70,20 @@ class AppTextTheme {
   );
 
   static TextTheme get textTheme => TextTheme(
-        displayLarge: amount,
-        displayMedium: amount.copyWith(fontSize: 26),
-        displaySmall: headline,
-        headlineLarge: headline,
-        headlineMedium: title,
-        headlineSmall: pageTitle,
-        titleLarge: pageTitle,
-        titleMedium: sectionTitle.copyWith(fontWeight: FontWeight.w600),
-        titleSmall: label,
-        bodyLarge: body,
-        bodyMedium: body.copyWith(fontSize: 15),
-        bodySmall: caption,
-        labelLarge: label,
-        labelMedium: hint,
-        labelSmall: hint.copyWith(fontSize: 13),
-      );
+    displayLarge: amount,
+    displayMedium: amount.copyWith(fontSize: 26),
+    displaySmall: headline,
+    headlineLarge: headline,
+    headlineMedium: title,
+    headlineSmall: pageTitle,
+    titleLarge: pageTitle,
+    titleMedium: sectionTitle.copyWith(fontWeight: FontWeight.w600),
+    titleSmall: label,
+    bodyLarge: body,
+    bodyMedium: body.copyWith(fontSize: 15),
+    bodySmall: caption,
+    labelLarge: label,
+    labelMedium: hint,
+    labelSmall: hint.copyWith(fontSize: 13),
+  );
 }

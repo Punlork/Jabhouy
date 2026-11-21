@@ -10,8 +10,9 @@ class AppTheme {
   static ThemeData get darkTheme => _buildTheme(Brightness.dark);
 
   static ThemeData _buildTheme(Brightness brightness) {
-    final tokens =
-        brightness == Brightness.dark ? AppTokens.dark : AppTokens.light;
+    final tokens = brightness == Brightness.dark
+        ? AppTokens.dark
+        : AppTokens.light;
     final colorScheme = _buildColorScheme(tokens, brightness);
     final textTheme = AppTextTheme.textTheme.apply(
       bodyColor: colorScheme.onSurface,
@@ -124,9 +125,7 @@ class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: colorScheme.onSurface,
-        ),
+        style: TextButton.styleFrom(foregroundColor: colorScheme.onSurface),
       ),
     );
   }

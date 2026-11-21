@@ -39,6 +39,30 @@ class _CreditViewState extends State<CreditView>
     return BlocBuilder<CreditListCubit, CreditListState>(
       builder: (context, state) {
         final summary = state.summary;
+        final grouped =
+            !state.loading &&
+            state.credits.isNotEmpty &&
+            state.sort == CreditSort.recent;
+        final sortMenu = SortMenu<CreditSort>(
+          tooltip: l10n.itemSortTooltip,
+          options: [
+            (
+              CreditSort.name,
+              Icons.sort_by_alpha_rounded,
+              l10n.itemSortName,
+              l10n.itemSortNameReversed,
+            ),
+            (
+              CreditSort.recent,
+              Icons.schedule_rounded,
+              l10n.itemSortRecent,
+              l10n.itemSortRecentReversed,
+            ),
+          ],
+          selected: state.sort,
+          reversed: state.sortReversed,
+          onChanged: cubit.setSort,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -79,7 +103,7 @@ class _CreditViewState extends State<CreditView>
                 child: summary == null
                     ? const SizedBox(width: double.infinity)
                     : Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                         child: _SummaryCard(summary),
                       ),
               ),
@@ -92,32 +116,16 @@ class _CreditViewState extends State<CreditView>
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.zero,
                   children: [
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: SortMenu<CreditSort>(
-                          tooltip: l10n.itemSortTooltip,
-                          options: [
-                            (
-                              CreditSort.name,
-                              Icons.sort_by_alpha_rounded,
-                              l10n.itemSortName,
-                              l10n.itemSortNameReversed,
-                            ),
-                            (
-                              CreditSort.recent,
-                              Icons.schedule_rounded,
-                              l10n.itemSortRecent,
-                              l10n.itemSortRecentReversed,
-                            ),
-                          ],
-                          selected: state.sort,
-                          reversed: state.sortReversed,
-                          onChanged: cubit.setSort,
+                    // Grouped by day, the sort icon rides on the first heading;
+                    // otherwise it gets a row of its own.
+                    if (!grouped)
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: sortMenu,
                         ),
                       ),
-                    ),
                     if (state.loading)
                       const Padding(
                         padding: EdgeInsets.only(top: 80),
@@ -135,30 +143,25 @@ class _CreditViewState extends State<CreditView>
                           ),
                         ),
                       )
+                    else if (state.sort == CreditSort.name)
+                      // Sorted by name, days would be out of order: one list.
+                      _CreditGroup(
+                        credits: state.credits,
+                        onOpen: widget.onOpen,
+                      )
                     else
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: context.tokens.surface,
-                            borderRadius: BorderRadius.circular(
-                              AppSizes.radiusCard,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              for (final (i, credit) in state.credits.indexed)
-                                _CreditRow(
-                                  credit: credit,
-                                  divider: i < state.credits.length - 1,
-                                  onTap: widget.onOpen == null
-                                      ? null
-                                      : () => widget.onOpen!(credit),
-                                ),
-                            ],
-                          ),
+                      for (final (i, group) in _groupByDay(
+                        state.credits,
+                      ).indexed) ...[
+                        _DayHeading(
+                          group.day,
+                          trailing: i == 0 ? sortMenu : null,
                         ),
-                      ),
+                        _CreditGroup(
+                          credits: group.credits,
+                          onOpen: widget.onOpen,
+                        ),
+                      ],
                     // Room for the nav bar and its floating button.
                     const SizedBox(height: 160),
                   ],
@@ -172,7 +175,102 @@ class _CreditViewState extends State<CreditView>
   }
 }
 
-/// The dark card: what is owed, in both currencies, and by how many.
+/// Credits taken on one Phnom Penh calendar day.
+typedef _DayGroup = ({DateTime day, List<Credit> credits});
+
+DateTime _phnomPenhDay(DateTime moment) {
+  final wall = moment.toPhnomPenh();
+  return DateTime.utc(wall.year, wall.month, wall.day);
+}
+
+/// Runs of [credits] (already sorted by time) that share a day, in order.
+List<_DayGroup> _groupByDay(List<Credit> credits) {
+  final groups = <_DayGroup>[];
+  for (final credit in credits) {
+    final day = _phnomPenhDay(credit.takenAt);
+    if (groups.isNotEmpty && groups.last.day == day) {
+      groups.last.credits.add(credit);
+    } else {
+      groups.add((day: day, credits: [credit]));
+    }
+  }
+  return groups;
+}
+
+/// `Today`, `Yesterday`, or the date, with an optional control at the end.
+class _DayHeading extends StatelessWidget {
+  const _DayHeading(this.day, {this.trailing});
+
+  final DateTime day;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final today = _phnomPenhDay(DateTime.now());
+    final label = switch (today.difference(day).inDays) {
+      <= 0 => l10n.creditGroupToday,
+      1 => l10n.creditGroupYesterday,
+      _ => l10n.formatDate(day),
+    };
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(
+        20,
+        trailing == null ? 10 : 0,
+        trailing == null ? 20 : 8,
+        4,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: AppTextTheme.label.copyWith(
+                color: context.tokens.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ?trailing,
+        ],
+      ),
+    );
+  }
+}
+
+/// One white card holding a run of Credit rows.
+class _CreditGroup extends StatelessWidget {
+  const _CreditGroup({required this.credits, required this.onOpen});
+
+  final List<Credit> credits;
+  final ValueChanged<Credit>? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.tokens.surface,
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        ),
+        child: Column(
+          children: [
+            for (final (i, credit) in credits.indexed)
+              _CreditRow(
+                credit: credit,
+                divider: i < credits.length - 1,
+                onTap: onOpen == null ? null : () => onOpen!(credit),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The minimal card: what is owed in both currencies, and by how many.
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard(this.summary);
 
@@ -182,48 +280,55 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final l10n = context.l10n;
-    final soft = t.surface.withValues(alpha: 0.8);
+    final hint = AppTextTheme.hint.copyWith(color: t.textMuted, fontSize: 13);
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: t.textPrimary,
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        color: t.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: t.dividerStrong),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.creditTotalOwed,
-            style: AppTextTheme.hint.copyWith(color: soft),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.end,
+            spacing: 8,
             children: [
+              Text(l10n.creditTotalOwed, style: hint.copyWith(fontSize: 14)),
               Text(
                 summary.total.format(),
                 style: AppTextTheme.headline.copyWith(
-                  color: t.surface,
-                  fontSize: 28,
+                  color: t.textPrimary,
+                  fontSize: 20,
                 ),
               ),
-              const SizedBox(width: 10),
               Text(
                 summary.other.formatApprox(),
-                style: AppTextTheme.label.copyWith(
-                  color: soft,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: hint.copyWith(fontSize: 14),
               ),
             ],
           ),
-          Text(
-            [
-              l10n.creditSummaryPeople(summary.people),
-              if (summary.peopleWithoutAmount > 0)
-                l10n.creditSummaryUnknown(summary.peopleWithoutAmount),
-            ].join(' · '),
-            style: AppTextTheme.hint.copyWith(color: soft, fontSize: 13),
+          Text.rich(
+            TextSpan(
+              style: hint,
+              children: [
+                TextSpan(text: l10n.creditSummaryPeople(summary.people)),
+                if (summary.peopleWithoutAmount > 0) ...[
+                  const TextSpan(text: ' · '),
+                  TextSpan(
+                    text: l10n.creditSummaryUnknown(
+                      summary.peopleWithoutAmount,
+                    ),
+                    style: TextStyle(
+                      color: t.warningText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
@@ -304,19 +409,15 @@ class _CreditRow extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  // Read often: body size, darker, two lines before cutting.
+                  // Read often: body size, darker, and the whole note.
                   child: Text(
                     note,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                     style: AppTextTheme.body.copyWith(
                       color: t.textSecondary,
                       fontSize: 15,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                StatusPill(paid: credit.isPaid),
               ],
             ),
             const SizedBox(height: 6),
