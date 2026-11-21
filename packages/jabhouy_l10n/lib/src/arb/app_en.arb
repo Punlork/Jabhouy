@@ -465,6 +465,14 @@
   "@updateLater": {
     "description": "Button label to dismiss the update prompt"
   },
+  "creditGroupToday": "Today",
+  "@creditGroupToday": {
+    "description": "Day heading in the credit list for credits taken today"
+  },
+  "creditGroupYesterday": "Yesterday",
+  "@creditGroupYesterday": {
+    "description": "Day heading in the credit list for credits taken yesterday"
+  },
   "updateNow": "Update now",
   "@updateNow": {
     "description": "Button label to open the latest release for updating"

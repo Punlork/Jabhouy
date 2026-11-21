@@ -50,10 +50,10 @@ class FilterChips extends StatelessWidget {
   }
 }
 
-/// The sort icon and its dropdown of orders: icon, label (the reversed
-/// label once [reversed]) and a ↓ ↑ pair with the active direction filled.
-/// Tapping a row picks it, or flips it when already in use; tapping an
-/// arrow sets that direction.
+/// The sort button (canvas ៧ option គ): the order in use as a label (the
+/// reversed label once [reversed]) beside a thin ↑↓ mark. It opens a plain
+/// list of orders with a ✓ on the one in use. Tapping an order picks it, or
+/// flips its direction when it is already in use.
 class SortMenu<T> extends StatelessWidget {
   const SortMenu({
     required this.tooltip,
@@ -66,7 +66,8 @@ class SortMenu<T> extends StatelessWidget {
 
   final String tooltip;
 
-  /// Each order: value, icon, label, reversed label.
+  /// Each order: value, icon, label, reversed label. The icon is not drawn;
+  /// the list is text and a check.
   final List<(T, IconData, String, String)> options;
   final T selected;
   final bool reversed;
@@ -75,6 +76,11 @@ class SortMenu<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final current = options.firstWhere(
+      (o) => o.$1 == selected,
+      orElse: () => options.first,
+    );
+    final currentLabel = reversed ? current.$4 : current.$3;
     return PopupMenuButton<T>(
       tooltip: tooltip,
       initialValue: selected,
@@ -88,72 +94,110 @@ class SortMenu<T> extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
         side: BorderSide(color: t.border),
       ),
-      icon: Icon(Icons.sort_rounded, color: t.textSecondary),
       itemBuilder: (_) => [
-        for (final (value, icon, label, reversedLabel) in options)
+        for (final (value, _, label, reversedLabel) in options)
           PopupMenuItem(
             value: value,
-            padding: const EdgeInsets.only(left: 16, right: 8),
-            child: Builder(
-              builder: (menuContext) {
-                final on = value == selected;
-                Widget arrow({required bool up, required String semantics}) {
-                  final active = on && reversed == up;
-                  return Semantics(
-                    button: true,
-                    selected: active,
-                    label: semantics,
-                    child: InkResponse(
-                      onTap: () {
-                        Navigator.pop(menuContext);
-                        onChanged(value, reversed: up);
-                      },
-                      radius: 20,
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: active ? t.textPrimary : null,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          up
-                              ? Icons.arrow_upward_rounded
-                              : Icons.arrow_downward_rounded,
-                          size: 18,
-                          color: active ? t.onPrimary : t.textMuted,
-                        ),
-                      ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value == selected && reversed ? reversedLabel : label,
+                    style: AppTextTheme.body.copyWith(
+                      color: value == selected
+                          ? t.textPrimary
+                          : t.textSecondary,
+                      fontWeight: value == selected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
-                  );
-                }
-
-                return Row(
-                  children: [
-                    Icon(icon, size: 20, color: on ? t.textPrimary : t.textMuted),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        on && reversed ? reversedLabel : label,
-                        style: AppTextTheme.body.copyWith(
-                          color: on ? t.textPrimary : t.textSecondary,
-                          fontWeight: on ? FontWeight.w700 : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    arrow(up: false, semantics: label),
-                    const SizedBox(width: 4),
-                    arrow(up: true, semantics: reversedLabel),
-                  ],
-                );
-              },
+                  ),
+                ),
+                if (value == selected) ...[
+                  const SizedBox(width: 16),
+                  Icon(Icons.check_rounded, size: 20, color: t.textPrimary),
+                ],
+              ],
             ),
           ),
       ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 44),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                currentLabel,
+                style: AppTextTheme.hint.copyWith(
+                  color: t.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(width: 4),
+              CustomPaint(
+                size: const Size.square(18),
+                painter: _SortGlyphPainter(
+                  active: t.textPrimary,
+                  idle: t.textMuted.withValues(alpha: 0.5),
+                  up: reversed,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
+}
+
+/// ↑ on the left and ↓ on the right, drawn on the design's 24 grid. The
+/// arrow for the direction in use is [active] and heavier; the other is
+/// [idle]. [up] is the reversed direction.
+class _SortGlyphPainter extends CustomPainter {
+  _SortGlyphPainter({
+    required this.active,
+    required this.idle,
+    required this.up,
+  });
+
+  final Color active;
+  final Color idle;
+  final bool up;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final unit = size.width / 24;
+    Paint stroke({required bool on}) => Paint()
+      ..color = on ? active : idle
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = (on ? 2.6 : 2) * unit
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    Offset p(double x, double y) => Offset(x * unit, y * unit);
+    final upArrow = Path()
+      ..moveTo(p(8, 19).dx, p(8, 19).dy)
+      ..lineTo(p(8, 5).dx, p(8, 5).dy)
+      ..moveTo(p(4, 9).dx, p(4, 9).dy)
+      ..lineTo(p(8, 5).dx, p(8, 5).dy)
+      ..lineTo(p(12, 9).dx, p(12, 9).dy);
+    final downArrow = Path()
+      ..moveTo(p(16, 5).dx, p(16, 5).dy)
+      ..lineTo(p(16, 19).dx, p(16, 19).dy)
+      ..moveTo(p(12, 15).dx, p(12, 15).dy)
+      ..lineTo(p(16, 19).dx, p(16, 19).dy)
+      ..lineTo(p(20, 15).dx, p(20, 15).dy);
+    // The idle arrow first, so the active one sits on top where they meet.
+    canvas
+      ..drawPath(up ? downArrow : upArrow, stroke(on: false))
+      ..drawPath(up ? upArrow : downArrow, stroke(on: true));
+  }
+
+  @override
+  bool shouldRepaint(_SortGlyphPainter old) =>
+      old.active != active || old.idle != idle || old.up != up;
 }
 
 /// Wrapping row of suggestions that fill a field when tapped.

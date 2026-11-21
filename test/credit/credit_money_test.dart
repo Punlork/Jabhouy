@@ -3,15 +3,19 @@ import 'package:jabhouy/credit/logic/credit_money.dart';
 import 'package:jabhouy/credit/models/credit.dart';
 import 'package:jabhouy_core/jabhouy_core.dart';
 
-CreditLine _line(String name, int qty, int price, [Currency c = Currency.khr]) =>
-    CreditLine(
-      id: name,
-      name: name,
-      unit: 'ដប',
-      qty: qty,
-      currency: c,
-      unitPrice: price,
-    );
+CreditLine _line(
+  String name,
+  int qty,
+  int price, [
+  Currency c = Currency.khr,
+]) => CreditLine(
+  id: name,
+  name: name,
+  unit: 'ដប',
+  qty: qty,
+  currency: c,
+  unitPrice: price,
+);
 
 Credit _credit({
   String customer = 'u',
@@ -45,7 +49,10 @@ void main() {
   test('a USD line converts per line, rounded to 100 ៛', () {
     // $0.30 x 3 = $0.90 -> 3,600 ៛ at 4,000; $1.25 -> 5,000 ៛.
     final credit = _credit(
-      lines: [_line('a', 3, 30, Currency.usd), _line('b', 1, 125, Currency.usd)],
+      lines: [
+        _line('a', 3, 30, Currency.usd),
+        _line('b', 1, 125, Currency.usd),
+      ],
     );
 
     expect(amountOf(credit), const Money(3600 + 5000, Currency.khr));

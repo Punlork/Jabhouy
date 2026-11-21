@@ -3,6 +3,7 @@ import 'package:jabhouy_l10n/jabhouy_l10n.dart';
 import 'package:jabhouy_ui/src/theme/app_tokens.dart';
 import 'package:jabhouy_ui/src/theme/text_theme.dart';
 import 'package:jabhouy_ui/src/voice/speech_service.dart';
+import 'package:jabhouy_ui/src/voice/spoken_numbers.dart';
 import 'package:jabhouy_ui/src/widget/app_sheet.dart';
 import 'package:jabhouy_ui/src/widget/segmented_control.dart';
 
@@ -57,7 +58,10 @@ class _VoiceSheetState extends State<VoiceSheet> {
       localeId: _locale,
       onText: (text) {
         if (mounted) {
-          setState(() => _text = before.isEmpty ? text : '$before $text');
+          setState(() {
+            final spoken = normalizeSpokenNumbers(text);
+            _text = before.isEmpty ? spoken : '$before $spoken';
+          });
         }
       },
       onLevel: (level) {

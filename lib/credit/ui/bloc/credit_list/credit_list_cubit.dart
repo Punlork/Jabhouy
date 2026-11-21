@@ -25,8 +25,7 @@ class CreditListCubit extends Cubit<CreditListState> {
   final CreditRepository _repository;
 
   /// Lets the app remember the sort order, as Home does for Items.
-  final void Function(CreditSort sort, {required bool reversed})?
-  onSortChanged;
+  final void Function(CreditSort sort, {required bool reversed})? onSortChanged;
 
   StreamSubscription<List<Credit>>? _subscription;
   List<Credit> _all = const [];
@@ -34,13 +33,13 @@ class CreditListCubit extends Cubit<CreditListState> {
   /// Starts reading once the Current Shop is known (after sign-in).
   void start() {
     if (!_repository.ready || _subscription != null) return;
-    _subscription = _repository
-        .watchCredits(filter: CreditFilter.all)
-        .listen((all) async {
-          _all = all;
-          final rates = await _repository.currentRates();
-          emit(_derive(state.copyWith(currency: rates.currency, loading: false)));
-        });
+    _subscription = _repository.watchCredits(filter: CreditFilter.all).listen((
+      all,
+    ) async {
+      _all = all;
+      final rates = await _repository.currentRates();
+      emit(_derive(state.copyWith(currency: rates.currency, loading: false)));
+    });
   }
 
   /// On sign-out: drops the Shop's data; [start] reads again later.
@@ -93,10 +92,7 @@ class CreditListCubit extends Cubit<CreditListState> {
     }
     return next.copyWith(
       credits: next.sortReversed ? credits.reversed.toList() : credits,
-      summary: summarize(
-        _all.where((credit) => !credit.isPaid),
-        next.currency,
-      ),
+      summary: summarize(_all.where((credit) => !credit.isPaid), next.currency),
     );
   }
 

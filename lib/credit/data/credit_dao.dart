@@ -18,17 +18,18 @@ class CreditDao {
 
   /// Live Credits, newest first, without their lines.
   Stream<List<Credit>> watchCredits(String shopId) {
-    final query = _db.select(_db.creditTable).join([
-      innerJoin(
-        _db.customerTable,
-        _db.customerTable.id.equalsExp(_db.creditTable.customerId),
-      ),
-    ])
-      ..where(
-        _db.creditTable.shopId.equals(shopId) &
-            _db.creditTable.deletedAt.isNull(),
-      )
-      ..orderBy([OrderingTerm.desc(_db.creditTable.takenAt)]);
+    final query =
+        _db.select(_db.creditTable).join([
+            innerJoin(
+              _db.customerTable,
+              _db.customerTable.id.equalsExp(_db.creditTable.customerId),
+            ),
+          ])
+          ..where(
+            _db.creditTable.shopId.equals(shopId) &
+                _db.creditTable.deletedAt.isNull(),
+          )
+          ..orderBy([OrderingTerm.desc(_db.creditTable.takenAt)]);
     return query.watch().map(
       (rows) => [
         for (final row in rows)
@@ -59,19 +60,19 @@ class CreditDao {
           .getSingleOrNull();
 
   Future<Credit?> creditById(String id) async {
-    final row =
-        await (_db.select(_db.creditTable)
-              ..where((c) => c.id.equals(id) & c.deletedAt.isNull()))
-            .getSingleOrNull();
+    final row = await (_db.select(
+      _db.creditTable,
+    )..where((c) => c.id.equals(id) & c.deletedAt.isNull())).getSingleOrNull();
     if (row == null) return null;
-    final customer =
-        await (_db.select(_db.customerTable)
-              ..where((c) => c.id.equals(row.customerId)))
-            .getSingleOrNull();
-    final lines = await (_db.select(_db.creditItemTable)
-          ..where((l) => l.creditId.equals(id)))
-        .get();
-    return _credit(row, customer?.name ?? '', [for (final l in lines) _line(l)]);
+    final customer = await (_db.select(
+      _db.customerTable,
+    )..where((c) => c.id.equals(row.customerId))).getSingleOrNull();
+    final lines = await (_db.select(
+      _db.creditItemTable,
+    )..where((l) => l.creditId.equals(id))).get();
+    return _credit(row, customer?.name ?? '', [
+      for (final l in lines) _line(l),
+    ]);
   }
 
   /// Writes the Credit and replaces its lines. One transaction.
@@ -81,7 +82,9 @@ class CreditDao {
     required DateTime now,
     String? userId,
   }) => _db.transaction(() async {
-    await _db.into(_db.creditTable).insertOnConflictUpdate(
+    await _db
+        .into(_db.creditTable)
+        .insertOnConflictUpdate(
           CreditTableCompanion.insert(
             id: credit.id,
             shopId: shopId,
@@ -112,11 +115,13 @@ class CreditDao {
       );
 
   Future<void> _replaceLines(String creditId, List<CreditLine> lines) async {
-    await (_db.delete(_db.creditItemTable)
-          ..where((l) => l.creditId.equals(creditId)))
-        .go();
+    await (_db.delete(
+      _db.creditItemTable,
+    )..where((l) => l.creditId.equals(creditId))).go();
     for (final l in lines) {
-      await _db.into(_db.creditItemTable).insert(
+      await _db
+          .into(_db.creditItemTable)
+          .insert(
             CreditItemTableCompanion.insert(
               id: l.id,
               creditId: creditId,
@@ -188,10 +193,9 @@ class CreditDao {
   }
 
   Future<CreditCustomer?> customerById(String id) async {
-    final row =
-        await (_db.select(_db.customerTable)
-              ..where((c) => c.id.equals(id) & c.deletedAt.isNull()))
-            .getSingleOrNull();
+    final row = await (_db.select(
+      _db.customerTable,
+    )..where((c) => c.id.equals(id) & c.deletedAt.isNull())).getSingleOrNull();
     return row == null ? null : _customer(row);
   }
 
@@ -200,7 +204,9 @@ class CreditDao {
     CreditCustomer customer, {
     required DateTime now,
     String? userId,
-  }) => _db.into(_db.customerTable).insertOnConflictUpdate(
+  }) => _db
+      .into(_db.customerTable)
+      .insertOnConflictUpdate(
         CustomerTableCompanion.insert(
           id: customer.id,
           shopId: shopId,
@@ -237,10 +243,9 @@ class CreditDao {
   // The Shop's settings, for a new Credit's snapshot and the balances.
 
   Future<({Currency currency, int khrPerUsd})> rates(String shopId) async {
-    final row =
-        await (_db.select(_db.shopSettingsTable)
-              ..where((s) => s.shopId.equals(shopId)))
-            .getSingleOrNull();
+    final row = await (_db.select(
+      _db.shopSettingsTable,
+    )..where((s) => s.shopId.equals(shopId))).getSingleOrNull();
     return (
       currency: row == null ? Currency.khr : _currency(row.defaultCurrency),
       khrPerUsd: row?.khrPerUsd ?? 4000,
@@ -261,8 +266,9 @@ class CreditDao {
       final by = row['updatedBy'] as String?;
       final seq = (row['seq'] as int?) ?? 0;
       if (row['deletedAt'] != null) {
-        await (_db.update(_db.customerTable)..where((c) => c.id.equals(id)))
-            .write(
+        await (_db.update(
+          _db.customerTable,
+        )..where((c) => c.id.equals(id))).write(
           CustomerTableCompanion(
             deletedAt: Value(_time(row['deletedAt'])),
             updatedAt: Value(at),
@@ -272,7 +278,9 @@ class CreditDao {
         );
         continue;
       }
-      await _db.into(_db.customerTable).insertOnConflictUpdate(
+      await _db
+          .into(_db.customerTable)
+          .insertOnConflictUpdate(
             CustomerTableCompanion.insert(
               id: id,
               shopId: shopId,
@@ -300,8 +308,9 @@ class CreditDao {
       final by = row['updatedBy'] as String?;
       final seq = (row['seq'] as int?) ?? 0;
       if (row['deletedAt'] != null) {
-        await (_db.update(_db.creditTable)..where((c) => c.id.equals(id)))
-            .write(
+        await (_db.update(
+          _db.creditTable,
+        )..where((c) => c.id.equals(id))).write(
           CreditTableCompanion(
             deletedAt: Value(_time(row['deletedAt'])),
             updatedAt: Value(at),
@@ -311,11 +320,14 @@ class CreditDao {
         );
         continue;
       }
-      await _db.into(_db.creditTable).insertOnConflictUpdate(
+      await _db
+          .into(_db.creditTable)
+          .insertOnConflictUpdate(
             CreditTableCompanion.insert(
               id: id,
               shopId: shopId,
-              customerId: (row['customer']! as Map<String, Object?>)['id']! as String,
+              customerId:
+                  (row['customer']! as Map<String, Object?>)['id']! as String,
               currency: row['currency']! as String,
               amount: Value(row['amount'] as int?),
               khrPerUsd: row['khrPerUsd']! as int,
@@ -350,27 +362,31 @@ class CreditDao {
   static DateTime? _time(Object? v) =>
       v == null ? null : DateTime.parse(v as String);
 
-  static Currency _currency(String v) => Currency.values.byName(v.toLowerCase());
+  static Currency _currency(String v) =>
+      Currency.values.byName(v.toLowerCase());
 
   static CreditCustomer _customer(CustomerRow r) =>
       CreditCustomer(id: r.id, name: r.name, phone: r.phone, note: r.note);
 
-  static Credit _credit(CreditRow r, String customerName, List<CreditLine> lines) =>
-      Credit(
-        id: r.id,
-        customerId: r.customerId,
-        customerName: customerName,
-        currency: _currency(r.currency),
-        amount: r.amount,
-        khrPerUsd: r.khrPerUsd,
-        status: CreditStatus.values.byName(r.status),
-        // Drift reads local time; the model always holds UTC.
-        takenAt: r.takenAt.toUtc(),
-        dueDate: r.dueDate,
-        paidAt: r.paidAt?.toUtc(),
-        note: r.note,
-        lines: lines,
-      );
+  static Credit _credit(
+    CreditRow r,
+    String customerName,
+    List<CreditLine> lines,
+  ) => Credit(
+    id: r.id,
+    customerId: r.customerId,
+    customerName: customerName,
+    currency: _currency(r.currency),
+    amount: r.amount,
+    khrPerUsd: r.khrPerUsd,
+    status: CreditStatus.values.byName(r.status),
+    // Drift reads local time; the model always holds UTC.
+    takenAt: r.takenAt.toUtc(),
+    dueDate: r.dueDate,
+    paidAt: r.paidAt?.toUtc(),
+    note: r.note,
+    lines: lines,
+  );
 
   static CreditLine _line(CreditItemRow r) => CreditLine(
     id: r.id,

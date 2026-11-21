@@ -36,7 +36,8 @@ class CustomLoadingWidget extends StatefulWidget {
   State<CustomLoadingWidget> createState() => _CustomLoadingWidgetState();
 }
 
-class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTickerProviderStateMixin {
+class _CustomLoadingWidgetState extends State<CustomLoadingWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _rotationAnimation;
 
@@ -48,9 +49,10 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
       vsync: this,
     )..repeat();
 
-    _rotationAnimation = Tween<double>(begin: 0, end: 2 * 3.14159).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.linear),
-    );
+    _rotationAnimation = Tween<double>(
+      begin: 0,
+      end: 2 * 3.14159,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
   }
 
   @override
@@ -80,7 +82,8 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.shadow.withValues(alpha: .2),
+                      color: Theme.of(context).colorScheme.shadow
+                          .withValues(alpha: .2),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -95,7 +98,9 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                       child: Stack(
                         children: List.generate(6, (index) {
                           return Transform.rotate(
-                            angle: _rotationAnimation.value + (index * 3.14159 / 3),
+                            angle:
+                                _rotationAnimation.value +
+                                (index * 3.14159 / 3),
                             child: Align(
                               alignment: Alignment.topCenter,
                               child: Container(
@@ -103,7 +108,8 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                                 height: 8,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: .7),
+                                  color: Theme.of(context).colorScheme.primary
+                                      .withValues(alpha: .7),
                                 ),
                               ),
                             ),
@@ -115,9 +121,9 @@ class _CustomLoadingWidgetState extends State<CustomLoadingWidget> with SingleTi
                     Text(
                       '${context.l10n.loading}...',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
