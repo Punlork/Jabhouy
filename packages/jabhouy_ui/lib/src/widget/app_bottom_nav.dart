@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jabhouy_ui/src/theme/app_tokens.dart';
 import 'package:jabhouy_ui/src/theme/text_theme.dart';
+import 'package:jabhouy_ui/src/widget/app_add_button.dart';
 
 /// One tab in [AppBottomNav].
 class AppNavTab {
@@ -44,14 +45,7 @@ class AppBottomNav extends StatelessWidget {
             AppSizes.screenPadding,
             12,
           ),
-          child: FloatingActionButton.extended(
-            onPressed: onAction,
-            backgroundColor: t.textPrimary,
-            foregroundColor: t.onPrimary,
-            shape: const StadiumBorder(),
-            icon: const Icon(Icons.add_rounded),
-            label: Text(actionLabel, style: AppTextTheme.label),
-          ),
+          child: AppAddButton(label: actionLabel, onPressed: onAction),
         ),
         DecoratedBox(
           decoration: BoxDecoration(

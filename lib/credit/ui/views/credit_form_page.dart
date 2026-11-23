@@ -111,58 +111,60 @@ class _CreditFormPageState extends State<CreditFormPage> {
           ),
           body: loading
               ? const Center(child: CircularProgressIndicator())
-              : ListView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  children: [
-                    _customer(state),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    _lines(state),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    _amount(state),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    LabeledField(
-                      label: l10n.noteLabel,
-                      hint: l10n.creditNoteHelp,
-                      child: TextField(
-                        controller: _note,
-                        minLines: 3,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                          hintText: l10n.creditNoteHint,
-                          suffixIcon: MicButton(
-                            fieldLabel: l10n.noteLabel,
-                            controller: _note,
+              : ContentWidth.form(
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                    children: [
+                      _customer(state),
+                      const SizedBox(height: AppSizes.sectionGap),
+                      _lines(state),
+                      const SizedBox(height: AppSizes.sectionGap),
+                      _amount(state),
+                      const SizedBox(height: AppSizes.sectionGap),
+                      LabeledField(
+                        label: l10n.noteLabel,
+                        hint: l10n.creditNoteHelp,
+                        child: TextField(
+                          controller: _note,
+                          minLines: 3,
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            hintText: l10n.creditNoteHint,
+                            suffixIcon: MicButton(
+                              fieldLabel: l10n.noteLabel,
+                              controller: _note,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    _takenAt(state),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    LabeledField(
-                      label: l10n.creditDueDate,
-                      optional: true,
-                      child: _DueDateField(
-                        day: state.dueDate,
-                        onTap: () => _pickDue(state),
-                        onClear: () => _cubit.setDueDate(null),
+                      const SizedBox(height: AppSizes.sectionGap),
+                      _takenAt(state),
+                      const SizedBox(height: AppSizes.sectionGap),
+                      LabeledField(
+                        label: l10n.creditDueDate,
+                        optional: true,
+                        child: _DueDateField(
+                          day: state.dueDate,
+                          onTap: () => _pickDue(state),
+                          onClear: () => _cubit.setDueDate(null),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    LabeledField(
-                      label: l10n.statusLabel,
-                      child: SegmentedControl<CreditStatus>(
-                        options: [
-                          (CreditStatus.unpaid, l10n.creditUnpaid),
-                          (CreditStatus.paid, l10n.creditPaid),
-                        ],
-                        selected: state.creditStatus,
-                        onChanged: _cubit.setStatus,
+                      const SizedBox(height: AppSizes.sectionGap),
+                      LabeledField(
+                        label: l10n.statusLabel,
+                        child: SegmentedControl<CreditStatus>(
+                          options: [
+                            (CreditStatus.unpaid, l10n.creditUnpaid),
+                            (CreditStatus.paid, l10n.creditPaid),
+                          ],
+                          selected: state.creditStatus,
+                          onChanged: _cubit.setStatus,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
           bottomNavigationBar: SafeArea(
             child: Container(

@@ -145,34 +145,36 @@ class _ItemFormPageState extends State<ItemFormPage> {
           ),
           body: loading
               ? const Center(child: CircularProgressIndicator())
-              : ListView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  children: [
-                    _nameSection(state),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    LabeledField(
-                      label: l10n.noteLabel,
-                      hint: l10n.itemNoteHelp,
-                      child: TextField(
-                        controller: _note,
-                        minLines: 3,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                          hintText: l10n.itemNoteHint,
-                          suffixIcon: MicButton(
-                            fieldLabel: l10n.noteLabel,
-                            controller: _note,
+              : ContentWidth.form(
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                    children: [
+                      _nameSection(state),
+                      const SizedBox(height: AppSizes.sectionGap),
+                      LabeledField(
+                        label: l10n.noteLabel,
+                        hint: l10n.itemNoteHelp,
+                        child: TextField(
+                          controller: _note,
+                          minLines: 3,
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            hintText: l10n.itemNoteHint,
+                            suffixIcon: MicButton(
+                              fieldLabel: l10n.noteLabel,
+                              controller: _note,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    _categorySection(state),
-                    const SizedBox(height: AppSizes.sectionGap),
-                    _priceSection(state),
-                  ],
+                      const SizedBox(height: AppSizes.sectionGap),
+                      _categorySection(state),
+                      const SizedBox(height: AppSizes.sectionGap),
+                      _priceSection(state),
+                    ],
+                  ),
                 ),
           bottomNavigationBar: SafeArea(
             child: Container(
