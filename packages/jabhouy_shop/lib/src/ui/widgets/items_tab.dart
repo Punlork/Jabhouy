@@ -191,7 +191,9 @@ class _ItemsTabState extends State<ItemsTab>
                     ? MasonryGridView.count(
                         controller: controller,
                         physics: const AlwaysScrollableScrollPhysics(),
-                        crossAxisCount: 2,
+                        crossAxisCount: AppBreakpoints.gridColumns(
+                          MediaQuery.sizeOf(context).width,
+                        ),
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
                         padding: _listPadding,

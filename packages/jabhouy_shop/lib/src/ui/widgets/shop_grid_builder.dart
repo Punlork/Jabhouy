@@ -128,12 +128,6 @@ class _ShopGridBuilderState extends State<ShopGridBuilder>
   bool get wantKeepAlive => true;
 
   int _resolveCrossAxisCount(BuildContext context, {required int itemCount}) {
-    final preferredCount = MediaQuery.sizeOf(context).width > 600 ? 3 : 2;
-
-    if (itemCount <= 0) {
-      return preferredCount;
-    }
-
-    return preferredCount;
+    return AppBreakpoints.gridColumns(MediaQuery.sizeOf(context).width);
   }
 }

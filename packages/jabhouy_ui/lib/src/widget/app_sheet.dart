@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jabhouy_ui/src/theme/app_tokens.dart';
 import 'package:jabhouy_ui/src/theme/text_theme.dart';
 import 'package:jabhouy_ui/src/widget/app_bottom_sheet.dart';
+import 'package:jabhouy_ui/src/widget/content_width.dart';
 
 /// Opens [builder]'s sheet the standard way: [initialSize] of the screen
 /// at first; scrolling its content up grows it to [maxSize] before the
@@ -76,72 +77,80 @@ class AppSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    // The sheet spans the screen; its content stays a readable column.
     return AppBottomSheet(
       scrollable: false,
-      child: Column(
-        mainAxisSize: fit ? MainAxisSize.min : MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: t.border,
-                borderRadius: BorderRadius.circular(2),
+      child: ContentWidth.form(
+        child: Column(
+          mainAxisSize: fit ? MainAxisSize.min : MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: t.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSizes.screenPadding, 4, 4, 4),
-            child: Row(
-              crossAxisAlignment: header == null
-                  ? CrossAxisAlignment.center
-                  : CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child:
-                      header ??
-                      Text(
-                        title!,
-                        style: AppTextTheme.pageTitle.copyWith(
-                          color: t.textPrimary,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.screenPadding,
+                4,
+                4,
+                4,
+              ),
+              child: Row(
+                crossAxisAlignment: header == null
+                    ? CrossAxisAlignment.center
+                    : CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child:
+                        header ??
+                        Text(
+                          title!,
+                          style: AppTextTheme.pageTitle.copyWith(
+                            color: t.textPrimary,
+                          ),
                         ),
-                      ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: Icon(Icons.close_rounded, color: t.textPrimary),
+                    tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                  ),
+                ],
+              ),
+            ),
+            if (pinned case final pinned?) pinned,
+            // Fills the sheet, so a short body still leaves the footer at
+            // the bottom rather than floating mid-sheet.
+            Flexible(
+              fit: fit ? FlexFit.loose : FlexFit.tight,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.screenPadding,
                 ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  icon: Icon(Icons.close_rounded, color: t.textPrimary),
-                  tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                child: child,
+              ),
+            ),
+            if (footer != null)
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: t.dividerStrong)),
                 ),
-              ],
-            ),
-          ),
-          if (pinned case final pinned?) pinned,
-          // Fills the sheet, so a short body still leaves the footer at
-          // the bottom rather than floating mid-sheet.
-          Flexible(
-            fit: fit ? FlexFit.loose : FlexFit.tight,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSizes.screenPadding,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSizes.screenPadding),
+                  child: footer,
+                ),
               ),
-              child: child,
-            ),
-          ),
-          if (footer != null)
-            DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: t.dividerStrong)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSizes.screenPadding),
-                child: footer,
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

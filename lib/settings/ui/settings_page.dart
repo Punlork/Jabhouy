@@ -23,7 +23,9 @@ class _SettingsPageState extends State<SettingsPage> {
   int _diagnosticsTapCount = 0;
   late final Future<String> _appVersionFuture;
   final _isIncomeEnabled = getIt<FeatureFlags>().isEnabled(Feature.income);
-  final _isDiagnosticsEnabled = getIt<FeatureFlags>().isEnabled(Feature.diagnostics);
+  final _isDiagnosticsEnabled = getIt<FeatureFlags>().isEnabled(
+    Feature.diagnostics,
+  );
   // Switching, joining and members need the API's Shops.
   final _hasServerShops = getIt<FeatureFlags>().isEnabled(Feature.serverShops);
 
@@ -50,9 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void _openDiagnostics() {
     context.pushNamed(
       AppRoutes.appDiagnostics,
-      extra: {
-        if (_isIncomeEnabled) 'incomeBloc': context.read<IncomeBloc>(),
-      },
+      extra: {if (_isIncomeEnabled) 'incomeBloc': context.read<IncomeBloc>()},
     );
   }
 
@@ -88,28 +88,16 @@ class _SettingsPageState extends State<SettingsPage> {
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          l10n.signOut,
-          style: AppTextTheme.title,
-        ),
-        content: Text(
-          l10n.confirmSignOut,
-          style: AppTextTheme.body,
-        ),
+        title: Text(l10n.signOut, style: AppTextTheme.title),
+        content: Text(l10n.confirmSignOut, style: AppTextTheme.body),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              l10n.cancel,
-              style: AppTextTheme.caption,
-            ),
+            child: Text(l10n.cancel, style: AppTextTheme.caption),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              l10n.signOut,
-              style: AppTextTheme.caption,
-            ),
+            child: Text(l10n.signOut, style: AppTextTheme.caption),
           ),
         ],
       ),
@@ -141,16 +129,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// `$1 = 4,000 ៛ · លក់ដុំ · ដើម`: the rate and the extra prices in use.
   String _pricesSummary(AppLocalizations l10n, PriceSettings s) => [
-        l10n.settingsRateFormat(Money(s.khrPerUsd, Currency.khr).formatNumber()),
-        if (s.useWholesale) l10n.priceWholesaleLabel,
-        if (s.useCost) l10n.priceCostShort,
-      ].join(' · ');
+    l10n.settingsRateFormat(Money(s.khrPerUsd, Currency.khr).formatNumber()),
+    if (s.useWholesale) l10n.priceWholesaleLabel,
+    if (s.useCost) l10n.priceCostShort,
+  ].join(' · ');
 
   String _roleLabel(AppLocalizations l10n, MemberRole? role) => switch (role) {
-        MemberRole.owner => l10n.roleOwner,
-        MemberRole.editor => l10n.roleEditor,
-        MemberRole.viewer || null => l10n.roleViewer,
-      };
+    MemberRole.owner => l10n.roleOwner,
+    MemberRole.editor => l10n.roleEditor,
+    MemberRole.viewer || null => l10n.roleViewer,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -180,154 +168,162 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Text(l10n.settings),
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-          children: [
-            _ProfileCard(
-              name: name,
-              subtitle: [
-                if (shopName != null && shopName.isNotEmpty) shopName,
-                _roleLabel(l10n, shop.role),
-              ].join(' · '),
-              onTap: () => context.pushNamed(AppRoutes.profile),
-            ),
-            const SizedBox(height: 22),
-            _Section(
-              title: l10n.shop,
-              footnote: shop.role == MemberRole.owner
-                  ? null
-                  : l10n.settingsOwnerOnly,
-              rows: [
-                if (_hasServerShops)
-                  _Row(
-                    icon: Icons.storefront_outlined,
-                    title: l10n.shopSwitch,
-                    subtitle: shopName,
-                    onTap: () => showShopSwitcher(context),
-                  ),
-                if (_hasServerShops && shop.role == MemberRole.owner)
-                  _Row(
-                    icon: Icons.group_outlined,
-                    title: l10n.settingsMembers,
-                    onTap: () => openMembers(context),
-                  ),
-                BlocBuilder<PriceSettingsCubit, PriceSettings?>(
-                  builder: (context, prices) => _Row(
-                    icon: Icons.sell_outlined,
-                    title: l10n.settingsPricesCurrency,
-                    subtitle:
-                        prices == null ? null : _pricesSummary(l10n, prices),
-                    onTap: _openPriceSettings,
-                  ),
-                ),
-                BlocBuilder<CategoriesCubit, List<ItemCategory>?>(
-                  builder: (context, categories) => _Row(
-                    icon: Icons.category_outlined,
-                    title: l10n.settingsCategoriesUnits,
-                    subtitle: categories == null
-                        ? null
-                        : l10n.categoriesCount(categories.length),
-                    onTap: _openCategoriesUnits,
-                  ),
-                ),
-                _Row(
-                  icon: Icons.people_outline_rounded,
-                  title: l10n.customers,
-                  onTap: () => showCustomerPicker(
-                    context,
-                    getIt<CreditRepository>(),
-                    manage: true,
-                  ),
-                ),
-              ],
-            ),
-            // The main/sub device role only decides which phone captures
-            // bank notifications, so it goes with the income feature.
-            if (_isIncomeEnabled) ...[
-              const SizedBox(height: 22),
-              BlocBuilder<AppBloc, AppState>(
-                builder: (context, state) => _DeviceRoleCard(
-                  isMainDevice: state.deviceRole.isMain,
-                  onToggle: () => _toggleDeviceRole(
-                    isMainDevice: state.deviceRole.isMain,
-                    l10n: l10n,
-                  ),
-                ),
+      body: ContentWidth.form(
+        child: SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            children: [
+              _ProfileCard(
+                name: name,
+                subtitle: [
+                  if (shopName != null && shopName.isNotEmpty) shopName,
+                  _roleLabel(l10n, shop.role),
+                ].join(' · '),
+                onTap: () => context.pushNamed(AppRoutes.profile),
               ),
-            ],
-            const SizedBox(height: 22),
-            BlocBuilder<AppBloc, AppState>(
-              builder: (context, state) => _Section(
-                title: l10n.settingsAppSection,
+              const SizedBox(height: 22),
+              _Section(
+                title: l10n.shop,
+                footnote: shop.role == MemberRole.owner
+                    ? null
+                    : l10n.settingsOwnerOnly,
                 rows: [
-                  _Row(
-                    icon: Icons.language_rounded,
-                    title: l10n.settingsLanguage,
-                    value: state.locale.languageCode == 'en'
-                        ? l10n.languageEnglish
-                        : l10n.languageKhmer,
-                    onTap: () => context.read<AppBloc>().add(
-                          SwitchLanguage(state.locale.languageCode),
-                        ),
+                  if (_hasServerShops)
+                    _Row(
+                      icon: Icons.storefront_outlined,
+                      title: l10n.shopSwitch,
+                      subtitle: shopName,
+                      onTap: () => showShopSwitcher(context),
+                    ),
+                  if (_hasServerShops && shop.role == MemberRole.owner)
+                    _Row(
+                      icon: Icons.group_outlined,
+                      title: l10n.settingsMembers,
+                      onTap: () => openMembers(context),
+                    ),
+                  BlocBuilder<PriceSettingsCubit, PriceSettings?>(
+                    builder: (context, prices) => _Row(
+                      icon: Icons.sell_outlined,
+                      title: l10n.settingsPricesCurrency,
+                      subtitle: prices == null
+                          ? null
+                          : _pricesSummary(l10n, prices),
+                      onTap: _openPriceSettings,
+                    ),
+                  ),
+                  BlocBuilder<CategoriesCubit, List<ItemCategory>?>(
+                    builder: (context, categories) => _Row(
+                      icon: Icons.category_outlined,
+                      title: l10n.settingsCategoriesUnits,
+                      subtitle: categories == null
+                          ? null
+                          : l10n.categoriesCount(categories.length),
+                      onTap: _openCategoriesUnits,
+                    ),
                   ),
                   _Row(
-                    icon: state.isDarkMode
-                        ? Icons.dark_mode_outlined
-                        : Icons.light_mode_outlined,
-                    title: l10n.settingsAppearance,
-                    subtitle:
-                        state.isDarkMode ? l10n.darkModeOn : l10n.darkModeOff,
-                    trailing: Switch.adaptive(
-                      value: state.isDarkMode,
-                      onChanged: (value) => context
-                          .read<AppBloc>()
-                          .add(SwitchThemeMode(isDarkMode: value)),
+                    icon: Icons.people_outline_rounded,
+                    title: l10n.customers,
+                    onTap: () => showCustomerPicker(
+                      context,
+                      getIt<CreditRepository>(),
+                      manage: true,
                     ),
-                    onTap: () => context.read<AppBloc>().add(
-                          SwitchThemeMode(isDarkMode: !state.isDarkMode),
-                        ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 22),
-            Material(
-              color: t.surface,
-              borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-              child: InkWell(
-                onTap: () => _confirmSignOut(l10n),
-                borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                child: SizedBox(
-                  height: 52,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout_rounded, color: t.dangerText, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.signOut,
-                        style: AppTextTheme.body.copyWith(
-                          color: t.dangerText,
-                          fontWeight: FontWeight.w600,
+              // The main/sub device role only decides which phone captures
+              // bank notifications, so it goes with the income feature.
+              if (_isIncomeEnabled) ...[
+                const SizedBox(height: 22),
+                BlocBuilder<AppBloc, AppState>(
+                  builder: (context, state) => _DeviceRoleCard(
+                    isMainDevice: state.deviceRole.isMain,
+                    onToggle: () => _toggleDeviceRole(
+                      isMainDevice: state.deviceRole.isMain,
+                      l10n: l10n,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 22),
+              BlocBuilder<AppBloc, AppState>(
+                builder: (context, state) => _Section(
+                  title: l10n.settingsAppSection,
+                  rows: [
+                    _Row(
+                      icon: Icons.language_rounded,
+                      title: l10n.settingsLanguage,
+                      value: state.locale.languageCode == 'en'
+                          ? l10n.languageEnglish
+                          : l10n.languageKhmer,
+                      onTap: () => context.read<AppBloc>().add(
+                        SwitchLanguage(state.locale.languageCode),
+                      ),
+                    ),
+                    _Row(
+                      icon: state.isDarkMode
+                          ? Icons.dark_mode_outlined
+                          : Icons.light_mode_outlined,
+                      title: l10n.settingsAppearance,
+                      subtitle: state.isDarkMode
+                          ? l10n.darkModeOn
+                          : l10n.darkModeOff,
+                      trailing: Switch.adaptive(
+                        value: state.isDarkMode,
+                        onChanged: (value) => context.read<AppBloc>().add(
+                          SwitchThemeMode(isDarkMode: value),
                         ),
                       ),
-                    ],
+                      onTap: () => context.read<AppBloc>().add(
+                        SwitchThemeMode(isDarkMode: !state.isDarkMode),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
+              Material(
+                color: t.surface,
+                borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                child: InkWell(
+                  onTap: () => _confirmSignOut(l10n),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                  child: SizedBox(
+                    height: 52,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.logout_rounded,
+                          color: t.dangerText,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.signOut,
+                          style: AppTextTheme.body.copyWith(
+                            color: t.dangerText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            FutureBuilder<String>(
-              future: _appVersionFuture,
-              builder: (context, snapshot) => Text(
-                l10n.appVersion(snapshot.data ?? '--'),
-                textAlign: TextAlign.center,
-                style: AppTextTheme.hint.copyWith(color: t.textMuted),
+              const SizedBox(height: 12),
+              FutureBuilder<String>(
+                future: _appVersionFuture,
+                builder: (context, snapshot) => Text(
+                  l10n.appVersion(snapshot.data ?? '--'),
+                  textAlign: TextAlign.center,
+                  style: AppTextTheme.hint.copyWith(color: t.textMuted),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

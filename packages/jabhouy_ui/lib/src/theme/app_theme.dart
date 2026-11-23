@@ -48,6 +48,9 @@ class AppTheme {
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
+        // Material 3 caps modal sheets at 640; ours span the screen and
+        // center their content (see AppSheet).
+        constraints: const BoxConstraints(),
         backgroundColor: colorScheme.surfaceContainerLow,
         modalBackgroundColor: colorScheme.surfaceContainerLow,
         shape: const RoundedRectangleBorder(

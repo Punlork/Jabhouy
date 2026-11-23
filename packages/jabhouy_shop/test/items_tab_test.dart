@@ -69,12 +69,9 @@ void main() {
         Item(id: 'rice', name: 'អង្ករផ្កាម្លិះ', prices: [_option('បេ', null)]),
       );
       // Quick add: a name only, priced later.
-      await repo.saveItem(const Item(
-          id: 'sugar',
-          name: 'ស្ករ',
-          nicknames: ['ស្ករស'],
-          prices: [],
-        ));
+      await repo.saveItem(
+        const Item(id: 'sugar', name: 'ស្ករ', nicknames: ['ស្ករស'], prices: []),
+      );
     });
     opened.clear();
     added.clear();
@@ -186,7 +183,10 @@ void main() {
     await settle(tester);
 
     expect(find.text('លទ្ធផល 1'), findsOneWidget);
-    expect(find.textContaining('ឈ្មោះផ្សេង៖', findRichText: true), findsOneWidget);
+    expect(
+      find.textContaining('ឈ្មោះផ្សេង៖', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.text('រកមិនឃើញទំនិញដែលចង់បាន?'), findsOneWidget);
 
     await tester.tap(find.text('បន្ថែម «ស្ករស»'));
@@ -265,6 +265,12 @@ void main() {
   });
 
   testWidgets('the grid shows the same price lines', (tester) async {
+    // Widest two-column layout: the test font is far wider than the real
+    // one, so narrower cards overflow for a reason that is not the app's.
+    tester.view
+      ..physicalSize = const Size(599, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await pumpTab(tester, grid: true);
 
     expect(find.text('កេះ (24)'), findsOneWidget);

@@ -336,6 +336,26 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Widget _buildAuthenticatedScaffold(BuildContext context) {
     final appState = context.watch<AppBloc>().state;
     final bottomAction = _buildBottomActionConfig(appState);
+    final isTablet = AppBreakpoints.isTablet(context);
+    final navTabs = [
+      for (final tab in _tabs)
+        switch (tab) {
+          HomeTab.shop => AppNavTab(icon: Icons.storefront_outlined, label: context.l10n.shop),
+          HomeTab.credit => AppNavTab(icon: Icons.menu_book_outlined, label: context.l10n.credit),
+          HomeTab.income => AppNavTab(icon: Icons.account_balance_wallet_outlined, label: context.l10n.income),
+        },
+    ];
+
+    void onTabChanged(int index) {
+      _setChromeVisible(true);
+      if (index != _selectedIndex) {
+        // One search box serves every tab, so leaving a tab clears its search.
+        _onSearchChanged('');
+        _searchController.clear();
+      }
+      _onItemTapped(index);
+      setState(() => _selectedIndex = index);
+    }
 
     return MultiBlocListener(
       listeners: [
@@ -361,124 +381,119 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ],
       child: Scaffold(
         // The list scrolls behind the nav bar's floating button.
-        extendBody: true,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              ClipRect(
-                child: AnimatedAlign(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOut,
-                  alignment: Alignment.bottomCenter,
-                  heightFactor: _chromeVisible ? 1 : 0,
+        extendBody: !isTablet,
+        // Tablet: the add button floats bottom-right over the content.
+        floatingActionButton: isTablet
+            ? AppAddButton(label: bottomAction?.label ?? '', onPressed: bottomAction?.onPressed)
+            : null,
+        body: _withTabletRail(
+          isTablet: isTablet,
+          rail: AppNavRail(tabs: navTabs, selectedIndex: _selectedIndex, onTabChanged: onTabChanged),
+          content: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                ClipRect(
+                  child: AnimatedAlign(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    alignment: Alignment.bottomCenter,
+                    heightFactor: _chromeVisible ? 1 : 0,
+                    child: Builder(
+                      builder: (context) {
+                        Widget buildShopHeader({
+                          bool hasFilter = false,
+                          String? searchHintText,
+                          bool withFilter = true,
+                          VoidCallback? onScanPressed,
+                        }) {
+                          return ShopHeader(
+                            hasFilter: hasFilter,
+                            searchHintText: searchHintText,
+                            onSettingsPressed: _openSettingsPage,
+                            onSearchChanged: _onSearchChanged,
+                            onFilterPressed: withFilter ? _showFilterSheet : null,
+                            onScanPressed: onScanPressed,
+                            searchController: _searchController,
+                            trailing: _isBackgroundSyncEnabled
+                                ? SyncIndicator(engine: getIt<SyncEngine>(), connectivity: getIt<ConnectivityService>())
+                                : null,
+                          );
+                        }
+
+                        return switch (_selectedTab) {
+                          // Filtering is the chips under the header.
+                          HomeTab.shop => buildShopHeader(
+                            searchHintText: context.l10n.itemSearchHint,
+                            withFilter: false,
+                            onScanPressed: _isBarcodeScanEnabled ? _scanItem : null,
+                          ),
+                          HomeTab.credit => buildShopHeader(
+                            searchHintText: context.l10n.searchCustomers,
+                            withFilter: false,
+                          ),
+                          HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
+                            builder: (context, state) {
+                              final loaded = state.asLoaded;
+                              return buildShopHeader(
+                                hasFilter: loaded?.hasFilter ?? false,
+                                searchHintText: context.l10n.searchIncome,
+                              );
+                            },
+                          ),
+                        };
+                      },
+                    ),
+                  ),
+                ),
+                Expanded(
                   child: Builder(
                     builder: (context) {
-                      Widget buildShopHeader({
-                        bool hasFilter = false,
-                        String? searchHintText,
-                        bool withFilter = true,
-                        VoidCallback? onScanPressed,
-                      }) {
-                        return ShopHeader(
-                          hasFilter: hasFilter,
-                          searchHintText: searchHintText,
-                          onSettingsPressed: _openSettingsPage,
-                          onSearchChanged: _onSearchChanged,
-                          onFilterPressed: withFilter ? _showFilterSheet : null,
-                          onScanPressed: onScanPressed,
-                          searchController: _searchController,
-                          trailing: _isBackgroundSyncEnabled
-                              ? SyncIndicator(engine: getIt<SyncEngine>(), connectivity: getIt<ConnectivityService>())
-                              : null,
-                        );
+                      Widget content = TabScrollManager(
+                        controllers: _scrollControllers,
+                        child: NotificationListener<ScrollUpdateNotification>(
+                          onNotification: _onPageScroll,
+                          child: PageView(
+                            controller: _pageController,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [for (final tab in _tabs) _pageFor(tab)],
+                          ),
+                        ),
+                      );
+
+                      if (_isIncomeEnabled) {
+                        content = BlocProvider.value(value: context.read<IncomeBloc>(), child: content);
                       }
 
-                      return switch (_selectedTab) {
-                        // Filtering is the chips under the header.
-                        HomeTab.shop => buildShopHeader(
-                          searchHintText: context.l10n.itemSearchHint,
-                          withFilter: false,
-                          onScanPressed: _isBarcodeScanEnabled ? _scanItem : null,
-                        ),
-                        HomeTab.credit => buildShopHeader(
-                          searchHintText: context.l10n.searchCustomers,
-                          withFilter: false,
-                        ),
-                        HomeTab.income => BlocBuilder<IncomeBloc, IncomeState>(
-                          builder: (context, state) {
-                            final loaded = state.asLoaded;
-                            return buildShopHeader(
-                              hasFilter: loaded?.hasFilter ?? false,
-                              searchHintText: context.l10n.searchIncome,
-                            );
-                          },
-                        ),
-                      };
+                      return content;
                     },
                   ),
                 ),
-              ),
-              Expanded(
-                child: Builder(
-                  builder: (context) {
-                    Widget content = TabScrollManager(
-                      controllers: _scrollControllers,
-                      child: NotificationListener<ScrollUpdateNotification>(
-                        onNotification: _onPageScroll,
-                        child: PageView(
-                          controller: _pageController,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [for (final tab in _tabs) _pageFor(tab)],
-                        ),
-                      ),
-                    );
-
-                    if (_isIncomeEnabled) {
-                      content = BlocProvider.value(value: context.read<IncomeBloc>(), child: content);
-                    }
-
-                    return content;
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        bottomNavigationBar: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppBottomNav(
-              tabs: [
-                for (final tab in _tabs)
-                  switch (tab) {
-                    HomeTab.shop => AppNavTab(icon: Icons.storefront_outlined, label: context.l10n.shop),
-                    HomeTab.credit => AppNavTab(icon: Icons.menu_book_outlined, label: context.l10n.credit),
-                    HomeTab.income => AppNavTab(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: context.l10n.income,
-                    ),
-                  },
-              ],
-              selectedIndex: _selectedIndex,
-              onTabChanged: (index) {
-                _setChromeVisible(true);
-                if (index != _selectedIndex) {
-                  // One search box serves every tab, so leaving a tab clears its search.
-                  _onSearchChanged('');
-                  _searchController.clear();
-                }
-                _onItemTapped(index);
-                setState(() => _selectedIndex = index);
-              },
-              actionLabel: bottomAction?.label ?? '',
-              onAction: bottomAction?.onPressed,
-            ),
-          ],
-        ),
+        bottomNavigationBar: isTablet
+            ? null
+            : AppBottomNav(
+                tabs: navTabs,
+                selectedIndex: _selectedIndex,
+                onTabChanged: onTabChanged,
+                actionLabel: bottomAction?.label ?? '',
+                onAction: bottomAction?.onPressed,
+              ),
       ),
     );
   }
+
+  Widget _withTabletRail({required bool isTablet, required Widget rail, required Widget content}) => isTablet
+      ? Row(
+          children: [
+            rail,
+            Expanded(child: ContentWidth(child: content)),
+          ],
+        )
+      : content;
 }
 
 class _BottomActionConfig {
