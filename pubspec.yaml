@@ -45,11 +45,11 @@ dependencies:
   go_router: ^18.0.1
 
   # Local storage and database
-  drift: ^2.16.0
+  drift: ^2.35.4
   path: ^1.9.1
   path_provider: ^2.1.5
   shared_preferences: ^2.5.4
-  sqlite3: ^2.9.4
+  sqlite3: ^3.9.2
   # No Dart import: bundles the native SQLite library Drift opens.
   sqlite3_flutter_libs: ^0.5.0
 
@@ -69,7 +69,7 @@ dependencies:
   flutter_slidable: ^3.1.2
   flutter_svg: ^2.2.0
   flutter_typeahead: ^5.2.0
-  shimmer: ^3.0.0
+  shimmer: ^4.0.0
 
   # Device and platform
   image_picker: ^1.1.2
@@ -103,7 +103,7 @@ dev_dependencies:
   # Code generation (`melos run gen`)
   build_runner: ^2.4.0
   copy_with_extension_gen: ^18.0.0
-  drift_dev: ^2.16.0
+  drift_dev: ^2.35.3
 
   # Tooling
   # Generates app icons from flutter_launcher_icons.yaml; never imported.
